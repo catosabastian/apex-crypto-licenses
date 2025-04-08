@@ -1,7 +1,7 @@
 
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { Shield, BookOpen, GlobeCheck, Scale, FileCheck } from "lucide-react";
+import { Shield, BookOpen, Globe, Scale, FileCheck } from "lucide-react";
 
 const AboutPage = () => {
   return (
@@ -25,7 +25,7 @@ const AboutPage = () => {
               
               <section>
                 <h2 className="text-2xl font-semibold mb-4 flex items-center gap-2">
-                  <GlobeCheck className="h-6 w-6 text-primary" />
+                  <Globe className="h-6 w-6 text-primary" />
                   Global Recognition
                 </h2>
                 <p className="text-muted-foreground">
