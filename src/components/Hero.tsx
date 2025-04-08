@@ -21,15 +21,15 @@ const Hero = () => {
         <div className="max-w-3xl mx-auto text-center">
           <div className="inline-flex items-center gap-2 bg-accent/10 text-accent px-3 py-1 rounded-full text-sm mb-6">
             <Shield className="h-4 w-4" />
-            <span>Official Regulatory Service</span>
+            <span>Unified Regulatory Framework</span>
           </div>
           
           <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4">
-            Crypto Trading License Authority
+            Global Crypto Compliance Authority
           </h1>
           
           <p className="text-lg md:text-xl text-muted-foreground mb-8">
-            Secure official recognition for your cryptocurrency trading activities with government-compliant licensing.
+            Secure official recognition for your cryptocurrency trading activities with globally-compliant licensing.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -66,52 +66,54 @@ const Hero = () => {
         </a>
       </div>
       
-      <CryptoBubbles />
+      <RegulatoryBubbles />
       
       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background to-transparent h-32"></div>
     </section>
   );
 };
 
-const CryptoBubbles = () => {
-  const cryptoIcons = [
-    { name: 'Bitcoin', symbol: 'BTC', color: '#F7931A' },
-    { name: 'Ethereum', symbol: 'ETH', color: '#627EEA' },
-    { name: 'Tether', symbol: 'USDT', color: '#26A17B' },
-    { name: 'XRP', symbol: 'XRP', color: '#23292F' },
-    { name: 'Binance', symbol: 'BNB', color: '#F3BA2F' },
-    { name: 'Kraken', symbol: 'KRK', color: '#5741D9' },
-    { name: 'Cardano', symbol: 'ADA', color: '#0033AD' },
-    { name: 'Solana', symbol: 'SOL', color: '#14F195' },
-    { name: 'Polkadot', symbol: 'DOT', color: '#E6007A' },
-    { name: 'Chainlink', symbol: 'LINK', color: '#2A5ADA' },
-    { name: 'Uniswap', symbol: 'UNI', color: '#FF007A' },
-    { name: 'Litecoin', symbol: 'LTC', color: '#345D9D' },
-    { name: 'Polygon', symbol: 'MATIC', color: '#8247E5' },
-    { name: 'Avalanche', symbol: 'AVAX', color: '#E84142' },
-    { name: 'Stellar', symbol: 'XLM', color: '#7D00FF' }
+const RegulatoryBubbles = () => {
+  const regulatoryAuthorities = [
+    { name: 'Securities and Exchange Commission', acronym: 'SEC', country: 'USA', color: '#1A478B' },
+    { name: 'Commodity Futures Trading Commission', acronym: 'CFTC', country: 'USA', color: '#00467F' },
+    { name: 'European Securities and Markets Authority', acronym: 'ESMA', country: 'EU', color: '#154880' },
+    { name: 'Financial Conduct Authority', acronym: 'FCA', country: 'UK', color: '#1E4F8A' },
+    { name: 'Monetary Authority of Singapore', acronym: 'MAS', country: 'Singapore', color: '#27558F' },
+    { name: 'Swiss Financial Market Supervisory Authority', acronym: 'FINMA', country: 'Switzerland', color: '#2D5C93' },
+    { name: 'Financial Services Agency', acronym: 'FSA', country: 'Japan', color: '#346298' },
+    { name: 'Australian Securities and Investments Commission', acronym: 'ASIC', country: 'Australia', color: '#3A689D' },
+    { name: 'Financial Services Commission', acronym: 'FSC', country: 'South Korea', color: '#416EA1' },
+    { name: 'Dubai Financial Services Authority', acronym: 'DFSA', country: 'UAE', color: '#4774A6' },
+    { name: 'Canadian Securities Administrators', acronym: 'CSA', country: 'Canada', color: '#4D7AAB' },
+    { name: 'Securities and Futures Commission', acronym: 'SFC', country: 'Hong Kong', color: '#5380AF' },
+    { name: 'Autorité des Marchés Financiers', acronym: 'AMF', country: 'France', color: '#5986B4' },
+    { name: 'Bundesanstalt für Finanzdienstleistungsaufsicht', acronym: 'BaFin', country: 'Germany', color: '#5F8CB8' },
+    { name: 'Central Bank of Brazil', acronym: 'BCB', country: 'Brazil', color: '#6592BD' }
   ];
 
   return (
     <div className="absolute inset-0 overflow-hidden -z-10">
-      {cryptoIcons.map((crypto, idx) => (
+      {regulatoryAuthorities.map((authority, idx) => (
         <div 
-          key={crypto.symbol}
+          key={authority.acronym}
           className="bubble"
           style={{
-            width: `${30 + Math.random() * 25}px`,
-            height: `${30 + Math.random() * 25}px`,
+            width: `${40 + Math.random() * 30}px`,
+            height: `${40 + Math.random() * 30}px`,
             left: `${Math.random() * 100}%`,
             top: `${Math.random() * 100}%`,
-            animationDelay: `${idx * 0.3}s`,
-            animationDuration: `${6 + Math.random() * 6}s`,
-            background: 'white',
-            opacity: '0.6',
-            border: `1px solid ${crypto.color}`,
+            animationDelay: `${idx * 0.4}s`,
+            animationDuration: `${8 + Math.random() * 7}s`,
+            background: '#f8f9fa',
+            opacity: '0.7',
+            border: `1px solid ${authority.color}`,
             boxShadow: `0 2px 8px rgba(0,0,0,0.05)`
           }}
         >
-          <span className="font-bold text-xs text-gray-600">{crypto.symbol}</span>
+          <span className="font-bold text-xs text-gray-700" title={`${authority.name} (${authority.country})`}>
+            {authority.acronym}
+          </span>
         </div>
       ))}
     </div>
