@@ -81,6 +81,15 @@ const CryptoBubbles = () => {
     { name: 'XRP', symbol: 'XRP', color: '#23292F' },
     { name: 'Binance', symbol: 'BNB', color: '#F3BA2F' },
     { name: 'Kraken', symbol: 'KRK', color: '#5741D9' },
+    { name: 'Cardano', symbol: 'ADA', color: '#0033AD' },
+    { name: 'Solana', symbol: 'SOL', color: '#14F195' },
+    { name: 'Polkadot', symbol: 'DOT', color: '#E6007A' },
+    { name: 'Chainlink', symbol: 'LINK', color: '#2A5ADA' },
+    { name: 'Uniswap', symbol: 'UNI', color: '#FF007A' },
+    { name: 'Litecoin', symbol: 'LTC', color: '#345D9D' },
+    { name: 'Polygon', symbol: 'MATIC', color: '#8247E5' },
+    { name: 'Avalanche', symbol: 'AVAX', color: '#E84142' },
+    { name: 'Stellar', symbol: 'XLM', color: '#7D00FF' }
   ];
 
   return (
@@ -90,16 +99,19 @@ const CryptoBubbles = () => {
           key={crypto.symbol}
           className="bubble"
           style={{
-            width: `${40 + Math.random() * 30}px`,
-            height: `${40 + Math.random() * 30}px`,
+            width: `${30 + Math.random() * 25}px`,
+            height: `${30 + Math.random() * 25}px`,
             left: `${Math.random() * 100}%`,
             top: `${Math.random() * 100}%`,
-            animationDelay: `${idx * 0.5}s`,
+            animationDelay: `${idx * 0.3}s`,
+            animationDuration: `${6 + Math.random() * 6}s`,
             background: 'white',
-            border: `2px solid ${crypto.color}`
+            opacity: '0.6',
+            border: `1px solid ${crypto.color}`,
+            boxShadow: `0 2px 8px rgba(0,0,0,0.05)`
           }}
         >
-          <span className="font-bold text-xs">{crypto.symbol}</span>
+          <span className="font-bold text-xs text-gray-600">{crypto.symbol}</span>
         </div>
       ))}
     </div>
