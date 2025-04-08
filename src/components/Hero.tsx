@@ -2,9 +2,11 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, Globe, Shield, AlertTriangle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Hero = () => {
   const [scrolled, setScrolled] = useState(false);
+  const navigate = useNavigate();
   
   useEffect(() => {
     const handleScroll = () => {
@@ -15,20 +17,20 @@ const Hero = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleVerifyLicense = () => {
+    navigate('/verification');
+  };
+
   return (
     <section className="relative min-h-screen pt-16 flex flex-col">
       <div className="container flex-1 flex flex-col justify-center py-12 relative z-10">
         <div className="max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-accent/10 text-accent px-3 py-1 rounded-full text-sm mb-6">
-            <Shield className="h-4 w-4" />
+          <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-5 py-2 rounded-full text-lg font-medium mb-8">
+            <Shield className="h-5 w-5" />
             <span>Unified Regulatory Framework</span>
           </div>
           
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4">
-            Global Crypto Compliance Authority
-          </h1>
-          
-          <p className="text-lg md:text-xl text-muted-foreground mb-8">
+          <p className="text-xl md:text-2xl text-muted-foreground mb-10">
             Secure official recognition for your cryptocurrency trading activities with globally-compliant licensing.
           </p>
           
@@ -37,7 +39,12 @@ const Hero = () => {
               Apply for License
               <ChevronDown className="h-4 w-4" />
             </Button>
-            <Button size="lg" variant="outline" className="gap-2">
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="gap-2"
+              onClick={handleVerifyLicense}
+            >
               Verify License
               <Globe className="h-4 w-4" />
             </Button>
