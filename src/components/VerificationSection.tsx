@@ -1,10 +1,23 @@
-
-import { Shield, Search, Clock, Check, ArrowRight } from 'lucide-react';
+import { Shield, Search, Clock, Check, ArrowRight, QrCode } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useState } from 'react';
 
 const VerificationSection = () => {
+  const [licenseId, setLicenseId] = useState('');
+  const [isVerified, setIsVerified] = useState(false);
+
+  const handleVerify = () => {
+    // In a real application, this would make an API call to verify the license
+    // For demo purposes, we'll just simulate a successful verification
+    setIsVerified(true);
+  };
+
   return (
     <section id="verification" className="py-20 bg-white">
       <div className="container">
@@ -32,7 +45,7 @@ const VerificationSection = () => {
             <VerificationCard 
               icon={<Search className="h-6 w-6" />}
               title="Trading History Analysis"
-              description="Comprehensive review of trading history, volume, and patterns to determine appropriate licensing tier."
+              description="Comprehensive review of trading history, volume, and patterns to determine appropriate licensing category."
             />
             
             <VerificationCard 
@@ -58,7 +71,7 @@ const VerificationSection = () => {
                 number={2}
                 title="Initial Review"
                 description="Our system performs automated checks on submitted information and documentation."
-                badge="Day 1-2"
+                badge="Day 1"
                 isCompleted={true}
               />
               
@@ -66,7 +79,7 @@ const VerificationSection = () => {
                 number={3}
                 title="Detailed Verification"
                 description="Our compliance team manually reviews your application, trading history, and identity documentation."
-                badge="Day 3-5"
+                badge="Day 2"
                 isCompleted={false}
               />
               
@@ -74,10 +87,43 @@ const VerificationSection = () => {
                 number={4}
                 title="License Issuance"
                 description="Upon successful verification, your official license is generated and sent via email."
-                badge="Day 6-7"
+                badge="Day 3"
                 isCompleted={false}
               />
             </div>
+          </div>
+          
+          <div className="mt-12">
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button className="mx-auto block">Verify a License</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>License Verification</DialogTitle>
+                  <DialogDescription>
+                    Enter the license ID to verify its authenticity.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="licenseId" className="text-right">
+                      License ID
+                    </Label>
+                    <Input 
+                      id="licenseId" 
+                      value={licenseId} 
+                      onChange={(e) => setLicenseId(e.target.value)} 
+                      placeholder="e.g. CL-2023-8294-T2"
+                      className="col-span-3"
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button onClick={handleVerify}>Verify License</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
           
           <div className="mt-12 flex items-center justify-center gap-4">
@@ -102,7 +148,7 @@ const VerificationSection = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <h4 className="text-sm text-muted-foreground">License Type</h4>
-                      <p className="font-semibold">Tier 2 - Advanced</p>
+                      <p className="font-semibold">Category 2 - Advanced</p>
                     </div>
                     <div>
                       <h4 className="text-sm text-muted-foreground">License ID</h4>
@@ -128,7 +174,9 @@ const VerificationSection = () => {
                   
                   <div className="pt-4 flex items-center justify-between">
                     <div className="text-xs text-muted-foreground">Verify at verify.apexcrypto.auth</div>
-                    <div className="bg-black h-16 w-16 flex items-center justify-center text-white">QR</div>
+                    <div className="border border-black h-16 w-16 flex items-center justify-center">
+                      <QrCode className="h-12 w-12" />
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -180,7 +228,6 @@ const VerificationStep = ({ number, title, description, badge, isCompleted }: Ve
         </div>
         <p className="text-sm text-muted-foreground">{description}</p>
         
-        {/* Add separator if not the last item */}
         <Separator className="mt-4" />
       </div>
     </div>

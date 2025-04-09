@@ -1,10 +1,11 @@
-
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, Globe, Shield, AlertTriangle } from 'lucide-react';
+import { useApplicationDialog } from '@/components/ApplicationDialog';
 
 const Hero = () => {
   const [scrolled, setScrolled] = useState(false);
+  const { openApplicationDialog } = useApplicationDialog();
   
   useEffect(() => {
     const handleScroll = () => {
@@ -14,10 +15,6 @@ const Hero = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const scrollToApplication = () => {
-    document.getElementById('application')?.scrollIntoView({ behavior: 'smooth' });
-  };
 
   return (
     <section className="relative min-h-screen pt-16 flex flex-col">
@@ -37,11 +34,11 @@ const Hero = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="gap-2" onClick={scrollToApplication}>
+            <Button size="lg" className="gap-2" onClick={openApplicationDialog}>
               Apply for License
               <ChevronDown className="h-4 w-4" />
             </Button>
-            <Button size="lg" variant="outline" className="gap-2">
+            <Button size="lg" variant="outline" className="gap-2" onClick={() => document.getElementById('verification')?.scrollIntoView({ behavior: 'smooth' })}>
               Verify License
               <Globe className="h-4 w-4" />
             </Button>

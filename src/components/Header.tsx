@@ -2,9 +2,11 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ShieldCheck, Menu, X } from 'lucide-react';
+import { useApplicationDialog } from '@/components/ApplicationDialog';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { openApplicationDialog } = useApplicationDialog();
   
   const scrollToSection = (sectionId: string) => {
     document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
@@ -27,8 +29,7 @@ const Header = () => {
           <a href="#about" className="text-sm font-medium hover:text-accent transition-colors">About</a>
           <a href="#licenses" className="text-sm font-medium hover:text-accent transition-colors">Licenses</a>
           <a href="#verification" className="text-sm font-medium hover:text-accent transition-colors">Verification</a>
-          <a href="#application" className="text-sm font-medium hover:text-accent transition-colors">Application</a>
-          <Button variant="default" size="sm" onClick={() => scrollToSection('application')}>Apply Now</Button>
+          <Button variant="default" size="sm" onClick={openApplicationDialog}>Apply Now</Button>
         </nav>
 
         {/* Mobile Navigation Toggle */}
@@ -47,8 +48,10 @@ const Header = () => {
             <a href="#about" className="text-sm font-medium py-2 hover:text-accent transition-colors" onClick={() => setIsMenuOpen(false)}>About</a>
             <a href="#licenses" className="text-sm font-medium py-2 hover:text-accent transition-colors" onClick={() => setIsMenuOpen(false)}>Licenses</a>
             <a href="#verification" className="text-sm font-medium py-2 hover:text-accent transition-colors" onClick={() => setIsMenuOpen(false)}>Verification</a>
-            <a href="#application" className="text-sm font-medium py-2 hover:text-accent transition-colors" onClick={() => setIsMenuOpen(false)}>Application</a>
-            <Button variant="default" size="sm" className="w-full" onClick={() => scrollToSection('application')}>Apply Now</Button>
+            <Button variant="default" size="sm" className="w-full" onClick={() => {
+              openApplicationDialog();
+              setIsMenuOpen(false);
+            }}>Apply Now</Button>
           </nav>
         </div>
       )}

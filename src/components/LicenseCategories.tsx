@@ -1,21 +1,41 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CheckCircle, ChevronRight, CreditCard, DollarSign, Bitcoin, MessageSquareText } from 'lucide-react';
+import { useApplicationDialog } from '@/components/ApplicationDialog';
 
-const LicenseTiers = () => {
+const LicenseCategories = () => {
   const [currency, setCurrency] = useState<'USD' | 'USDT' | 'BTC' | 'ETH' | 'XRP'>('USD');
-  
-  // Conversion rates (simplified for demo)
-  const rates = {
+  const [rates, setRates] = useState({
     USDT: 1,
     BTC: 0.00039,
     ETH: 0.0069,
     XRP: 20.44
-  };
+  });
+  const { openApplicationDialog } = useApplicationDialog();
+  
+  // Simulating API call to get latest rates
+  useEffect(() => {
+    const fetchRates = () => {
+      // In a real application, this would be an API call
+      // For now, we're using the simulated rates that would maintain the consistency
+      // with the fiat values of $20,000, $40,000, and $70,000
+      setRates({
+        USDT: 1.0,      // 1 USDT = 1 USD
+        BTC: 0.00039,   // 1 USD = 0.00039 BTC (1 BTC ≈ $25,641)
+        ETH: 0.0069,    // 1 USD = 0.0069 ETH (1 ETH ≈ $144.93)
+        XRP: 20.44      // 1 USD = 20.44 XRP (1 XRP ≈ $0.049)
+      });
+    };
+    
+    fetchRates();
+    // In a real app, we might want to update the rates periodically
+    // const interval = setInterval(fetchRates, 60000);
+    // return () => clearInterval(interval);
+  }, []);
   
   const formatPrice = (usdPrice: number): string => {
     if (currency === 'USD') return `$${usdPrice.toLocaleString()}`;
@@ -25,10 +45,6 @@ const LicenseTiers = () => {
     return currency === 'USDT' 
       ? `${converted.toLocaleString()} USDT`
       : `${converted.toFixed(currency === 'BTC' ? 6 : currency === 'ETH' ? 4 : 2)} ${currency}`;
-  };
-  
-  const scrollToApplication = () => {
-    document.getElementById('application')?.scrollIntoView({ behavior: 'smooth' });
   };
   
   return (
@@ -43,7 +59,7 @@ const LicenseTiers = () => {
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
             <div>
               <h2 className="text-3xl md:text-4xl font-bold">
-                Regulatory Licensing Tiers
+                Regulatory Licensing Categories
               </h2>
               <p className="text-lg text-muted-foreground mt-2">
                 Select the appropriate license category based on your trading volume and activity.
@@ -66,8 +82,8 @@ const LicenseTiers = () => {
           </div>
           
           <div className="grid md:grid-cols-3 gap-6">
-            <LicenseTier 
-              tier={1}
+            <LicenseCategory 
+              category={1}
               title="Individual Trader"
               price={formatPrice(20000)}
               minVolume="$50,000"
@@ -76,13 +92,13 @@ const LicenseTiers = () => {
                 "Individual trader verification",
                 "Basic compliance certification",
                 "Standard support response",
-                "Recognized on major exchanges"
+                "Recognized on all exchanges"
               ]}
-              onApplyClick={scrollToApplication}
+              onApplyClick={openApplicationDialog}
             />
             
-            <LicenseTier 
-              tier={2}
+            <LicenseCategory 
+              category={2}
               title="Advanced Trader"
               price={formatPrice(40000)}
               minVolume="$250,000"
@@ -95,11 +111,11 @@ const LicenseTiers = () => {
                 "Trading strategy protection"
               ]}
               popular
-              onApplyClick={scrollToApplication}
+              onApplyClick={openApplicationDialog}
             />
             
-            <LicenseTier 
-              tier={3}
+            <LicenseCategory 
+              category={3}
               title="Institutional Trader"
               price={formatPrice(70000)}
               minVolume="$1,000,000+"
@@ -112,7 +128,7 @@ const LicenseTiers = () => {
                 "Trading strategy protection",
                 "Multi-user access controls"
               ]}
-              onApplyClick={scrollToApplication}
+              onApplyClick={openApplicationDialog}
             />
           </div>
           
@@ -140,7 +156,7 @@ const LicenseTiers = () => {
                     <span>Dedicated legal advisors</span>
                   </div>
                 </div>
-                <Button variant="outline" className="gap-2" onClick={scrollToApplication}>
+                <Button variant="outline" className="gap-2" onClick={openApplicationDialog}>
                   Contact Support
                   <ChevronRight className="h-4 w-4" />
                 </Button>
@@ -153,8 +169,8 @@ const LicenseTiers = () => {
   );
 };
 
-interface LicenseTierProps {
-  tier: number;
+interface LicenseCategoryProps {
+  category: number;
   title: string;
   price: string;
   minVolume: string;
@@ -163,7 +179,7 @@ interface LicenseTierProps {
   onApplyClick: () => void;
 }
 
-const LicenseTier = ({ tier, title, price, minVolume, features, popular, onApplyClick }: LicenseTierProps) => {
+const LicenseCategory = ({ category, title, price, minVolume, features, popular, onApplyClick }: LicenseCategoryProps) => {
   return (
     <Card className={`relative h-full ${popular ? 'border-accent shadow-lg' : ''}`}>
       {popular && (
@@ -174,7 +190,7 @@ const LicenseTier = ({ tier, title, price, minVolume, features, popular, onApply
       
       <CardHeader>
         <div className="flex items-center justify-between">
-          <Badge variant="outline" className="mb-2">Tier {tier}</Badge>
+          <Badge variant="outline" className="mb-2">Category {category}</Badge>
           {popular && <CheckCircle className="h-5 w-5 text-accent" />}
         </div>
         <CardTitle>{title}</CardTitle>
@@ -207,23 +223,4 @@ const LicenseTier = ({ tier, title, price, minVolume, features, popular, onApply
   );
 };
 
-const AlertCircle = ({ className }: { className?: string }) => {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <circle cx="12" cy="12" r="10" />
-      <line x1="12" x2="12" y1="8" y2="12" />
-      <line x1="12" x2="12.01" y1="16" y2="16" />
-    </svg>
-  );
-};
-
-export default LicenseTiers;
+export default LicenseCategories;
