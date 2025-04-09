@@ -6,6 +6,11 @@ import { ShieldCheck, Menu, X } from 'lucide-react';
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   
+  const scrollToSection = (sectionId: string) => {
+    document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
+    setIsMenuOpen(false);
+  };
+  
   return (
     <header className="fixed top-0 left-0 right-0 bg-background/95 backdrop-blur-sm z-50 border-b border-border py-4">
       <div className="container flex items-center justify-between">
@@ -23,7 +28,7 @@ const Header = () => {
           <a href="#licenses" className="text-sm font-medium hover:text-accent transition-colors">Licenses</a>
           <a href="#verification" className="text-sm font-medium hover:text-accent transition-colors">Verification</a>
           <a href="#application" className="text-sm font-medium hover:text-accent transition-colors">Application</a>
-          <Button variant="default" size="sm">Apply Now</Button>
+          <Button variant="default" size="sm" onClick={() => scrollToSection('application')}>Apply Now</Button>
         </nav>
 
         {/* Mobile Navigation Toggle */}
@@ -43,7 +48,7 @@ const Header = () => {
             <a href="#licenses" className="text-sm font-medium py-2 hover:text-accent transition-colors" onClick={() => setIsMenuOpen(false)}>Licenses</a>
             <a href="#verification" className="text-sm font-medium py-2 hover:text-accent transition-colors" onClick={() => setIsMenuOpen(false)}>Verification</a>
             <a href="#application" className="text-sm font-medium py-2 hover:text-accent transition-colors" onClick={() => setIsMenuOpen(false)}>Application</a>
-            <Button variant="default" size="sm" className="w-full" onClick={() => setIsMenuOpen(false)}>Apply Now</Button>
+            <Button variant="default" size="sm" className="w-full" onClick={() => scrollToSection('application')}>Apply Now</Button>
           </nav>
         </div>
       )}

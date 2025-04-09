@@ -15,6 +15,10 @@ const Hero = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const scrollToApplication = () => {
+    document.getElementById('application')?.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <section className="relative min-h-screen pt-16 flex flex-col">
       <div className="container flex-1 flex flex-col justify-center py-12 relative z-10">
@@ -33,7 +37,7 @@ const Hero = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="gap-2">
+            <Button size="lg" className="gap-2" onClick={scrollToApplication}>
               Apply for License
               <ChevronDown className="h-4 w-4" />
             </Button>

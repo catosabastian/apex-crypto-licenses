@@ -27,6 +27,10 @@ const LicenseTiers = () => {
       : `${converted.toFixed(currency === 'BTC' ? 6 : currency === 'ETH' ? 4 : 2)} ${currency}`;
   };
   
+  const scrollToApplication = () => {
+    document.getElementById('application')?.scrollIntoView({ behavior: 'smooth' });
+  };
+  
   return (
     <section id="licenses" className="py-20 bg-muted/30">
       <div className="container">
@@ -74,6 +78,7 @@ const LicenseTiers = () => {
                 "Standard support response",
                 "Recognized on major exchanges"
               ]}
+              onApplyClick={scrollToApplication}
             />
             
             <LicenseTier 
@@ -90,6 +95,7 @@ const LicenseTiers = () => {
                 "Trading strategy protection"
               ]}
               popular
+              onApplyClick={scrollToApplication}
             />
             
             <LicenseTier 
@@ -106,6 +112,7 @@ const LicenseTiers = () => {
                 "Trading strategy protection",
                 "Multi-user access controls"
               ]}
+              onApplyClick={scrollToApplication}
             />
           </div>
           
@@ -133,7 +140,7 @@ const LicenseTiers = () => {
                     <span>Dedicated legal advisors</span>
                   </div>
                 </div>
-                <Button variant="outline" className="gap-2">
+                <Button variant="outline" className="gap-2" onClick={scrollToApplication}>
                   Contact Support
                   <ChevronRight className="h-4 w-4" />
                 </Button>
@@ -153,9 +160,10 @@ interface LicenseTierProps {
   minVolume: string;
   features: string[];
   popular?: boolean;
+  onApplyClick: () => void;
 }
 
-const LicenseTier = ({ tier, title, price, minVolume, features, popular }: LicenseTierProps) => {
+const LicenseTier = ({ tier, title, price, minVolume, features, popular, onApplyClick }: LicenseTierProps) => {
   return (
     <Card className={`relative h-full ${popular ? 'border-accent shadow-lg' : ''}`}>
       {popular && (
@@ -190,7 +198,7 @@ const LicenseTier = ({ tier, title, price, minVolume, features, popular }: Licen
       </CardContent>
       
       <CardFooter>
-        <Button className="w-full gap-2" variant={popular ? "default" : "outline"}>
+        <Button className="w-full gap-2" variant={popular ? "default" : "outline"} onClick={onApplyClick}>
           Apply Now
           <ChevronRight className="h-4 w-4" />
         </Button>
