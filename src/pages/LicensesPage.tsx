@@ -18,10 +18,10 @@ const LicensesPage = () => {
               <span>Official Licensing Options</span>
             </div>
             
-            <h1 className="text-3xl md:text-4xl font-bold mb-5">Crypto Trading License Categories</h1>
+            <h1 className="text-3xl md:text-4xl font-bold mb-5">Crypto Trading License Tiers</h1>
             
             <p className="text-lg text-muted-foreground">
-              Select the appropriate license category based on your trading volume and activities.
+              Select the appropriate license tier based on your trading volume and activities.
               All licenses are valid for one year and comply with global regulatory standards.
             </p>
           </div>
@@ -40,7 +40,7 @@ const LicensesPage = () => {
                   <FileCheck className="h-5 w-5 text-primary shrink-0 mt-0.5" />
                   <div>
                     <span className="font-medium">Global Recognition</span> - 
-                    <span className="text-muted-foreground"> Accepted by all cryptocurrency exchanges and trading platforms worldwide.</span>
+                    <span className="text-muted-foreground"> Accepted by major cryptocurrency exchanges and trading platforms worldwide.</span>
                   </div>
                 </li>
                 <li className="flex gap-3">

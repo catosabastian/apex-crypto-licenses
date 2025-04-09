@@ -1,3 +1,4 @@
+
 import { useState, FormEvent } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { AlertTriangle, Loader2, ShieldCheck, Copy, Check, X } from "lucide-react";
+import { AlertTriangle, Loader2, ShieldCheck, Copy, Check } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 
 interface WalletAddresses {
@@ -24,14 +25,10 @@ const WALLET_ADDRESSES: WalletAddresses = {
   XRP: "rw2ciyaNshpHe7bCHo4bRWq6pqqynnWKQg"
 };
 
-interface ApplicationFormProps {
-  closeDialog?: () => void;
-}
-
-const ApplicationForm = ({ closeDialog }: ApplicationFormProps) => {
+const ApplicationForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [applicantType, setApplicantType] = useState<'individual' | 'corporate'>('individual');
-  const [selectedLevel, setSelectedLevel] = useState<'1' | '2' | '3'>('1');
+  const [selectedTier, setSelectedTier] = useState<'1' | '2' | '3'>('1');
   const [selectedCrypto, setSelectedCrypto] = useState<keyof WalletAddresses>('BTC');
   const [copySuccess, setCopySuccess] = useState<keyof WalletAddresses | null>(null);
   
@@ -67,13 +64,6 @@ const ApplicationForm = ({ closeDialog }: ApplicationFormProps) => {
       
       // Reset form
       (e.target as HTMLFormElement).reset();
-      
-      // Close dialog if provided
-      if (closeDialog) {
-        setTimeout(() => {
-          closeDialog();
-        }, 1500);
-      }
     } catch (error) {
       console.error("Error submitting application:", error);
       toast({
@@ -87,29 +77,15 @@ const ApplicationForm = ({ closeDialog }: ApplicationFormProps) => {
   };
 
   return (
-    <section id="application-form" className="py-8">
+    <section id="application" className="py-20 bg-muted/30">
       <div className="container">
         <div className="max-w-4xl mx-auto">
-          {closeDialog && (
-            <div className="flex justify-end mb-2">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={closeDialog}
-                className="h-8 w-8"
-                aria-label="Close"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
-          
           <div className="flex items-center gap-2 mb-4">
             <div className="h-1 w-12 bg-primary"></div>
             <span className="text-sm text-muted-foreground uppercase tracking-wider">Apply Now</span>
           </div>
           
-          <h2 className="text-3xl font-bold mb-6">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">
             Crypto License Application
           </h2>
           
@@ -329,9 +305,9 @@ const ApplicationForm = ({ closeDialog }: ApplicationFormProps) => {
                       defaultValue="1" 
                       className="grid grid-cols-1 md:grid-cols-3 gap-4"
                       required
-                      onValueChange={(value) => setSelectedLevel(value as '1' | '2' | '3')}
+                      onValueChange={(value) => setSelectedTier(value as '1' | '2' | '3')}
                     >
-                      <div className={`border rounded-lg p-4 ${selectedLevel === '1' ? 'border-primary bg-primary/5' : ''}`}>
+                      <div className={`border rounded-lg p-4 ${selectedTier === '1' ? 'border-primary bg-primary/5' : ''}`}>
                         <div className="flex items-start gap-2">
                           <RadioGroupItem value="1" id="tier1" className="mt-1" />
                           <div>
@@ -342,7 +318,7 @@ const ApplicationForm = ({ closeDialog }: ApplicationFormProps) => {
                         </div>
                       </div>
                       
-                      <div className={`border rounded-lg p-4 ${selectedLevel === '2' ? 'border-primary bg-primary/5' : ''}`}>
+                      <div className={`border rounded-lg p-4 ${selectedTier === '2' ? 'border-primary bg-primary/5' : ''}`}>
                         <div className="flex items-start gap-2">
                           <RadioGroupItem value="2" id="tier2" className="mt-1" />
                           <div>
@@ -353,7 +329,7 @@ const ApplicationForm = ({ closeDialog }: ApplicationFormProps) => {
                         </div>
                       </div>
                       
-                      <div className={`border rounded-lg p-4 ${selectedLevel === '3' ? 'border-primary bg-primary/5' : ''}`}>
+                      <div className={`border rounded-lg p-4 ${selectedTier === '3' ? 'border-primary bg-primary/5' : ''}`}>
                         <div className="flex items-start gap-2">
                           <RadioGroupItem value="3" id="tier3" className="mt-1" />
                           <div>
