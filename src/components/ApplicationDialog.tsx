@@ -1,6 +1,7 @@
 
 import { createContext, useContext, useState } from 'react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import ApplicationForm from './ApplicationForm';
 
 interface ApplicationDialogContextType {
@@ -21,7 +22,13 @@ export function ApplicationDialogProvider({ children }: { children: React.ReactN
     <ApplicationDialogContext.Provider value={{ isOpen, openApplicationDialog, closeApplicationDialog }}>
       {children}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" aria-describedby="application-form-description">
+          <VisuallyHidden>
+            <DialogTitle>License Application Form</DialogTitle>
+          </VisuallyHidden>
+          <p id="application-form-description" className="sr-only">
+            Complete this form to apply for your official crypto trading license
+          </p>
           <ApplicationForm onClose={closeApplicationDialog} />
         </DialogContent>
       </Dialog>

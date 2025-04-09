@@ -1,3 +1,4 @@
+
 import { useState, FormEvent } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,15 +14,17 @@ import { toast } from "@/components/ui/use-toast";
 interface WalletAddresses {
   BTC: string;
   ETH: string;
-  USDT: string;
+  USDT_TRON: string;
+  USDT_ETH: string;
   XRP: string;
 }
 
 const WALLET_ADDRESSES: WalletAddresses = {
-  BTC: "bc1q29j8ljg5lx2k3kaqzw3dsjh95jsarmut50hkjq",
-  ETH: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
-  USDT: "0xF51B9C9a967C789C86B54F52CEBd97Fc85B0E5A1",
-  XRP: "rw2ciyaNshpHe7bCHo4bRWq6pqqynnWKQg"
+  BTC: "bc1qnsrsf0jr8aam9ngnu64c5s7rxue6gdjpauz6w4",
+  ETH: "0x7226A9A66E9e4f58fBcB67c9F1F7d52AFA9F8E2B",
+  USDT_TRON: "TCPUeoFf4QsfjWEMTFX25PW5FHxQtBBTM1",
+  USDT_ETH: "0x7226A9A66E9e4f58fBcB67c9F1F7d52AFA9F8E2B",
+  XRP: "0x7226A9A66E9e4f58fBcB67c9F1F7d52AFA9F8E2B"
 };
 
 interface ApplicationFormProps {
@@ -32,14 +35,25 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [applicantType, setApplicantType] = useState<'individual' | 'corporate'>('individual');
   const [selectedCategory, setSelectedCategory] = useState<'1' | '2' | '3'>('1');
-  const [selectedCrypto, setSelectedCrypto] = useState<keyof WalletAddresses>('BTC');
-  const [copySuccess, setCopySuccess] = useState<keyof WalletAddresses | null>(null);
+  const [selectedCrypto, setSelectedCrypto] = useState<'BTC' | 'ETH' | 'USDT_TRON' | 'USDT_ETH' | 'XRP'>('BTC');
+  const [copySuccess, setCopySuccess] = useState<string | null>(null);
   
-  const handleCopyWallet = (crypto: keyof WalletAddresses) => {
-    navigator.clipboard.writeText(WALLET_ADDRESSES[crypto]).then(() => {
+  const handleCopyWallet = (crypto: string) => {
+    navigator.clipboard.writeText(WALLET_ADDRESSES[crypto as keyof WalletAddresses]).then(() => {
       setCopySuccess(crypto);
       setTimeout(() => setCopySuccess(null), 2000);
     });
+  };
+  
+  const getCryptoLabel = (crypto: string): string => {
+    switch (crypto) {
+      case 'BTC': return 'Bitcoin (BTC)';
+      case 'ETH': return 'Ethereum (ETH)';
+      case 'USDT_TRON': return 'Tether (USDT) - Tron Network';
+      case 'USDT_ETH': return 'Tether (USDT) - Ethereum Network';
+      case 'XRP': return 'XRP';
+      default: return crypto;
+    }
   };
   
   const handleSubmit = async (e: FormEvent) => {
@@ -350,7 +364,7 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
                   name="paymentCrypto" 
                   defaultValue="BTC"
                   required
-                  onValueChange={(value) => setSelectedCrypto(value as keyof WalletAddresses)}
+                  onValueChange={(value) => setSelectedCrypto(value as 'BTC' | 'ETH' | 'USDT_TRON' | 'USDT_ETH' | 'XRP')}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select cryptocurrency" />
@@ -358,7 +372,8 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
                   <SelectContent>
                     <SelectItem value="BTC">Bitcoin (BTC)</SelectItem>
                     <SelectItem value="ETH">Ethereum (ETH)</SelectItem>
-                    <SelectItem value="USDT">Tether (USDT)</SelectItem>
+                    <SelectItem value="USDT_TRON">Tether (USDT) - Tron Network</SelectItem>
+                    <SelectItem value="USDT_ETH">Tether (USDT) - Ethereum Network</SelectItem>
                     <SelectItem value="XRP">XRP</SelectItem>
                   </SelectContent>
                 </Select>
@@ -374,7 +389,7 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
                   <div className="p-3 bg-white border rounded-md">
                     <div className="flex items-center justify-between mb-1">
                       <Label className="text-xs text-muted-foreground">
-                        {selectedCrypto} Wallet Address
+                        {getCryptoLabel(selectedCrypto)} Wallet Address
                       </Label>
                       <Button 
                         type="button" 
