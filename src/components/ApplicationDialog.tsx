@@ -3,6 +3,8 @@ import { createContext, useContext, useState } from 'react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import ApplicationForm from './ApplicationForm';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ShieldCheck } from 'lucide-react';
 
 interface ApplicationDialogContextType {
   isOpen: boolean;
@@ -21,17 +23,38 @@ export function ApplicationDialogProvider({ children }: { children: React.ReactN
   return (
     <ApplicationDialogContext.Provider value={{ isOpen, openApplicationDialog, closeApplicationDialog }}>
       {children}
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" aria-describedby="application-form-description">
-          <VisuallyHidden>
-            <DialogTitle>License Application Form</DialogTitle>
-          </VisuallyHidden>
-          <p id="application-form-description" className="sr-only">
-            Complete this form to apply for your official crypto trading license
-          </p>
-          <ApplicationForm onClose={closeApplicationDialog} />
-        </DialogContent>
-      </Dialog>
+      <AnimatePresence>
+        {isOpen && (
+          <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogContent 
+              className="max-w-4xl max-h-[90vh] overflow-y-auto p-0 gap-0" 
+              aria-describedby="application-form-description"
+            >
+              <VisuallyHidden>
+                <DialogTitle>License Application Form</DialogTitle>
+              </VisuallyHidden>
+              <p id="application-form-description" className="sr-only">
+                Complete this form to apply for your official crypto trading license
+              </p>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ duration: 0.3 }}
+                className="overflow-hidden rounded-lg"
+              >
+                <div className="bg-accent/10 p-4 flex items-center gap-3 border-b">
+                  <ShieldCheck className="h-6 w-6 text-accent" />
+                  <h2 className="text-xl font-semibold">Official License Application</h2>
+                </div>
+                <div className="p-6">
+                  <ApplicationForm onClose={closeApplicationDialog} />
+                </div>
+              </motion.div>
+            </DialogContent>
+          </Dialog>
+        )}
+      </AnimatePresence>
     </ApplicationDialogContext.Provider>
   );
 }

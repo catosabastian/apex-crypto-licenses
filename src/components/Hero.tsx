@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, Globe, Shield, AlertTriangle } from 'lucide-react';
@@ -20,16 +21,12 @@ const Hero = () => {
     <section className="relative min-h-screen pt-16 flex flex-col">
       <div className="container flex-1 flex flex-col justify-center py-12 relative z-10">
         <div className="max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-accent/10 text-accent px-3 py-1 rounded-full text-sm mb-6">
+          <div className="inline-flex items-center gap-2 bg-accent/10 text-accent px-4 py-2 rounded-full text-sm mb-8">
             <Shield className="h-4 w-4" />
-            <span>Official Regulatory Service</span>
+            <span className="font-semibold">Official Regulatory Service</span>
           </div>
           
-          <h1 className="text-4xl md:text-6xl font-bold tracking-tight mb-4">
-            Crypto Trading License Authority
-          </h1>
-          
-          <p className="text-lg md:text-xl text-muted-foreground mb-8">
+          <p className="text-lg md:text-xl text-muted-foreground mb-10">
             Secure official recognition for your cryptocurrency trading activities with government-compliant licensing.
           </p>
           
@@ -67,40 +64,45 @@ const Hero = () => {
         </a>
       </div>
       
-      <CryptoBubbles />
+      <RegulatoryBubbles />
       
       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background to-transparent h-32"></div>
     </section>
   );
 };
 
-const CryptoBubbles = () => {
-  const cryptoIcons = [
-    { name: 'Bitcoin', symbol: 'BTC', color: '#F7931A' },
-    { name: 'Ethereum', symbol: 'ETH', color: '#627EEA' },
-    { name: 'Tether', symbol: 'USDT', color: '#26A17B' },
-    { name: 'XRP', symbol: 'XRP', color: '#23292F' },
-    { name: 'Binance', symbol: 'BNB', color: '#F3BA2F' },
-    { name: 'Kraken', symbol: 'KRK', color: '#5741D9' },
+const RegulatoryBubbles = () => {
+  const regulatoryBodies = [
+    { name: 'Securities and Exchange Commission', acronym: 'SEC', color: '#1E4899' },
+    { name: 'Commodity Futures Trading Commission', acronym: 'CFTC', color: '#006633' },
+    { name: 'Financial Conduct Authority', acronym: 'FCA', color: '#9D2235' },
+    { name: 'European Securities and Markets Authority', acronym: 'ESMA', color: '#003399' },
+    { name: 'Monetary Authority of Singapore', acronym: 'MAS', color: '#DA291C' },
+    { name: 'Financial Services Agency', acronym: 'FSA', color: '#2A3990' },
+    { name: 'Financial Market Supervisory Authority', acronym: 'FINMA', color: '#D40F7D' },
+    { name: 'Australian Securities and Investments Commission', acronym: 'ASIC', color: '#234B8F' },
+    { name: 'Dubai Financial Services Authority', acronym: 'DFSA', color: '#8C1D40' },
+    { name: 'International Organization of Securities Commissions', acronym: 'IOSCO', color: '#004A85' }
   ];
 
   return (
     <div className="absolute inset-0 overflow-hidden -z-10">
-      {cryptoIcons.map((crypto, idx) => (
+      {regulatoryBodies.map((body, idx) => (
         <div 
-          key={crypto.symbol}
+          key={body.acronym}
           className="bubble"
           style={{
-            width: `${40 + Math.random() * 30}px`,
-            height: `${40 + Math.random() * 30}px`,
+            width: `${60 + Math.random() * 30}px`,
+            height: `${60 + Math.random() * 30}px`,
             left: `${Math.random() * 100}%`,
             top: `${Math.random() * 100}%`,
             animationDelay: `${idx * 0.5}s`,
             background: 'white',
-            border: `2px solid ${crypto.color}`
+            border: `2px solid ${body.color}`
           }}
+          title={body.name}
         >
-          <span className="font-bold text-xs">{crypto.symbol}</span>
+          <span className="font-bold text-xs">{body.acronym}</span>
         </div>
       ))}
     </div>

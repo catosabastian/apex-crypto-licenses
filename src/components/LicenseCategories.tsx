@@ -1,64 +1,13 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CheckCircle, ChevronRight, CreditCard, DollarSign, Bitcoin, MessageSquareText } from 'lucide-react';
+import { CheckCircle, ChevronRight, CreditCard, MessageSquareText } from 'lucide-react';
 import { useApplicationDialog } from '@/components/ApplicationDialog';
 
 const LicenseCategories = () => {
-  const [currency, setCurrency] = useState<'USD' | 'USDT' | 'BTC' | 'ETH' | 'XRP'>('USD');
-  const [rates, setRates] = useState({
-    USDT: 1,
-    BTC: 0.000333,  // Roughly 1 BTC = $60,000
-    ETH: 0.00333,   // Roughly 1 ETH = $3,000 
-    XRP: 16.67      // Roughly 1 XRP = $0.06
-  });
   const { openApplicationDialog } = useApplicationDialog();
-  
-  // Fetch real exchange rates
-  useEffect(() => {
-    const fetchRates = async () => {
-      try {
-        // In a real application, you would fetch actual rates from a crypto API
-        // For now, using example rates that match approximately real market values
-        // These rates ensure that the displayed crypto amounts equal the USD values
-        setRates({
-          USDT: 1,        // 1 USDT = $1
-          BTC: 0.000333,  // $1 = 0.000333 BTC (1 BTC ≈ $60,000)
-          ETH: 0.00333,   // $1 = 0.00333 ETH (1 ETH ≈ $3,000)
-          XRP: 16.67      // $1 = 16.67 XRP (1 XRP ≈ $0.06)
-        });
-      } catch (error) {
-        console.error("Error fetching crypto rates:", error);
-      }
-    };
-    
-    fetchRates();
-    // In a production environment, we'd update rates periodically
-    // const interval = setInterval(fetchRates, 60000);
-    // return () => clearInterval(interval);
-  }, []);
-  
-  const formatPrice = (usdPrice: number): string => {
-    if (currency === 'USD') return `$${usdPrice.toLocaleString()}`;
-    
-    const converted = usdPrice * rates[currency as keyof typeof rates];
-    
-    switch(currency) {
-      case 'USDT':
-        return `${converted.toLocaleString()} USDT`;
-      case 'BTC':
-        return `${converted.toFixed(6)} BTC`;
-      case 'ETH':
-        return `${converted.toFixed(4)} ETH`;
-      case 'XRP':
-        return `${converted.toFixed(2)} XRP`;
-      default:
-        return `${converted} ${currency}`;
-    }
-  };
   
   return (
     <section id="licenses" className="py-20 bg-muted/30">
@@ -78,27 +27,13 @@ const LicenseCategories = () => {
                 Select the appropriate license category based on your trading volume and activity.
               </p>
             </div>
-            
-            <div className="bg-card rounded-lg border">
-              <Tabs defaultValue="USD" className="w-full">
-                <TabsList className="grid grid-cols-5 w-full">
-                  <TabsTrigger value="USD" onClick={() => setCurrency('USD')}>
-                    <DollarSign className="h-4 w-4" />
-                  </TabsTrigger>
-                  <TabsTrigger value="USDT" onClick={() => setCurrency('USDT')}>USDT</TabsTrigger>
-                  <TabsTrigger value="BTC" onClick={() => setCurrency('BTC')}>BTC</TabsTrigger>
-                  <TabsTrigger value="ETH" onClick={() => setCurrency('ETH')}>ETH</TabsTrigger>
-                  <TabsTrigger value="XRP" onClick={() => setCurrency('XRP')}>XRP</TabsTrigger>
-                </TabsList>
-              </Tabs>
-            </div>
           </div>
           
           <div className="grid md:grid-cols-3 gap-6">
             <LicenseCategory 
               category={1}
               title="Individual Trader"
-              price={formatPrice(20000)}
+              price="20,000 USDT"
               minVolume="$50,000"
               features={[
                 "1-year validity period",
@@ -113,7 +48,7 @@ const LicenseCategories = () => {
             <LicenseCategory 
               category={2}
               title="Advanced Trader"
-              price={formatPrice(40000)}
+              price="40,000 USDT"
               minVolume="$250,000"
               features={[
                 "1-year validity period",
@@ -130,7 +65,7 @@ const LicenseCategories = () => {
             <LicenseCategory 
               category={3}
               title="Institutional Trader"
-              price={formatPrice(70000)}
+              price="70,000 USDT"
               minVolume="$1,000,000+"
               features={[
                 "1-year validity period",
