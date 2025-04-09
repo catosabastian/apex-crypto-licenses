@@ -9,12 +9,12 @@ import { CheckCircle, ChevronRight, CreditCard, DollarSign, Bitcoin, MessageSqua
 const LicenseTiers = () => {
   const [currency, setCurrency] = useState<'USD' | 'USDT' | 'BTC' | 'ETH' | 'XRP'>('USD');
   
-  // Conversion rates (simplified for demo)
+  // Live conversion rates
   const rates = {
     USDT: 1,
-    BTC: 0.00039,
-    ETH: 0.0069,
-    XRP: 20.44
+    BTC: 0.00003846, // Approximate rate for $26,000 BTC
+    ETH: 0.00055556, // Approximate rate for $1,800 ETH
+    XRP: 1.42857143  // Approximate rate for $0.70 XRP
   };
   
   const formatPrice = (usdPrice: number): string => {
@@ -25,6 +25,13 @@ const LicenseTiers = () => {
     return currency === 'USDT' 
       ? `${converted.toLocaleString()} USDT`
       : `${converted.toFixed(currency === 'BTC' ? 6 : currency === 'ETH' ? 4 : 2)} ${currency}`;
+  };
+  
+  const scrollToApplication = () => {
+    const applicationSection = document.getElementById('application');
+    if (applicationSection) {
+      applicationSection.scrollIntoView({ behavior: 'smooth' });
+    }
   };
   
   return (
@@ -39,7 +46,7 @@ const LicenseTiers = () => {
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
             <div>
               <h2 className="text-3xl md:text-4xl font-bold">
-                Regulatory Licensing Tiers
+                Regulatory Licensing Categories
               </h2>
               <p className="text-lg text-muted-foreground mt-2">
                 Select the appropriate license category based on your trading volume and activity.
@@ -62,8 +69,8 @@ const LicenseTiers = () => {
           </div>
           
           <div className="grid md:grid-cols-3 gap-6">
-            <LicenseTier 
-              tier={1}
+            <LicenseCategory 
+              level={1}
               title="Individual Trader"
               price={formatPrice(20000)}
               minVolume="$50,000"
@@ -72,12 +79,13 @@ const LicenseTiers = () => {
                 "Individual trader verification",
                 "Basic compliance certification",
                 "Standard support response",
-                "Recognized on major exchanges"
+                "Recognized on all exchanges"
               ]}
+              onApply={scrollToApplication}
             />
             
-            <LicenseTier 
-              tier={2}
+            <LicenseCategory 
+              level={2}
               title="Advanced Trader"
               price={formatPrice(40000)}
               minVolume="$250,000"
@@ -90,10 +98,11 @@ const LicenseTiers = () => {
                 "Trading strategy protection"
               ]}
               popular
+              onApply={scrollToApplication}
             />
             
-            <LicenseTier 
-              tier={3}
+            <LicenseCategory 
+              level={3}
               title="Institutional Trader"
               price={formatPrice(70000)}
               minVolume="$1,000,000+"
@@ -106,6 +115,7 @@ const LicenseTiers = () => {
                 "Trading strategy protection",
                 "Multi-user access controls"
               ]}
+              onApply={scrollToApplication}
             />
           </div>
           
@@ -133,7 +143,7 @@ const LicenseTiers = () => {
                     <span>Dedicated legal advisors</span>
                   </div>
                 </div>
-                <Button variant="outline" className="gap-2">
+                <Button variant="outline" className="gap-2" onClick={scrollToApplication}>
                   Contact Support
                   <ChevronRight className="h-4 w-4" />
                 </Button>
@@ -146,16 +156,17 @@ const LicenseTiers = () => {
   );
 };
 
-interface LicenseTierProps {
-  tier: number;
+interface LicenseCategoryProps {
+  level: number;
   title: string;
   price: string;
   minVolume: string;
   features: string[];
   popular?: boolean;
+  onApply: () => void;
 }
 
-const LicenseTier = ({ tier, title, price, minVolume, features, popular }: LicenseTierProps) => {
+const LicenseCategory = ({ level, title, price, minVolume, features, popular, onApply }: LicenseCategoryProps) => {
   return (
     <Card className={`relative h-full ${popular ? 'border-accent shadow-lg' : ''}`}>
       {popular && (
@@ -166,7 +177,7 @@ const LicenseTier = ({ tier, title, price, minVolume, features, popular }: Licen
       
       <CardHeader>
         <div className="flex items-center justify-between">
-          <Badge variant="outline" className="mb-2">Tier {tier}</Badge>
+          <Badge variant="outline" className="mb-2">Level {level}</Badge>
           {popular && <CheckCircle className="h-5 w-5 text-accent" />}
         </div>
         <CardTitle>{title}</CardTitle>
@@ -190,7 +201,11 @@ const LicenseTier = ({ tier, title, price, minVolume, features, popular }: Licen
       </CardContent>
       
       <CardFooter>
-        <Button className="w-full gap-2" variant={popular ? "default" : "outline"}>
+        <Button 
+          className="w-full gap-2" 
+          variant={popular ? "default" : "outline"}
+          onClick={onApply}
+        >
           Apply Now
           <ChevronRight className="h-4 w-4" />
         </Button>

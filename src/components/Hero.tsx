@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, Globe, Shield, AlertTriangle } from 'lucide-react';
+import { ChevronDown, Globe, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Hero = () => {
@@ -20,13 +20,20 @@ const Hero = () => {
   const handleVerifyLicense = () => {
     navigate('/verification');
   };
+  
+  const scrollToApplication = () => {
+    const applicationSection = document.getElementById('application');
+    if (applicationSection) {
+      applicationSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   return (
     <section className="relative min-h-screen pt-16 flex flex-col">
       <div className="container flex-1 flex flex-col justify-center py-12 relative z-10">
         <div className="max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-5 py-2 rounded-full text-lg font-medium mb-8">
-            <Shield className="h-5 w-5" />
+          <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-5 py-3 rounded-full text-xl font-medium mb-8">
+            <Shield className="h-6 w-6" />
             <span>Unified Regulatory Framework</span>
           </div>
           
@@ -35,7 +42,11 @@ const Hero = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="gap-2">
+            <Button 
+              size="lg" 
+              className="gap-2"
+              onClick={scrollToApplication}
+            >
               Apply for License
               <ChevronDown className="h-4 w-4" />
             </Button>
