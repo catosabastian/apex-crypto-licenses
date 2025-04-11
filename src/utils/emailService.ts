@@ -2,9 +2,9 @@
 import emailjs from 'emailjs-com';
 
 // EmailJS configuration
-const SERVICE_ID = "default_service"; // Your EmailJS service ID
+const SERVICE_ID = "service_c4j7pma"; // Your EmailJS service ID
 const TEMPLATE_ID = "template_notification"; // Your EmailJS template ID
-const USER_ID = "YOUR_USER_ID"; // Your EmailJS user ID
+const USER_ID = "WgE_CtN7sU876wEGJ"; // Your EmailJS user ID
 
 /**
  * Sends an email notification to the administrator when a new license application is submitted
@@ -31,14 +31,7 @@ export const sendAdminNotification = async (
 
     console.log("Sending email notification with parameters:", templateParams);
     
-    // In development or if EmailJS is not fully configured, log the data
-    if (!USER_ID || USER_ID === "YOUR_USER_ID") {
-      console.log("EmailJS not configured. Email would be sent to:", adminEmail);
-      console.log("Email content:", templateParams);
-      return true; // Mock success for development
-    }
-
-    // Send the actual email
+    // Send the actual email with your provided credentials
     const response = await emailjs.send(
       SERVICE_ID,
       TEMPLATE_ID,
