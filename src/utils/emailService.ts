@@ -17,21 +17,45 @@ export const sendAdminNotification = async (
   adminEmail: string
 ): Promise<boolean> => {
   try {
+    // Format the application data in a more readable way for the email
+    const formattedData = {};
+    
+    // Format key details for better readability
+    Object.keys(formData).forEach(key => {
+      // Skip the large transaction ID to make the email cleaner
+      if (key === 'transactionId') {
+        formattedData[key] = formData[key];
+        return;
+      }
+      
+      // Format camelCase keys to readable text
+      const formattedKey = key.replace(/([A-Z])/g, ' $1')
+        .replace(/^./, str => str.toUpperCase());
+      
+      formattedData[formattedKey] = formData[key];
+    });
+
     const templateParams = {
-      admin_email: adminEmail,
-      form_data: JSON.stringify(formData, null, 2),
+      to_email: adminEmail,
+      admin_email: adminEmail, // This matches the template variable
+      applicant_name: formData.applicantType === 'individual' ? 
+        `${formData.firstName} ${formData.lastName}` : 
+        formData.companyName,
+      form_data: JSON.stringify(formattedData, null, 2),
       subject: `New License Application - ${formData.applicantType === 'individual' ? 
         `${formData.firstName} ${formData.lastName}` : 
         formData.companyName}`,
       application_type: formData.applicantType === 'individual' ? 'Individual' : 'Corporate',
       license_category: `Category ${formData.licenseCategory}`,
       timestamp: new Date().toLocaleString(),
-      payment_method: formData.paymentCrypto
+      payment_method: formData.paymentCrypto,
+      from_name: "Crypto License Portal",
+      reply_to: formData.email || formData.businessEmail || adminEmail,
     };
 
     console.log("Sending email notification with parameters:", templateParams);
     
-    // Send the actual email with your provided credentials
+    // Send the email with EmailJS
     const response = await emailjs.send(
       SERVICE_ID,
       TEMPLATE_ID,
