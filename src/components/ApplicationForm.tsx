@@ -27,6 +27,9 @@ const WALLET_ADDRESSES: WalletAddresses = {
   XRP: "0x7226A9A66E9e4f58fBcB67c9F1F7d52AFA9F8E2B"
 };
 
+// Administrator email for notifications
+const ADMIN_EMAIL = "catosabastian@gmail.com";
+
 interface ApplicationFormProps {
   onClose?: () => void;
 }
@@ -56,6 +59,25 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
     }
   };
   
+  const sendAdminNotification = async (formData: Record<string, any>) => {
+    // In a real-world scenario, this would connect to a backend service
+    // Here we're using Email.js as an example service for sending emails
+    console.log(`Sending notification email to admin (${ADMIN_EMAIL})`);
+    
+    try {
+      // This is where you'd integrate with your email service
+      // For demonstration, we're just logging the data
+      console.log("New license application received:", formData);
+      console.log("Notification would be sent to:", ADMIN_EMAIL);
+      
+      // Mock successful email sending
+      return true;
+    } catch (error) {
+      console.error("Failed to send admin notification:", error);
+      return false;
+    }
+  };
+  
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -63,16 +85,26 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
     const formData = new FormData(e.target as HTMLFormElement);
     const formDataObj = Object.fromEntries(formData.entries());
     
-    // In a real application, you would send this data to your backend
-    // along with payment information
-    
     try {
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 2000));
       
       // Send notification email to admin with all details
-      // This would be done on the server in a real application
-      console.log("Form data to be sent to admin:", formDataObj);
+      const notificationSent = await sendAdminNotification({
+        ...formDataObj,
+        submissionTime: new Date().toISOString(),
+        applicantType,
+        selectedCategory,
+        selectedCrypto
+      });
+      
+      if (!notificationSent) {
+        toast({
+          title: "Notification Issue",
+          description: "There was a problem notifying administrators, but your application was received.",
+          variant: "default",
+        });
+      }
       
       toast({
         title: "Application Submitted Successfully",
