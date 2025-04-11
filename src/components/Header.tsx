@@ -20,7 +20,7 @@ const Header = () => {
           <ShieldCheck className="h-8 w-8 text-primary" />
           <div>
             <h1 className="text-xl font-bold tracking-tight">APEX</h1>
-            <p className="text-xs text-muted-foreground">Crypto Licensing Authority</p>
+            <p className="text-xs text-muted-foreground">Crypto Licensing Regulatory</p>
           </div>
         </div>
 

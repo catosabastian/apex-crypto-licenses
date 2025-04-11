@@ -12,12 +12,12 @@ const Footer = () => {
               <ShieldCheck className="h-6 w-6" />
               <div>
                 <h2 className="text-xl font-bold">APEX</h2>
-                <p className="text-xs opacity-80">Crypto Licensing Authority</p>
+                <p className="text-xs opacity-80">Crypto Licensing Regulatory</p>
               </div>
             </div>
             
             <p className="mt-4 text-sm opacity-80 max-w-md">
-              APEX Crypto Licensing Authority provides official regulatory licensing for cryptocurrency traders and institutions. Our mission is to ensure compliance and security in digital asset trading.
+              APEX Crypto Licensing provides official regulatory licensing for cryptocurrency traders and institutions. Our mission is to ensure compliance and security in digital asset trading.
             </p>
           </div>
           
@@ -25,7 +25,7 @@ const Footer = () => {
             <h3 className="font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2 text-sm">
               <li><a href="#about" className="opacity-80 hover:opacity-100 transition-opacity">About Us</a></li>
-              <li><a href="#licenses" className="opacity-80 hover:opacity-100 transition-opacity">License Tiers</a></li>
+              <li><a href="#licenses" className="opacity-80 hover:opacity-100 transition-opacity">License Categories</a></li>
               <li><a href="#verification" className="opacity-80 hover:opacity-100 transition-opacity">Verification Process</a></li>
               <li><a href="#application" className="opacity-80 hover:opacity-100 transition-opacity">Application</a></li>
             </ul>
@@ -36,7 +36,7 @@ const Footer = () => {
             <ul className="space-y-2 text-sm">
               <li className="flex items-center gap-2">
                 <Globe className="h-4 w-4 opacity-80" />
-                <span className="opacity-80">support@apex-crypto.auth</span>
+                <span className="opacity-80">support@apex-crypto.reg</span>
               </li>
               <li className="flex items-center gap-2">
                 <MessageSquare className="h-4 w-4 opacity-80" />
@@ -50,7 +50,7 @@ const Footer = () => {
         
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-xs opacity-70">
-            © {new Date().getFullYear()} APEX Crypto Licensing Authority. All rights reserved.
+            © {new Date().getFullYear()} APEX Crypto Licensing Regulatory. All rights reserved.
           </div>
           
           <div className="flex gap-6 text-xs opacity-70">

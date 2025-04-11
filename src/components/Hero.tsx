@@ -26,6 +26,10 @@ const Hero = () => {
             <span className="font-semibold">Official Regulatory Service</span>
           </div>
           
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
+            Crypto Trading License
+          </h1>
+          
           <p className="text-lg md:text-xl text-muted-foreground mb-10">
             Secure official recognition for your cryptocurrency trading activities with government-compliant licensing.
           </p>
@@ -97,12 +101,14 @@ const RegulatoryBubbles = () => {
             left: `${Math.random() * 100}%`,
             top: `${Math.random() * 100}%`,
             animationDelay: `${idx * 0.5}s`,
-            background: 'white',
-            border: `2px solid ${body.color}`
+            background: 'rgba(255, 255, 255, 0.05)',
+            backdropFilter: 'blur(1px)',
+            border: `1px solid rgba(${body.color.replace('#', '').match(/.{1,2}/g)?.map(val => parseInt(val, 16) + ',') || ''} 0.2)`,
+            opacity: '0.4'
           }}
           title={body.name}
         >
-          <span className="font-bold text-xs">{body.acronym}</span>
+          <span className="font-bold text-xs opacity-60">{body.acronym}</span>
         </div>
       ))}
     </div>

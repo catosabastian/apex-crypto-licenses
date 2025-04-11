@@ -48,18 +48,29 @@
     background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
     backdrop-filter: blur(10px);
     border: 1px solid rgba(255,255,255,0.18);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .license-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
   }
 
   .bubble {
     position: absolute;
     border-radius: 50%;
-    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-    background: white;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    backdrop-filter: blur(3px);
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0.85;
+    opacity: 0.5;
     animation: float 8s ease-in-out infinite;
+    transition: opacity 0.3s ease;
+  }
+  
+  .bubble:hover {
+    opacity: 0.8;
   }
 
   @keyframes float {
@@ -87,4 +98,19 @@
     opacity: 0.7;
     color: theme('colors.primary.DEFAULT');
   }
+  
+  .glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  }
+  
+  .gradient-text {
+    background: linear-gradient(90deg, theme('colors.accent.DEFAULT') 0%, theme('colors.primary.DEFAULT') 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
 }
+

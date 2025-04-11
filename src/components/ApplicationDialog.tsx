@@ -37,17 +37,21 @@ export function ApplicationDialogProvider({ children }: { children: React.ReactN
                 Complete this form to apply for your official crypto trading license
               </p>
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.3 }}
-                className="overflow-hidden rounded-lg"
+                initial={{ opacity: 0, y: 20, scale: 0.98 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -20, scale: 0.98 }}
+                transition={{ 
+                  duration: 0.4, 
+                  ease: [0.22, 1, 0.36, 1],
+                  staggerChildren: 0.1 
+                }}
+                className="overflow-hidden rounded-lg shadow-lg"
               >
-                <div className="bg-accent/10 p-4 flex items-center gap-3 border-b">
+                <div className="bg-gradient-to-r from-accent/20 to-accent/5 p-4 flex items-center gap-3 border-b">
                   <ShieldCheck className="h-6 w-6 text-accent" />
                   <h2 className="text-xl font-semibold">Official License Application</h2>
                 </div>
-                <div className="p-6">
+                <div className="p-6 bg-background">
                   <ApplicationForm onClose={closeApplicationDialog} />
                 </div>
               </motion.div>
