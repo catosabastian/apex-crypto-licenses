@@ -1,4 +1,3 @@
-
 import { useState, FormEvent } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { AlertTriangle, Loader2, ShieldCheck, Copy, Check } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
+import { sendAdminNotification } from "@/utils/emailService";
 
 interface WalletAddresses {
   BTC: string;
@@ -59,25 +59,6 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
     }
   };
   
-  const sendAdminNotification = async (formData: Record<string, any>) => {
-    // In a real-world scenario, this would connect to a backend service
-    // Here we're using Email.js as an example service for sending emails
-    console.log(`Sending notification email to admin (${ADMIN_EMAIL})`);
-    
-    try {
-      // This is where you'd integrate with your email service
-      // For demonstration, we're just logging the data
-      console.log("New license application received:", formData);
-      console.log("Notification would be sent to:", ADMIN_EMAIL);
-      
-      // Mock successful email sending
-      return true;
-    } catch (error) {
-      console.error("Failed to send admin notification:", error);
-      return false;
-    }
-  };
-  
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -86,24 +67,29 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
     const formDataObj = Object.fromEntries(formData.entries());
     
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Send notification email to admin with all details
-      const notificationSent = await sendAdminNotification({
+      // Prepare complete form data with additional information
+      const completeFormData = {
         ...formDataObj,
         submissionTime: new Date().toISOString(),
         applicantType,
         selectedCategory,
         selectedCrypto
-      });
+      };
+      
+      // First send the notification email to admin
+      const notificationSent = await sendAdminNotification(
+        completeFormData,
+        ADMIN_EMAIL
+      );
       
       if (!notificationSent) {
         toast({
-          title: "Notification Issue",
-          description: "There was a problem notifying administrators, but your application was received.",
+          title: "Admin Notification Status",
+          description: "There was an issue sending the notification to administrators, but your application was received.",
           variant: "default",
         });
+      } else {
+        console.log("Admin notification email sent successfully to:", ADMIN_EMAIL);
       }
       
       toast({
