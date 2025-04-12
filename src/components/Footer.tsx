@@ -1,6 +1,7 @@
 
 import { Globe, MessageSquare, ShieldCheck } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -27,7 +28,7 @@ const Footer = () => {
               <li><a href="#about" className="opacity-80 hover:opacity-100 transition-opacity">About Us</a></li>
               <li><a href="#licenses" className="opacity-80 hover:opacity-100 transition-opacity">License Categories</a></li>
               <li><a href="#verification" className="opacity-80 hover:opacity-100 transition-opacity">Verification Process</a></li>
-              <li><a href="#application" className="opacity-80 hover:opacity-100 transition-opacity">Application</a></li>
+              <li><Link to="/application" className="opacity-80 hover:opacity-100 transition-opacity">Application</Link></li>
             </ul>
           </div>
           
@@ -36,7 +37,7 @@ const Footer = () => {
             <ul className="space-y-2 text-sm">
               <li className="flex items-center gap-2">
                 <Globe className="h-4 w-4 opacity-80" />
-                <span className="opacity-80">support@apex-crypto.reg</span>
+                <span className="opacity-80">support@apexcrypto.reg</span>
               </li>
               <li className="flex items-center gap-2">
                 <MessageSquare className="h-4 w-4 opacity-80" />
