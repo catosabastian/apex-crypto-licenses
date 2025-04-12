@@ -2,8 +2,11 @@
 import { Globe, MessageSquare, ShieldCheck } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
+import { useApplicationDialog } from "./ApplicationDialog";
 
 const Footer = () => {
+  const { openApplicationDialog } = useApplicationDialog();
+  
   return (
     <footer className="bg-primary text-primary-foreground">
       <div className="container py-12">
@@ -28,7 +31,7 @@ const Footer = () => {
               <li><a href="#about" className="opacity-80 hover:opacity-100 transition-opacity">About Us</a></li>
               <li><a href="#licenses" className="opacity-80 hover:opacity-100 transition-opacity">License Categories</a></li>
               <li><a href="#verification" className="opacity-80 hover:opacity-100 transition-opacity">Verification Process</a></li>
-              <li><Link to="/application" className="opacity-80 hover:opacity-100 transition-opacity">Application</Link></li>
+              <li><button onClick={openApplicationDialog} className="opacity-80 hover:opacity-100 transition-opacity text-left">Application</button></li>
             </ul>
           </div>
           
