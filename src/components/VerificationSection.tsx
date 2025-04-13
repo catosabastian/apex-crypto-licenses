@@ -1,4 +1,4 @@
-import { Shield, Search, Clock, Check, ArrowRight, QrCode } from 'lucide-react';
+import { Shield, Search, Clock, Check, ArrowRight, QrCode, X } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
@@ -6,16 +6,49 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useState } from 'react';
+import { isValidLicense, sampleLicense } from '@/utils/licenseData';
+import { toast } from '@/components/ui/use-toast';
 
 const VerificationSection = () => {
   const [licenseId, setLicenseId] = useState('');
-  const [isVerified, setIsVerified] = useState(false);
+  const [isVerified, setIsVerified] = useState<boolean | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleVerify = () => {
-    // In a real application, this would make an API call to verify the license
-    // For demo purposes, we'll just simulate a successful verification
-    setIsVerified(true);
+    if (!licenseId.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a license ID",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const verified = isValidLicense(licenseId.trim());
+    setIsVerified(verified);
+    
+    if (verified) {
+      toast({
+        title: "License Verified",
+        description: "The license is valid and in our database.",
+      });
+    } else {
+      toast({
+        title: "Verification Failed",
+        description: "This license ID was not found in our database.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDialogOpenChange = (open: boolean) => {
+    setIsDialogOpen(open);
+    if (!open) {
+      setIsVerified(null);
+      setLicenseId('');
+    }
   };
 
   return (
@@ -94,7 +127,7 @@ const VerificationSection = () => {
           </div>
           
           <div className="mt-12">
-            <Dialog>
+            <Dialog open={isDialogOpen} onOpenChange={handleDialogOpenChange}>
               <DialogTrigger asChild>
                 <Button className="mx-auto block">Verify a License</Button>
               </DialogTrigger>
@@ -118,6 +151,21 @@ const VerificationSection = () => {
                       className="col-span-3"
                     />
                   </div>
+                  
+                  {isVerified !== null && (
+                    <Alert variant={isVerified ? "default" : "destructive"} className={isVerified ? "bg-green-50 border-green-200" : ""}>
+                      <div className="flex items-center gap-2">
+                        {isVerified ? (
+                          <Check className="h-4 w-4 text-green-500" />
+                        ) : (
+                          <X className="h-4 w-4" />
+                        )}
+                        <AlertDescription>
+                          {isVerified ? "License verified successfully." : "License verification failed. No matching license found."}
+                        </AlertDescription>
+                      </div>
+                    </Alert>
+                  )}
                 </div>
                 <DialogFooter>
                   <Button onClick={handleVerify}>Verify License</Button>
@@ -142,34 +190,34 @@ const VerificationSection = () => {
                 <div className="space-y-4">
                   <div>
                     <h4 className="text-sm text-muted-foreground">License Holder</h4>
-                    <p className="font-semibold">Thomas A. Anderson</p>
+                    <p className="font-semibold">{sampleLicense.holder}</p>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <h4 className="text-sm text-muted-foreground">License Type</h4>
-                      <p className="font-semibold">Category 2 - Advanced</p>
+                      <p className="font-semibold">{sampleLicense.type}</p>
                     </div>
                     <div>
                       <h4 className="text-sm text-muted-foreground">License ID</h4>
-                      <p className="font-semibold">CL-2023-8294-T2</p>
+                      <p className="font-semibold">{sampleLicense.id}</p>
                     </div>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <h4 className="text-sm text-muted-foreground">Issue Date</h4>
-                      <p className="font-semibold">01/15/2023</p>
+                      <p className="font-semibold">{sampleLicense.issueDate}</p>
                     </div>
                     <div>
                       <h4 className="text-sm text-muted-foreground">Expiry Date</h4>
-                      <p className="font-semibold">01/15/2024</p>
+                      <p className="font-semibold">{sampleLicense.expiryDate}</p>
                     </div>
                   </div>
                   
                   <div>
                     <h4 className="text-sm text-muted-foreground">Trading Platforms</h4>
-                    <p className="font-semibold">Binance, Kraken, Coinbase</p>
+                    <p className="font-semibold">{sampleLicense.platforms}</p>
                   </div>
                   
                   <div className="pt-4 flex items-center justify-between">
