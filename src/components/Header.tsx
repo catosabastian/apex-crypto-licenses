@@ -17,7 +17,11 @@ const Header = () => {
     <header className="fixed top-0 left-0 right-0 bg-background/95 backdrop-blur-sm z-50 border-b border-border py-4">
       <div className="container flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <ShieldCheck className="h-8 w-8 text-primary" />
+          <img 
+            src="/lovable-uploads/319819f6-bda5-4ab2-af50-3b909645c976.png" 
+            alt="APEX Crypto License" 
+            className="h-12 w-auto rounded-lg shadow-sm"
+          />
           <div>
             <h1 className="text-xl font-bold tracking-tight">APEX</h1>
             <p className="text-xs text-muted-foreground">Crypto Licensing Regulatory</p>
