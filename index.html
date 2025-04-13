@@ -20,18 +20,7 @@
 
   <body>
     <div id="root"></div>
-    <script>
-      // Only include the GPTEngineer script in development
-      if (window.location.hostname === 'localhost' || 
-          window.location.hostname === '127.0.0.1' || 
-          window.location.hostname.startsWith('localhost') ||
-          window.location.hostname.includes('lovableproject.com')) {
-        const script = document.createElement('script');
-        script.src = 'https://cdn.gpteng.co/gptengineer.js';
-        script.type = 'module';
-        document.body.appendChild(script);
-      }
-    </script>
+    <!-- GPTEngineer script completely removed from production builds -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
