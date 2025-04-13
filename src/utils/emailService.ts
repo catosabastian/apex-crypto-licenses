@@ -17,6 +17,12 @@ export const sendAdminNotification = async (
   adminEmail: string
 ): Promise<boolean> => {
   try {
+    // Validate required EmailJS configuration
+    if (!SERVICE_ID || !TEMPLATE_ID || !USER_ID) {
+      console.error("Missing EmailJS configuration. Please check your credentials.");
+      return false;
+    }
+
     // Format the application data in a more readable way for the email
     const formattedData = {};
     
