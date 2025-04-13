@@ -35,9 +35,11 @@ export const sendAdminNotification = async (
       formattedData[formattedKey] = formData[key];
     });
 
+    // Prepare email parameters that match exactly what's expected in the template
     const templateParams = {
+      to_name: "Admin", // Added for template compatibility
       to_email: adminEmail,
-      admin_email: adminEmail, // This matches the template variable
+      admin_email: adminEmail,
       applicant_name: formData.applicantType === 'individual' ? 
         `${formData.firstName} ${formData.lastName}` : 
         formData.companyName,
@@ -51,6 +53,9 @@ export const sendAdminNotification = async (
       payment_method: formData.paymentCrypto,
       from_name: "Crypto License Portal",
       reply_to: formData.email || formData.businessEmail || adminEmail,
+      message: `A new license application has been submitted by ${formData.applicantType === 'individual' ? 
+        `${formData.firstName} ${formData.lastName}` : 
+        formData.companyName}. Please review the details.`, // Added for template compatibility
     };
 
     console.log("Sending email notification with parameters:", templateParams);
