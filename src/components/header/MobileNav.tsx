@@ -1,0 +1,70 @@
+
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { X, Menu } from 'lucide-react';
+
+interface MobileNavProps {
+  isOpen: boolean;
+  onToggle: () => void;
+  onApplyClick: () => void;
+  onNavItemClick: () => void;
+}
+
+const MobileNav = ({ isOpen, onToggle, onApplyClick, onNavItemClick }: MobileNavProps) => {
+  const handleApplyClick = () => {
+    onApplyClick();
+    onNavItemClick();
+  };
+
+  return (
+    <>
+      {/* Mobile Navigation Toggle */}
+      <button 
+        className="md:hidden text-foreground p-2" 
+        onClick={onToggle}
+        aria-label={isOpen ? "Close menu" : "Open menu"}
+      >
+        {isOpen ? <X /> : <Menu />}
+      </button>
+      
+      {/* Mobile Navigation Menu */}
+      {isOpen && (
+        <div className="md:hidden bg-background border-t border-border animate-fade-in">
+          <nav className="container flex flex-col py-4 gap-4">
+            <a 
+              href="#about" 
+              className="text-sm font-medium py-2 hover:text-accent transition-colors" 
+              onClick={onNavItemClick}
+            >
+              About
+            </a>
+            <a 
+              href="#licenses" 
+              className="text-sm font-medium py-2 hover:text-accent transition-colors" 
+              onClick={onNavItemClick}
+            >
+              Licenses
+            </a>
+            <a 
+              href="#verification" 
+              className="text-sm font-medium py-2 hover:text-accent transition-colors" 
+              onClick={onNavItemClick}
+            >
+              Verification
+            </a>
+            <Button 
+              variant="default" 
+              size="sm" 
+              className="w-full" 
+              onClick={handleApplyClick}
+            >
+              Apply Now
+            </Button>
+          </nav>
+        </div>
+      )}
+    </>
+  );
+};
+
+export default MobileNav;
