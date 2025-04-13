@@ -20,15 +20,14 @@
 
   <body>
     <div id="root"></div>
+    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
     <script>
-      // Only load Lovable script in development environments
-      if (window.location.hostname === 'localhost' || 
-          window.location.hostname === '127.0.0.1' || 
-          window.location.hostname.includes('.lovableproject.com')) {
-        const script = document.createElement('script');
-        script.src = 'https://cdn.gpteng.co/gptengineer.js';
-        script.type = 'module';
-        document.body.appendChild(script);
+      // Only use Lovable's features in development environments
+      if (!(window.location.hostname === 'localhost' || 
+            window.location.hostname === '127.0.0.1' || 
+            window.location.hostname.includes('.lovableproject.com'))) {
+        // Remove Lovable script in production
+        document.querySelector('script[src="https://cdn.gpteng.co/gptengineer.js"]')?.remove();
       }
     </script>
     <script type="module" src="/src/main.tsx"></script>
