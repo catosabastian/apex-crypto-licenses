@@ -4,12 +4,16 @@ import { validLicenses, generateLicenseId } from '@/utils/licenseData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Shield, Copy, Search, Download, Filter } from 'lucide-react';
+import { Shield, Copy, Search, Download, Filter, LogOut } from 'lucide-react';
 import { toast } from '@/components/ui/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Admin = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTier, setFilterTier] = useState<number | null>(null);
+  const { logout } = useAuth();
+  const navigate = useNavigate();
   
   // Copy license ID to clipboard
   const handleCopy = (licenseId: string) => {
@@ -62,6 +66,11 @@ const Admin = () => {
     });
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   return (
     <div className="container mx-auto py-10 px-4">
       <header className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
@@ -75,10 +84,16 @@ const Admin = () => {
           </p>
         </div>
         
-        <Button onClick={exportCsv} className="flex items-center gap-2 md:self-end">
-          <Download className="h-4 w-4" />
-          Export Licenses
-        </Button>
+        <div className="flex gap-3">
+          <Button onClick={exportCsv} className="flex items-center gap-2 md:self-end">
+            <Download className="h-4 w-4" />
+            Export Licenses
+          </Button>
+          <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2 md:self-end">
+            <LogOut className="h-4 w-4" />
+            Logout
+          </Button>
+        </div>
       </header>
       
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
