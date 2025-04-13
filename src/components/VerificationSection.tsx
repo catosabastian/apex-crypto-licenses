@@ -168,7 +168,7 @@ const VerificationSection = () => {
                   )}
                 </div>
                 <DialogFooter>
-                  <Button onClick={handleVerify}>Verify License</Button>
+                  <Button onClick={handleVerify} type="button">Verify License</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>

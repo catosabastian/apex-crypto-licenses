@@ -5,9 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, ChevronRight, CreditCard, MessageSquareText } from 'lucide-react';
 import { useApplicationDialog } from '@/components/ApplicationDialog';
+import SupportDialog from '@/components/SupportDialog';
 
 const LicenseCategories = () => {
   const { openApplicationDialog } = useApplicationDialog();
+  const [isSupportDialogOpen, setSupportDialogOpen] = useState(false);
   
   return (
     <section id="licenses" className="py-20 bg-muted/30">
@@ -104,13 +106,19 @@ const LicenseCategories = () => {
                     <span>Dedicated legal advisors</span>
                   </div>
                 </div>
-                <Button variant="outline" className="gap-2" onClick={openApplicationDialog}>
+                <Button 
+                  variant="outline" 
+                  className="gap-2" 
+                  onClick={() => setSupportDialogOpen(true)}
+                >
                   Contact Support
                   <ChevronRight className="h-4 w-4" />
                 </Button>
               </div>
             </CardContent>
           </Card>
+          
+          <SupportDialog open={isSupportDialogOpen} onOpenChange={setSupportDialogOpen} />
         </div>
       </div>
     </section>
