@@ -2,10 +2,20 @@
 import React from 'react';
 
 const Logo = () => {
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
-    <div className="flex items-center gap-2">
+    <div 
+      className="flex items-center gap-2 cursor-pointer" 
+      onClick={scrollToTop}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => e.key === 'Enter' && scrollToTop()}
+    >
       <img 
-        src="/lovable-uploads/b2cc4e8d-8018-486d-b638-bdf6fd39a656.png" 
+        src="/lovable-uploads/02d8cd79-362f-4ede-b81f-5fef233fbf32.png" 
         alt="APEX Crypto License" 
         className="h-12 w-auto rounded-lg shadow-sm"
       />
