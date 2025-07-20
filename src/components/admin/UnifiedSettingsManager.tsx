@@ -9,14 +9,14 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Edit, Save, DollarSign, Wallet, CheckCircle, Wifi } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { unifiedDataManager, WebsiteSettings } from '@/utils/unifiedDataManager';
+import { unifiedDataManager } from '@/utils/unifiedDataManager';
 import { ContactSettingsManager } from './ContactSettingsManager';
 
 export const UnifiedSettingsManager = () => {
-  const [settings, setSettings] = useState<WebsiteSettings>(unifiedDataManager.getSettings());
+  const [settings, setSettings] = useState(unifiedDataManager.getSettings());
   const [isEditingPrices, setIsEditingPrices] = useState(false);
   const [isEditingWallets, setIsEditingWallets] = useState(false);
-  const [tempSettings, setTempSettings] = useState<WebsiteSettings>(settings);
+  const [tempSettings, setTempSettings] = useState(settings);
   const [lastUpdateTime, setLastUpdateTime] = useState<Date>(new Date());
   const [updateCount, setUpdateCount] = useState(0);
 
@@ -78,7 +78,7 @@ export const UnifiedSettingsManager = () => {
     }
   };
 
-  const handleAvailabilityToggle = (category: keyof WebsiteSettings, value: boolean) => {
+  const handleAvailabilityToggle = (category: string, value: boolean) => {
     console.log(`[UnifiedSettingsManager] Toggling availability for ${category}:`, value);
     
     try {
@@ -93,7 +93,7 @@ export const UnifiedSettingsManager = () => {
       
       toast({
         title: "Availability Updated",
-        description: `${category} has been ${value ? 'enabled' : 'disabled'}`,
+        description: `${String(category)} has been ${value ? 'enabled' : 'disabled'}`,
       });
       
     } catch (error) {
@@ -161,7 +161,7 @@ export const UnifiedSettingsManager = () => {
                     <div key={category} className="flex items-center gap-4">
                       <Label className="w-24">Category {category}</Label>
                       <Input
-                        value={tempSettings[`category${category}Price` as keyof WebsiteSettings] as string}
+                        value={(tempSettings as any)[`category${category}Price`] || ''}
                         onChange={(e) => setTempSettings(prev => ({
                           ...prev,
                           [`category${category}Price`]: e.target.value
@@ -190,19 +190,19 @@ export const UnifiedSettingsManager = () => {
                 <div>
                   <p className="font-medium">Category {category}</p>
                   <p className="text-sm text-muted-foreground">
-                    {settings[`category${category}Price` as keyof WebsiteSettings]}
+                    {(settings as any)[`category${category}Price`]}
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-2">
                     <Switch
-                      checked={settings[`category${category}Available` as keyof WebsiteSettings] as boolean}
+                      checked={(settings as any)[`category${category}Available`] || false}
                       onCheckedChange={(checked) => 
-                        handleAvailabilityToggle(`category${category}Available` as keyof WebsiteSettings, checked)
+                        handleAvailabilityToggle(`category${category}Available`, checked)
                       }
                     />
-                    <Badge variant={settings[`category${category}Available` as keyof WebsiteSettings] ? "default" : "secondary"}>
-                      {settings[`category${category}Available` as keyof WebsiteSettings] ? "Available" : "Sold Out"}
+                    <Badge variant={(settings as any)[`category${category}Available`] ? "default" : "secondary"}>
+                      {(settings as any)[`category${category}Available`] ? "Available" : "Sold Out"}
                     </Badge>
                     <Badge variant="outline" className="text-green-600 border-green-600">
                       Live ✓
@@ -246,7 +246,7 @@ export const UnifiedSettingsManager = () => {
                     <Label htmlFor="bitcoin">Bitcoin Address</Label>
                     <Input
                       id="bitcoin"
-                      value={tempSettings.bitcoinAddress}
+                      value={(tempSettings as any).bitcoinAddress || ''}
                       onChange={(e) => setTempSettings(prev => ({
                         ...prev,
                         bitcoinAddress: e.target.value
@@ -259,7 +259,7 @@ export const UnifiedSettingsManager = () => {
                     <Label htmlFor="ethereum">Ethereum Address</Label>
                     <Input
                       id="ethereum"
-                      value={tempSettings.ethereumAddress}
+                      value={(tempSettings as any).ethereumAddress || ''}
                       onChange={(e) => setTempSettings(prev => ({
                         ...prev,
                         ethereumAddress: e.target.value
@@ -272,7 +272,7 @@ export const UnifiedSettingsManager = () => {
                     <Label htmlFor="usdt">USDT Address</Label>
                     <Input
                       id="usdt"
-                      value={tempSettings.usdtAddress}
+                      value={(tempSettings as any).usdtAddress || ''}
                       onChange={(e) => setTempSettings(prev => ({
                         ...prev,
                         usdtAddress: e.target.value
@@ -298,7 +298,7 @@ export const UnifiedSettingsManager = () => {
             <div className="flex items-center justify-between p-4 border rounded-lg glass-card">
               <div>
                 <p className="font-medium">Bitcoin</p>
-                <p className="text-sm text-muted-foreground font-mono break-all">{settings.bitcoinAddress}</p>
+                <p className="text-sm text-muted-foreground font-mono break-all">{(settings as any).bitcoinAddress}</p>
               </div>
               <Badge variant="outline" className="text-green-600 border-green-600">
                 Live ✓
@@ -307,7 +307,7 @@ export const UnifiedSettingsManager = () => {
             <div className="flex items-center justify-between p-4 border rounded-lg glass-card">
               <div>
                 <p className="font-medium">Ethereum</p>
-                <p className="text-sm text-muted-foreground font-mono break-all">{settings.ethereumAddress}</p>
+                <p className="text-sm text-muted-foreground font-mono break-all">{(settings as any).ethereumAddress}</p>
               </div>
               <Badge variant="outline" className="text-green-600 border-green-600">
                 Live ✓
@@ -316,7 +316,7 @@ export const UnifiedSettingsManager = () => {
             <div className="flex items-center justify-between p-4 border rounded-lg glass-card">
               <div>
                 <p className="font-medium">USDT</p>
-                <p className="text-sm text-muted-foreground font-mono break-all">{settings.usdtAddress}</p>
+                <p className="text-sm text-muted-foreground font-mono break-all">{(settings as any).usdtAddress}</p>
               </div>
               <Badge variant="outline" className="text-green-600 border-green-600">
                 Live ✓

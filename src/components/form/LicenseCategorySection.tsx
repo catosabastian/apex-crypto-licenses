@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Shield, AlertCircle, Wifi } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { unifiedDataManager, WebsiteSettings } from '@/utils/unifiedDataManager';
+import { unifiedDataManager } from '@/utils/unifiedDataManager';
 
 interface LicenseCategory {
   id: string;
@@ -19,7 +19,7 @@ interface LicenseCategorySectionProps {
 }
 
 const LicenseCategorySection = ({ selectedCategory, onCategorySelect }: LicenseCategorySectionProps) => {
-  const [settings, setSettings] = useState<WebsiteSettings>(unifiedDataManager.getSettings());
+  const [settings, setSettings] = useState(unifiedDataManager.getSettings());
   const [lastUpdateTime, setLastUpdateTime] = useState<Date>(new Date());
 
   useEffect(() => {

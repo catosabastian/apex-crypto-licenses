@@ -6,12 +6,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { CheckCircle, ChevronRight, MessageSquareText, XCircle, Shield, Star, Crown, Building, Zap, Trophy, Wifi } from 'lucide-react';
 import { useApplicationDialog } from '@/components/ApplicationDialog';
 import SupportDialog from '@/components/SupportDialog';
-import { unifiedDataManager, WebsiteSettings } from '@/utils/unifiedDataManager';
+import { unifiedDataManager, ContentSettings } from '@/utils/unifiedDataManager';
 
 const LicenseCategories = () => {
   const { openApplicationDialog } = useApplicationDialog();
   const [isSupportDialogOpen, setSupportDialogOpen] = useState(false);
-  const [settings, setSettings] = useState<WebsiteSettings>(unifiedDataManager.getSettings());
+  const [settings, setSettings] = useState(unifiedDataManager.getSettings());
   const [lastUpdateTime, setLastUpdateTime] = useState<Date>(new Date());
   const [isConnected, setIsConnected] = useState(true);
 

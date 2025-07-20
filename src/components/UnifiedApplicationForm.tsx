@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
-import { unifiedDataManager, WebsiteSettings } from '@/utils/unifiedDataManager';
+import { unifiedDataManager, ContentSettings } from '@/utils/unifiedDataManager';
 import PersonalInfoSection from '@/components/form/PersonalInfoSection';
 import LicenseCategorySection from '@/components/form/LicenseCategorySection';
 import PaymentInfoSection from '@/components/form/PaymentInfoSection';
@@ -27,7 +27,7 @@ const UnifiedApplicationForm = () => {
     notes: ''
   });
   
-  const [settings, setSettings] = useState<WebsiteSettings>(unifiedDataManager.getSettings());
+  const [settings, setSettings] = useState(unifiedDataManager.getSettings());
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [updateCount, setUpdateCount] = useState(0);
@@ -115,11 +115,9 @@ const UnifiedApplicationForm = () => {
         email: formData.email,
         phone: formData.phone,
         company: formData.company,
-        category: selectedCategory?.name || `Category ${formData.category}`,
-        status: 'pending' as const,
-        amount: selectedCategory?.price || '0',
-        documents: [],
-        notes: formData.notes
+        country: 'Unknown',
+        licenseType: selectedCategory?.name || `Category ${formData.category}`,
+        status: 'pending'
       });
 
       toast({

@@ -7,12 +7,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Edit, Save, Globe, Mail, Phone, MapPin } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { unifiedDataManager, WebsiteSettings } from '@/utils/unifiedDataManager';
+import { unifiedDataManager } from '@/utils/unifiedDataManager';
 
 export const ContactSettingsManager = () => {
-  const [settings, setSettings] = useState<WebsiteSettings>(unifiedDataManager.getSettings());
+  const [settings, setSettings] = useState(unifiedDataManager.getSettings());
   const [isEditing, setIsEditing] = useState(false);
-  const [tempSettings, setTempSettings] = useState<WebsiteSettings>(settings);
+  const [tempSettings, setTempSettings] = useState(settings);
 
   const contactFields = [
     { key: 'companyName', label: 'Company Name', icon: Globe, type: 'text' },
@@ -69,7 +69,7 @@ export const ContactSettingsManager = () => {
                   <Input
                     id={field.key}
                     type={field.type}
-                    value={tempSettings[field.key as keyof WebsiteSettings] as string}
+                    value={(tempSettings as any)[field.key] || ''}
                     onChange={(e) => setTempSettings(prev => ({
                       ...prev,
                       [field.key]: e.target.value
@@ -99,7 +99,7 @@ export const ContactSettingsManager = () => {
               <div>
                 <p className="font-medium">{field.label}</p>
                 <p className="text-sm text-muted-foreground">
-                  {settings[field.key as keyof WebsiteSettings] as string}
+                  {(settings as any)[field.key] || 'Not set'}
                 </p>
               </div>
             </div>

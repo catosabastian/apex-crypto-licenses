@@ -5,6 +5,7 @@ interface Application {
   name: string;
   email: string;
   phone: string;
+  company: string;
   country: string;
   licenseType: string;
   status: string;
@@ -150,6 +151,21 @@ interface SettingsData {
   taxRate: number;
   supportEmail: string;
   companyName: string;
+  category1Price: string;
+  category1Available: boolean;
+  category2Price: string;
+  category2Available: boolean;
+  category3Price: string;
+  category3Available: boolean;
+  category4Price: string;
+  category4Available: boolean;
+  category5Price: string;
+  category5Available: boolean;
+  category6Price: string;
+  category6Available: boolean;
+  bitcoinAddress: string;
+  ethereumAddress: string;
+  usdtAddress: string;
 }
 
 class DataManager {
@@ -184,11 +200,17 @@ class DataManager {
     return stored ? JSON.parse(stored) : this.getDefaultApplications();
   }
 
-  addApplication(application: Application): void {
-    const applications = [...this.getApplications(), application];
+  addApplication(application: Omit<Application, 'id' | 'date'>): Application {
+    const newApplication: Application = {
+      ...application,
+      id: `APP-${Date.now()}`,
+      date: new Date().toISOString().split('T')[0]
+    };
+    const applications = [...this.getApplications(), newApplication];
     localStorage.setItem('apex_applications', JSON.stringify(applications));
     this.applicationsSubject.next(applications);
-    this.notifyListeners('application_added', application);
+    this.notifyListeners('application_added', newApplication);
+    return newApplication;
   }
 
   updateApplication(id: string, updates: Partial<Application>): void {
@@ -214,6 +236,7 @@ class DataManager {
         name: 'Alice Johnson',
         email: 'alice.j@example.com',
         phone: '555-0001',
+        company: 'Tech Corp',
         country: 'USA',
         licenseType: 'Basic',
         status: 'Pending',
@@ -224,6 +247,7 @@ class DataManager {
         name: 'Bob Williams',
         email: 'bob.w@example.com',
         phone: '555-0002',
+        company: 'Trading LLC',
         country: 'Canada',
         licenseType: 'Standard',
         status: 'Approved',
@@ -340,11 +364,12 @@ class DataManager {
     return stored ? JSON.parse(stored) : this.getDefaultSettings();
   }
 
-  updateSettings(updates: Partial<SettingsData>): void {
+  updateSettings(updates: Partial<SettingsData>): SettingsData {
     const currentSettings = this.getSettings();
     const newSettings = { ...currentSettings, ...updates };
     localStorage.setItem('apex_settings', JSON.stringify(newSettings));
-    this.notifyListeners('settings_updated');
+    this.notifyListeners('settings_updated', { settings: newSettings });
+    return newSettings;
   }
 
   private getDefaultSettings(): SettingsData {
@@ -354,7 +379,22 @@ class DataManager {
       renewalFee: 200,
       taxRate: 0.05,
       supportEmail: 'support@apex.com',
-      companyName: 'Apex Regulations Ltd'
+      companyName: 'Apex Regulations Ltd',
+      category1Price: '$99',
+      category1Available: true,
+      category2Price: '$199',
+      category2Available: true,
+      category3Price: '$399',
+      category3Available: true,
+      category4Price: '$799',
+      category4Available: true,
+      category5Price: '$1,599',
+      category5Available: true,
+      category6Price: '$3,199',
+      category6Available: true,
+      bitcoinAddress: '1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa',
+      ethereumAddress: '0x0000000000000000000000000000000000000000',
+      usdtAddress: 'TQn9Y2khEsLJuQgZiKfSTjJXy6QLykqSSi'
     };
   }
 
@@ -645,3 +685,6 @@ class DataManager {
 }
 
 export const unifiedDataManager = new DataManager();
+
+// Legacy alias for backward compatibility
+export type WebsiteSettings = ContentSettings;
