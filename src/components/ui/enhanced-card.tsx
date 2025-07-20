@@ -85,7 +85,7 @@ const EnhancedCardDescription = React.forwardRef<
 EnhancedCardDescription.displayName = "EnhancedCardDescription"
 
 const EnhancedCardContent = React.forwardRef<
-  HTMLDivContainer,
+  HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
   <div
