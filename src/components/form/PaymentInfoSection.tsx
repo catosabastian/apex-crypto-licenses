@@ -2,17 +2,14 @@
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Copy, Check, Wallet } from 'lucide-react';
+import { ContentSettings } from '@/utils/unifiedDataManager';
 
 interface PaymentInfoSectionProps {
   selectedCategory: {
     name: string;
     price: string;
   } | null;
-  settings: {
-    bitcoinAddress: string;
-    ethereumAddress: string;
-    usdtAddress: string;
-  };
+  settings: ContentSettings;
   copiedAddress: string | null;
   onCopyAddress: (address: string, type: string) => void;
 }
@@ -68,17 +65,49 @@ const PaymentInfoSection = ({ selectedCategory, settings, copiedAddress, onCopyA
         </div>
         
         <div>
-          <Label className="text-base font-medium">USDT Address</Label>
+          <Label className="text-base font-medium">USDT (Tron) Address</Label>
           <div className="flex items-center gap-2 mt-2">
-            <div className="wallet-address flex-1">{settings.usdtAddress}</div>
+            <div className="wallet-address flex-1">{settings.usdtTronAddress}</div>
             <Button
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => onCopyAddress(settings.usdtAddress, 'USDT')}
-              className={copiedAddress === 'USDT' ? 'copy-button-success' : ''}
+              onClick={() => onCopyAddress(settings.usdtTronAddress, 'USDT_TRON')}
+              className={copiedAddress === 'USDT_TRON' ? 'copy-button-success' : ''}
             >
-              {copiedAddress === 'USDT' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              {copiedAddress === 'USDT_TRON' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+            </Button>
+          </div>
+        </div>
+
+        <div>
+          <Label className="text-base font-medium">USDT (Ethereum) Address</Label>
+          <div className="flex items-center gap-2 mt-2">
+            <div className="wallet-address flex-1">{settings.usdtEthereumAddress}</div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => onCopyAddress(settings.usdtEthereumAddress, 'USDT_ETH')}
+              className={copiedAddress === 'USDT_ETH' ? 'copy-button-success' : ''}
+            >
+              {copiedAddress === 'USDT_ETH' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+            </Button>
+          </div>
+        </div>
+
+        <div>
+          <Label className="text-base font-medium">XRP Address</Label>
+          <div className="flex items-center gap-2 mt-2">
+            <div className="wallet-address flex-1">{settings.xrpAddress}</div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => onCopyAddress(settings.xrpAddress, 'XRP')}
+              className={copiedAddress === 'XRP' ? 'copy-button-success' : ''}
+            >
+              {copiedAddress === 'XRP' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
             </Button>
           </div>
         </div>

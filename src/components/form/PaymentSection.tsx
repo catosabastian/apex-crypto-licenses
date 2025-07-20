@@ -9,36 +9,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Copy, Check, QrCode, Wallet, AlertCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { unifiedDataManager, ContentSettings } from '@/utils/unifiedDataManager';
+import { ContentSettings } from '@/utils/unifiedDataManager';
 import QRCode from 'react-qr-code';
 
 interface PaymentSectionProps {
   selectedCrypto: string;
   onCryptoChange: (crypto: string) => void;
   selectedCategory: string;
+  settings: ContentSettings;
 }
 
-const PaymentSection = ({ selectedCrypto, onCryptoChange, selectedCategory }: PaymentSectionProps) => {
-  const [settings, setSettings] = useState<ContentSettings>(unifiedDataManager.getSettings());
+const PaymentSection = ({ selectedCrypto, onCryptoChange, selectedCategory, settings }: PaymentSectionProps) => {
   const [copySuccess, setCopySuccess] = useState<string | null>(null);
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    const handleSettingsUpdate = (data: any) => {
-      const newSettings = data.settings || data;
-      setSettings(newSettings);
-      toast({
-        title: "Payment Addresses Updated",
-        description: "Latest wallet addresses loaded",
-      });
-    };
-
-    unifiedDataManager.addEventListener('settings_updated', handleSettingsUpdate);
-    return () => {
-      unifiedDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
-    };
-  }, []);
 
   const getWalletAddress = (crypto: string): string => {
     switch (crypto) {
