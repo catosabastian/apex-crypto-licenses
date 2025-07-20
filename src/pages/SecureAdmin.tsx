@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { validLicenses, generateLicenseId } from '@/utils/licenseData';
 import { Button } from '@/components/ui/button';
@@ -12,6 +11,7 @@ import { toast } from '@/hooks/use-toast';
 import { useSecureAuth } from '@/contexts/SecureAuthContext';
 import { useNavigate } from 'react-router-dom';
 import { secureDataManager } from '@/utils/secureDataManager';
+import { dataMigration } from '@/utils/dataMigration';
 import { ApplicationsManager } from '@/components/admin/ApplicationsManager';
 import { ContactsManager } from '@/components/admin/ContactsManager';
 import { SettingsManager } from '@/components/admin/SettingsManager';
@@ -31,6 +31,15 @@ const SecureAdmin = () => {
 
   // Real-time updates with enhanced error handling
   useEffect(() => {
+    // Ensure data migration runs in admin
+    if (dataMigration.isMigrationNeeded()) {
+      dataMigration.migrateToSecureStorage();
+      toast({
+        title: "Data Migration",
+        description: "Legacy data has been migrated to the secure system",
+      });
+    }
+
     const updateAnalytics = () => {
       try {
         setAnalytics(secureDataManager.getAnalytics());

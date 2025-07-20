@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,17 +8,17 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Edit, Save, DollarSign, Wallet } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { dataManager, WebsiteSettings } from '@/utils/dataManager';
+import { secureDataManager, WebsiteSettings } from '@/utils/secureDataManager';
 import { ContactSettingsManager } from './ContactSettingsManager';
 
 export const SettingsManager = () => {
-  const [settings, setSettings] = useState<WebsiteSettings>(dataManager.getSettings());
+  const [settings, setSettings] = useState<WebsiteSettings>(secureDataManager.getSettings());
   const [isEditingPrices, setIsEditingPrices] = useState(false);
   const [isEditingWallets, setIsEditingWallets] = useState(false);
   const [tempSettings, setTempSettings] = useState<WebsiteSettings>(settings);
 
   const handleSaveSettings = () => {
-    const updatedSettings = dataManager.updateSettings(tempSettings);
+    const updatedSettings = secureDataManager.updateSettings(tempSettings);
     setSettings(updatedSettings);
     setIsEditingPrices(false);
     setIsEditingWallets(false);
@@ -31,7 +30,7 @@ export const SettingsManager = () => {
 
   const handleAvailabilityToggle = (category: keyof WebsiteSettings, value: boolean) => {
     const updates = { [category]: value };
-    const updatedSettings = dataManager.updateSettings(updates);
+    const updatedSettings = secureDataManager.updateSettings(updates);
     setSettings(updatedSettings);
     setTempSettings(updatedSettings);
     toast({

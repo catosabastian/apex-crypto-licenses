@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,10 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Edit, Save, Globe, Mail, Phone, MapPin } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { dataManager, WebsiteSettings } from '@/utils/dataManager';
+import { secureDataManager, WebsiteSettings } from '@/utils/secureDataManager';
 
 export const ContactSettingsManager = () => {
-  const [settings, setSettings] = useState<WebsiteSettings>(dataManager.getSettings());
+  const [settings, setSettings] = useState<WebsiteSettings>(secureDataManager.getSettings());
   const [isEditing, setIsEditing] = useState(false);
   const [tempSettings, setTempSettings] = useState<WebsiteSettings>(settings);
 
@@ -26,7 +25,7 @@ export const ContactSettingsManager = () => {
   ];
 
   const handleSaveSettings = () => {
-    const updatedSettings = dataManager.updateSettings(tempSettings);
+    const updatedSettings = secureDataManager.updateSettings(tempSettings);
     setSettings(updatedSettings);
     setIsEditing(false);
     toast({

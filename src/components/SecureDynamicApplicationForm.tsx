@@ -1,8 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { secureDataManager, WebsiteSettings } from '@/utils/secureDataManager';
+import { dataMigration } from '@/utils/dataMigration';
 import PersonalInfoSection from '@/components/form/PersonalInfoSection';
 import LicenseCategorySection from '@/components/form/LicenseCategorySection';
 import PaymentInfoSection from '@/components/form/PaymentInfoSection';
@@ -33,6 +33,11 @@ const SecureDynamicApplicationForm = () => {
   const [updateCount, setUpdateCount] = useState(0);
 
   useEffect(() => {
+    // Ensure data migration runs
+    if (dataMigration.isMigrationNeeded()) {
+      dataMigration.migrateToSecureStorage();
+    }
+
     // Enhanced real-time settings update handler with multiple channels
     const handleSettingsUpdate = (updatedSettings: WebsiteSettings) => {
       console.log('Settings updated in secure form:', updatedSettings);
