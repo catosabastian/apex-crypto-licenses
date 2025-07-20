@@ -5,37 +5,27 @@ import { cn } from "@/lib/utils"
 const EnhancedCard = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement> & {
-    variant?: "default" | "elevated" | "glass" | "gradient"
-    size?: "sm" | "md" | "lg"
+    variant?: 'default' | 'glass' | 'gradient' | 'elevated'
+    hover?: boolean
   }
->(({ className, variant = "default", size = "md", ...props }, ref) => {
-  const variants = {
-    default: "bg-card text-card-foreground border shadow-sm",
-    elevated: "bg-card text-card-foreground border shadow-lg hover:shadow-xl transition-shadow",
-    glass: "bg-card/80 backdrop-blur-sm text-card-foreground border border-white/20 shadow-lg",
-    gradient: "bg-gradient-to-br from-card via-card/95 to-muted/50 text-card-foreground border shadow-lg"
-  }
-  
-  const sizes = {
-    sm: "p-4",
-    md: "p-6", 
-    lg: "p-8"
-  }
-
-  return (
-    <div
-      ref={ref}
-      className={cn(
-        "rounded-lg transition-all duration-200",
-        variants[variant],
-        sizes[size],
-        "min-h-0 flex flex-col", // Prevents content cut-off
-        className
-      )}
-      {...props}
-    />
-  )
-})
+>(({ className, variant = 'default', hover = true, ...props }, ref) => (
+  <div
+    ref={ref}
+    className={cn(
+      "rounded-xl border bg-card text-card-foreground shadow-sm transition-all duration-300",
+      {
+        'default': "border-border",
+        'glass': "glass-card border-border/50 backdrop-blur-sm",
+        'gradient': "bg-gradient-to-br from-card via-card to-accent/5 border-primary/20",
+        'elevated': "shadow-lg border-border/50"
+      }[variant],
+      hover && "hover:shadow-xl hover:scale-[1.02] hover:border-primary/30",
+      "overflow-visible", // Ensure content is never cut off
+      className
+    )}
+    {...props}
+  />
+))
 EnhancedCard.displayName = "EnhancedCard"
 
 const EnhancedCardHeader = React.forwardRef<
@@ -44,23 +34,63 @@ const EnhancedCardHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex flex-col space-y-1.5 flex-shrink-0", className)}
+    className={cn(
+      "flex flex-col space-y-1.5 p-6 pb-4",
+      "min-h-fit", // Ensure header takes needed space
+      className
+    )}
     {...props}
   />
 ))
 EnhancedCardHeader.displayName = "EnhancedCardHeader"
 
+const EnhancedCardTitle = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLHeadingElement> & {
+    gradient?: boolean
+  }
+>(({ className, gradient = false, ...props }, ref) => (
+  <h3
+    ref={ref}
+    className={cn(
+      "font-semibold leading-none tracking-tight",
+      "text-lg sm:text-xl", // Responsive text sizing
+      "break-words hyphens-auto", // Prevent text overflow
+      gradient ? "gradient-text bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent" : "",
+      className
+    )}
+    {...props}
+  />
+))
+EnhancedCardTitle.displayName = "EnhancedCardTitle"
+
+const EnhancedCardDescription = React.forwardRef<
+  HTMLParagraphElement,
+  React.HTMLAttributes<HTMLParagraphElement>
+>(({ className, ...props }, ref) => (
+  <p
+    ref={ref}
+    className={cn(
+      "text-sm text-muted-foreground leading-relaxed",
+      "break-words hyphens-auto", // Prevent text overflow
+      "min-h-fit", // Allow natural height
+      className
+    )}
+    {...props}
+  />
+))
+EnhancedCardDescription.displayName = "EnhancedCardDescription"
+
 const EnhancedCardContent = React.forwardRef<
   HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement> & {
-    scrollable?: boolean
-  }
->(({ className, scrollable = false, ...props }, ref) => (
+  React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => (
   <div
     ref={ref}
     className={cn(
-      "flex-1 min-h-0",
-      scrollable && "overflow-y-auto",
+      "p-6 pt-0 space-y-4",
+      "flex-1", // Take remaining space
+      "overflow-visible", // Ensure content is never clipped
       className
     )}
     {...props}
@@ -74,10 +104,22 @@ const EnhancedCardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex items-center mt-auto pt-4 flex-shrink-0", className)}
+    className={cn(
+      "flex items-center p-6 pt-0",
+      "mt-auto", // Push to bottom
+      "min-h-fit", // Ensure footer takes needed space
+      className
+    )}
     {...props}
   />
 ))
 EnhancedCardFooter.displayName = "EnhancedCardFooter"
 
-export { EnhancedCard, EnhancedCardHeader, EnhancedCardContent, EnhancedCardFooter }
+export { 
+  EnhancedCard, 
+  EnhancedCardHeader, 
+  EnhancedCardFooter, 
+  EnhancedCardTitle, 
+  EnhancedCardDescription, 
+  EnhancedCardContent 
+}

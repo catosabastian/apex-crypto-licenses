@@ -1,316 +1,219 @@
 
-import { useEffect, useState, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, Shield, Award, Users, Globe, CheckCircle, Star, Zap, Sparkles, TrendingUp, Clock, Cpu } from 'lucide-react';
-import { useApplicationDialog } from '@/components/ApplicationDialog';
-import { unifiedDataManager } from '@/utils/unifiedDataManager';
+import { Badge } from '@/components/ui/badge';
+import { Shield, TrendingUp, Users, Award, Star, ChevronRight } from 'lucide-react';
+import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { UnifiedApplicationForm } from './UnifiedApplicationForm';
 
 const Hero = () => {
-  const [scrolled, setScrolled] = useState(false);
-  const [currentStat, setCurrentStat] = useState(0);
-  const [content, setContent] = useState(unifiedDataManager.getContent().hero);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [animatedStats, setAnimatedStats] = useState<Record<string, number>>({});
-  const { openApplicationDialog } = useApplicationDialog();
-  
-  // Enhanced scroll handler with parallax effect
+  const [stats, setStats] = useState({
+    licenses: 0,
+    traders: 0,
+    volume: 0,
+    satisfaction: 0
+  });
+
   useEffect(() => {
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      setScrolled(scrollY > 50);
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePosition({ x: e.clientX, y: e.clientY });
     };
-    
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
-  // Mouse movement tracking for interactive effects
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    setMousePosition({
-      x: (e.clientX / window.innerWidth) * 100,
-      y: (e.clientY / window.innerHeight) * 100,
-    });
-  }, []);
-
-  useEffect(() => {
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, [handleMouseMove]);
-
-  // Content updates
-  useEffect(() => {
-    const handleContentUpdate = () => {
-      setContent(unifiedDataManager.getContent().hero);
-    };
-
-    unifiedDataManager.addEventListener('content_updated', handleContentUpdate);
-    
-    return () => {
-      unifiedDataManager.removeEventListener('content_updated', handleContentUpdate);
-    };
   }, []);
 
-  const iconMap: Record<string, any> = {
-    Users,
-    Globe,
-    Award,
-    Shield,
-    TrendingUp,
-    Clock,
-    Cpu
-  };
-
-  // Enhanced stat rotation with animation
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentStat((prev) => (prev + 1) % content.stats.length);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, [content.stats.length]);
-
-  // Animated number counting for stats
-  useEffect(() => {
-    const animateNumber = (target: number, key: string) => {
-      let current = 0;
-      const increment = target / 60; // 60 frames for smooth animation
-      const timer = setInterval(() => {
-        current += increment;
-        if (current >= target) {
-          current = target;
-          clearInterval(timer);
+    // Animate stats on mount
+    const animateStats = () => {
+      const targetStats = { licenses: 2847, traders: 15642, volume: 2.8, satisfaction: 98 };
+      const duration = 2000;
+      const steps = 60;
+      const stepDuration = duration / steps;
+      
+      let currentStep = 0;
+      const interval = setInterval(() => {
+        currentStep++;
+        const progress = currentStep / steps;
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        
+        setStats({
+          licenses: Math.floor(targetStats.licenses * easeOut),
+          traders: Math.floor(targetStats.traders * easeOut),
+          volume: parseFloat((targetStats.volume * easeOut).toFixed(1)),
+          satisfaction: Math.floor(targetStats.satisfaction * easeOut)
+        });
+        
+        if (currentStep >= steps) {
+          clearInterval(interval);
         }
-        setAnimatedStats(prev => ({ ...prev, [key]: Math.floor(current) }));
-      }, 16); // ~60fps
+      }, stepDuration);
     };
 
-    content.stats.forEach((stat, index) => {
-      const numericValue = parseInt(stat.value.replace(/[^0-9]/g, ''));
-      if (numericValue) {
-        setTimeout(() => animateNumber(numericValue, `stat-${index}`), index * 200);
-      }
-    });
-  }, [content.stats]);
-
-  // Generate floating particles
-  const generateParticles = () => {
-    return Array.from({ length: 8 }, (_, i) => (
-      <div
-        key={i}
-        className="particle"
-        style={{
-          left: `${10 + (i * 12)}%`,
-          top: `${20 + (i * 8)}%`,
-          width: `${4 + (i % 3) * 2}px`,
-          height: `${4 + (i % 3) * 2}px`,
-          animationDelay: `${i * 0.5}s`,
-          animationDuration: `${6 + (i % 3) * 2}s`,
-        }}
-      />
-    ));
-  };
+    const timer = setTimeout(animateStats, 500);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
-    <section className="relative min-h-screen pt-16 flex flex-col overflow-hidden">
-      {/* Advanced Gradient Background with Parallax */}
-      <div 
-        className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-accent/10 transition-all duration-1000"
-        style={{
-          transform: `translate(${mousePosition.x * 0.02}px, ${mousePosition.y * 0.02}px)`,
-        }}
-      />
-      
-      {/* Enhanced Glass Morphism Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/15 via-white/8 to-transparent backdrop-blur-3xl" />
-      
-      {/* Dynamic Mesh Gradient */}
-      <div 
-        className="absolute inset-0 opacity-30"
-        style={{
-          background: `radial-gradient(circle at ${mousePosition.x}% ${mousePosition.y}%, 
-            hsl(var(--primary) / 0.3) 0%, 
-            hsl(var(--accent-amber) / 0.2) 30%, 
-            hsl(var(--accent-emerald) / 0.1) 60%, 
-            transparent 100%)`,
-          transition: 'background 0.3s ease',
-        }}
-      />
-      
-      {/* Floating Particles System */}
-      <div className="floating-particles">
-        {generateParticles()}
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-background via-background/95 to-accent/5">
+      {/* Enhanced Animated Background */}
+      <div className="absolute inset-0 overflow-hidden">
+        {/* Primary Gradient Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/10" />
+        
+        {/* Animated Particles */}
+        <div className="absolute inset-0">
+          {[...Array(50)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-1 h-1 bg-primary/20 rounded-full animate-float"
+              style={{
+                left: `${Math.random() * 100}%`,
+                top: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 5}s`,
+                animationDuration: `${3 + Math.random() * 4}s`,
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Interactive Mouse Effect */}
+        <div
+          className="absolute w-96 h-96 bg-gradient-radial from-primary/10 to-transparent rounded-full pointer-events-none transition-all duration-300 ease-out"
+          style={{
+            left: mousePosition.x - 192,
+            top: mousePosition.y - 192,
+            transform: 'translate3d(0, 0, 0)',
+          }}
+        />
+
+        {/* Geometric Patterns */}
+        <div className="absolute top-20 left-20 w-32 h-32 border border-primary/20 rounded-full animate-spin-slow" />
+        <div className="absolute bottom-20 right-20 w-24 h-24 border border-accent/30 rotate-45 animate-bounce-slow" />
+        <div className="absolute top-1/2 left-10 w-16 h-16 bg-gradient-to-r from-primary/10 to-accent/10 rounded-lg animate-pulse-slow" />
       </div>
-      
-      <div className="container flex-1 flex flex-col justify-center py-20 relative z-10">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-20 items-center">
-            {/* Enhanced Left Content */}
-            <div className="text-center lg:text-left space-y-12 animate-fade-in-up">
-              {/* Premium Badge */}
-              <div className="inline-flex items-center gap-3 glass-card px-8 py-4 rounded-full text-sm font-medium hover-lift">
-                <Shield className="h-6 w-6 text-primary animate-pulse" />
-                <span className="text-primary font-bold text-base">Official Regulatory Authority</span>
-                <Sparkles className="h-5 w-5 text-accent-amber animate-pulse" />
+
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="text-center max-w-5xl mx-auto">
+          {/* Status Badge */}
+          <div className="animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+            <Badge variant="outline" className="mb-6 px-4 py-2 glass-card border-primary/30 text-primary hover:bg-primary/10 transition-all duration-300">
+              <Shield className="w-4 h-4 mr-2" />
+              Regulated & Certified Authority
+            </Badge>
+          </div>
+
+          {/* Main Heading */}
+          <div className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+            <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold mb-6 leading-tight">
+              <span className="gradient-text bg-gradient-to-r from-primary via-accent-emerald to-primary bg-clip-text text-transparent">
+                Professional
+              </span>
+              <br />
+              <span className="text-foreground">Crypto Trading</span>
+              <br />
+              <span className="gradient-text bg-gradient-to-r from-accent-amber via-primary to-accent-emerald bg-clip-text text-transparent">
+                Licenses
+              </span>
+            </h1>
+          </div>
+
+          {/* Subtitle */}
+          <div className="animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+            <p className="text-lg sm:text-xl lg:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed">
+              Get officially certified to trade cryptocurrencies with our globally recognized licensing program. 
+              <span className="text-primary font-medium"> Join thousands of professional traders</span> who trust our certification.
+            </p>
+          </div>
+
+          {/* Stats Grid */}
+          <div className="animate-fade-in-up grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12" style={{ animationDelay: '0.4s' }}>
+            <div className="glass-card p-6 rounded-2xl border border-primary/20 hover:border-primary/40 transition-all duration-300 group">
+              <div className="text-2xl lg:text-3xl font-bold text-primary mb-2 group-hover:scale-110 transition-transform duration-300">
+                {stats.licenses.toLocaleString()}+
               </div>
-              
-              {/* Enhanced Hero Title */}
-              <div className="space-y-4">
-                <h1 className="text-display leading-tight animate-slide-up">
-                  <span className="block text-foreground font-light">World's Leading</span>
-                  <span className="block gradient-text font-black text-6xl lg:text-7xl mb-2">
-                    Crypto Trading
-                  </span>
-                  <span className="block text-foreground font-light">License Provider</span>
-                </h1>
-                
-                {/* Animated Underline */}
-                <div className="w-24 h-1 bg-gradient-to-r from-primary via-accent-amber to-accent-emerald rounded-full mx-auto lg:mx-0 animate-pulse-glow"></div>
-              </div>
-              
-              {/* Enhanced Subtitle */}
-              <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-2xl animate-fade-in font-medium" style={{animationDelay: '0.2s'}}>
-                {content.subheadline}
-              </p>
-              
-              {/* Premium CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-6 justify-center lg:justify-start animate-fade-in" style={{animationDelay: '0.4s'}}>
-                <Button 
-                  size="lg" 
-                  className="glass-button gap-4 px-12 py-8 text-lg font-bold rounded-2xl hover-lift hover-glow group relative overflow-hidden" 
-                  onClick={openApplicationDialog}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-accent-amber/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  <Zap className="h-7 w-7 relative z-10" />
-                  <span className="relative z-10">{content.ctaText}</span>
-                </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="gap-4 px-12 py-8 text-lg font-bold rounded-2xl glass-card hover-lift border-2 border-primary/30 hover:border-primary/60 group"
-                  onClick={() => document.getElementById('verification')?.scrollIntoView({ behavior: 'smooth' })}
-                >
-                  <Award className="h-7 w-7 group-hover:rotate-12 transition-transform duration-300" />
-                  <span>{content.ctaSecondaryText}</span>
-                </Button>
-              </div>
-              
-              {/* Enhanced Trust Indicators */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-8 animate-fade-in" style={{animationDelay: '0.6s'}}>
-                {content.trustBadges.map((badge, index) => (
-                  <div 
-                    key={index} 
-                    className="trust-badge flex items-center gap-3 justify-center lg:justify-start p-4 rounded-xl hover-lift"
-                    style={{ animationDelay: `${0.1 * index}s` }}
-                  >
-                    <CheckCircle className="h-5 w-5 text-accent-emerald animate-pulse" />
-                    <span className="text-sm font-bold">{badge.name}</span>
-                  </div>
-                ))}
-              </div>
+              <div className="text-sm text-muted-foreground">Active Licenses</div>
             </div>
+            <div className="glass-card p-6 rounded-2xl border border-accent/20 hover:border-accent/40 transition-all duration-300 group">
+              <div className="text-2xl lg:text-3xl font-bold text-accent mb-2 group-hover:scale-110 transition-transform duration-300">
+                {stats.traders.toLocaleString()}+
+              </div>
+              <div className="text-sm text-muted-foreground">Certified Traders</div>
+            </div>
+            <div className="glass-card p-6 rounded-2xl border border-accent-emerald/20 hover:border-accent-emerald/40 transition-all duration-300 group">
+              <div className="text-2xl lg:text-3xl font-bold text-accent-emerald mb-2 group-hover:scale-110 transition-transform duration-300">
+                ${stats.volume}B+
+              </div>
+              <div className="text-sm text-muted-foreground">Trading Volume</div>
+            </div>
+            <div className="glass-card p-6 rounded-2xl border border-accent-amber/20 hover:border-accent-amber/40 transition-all duration-300 group">
+              <div className="text-2xl lg:text-3xl font-bold text-accent-amber mb-2 group-hover:scale-110 transition-transform duration-300">
+                {stats.satisfaction}%
+              </div>
+              <div className="text-sm text-muted-foreground">Satisfaction</div>
+            </div>
+          </div>
+
+          {/* CTA Buttons */}
+          <div className="animate-fade-in-up flex flex-col sm:flex-row gap-4 justify-center items-center mb-12" style={{ animationDelay: '0.5s' }}>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button 
+                  size="lg" 
+                  className="group px-8 py-4 text-lg font-semibold bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                >
+                  Start Your Application
+                  <ChevronRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform duration-300" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" aria-describedby="application-form-description">
+                <div id="application-form-description" className="sr-only">
+                  Complete the trading license application form to get certified
+                </div>
+                <UnifiedApplicationForm />
+              </DialogContent>
+            </Dialog>
             
-            {/* Enhanced Right Content - Advanced Statistics Dashboard */}
-            <div className="relative animate-fade-in" style={{animationDelay: '0.3s'}}>
-              <div className="modern-card hover-lift relative overflow-hidden">
-                {/* Card Header */}
-                <div className="text-center mb-10">
-                  <div className="flex items-center justify-center gap-3 mb-4">
-                    <div className="w-3 h-3 bg-accent-emerald rounded-full animate-pulse"></div>
-                    <h3 className="text-section gradient-text">Live Platform Metrics</h3>
-                    <div className="w-3 h-3 bg-accent-amber rounded-full animate-pulse"></div>
-                  </div>
-                  <p className="text-lg text-muted-foreground font-medium">Real-time global statistics</p>
-                </div>
-                
-                {/* Enhanced Stats Grid */}
-                <div className="grid grid-cols-2 gap-6 mb-10">
-                  {content.stats.map((stat, index) => {
-                    const IconComponent = iconMap[stat.icon];
-                    const animatedValue = animatedStats[`stat-${index}`];
-                    const displayValue = animatedValue ? 
-                      stat.value.replace(/\d+/, animatedValue.toString()) : 
-                      stat.value;
-                    
-                    return (
-                      <div 
-                        key={index}
-                        className={`stat-card text-center p-6 transition-all duration-500 hover-lift ${
-                          index === currentStat 
-                            ? 'bg-primary/10 border-2 border-primary shadow-lg shadow-primary/20 animate-glow' 
-                            : 'hover:border-primary/30'
-                        }`}
-                      >
-                        <div className="flex justify-center mb-4">
-                          {IconComponent && (
-                            <div className={`p-3 rounded-full ${
-                              index === currentStat 
-                                ? 'bg-primary/20 text-primary' 
-                                : 'bg-muted/30 text-muted-foreground'
-                            } transition-all duration-300`}>
-                              <IconComponent className="h-8 w-8" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="text-3xl font-black text-primary mb-2 font-mono">
-                          {displayValue}
-                        </div>
-                        <div className="text-sm text-muted-foreground font-semibold">
-                          {stat.label}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-                
-                {/* Enhanced Progress Sections */}
-                <div className="space-y-6">
-                  <div className="glass-card p-6 rounded-2xl hover-lift">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <Clock className="h-5 w-5 text-primary" />
-                        <span className="text-sm font-bold text-muted-foreground">Processing Speed</span>
-                      </div>
-                      <span className="text-sm font-black text-primary bg-primary/10 px-3 py-1 rounded-full">
-                        18 hours avg
-                      </span>
-                    </div>
-                    <div className="w-full bg-muted/30 rounded-full h-4 overflow-hidden">
-                      <div className="progress-enhanced h-4 w-[90%]"></div>
-                    </div>
-                  </div>
-                  
-                  <div className="glass-card p-6 rounded-2xl hover-lift">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <TrendingUp className="h-5 w-5 text-accent-emerald" />
-                        <span className="text-sm font-bold text-muted-foreground">Success Rate</span>
-                      </div>
-                      <span className="text-sm font-black text-accent-emerald bg-accent-emerald/10 px-3 py-1 rounded-full">
-                        99.9%
-                      </span>
-                    </div>
-                    <div className="w-full bg-muted/30 rounded-full h-4 overflow-hidden">
-                      <div className="bg-gradient-to-r from-accent-emerald to-primary h-4 rounded-full w-[99%] progress-enhanced"></div>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Floating Elements */}
-                <div className="absolute -top-4 -right-4 w-8 h-8 bg-accent-amber/30 rounded-full animate-pulse"></div>
-                <div className="absolute -bottom-4 -left-4 w-6 h-6 bg-accent-emerald/30 rounded-full animate-pulse" style={{animationDelay: '1s'}}></div>
+            <Button 
+              variant="outline" 
+              size="lg" 
+              className="group px-8 py-4 text-lg font-semibold glass-card border-primary/30 hover:bg-primary/10 transition-all duration-300 hover:scale-105"
+            >
+              View License Types
+              <Award className="ml-2 h-5 w-5 group-hover:rotate-12 transition-transform duration-300" />
+            </Button>
+          </div>
+
+          {/* Trust Indicators */}
+          <div className="animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
+            <div className="flex flex-wrap justify-center items-center gap-6 text-sm text-muted-foreground">
+              <div className="flex items-center gap-2">
+                <Shield className="w-4 h-4 text-primary" />
+                <span>Globally Recognized</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Star className="w-4 h-4 text-accent-amber" />
+                <span>5-Star Rated</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <TrendingUp className="w-4 h-4 text-accent-emerald" />
+                <span>Fast Processing</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4 text-accent" />
+                <span>Expert Support</span>
               </div>
             </div>
           </div>
         </div>
       </div>
-      
-      {/* Enhanced Scroll Indicator */}
-      <div className="absolute bottom-8 left-0 right-0 flex justify-center animate-bounce z-10">
-        <a 
-          href="#about" 
-          className="glass-card p-4 rounded-full hover-lift text-muted-foreground hover:text-primary transition-all duration-300 group"
-        >
-          <ChevronDown className="h-6 w-6 group-hover:scale-110 transition-transform" />
-        </a>
+
+      {/* Scroll Indicator */}
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+        <div className="w-6 h-10 border-2 border-primary/50 rounded-full flex justify-center">
+          <div className="w-1 h-3 bg-primary rounded-full mt-2 animate-pulse" />
+        </div>
       </div>
     </section>
   );
