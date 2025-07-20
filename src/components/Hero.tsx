@@ -1,7 +1,6 @@
-
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, Globe, Shield, AlertTriangle } from 'lucide-react';
+import { ChevronDown, Shield, TrendingUp, Award } from 'lucide-react';
 import { useApplicationDialog } from '@/components/ApplicationDialog';
 
 const Hero = () => {
@@ -18,52 +17,62 @@ const Hero = () => {
   }, []);
 
   return (
-    <section className="relative min-h-screen pt-16 flex flex-col">
+    <section className="relative min-h-screen pt-16 flex flex-col government-gradient">
       <div className="container flex-1 flex flex-col justify-center py-12 relative z-10">
-        <div className="max-w-3xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-accent/10 text-accent px-4 py-2 rounded-full text-sm mb-8">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-2 rounded-full text-sm mb-8">
             <Shield className="h-4 w-4" />
-            <span className="font-semibold">Official Regulatory Service</span>
+            <span className="font-semibold">Official Regulatory Authority</span>
           </div>
           
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
-            Crypto Trading License
+          <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight mb-6 text-white">
+            Simplifying Your Trading
+            <span className="block gold-accent">Certificate Process</span>
           </h1>
           
-          <p className="text-lg md:text-xl text-muted-foreground mb-10">
-            Secure official recognition for your cryptocurrency trading activities with government-compliant licensing.
+          <p className="text-xl md:text-2xl text-white/90 mb-10 leading-relaxed">
+            Effortless trading certificate acquisition with speed and compliance.
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="gap-2" onClick={openApplicationDialog}>
-              Apply for License
-              <ChevronDown className="h-4 w-4" />
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+            <Button 
+              size="lg" 
+              className="gap-2 bg-accent hover:bg-accent/90 text-accent-foreground font-semibold px-8 py-4 text-lg" 
+              onClick={openApplicationDialog}
+            >
+              Get Started
+              <TrendingUp className="h-5 w-5" />
             </Button>
-            <Button size="lg" variant="outline" className="gap-2" onClick={() => document.getElementById('verification')?.scrollIntoView({ behavior: 'smooth' })}>
+            <Button 
+              size="lg" 
+              variant="outline" 
+              className="gap-2 border-white/20 text-white hover:bg-white/10 px-8 py-4 text-lg" 
+              onClick={() => document.getElementById('verification')?.scrollIntoView({ behavior: 'smooth' })}
+            >
               Verify License
-              <Globe className="h-4 w-4" />
+              <Award className="h-5 w-5" />
             </Button>
           </div>
           
-          <div className="mt-12 flex items-center gap-8 justify-center flex-wrap">
-            <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded-full bg-green-500"></div>
-              <span className="text-sm">Regulatory Compliance</span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto">
+            <div className="flex items-center gap-3 justify-center md:justify-start">
+              <div className="h-4 w-4 rounded-full bg-green-400"></div>
+              <span className="text-white/90 font-medium">Regulatory Compliance</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded-full bg-blue-500"></div>
-              <span className="text-sm">Identity Verification</span>
+            <div className="flex items-center gap-3 justify-center md:justify-start">
+              <div className="h-4 w-4 rounded-full bg-blue-400"></div>
+              <span className="text-white/90 font-medium">Identity Verification</span>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="h-3 w-3 rounded-full bg-purple-500"></div>
-              <span className="text-sm">Trade Protection</span>
+            <div className="flex items-center gap-3 justify-center md:justify-start">
+              <div className="h-4 w-4 rounded-full bg-purple-400"></div>
+              <span className="text-white/90 font-medium">Trade Protection</span>
             </div>
           </div>
         </div>
       </div>
       
       <div className="absolute bottom-6 left-0 right-0 flex justify-center animate-bounce">
-        <a href="#about" className="text-muted-foreground hover:text-foreground transition-colors">
+        <a href="#about" className="text-white/70 hover:text-white transition-colors">
           <ChevronDown className="h-6 w-6" />
         </a>
       </div>
@@ -108,7 +117,7 @@ const RegulatoryBubbles = () => {
           }}
           title={body.name}
         >
-          <span className="font-bold text-xs opacity-60">{body.acronym}</span>
+          <span className="font-bold text-xs opacity-60 text-white">{body.acronym}</span>
         </div>
       ))}
     </div>

@@ -14,26 +14,31 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 217 60% 21%;
+    --primary: 220 85% 25%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 217 24% 80%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 220 30% 88%;
+    --secondary-foreground: 220 85% 15%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 220 20% 96%;
+    --muted-foreground: 220 25% 45%;
 
-    --accent: 217 91% 60%;
-    --accent-foreground: 210 40% 98%;
+    --accent: 45 100% 51%;
+    --accent-foreground: 220 85% 15%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 220 25% 90%;
+    --input: 220 25% 90%;
+    --ring: 220 85% 25%;
 
     --radius: 0.5rem;
+    
+    --government-blue: 220 85% 25%;
+    --government-green: 140 60% 35%;
+    --government-gold: 45 100% 51%;
+    --government-navy: 220 90% 15%;
   }
 
   * {
@@ -108,22 +113,32 @@
   }
   
   .gradient-text {
-    background: linear-gradient(90deg, theme('colors.accent.DEFAULT') 0%, theme('colors.primary.DEFAULT') 100%);
+    background: linear-gradient(90deg, hsl(var(--accent)) 0%, hsl(var(--primary)) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
   
-  /* New styles for improved Application Form UI */
+  .government-gradient {
+    background: linear-gradient(135deg, hsl(var(--government-blue)) 0%, hsl(var(--government-navy)) 100%);
+  }
+  
+  .gold-accent {
+    background: linear-gradient(90deg, hsl(var(--government-gold)) 0%, #fbbf24 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  /* Form and Application Styles */
   .form-section {
-    @apply bg-white border border-gray-100 rounded-xl p-6 shadow-sm transition-all duration-300;
+    @apply bg-card border border-border rounded-xl p-6 shadow-sm transition-all duration-300;
   }
   
   .form-section:hover {
-    @apply shadow-md border-primary/10;
+    @apply shadow-md border-primary/20;
   }
   
   .section-heading {
-    @apply flex items-center gap-3 mb-4 pb-2 border-b;
+    @apply flex items-center gap-3 mb-4 pb-2 border-b border-border;
   }
 
   .section-icon {
@@ -143,7 +158,7 @@
   }
   
   .category-card {
-    @apply border bg-white rounded-lg p-4 transition-all duration-300 hover:shadow-md;
+    @apply border bg-card rounded-lg p-4 transition-all duration-300 hover:shadow-md;
   }
   
   .category-card.selected {
@@ -152,5 +167,21 @@
   
   .payment-notice {
     @apply bg-amber-50 border-l-4 border-amber-400 p-3 text-amber-800 text-sm mb-4;
+  }
+
+  .stats-card {
+    @apply bg-gradient-to-br from-primary/5 to-accent/5 border border-primary/20 rounded-xl p-6 text-center;
+  }
+
+  .feature-card {
+    @apply bg-gradient-to-br from-card to-muted/30 border border-border rounded-xl p-6 hover:shadow-lg transition-all duration-300;
+  }
+
+  .process-step {
+    @apply relative bg-gradient-to-br from-primary/5 to-accent/5 border-2 border-primary/20 rounded-xl p-6 text-center;
+  }
+
+  .step-number {
+    @apply absolute -top-4 left-1/2 transform -translate-x-1/2 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold text-sm;
   }
 }

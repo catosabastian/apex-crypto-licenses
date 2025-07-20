@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, ChevronRight, CreditCard, MessageSquareText } from 'lucide-react';
+import { CheckCircle, ChevronRight, MessageSquareText, XCircle } from 'lucide-react';
 import { useApplicationDialog } from '@/components/ApplicationDialog';
 import SupportDialog from '@/components/SupportDialog';
 
@@ -14,7 +14,7 @@ const LicenseCategories = () => {
   return (
     <section id="licenses" className="py-20 bg-muted/30">
       <div className="container">
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <div className="flex items-center gap-2 mb-4">
             <div className="h-1 w-12 bg-primary"></div>
             <span className="text-sm text-muted-foreground uppercase tracking-wider">License Categories</span>
@@ -26,16 +26,16 @@ const LicenseCategories = () => {
                 Regulatory Licensing Categories
               </h2>
               <p className="text-lg text-muted-foreground mt-2">
-                Select the appropriate license category based on your trading volume and activity.
+                Select the appropriate license category based on your trade volume and activity.
               </p>
             </div>
           </div>
           
-          <div className="grid md:grid-cols-3 gap-6">
+          <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
             <LicenseCategory 
               category={1}
-              title="Individual Trader"
-              price="20,000 USDT"
+              title="Basic Trader"
+              price="25,000 USDT"
               minVolume="$50,000"
               features={[
                 "1-year validity period",
@@ -44,13 +44,29 @@ const LicenseCategories = () => {
                 "Standard support response",
                 "Recognized on all exchanges"
               ]}
-              onApplyClick={openApplicationDialog}
+              soldOut={true}
             />
             
             <LicenseCategory 
               category={2}
+              title="Standard Trader"
+              price="50,000 USDT"
+              minVolume="$100,000"
+              features={[
+                "1-year validity period",
+                "Enhanced verification process",
+                "Standard compliance certification",
+                "Priority support response",
+                "Recognized on all exchanges",
+                "Basic trading protection"
+              ]}
+              soldOut={true}
+            />
+            
+            <LicenseCategory 
+              category={3}
               title="Advanced Trader"
-              price="40,000 USDT"
+              price="70,000 USDT"
               minVolume="$250,000"
               features={[
                 "1-year validity period",
@@ -60,23 +76,41 @@ const LicenseCategories = () => {
                 "Recognized on all exchanges",
                 "Trading strategy protection"
               ]}
+              soldOut={true}
+            />
+
+            <LicenseCategory 
+              category={4}
+              title="Professional Trader"
+              price="150,000 USDT"
+              minVolume="$500,000"
+              features={[
+                "1-year validity period",
+                "Fast-track verification",
+                "Professional compliance cert",
+                "Dedicated support line",
+                "Global regulatory recognition",
+                "Advanced trading protection",
+                "Multi-exchange access"
+              ]}
               popular
               onApplyClick={openApplicationDialog}
             />
             
             <LicenseCategory 
-              category={3}
+              category={5}
               title="Institutional Trader"
-              price="70,000 USDT"
+              price="250,000 USDT"
               minVolume="$1,000,000+"
               features={[
                 "1-year validity period",
                 "Expedited verification process",
-                "Comprehensive compliance certification",
+                "Comprehensive compliance cert",
                 "Dedicated account representative",
                 "Global regulatory recognition",
-                "Trading strategy protection",
-                "Multi-user access controls"
+                "Full trading strategy protection",
+                "Multi-user access controls",
+                "Custom compliance framework"
               ]}
               onApplyClick={openApplicationDialog}
             />
@@ -132,25 +166,33 @@ interface LicenseCategoryProps {
   minVolume: string;
   features: string[];
   popular?: boolean;
-  onApplyClick: () => void;
+  soldOut?: boolean;
+  onApplyClick?: () => void;
 }
 
-const LicenseCategory = ({ category, title, price, minVolume, features, popular, onApplyClick }: LicenseCategoryProps) => {
+const LicenseCategory = ({ category, title, price, minVolume, features, popular, soldOut, onApplyClick }: LicenseCategoryProps) => {
   return (
-    <Card className={`relative h-full ${popular ? 'border-accent shadow-lg' : ''}`}>
-      {popular && (
+    <Card className={`relative h-full ${popular ? 'border-accent shadow-lg' : ''} ${soldOut ? 'opacity-60' : ''}`}>
+      {popular && !soldOut && (
         <div className="absolute -top-4 left-0 right-0 flex justify-center">
           <Badge variant="secondary" className="bg-accent text-white border-0">Recommended</Badge>
+        </div>
+      )}
+      
+      {soldOut && (
+        <div className="absolute -top-4 left-0 right-0 flex justify-center">
+          <Badge variant="destructive" className="bg-red-500 text-white border-0">Sold Out</Badge>
         </div>
       )}
       
       <CardHeader>
         <div className="flex items-center justify-between">
           <Badge variant="outline" className="mb-2">Category {category}</Badge>
-          {popular && <CheckCircle className="h-5 w-5 text-accent" />}
+          {popular && !soldOut && <CheckCircle className="h-5 w-5 text-accent" />}
+          {soldOut && <XCircle className="h-5 w-5 text-red-500" />}
         </div>
         <CardTitle>{title}</CardTitle>
-        <CardDescription>Monthly Volume: {minVolume} minimum</CardDescription>
+        <CardDescription>Trade Volume: {minVolume} minimum</CardDescription>
       </CardHeader>
       
       <CardContent>
@@ -170,9 +212,14 @@ const LicenseCategory = ({ category, title, price, minVolume, features, popular,
       </CardContent>
       
       <CardFooter>
-        <Button className="w-full gap-2" variant={popular ? "default" : "outline"} onClick={onApplyClick}>
-          Apply Now
-          <ChevronRight className="h-4 w-4" />
+        <Button 
+          className="w-full gap-2" 
+          variant={popular && !soldOut ? "default" : "outline"} 
+          onClick={onApplyClick}
+          disabled={soldOut}
+        >
+          {soldOut ? "Sold Out" : "Apply Now"}
+          {!soldOut && <ChevronRight className="h-4 w-4" />}
         </Button>
       </CardFooter>
     </Card>
