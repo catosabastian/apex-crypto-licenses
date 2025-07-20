@@ -216,12 +216,20 @@ class SupabaseDataManager {
     try {
       const { data, error } = await (supabase as any)
         .from('payment_addresses')
-        .update(updates)
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString()
+        })
         .eq('cryptocurrency', cryptocurrency)
         .select()
         .single();
 
       if (error) throw error;
+      
+      // Update local data and emit event
+      await this.loadTableData('payment_addresses');
+      this.notifyListeners('payment_addresses_updated', data);
+      
       return data;
     } catch (error) {
       console.error('Error updating payment address:', error);
@@ -240,11 +248,21 @@ class SupabaseDataManager {
     try {
       const { data, error } = await (supabase as any)
         .from('settings')
-        .upsert({ key, value, category: 'general' })
+        .upsert({ 
+          key, 
+          value, 
+          category: key.startsWith('category') ? 'pricing' : 'general',
+          updated_at: new Date().toISOString()
+        })
         .select()
         .single();
 
       if (error) throw error;
+      
+      // Update local data and emit event
+      await this.loadTableData('settings');
+      this.notifyListeners('settings_updated', data);
+      
       return data;
     } catch (error) {
       console.error('Error updating setting:', error);

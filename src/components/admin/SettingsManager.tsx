@@ -14,11 +14,6 @@ export function SettingsManager() {
   const { toast } = useToast();
 
   useEffect(() => {
-    const loadSettings = async () => {
-      const currentSettings = await supabaseDataManager.getSettings();
-      setSettings(currentSettings);
-    };
-
     const handleSettingsUpdate = () => {
       loadSettings();
       setIsDirty(false);
@@ -54,17 +49,31 @@ export function SettingsManager() {
         await supabaseDataManager.updateSetting(key, value);
       }
       
+      // Force reload data to confirm updates
+      await loadSettings();
+      
       setIsDirty(false);
       toast({
         title: "Success",
         description: "Settings updated successfully",
       });
     } catch (error) {
+      console.error('Error saving settings:', error);
       toast({
-        title: "Error",
+        title: "Error", 
         description: "Failed to update settings",
         variant: "destructive",
       });
+    }
+  };
+
+  const loadSettings = async () => {
+    try {
+      const currentSettings = await supabaseDataManager.getSettings();
+      console.log('Loaded settings from database:', currentSettings);
+      setSettings(currentSettings);
+    } catch (error) {
+      console.error('Error loading settings:', error);
     }
   };
 

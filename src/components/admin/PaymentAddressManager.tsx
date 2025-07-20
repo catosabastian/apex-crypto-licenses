@@ -51,12 +51,18 @@ export function PaymentAddressManager() {
           is_active: address.is_active
         });
       }
+      
+      // Reload addresses to confirm updates
+      const addressData = await supabaseDataManager.getPaymentAddresses();
+      setAddresses(addressData);
+      
       setIsDirty(false);
       toast({
         title: "Success",
         description: "Payment addresses updated successfully",
       });
     } catch (error) {
+      console.error('Error saving payment addresses:', error);
       toast({
         title: "Error", 
         description: "Failed to update payment addresses",
