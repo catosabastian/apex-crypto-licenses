@@ -6,12 +6,12 @@
 
 @layer base {
   :root {
-    /* Enhanced 2026 Color Palette - More Vibrant */
-    --background: 0 0% 98%; /* Slightly darker for better contrast */
+    /* Enhanced 2026 Color Palette - Darker Background */
+    --background: 0 0% 94%; /* Darkened from 98% to 94% */
     --foreground: 195 92% 8%;
-    --card: 0 0% 99%;
+    --card: 0 0% 96%; /* Slightly darker for better contrast */
     --card-foreground: 195 92% 8%;
-    --popover: 0 0% 100%;
+    --popover: 0 0% 97%;
     --popover-foreground: 195 92% 8%;
     
     /* Enhanced Deep Teal Primary System - More Vibrant */
@@ -21,10 +21,10 @@
     --primary-dark: 183 98% 18%;
     
     /* Enhanced Warm Neutrals with Teal Undertones */
-    --secondary: 185 18% 96%;
+    --secondary: 185 18% 92%; /* Slightly darker for better contrast */
     --secondary-foreground: 183 92% 18%;
-    --muted: 185 22% 94%; /* Slightly darker for better contrast */
-    --muted-foreground: 185 18% 42%;
+    --muted: 185 22% 90%; /* Darker for better contrast */
+    --muted-foreground: 185 18% 45%; /* Slightly darker for better readability */
     
     /* Enhanced Vibrant Accent Colors */
     --accent: 8 95% 68%; /* Coral - increased saturation */
@@ -41,22 +41,22 @@
     --warning-foreground: 0 0% 98%;
     
     /* Enhanced Glass Morphism & Effects */
-    --glass-bg: 0 0% 100% / 0.12;
-    --glass-border: 0 0% 100% / 0.25;
-    --glass-shadow: 0 0% 0% / 0.15;
+    --glass-bg: 0 0% 100% / 0.15;
+    --glass-border: 0 0% 100% / 0.3;
+    --glass-shadow: 0 0% 0% / 0.2;
     --blur-sm: 6px;
     --blur-md: 12px;
     --blur-lg: 20px;
     
     /* Enhanced UI Elements */
-    --border: 185 28% 88%; /* Slightly darker */
-    --input: 185 28% 88%;
+    --border: 185 28% 84%; /* Darker for better contrast */
+    --input: 185 28% 84%;
     --ring: 183 92% 28%;
     --radius: 0.85rem;
     
     /* Enhanced Advanced Gradients */
     --gradient-primary: linear-gradient(135deg, hsl(183 92% 28%) 0%, hsl(183 75% 38%) 35%, hsl(8 95% 68%) 70%, hsl(41 98% 68%) 100%);
-    --gradient-glass: linear-gradient(135deg, hsl(0 0% 100% / 0.15) 0%, hsl(0 0% 100% / 0.08) 100%);
+    --gradient-glass: linear-gradient(135deg, hsl(0 0% 100% / 0.2) 0%, hsl(0 0% 100% / 0.1) 100%);
     --gradient-hero: linear-gradient(135deg, hsl(183 92% 28%) 0%, hsl(183 75% 38%) 25%, hsl(8 95% 68%) 65%, hsl(41 98% 68%) 100%);
     --gradient-dark-bg: linear-gradient(135deg, hsl(195 25% 4%) 0%, hsl(195 30% 6%) 100%);
     
@@ -131,7 +131,7 @@
   .modern-card {
     @apply backdrop-blur-md border rounded-2xl p-6 shadow-2xl;
     background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--card)) 50%, hsl(var(--secondary)) 100%);
-    border-color: hsl(var(--border) / 0.6);
+    border-color: hsl(var(--border) / 0.7);
     box-shadow: 0 25px 50px -12px hsl(var(--glass-shadow));
   }
   
@@ -231,7 +231,7 @@
   @apply space-y-6;
 }
 
-/* Modern Category Cards */
+/* Enhanced Category Cards with Better Disabled State */
 .category-card {
   @apply p-6 border border-border/50 rounded-2xl cursor-pointer transition-all duration-300 hover:shadow-xl hover:border-primary/50 hover:-translate-y-1 modern-card;
 }
@@ -240,13 +240,26 @@
   @apply border-primary bg-primary/5 ring-2 ring-primary/50 shadow-xl enhanced-shadow;
 }
 
+.category-card.disabled {
+  @apply opacity-40 cursor-not-allowed bg-muted/30 border-muted/50 transform-none;
+  pointer-events: none;
+}
+
+.category-card.disabled:hover {
+  @apply shadow-none border-muted/50 transform-none;
+}
+
+.category-card.disabled * {
+  @apply text-muted-foreground;
+}
+
 /* Enhanced Payment Components */
 .payment-notice {
   @apply p-6 bg-muted/50 rounded-2xl mb-6 space-y-3 border border-border/50 modern-card;
 }
 
 .wallet-address {
-  @apply p-4 bg-muted/30 rounded-xl font-mono text-sm break-all border border-border/50 hover-glow;
+  @apply p-4 bg-muted/40 rounded-xl font-mono text-sm break-all border border-border/50 hover-glow;
 }
 
 .copy-button-success {
@@ -267,6 +280,64 @@
   @apply bg-primary text-primary-foreground hover:bg-primary/95 transition-all duration-300 rounded-xl px-10 py-5 font-semibold shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/35 hover:-translate-y-1 vibrant-glow;
 }
 
+/* Professional License Card Styling */
+.license-card {
+  @apply relative overflow-hidden border-2 border-primary/30 shadow-2xl;
+  background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--secondary)) 100%);
+}
+
+.license-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    hsl(var(--primary) / 0.03) 10px,
+    hsl(var(--primary) / 0.03) 20px
+  );
+  pointer-events: none;
+}
+
+.license-card .stamp {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: bold;
+  font-size: 12px;
+  letter-spacing: 1px;
+  transform: rotate(15deg);
+  box-shadow: 0 4px 12px hsl(var(--primary) / 0.3);
+}
+
+.license-card .watermark {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  font-size: 60px;
+  color: hsl(var(--primary) / 0.05);
+  font-weight: bold;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.license-card .content {
+  position: relative;
+  z-index: 2;
+}
+
+.license-card .qr-section {
+  @apply border-2 border-primary/20 rounded-lg p-2 bg-white/80;
+}
+
 /* Enhanced Responsive Design */
 @media (max-width: 768px) {
   .form-section {
@@ -283,6 +354,11 @@
   
   .section-heading {
     @apply gap-2 mb-3;
+  }
+  
+  .license-card .stamp {
+    font-size: 10px;
+    padding: 6px 12px;
   }
 }
 

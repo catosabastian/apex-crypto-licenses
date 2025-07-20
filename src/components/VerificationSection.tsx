@@ -175,56 +175,76 @@ const VerificationSection = () => {
           </div>
           
           <div className="mt-12 flex items-center justify-center gap-4">
-            <Card className="license-card w-full max-w-md overflow-hidden relative">
-              <div className="flex items-center justify-between p-4 bg-primary">
+            <Card className="license-card w-full max-w-md relative">
+              <div className="watermark">APEX</div>
+              
+              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-primary to-accent">
                 <div className="flex items-center gap-2">
                   <Shield className="h-6 w-6 text-white" />
                   <h3 className="text-lg font-bold text-white">APEX CRYPTO LICENSE</h3>
                 </div>
-                <Badge className="bg-accent border-0">VALID</Badge>
+                <Badge className="bg-white/20 text-white border-white/30">VERIFIED</Badge>
               </div>
               
-              <CardContent className="p-6 relative">
-                <div className="stamp">VERIFIED</div>
+              <CardContent className="p-6 content">
+                <div className="stamp">AUTHENTIC</div>
                 
                 <div className="space-y-4">
-                  <div>
-                    <h4 className="text-sm text-muted-foreground">License Holder</h4>
-                    <p className="font-semibold">{sampleLicense.holder}</p>
-                  </div>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <h4 className="text-sm text-muted-foreground">License Type</h4>
-                      <p className="font-semibold">{sampleLicense.type}</p>
+                  <div className="flex items-center gap-3">
+                    <div className="h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center">
+                      <Shield className="h-6 w-6 text-primary" />
                     </div>
                     <div>
-                      <h4 className="text-sm text-muted-foreground">License ID</h4>
-                      <p className="font-semibold">{sampleLicense.id}</p>
+                      <h4 className="text-sm text-muted-foreground">License Holder</h4>
+                      <p className="font-bold text-lg">{sampleLicense.holder}</p>
                     </div>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4">
+                    <div className="p-3 bg-muted/30 rounded-lg">
+                      <h4 className="text-xs text-muted-foreground uppercase tracking-wider">Category</h4>
+                      <p className="font-bold text-primary">{sampleLicense.type}</p>
+                    </div>
+                    <div className="p-3 bg-muted/30 rounded-lg">
+                      <h4 className="text-xs text-muted-foreground uppercase tracking-wider">License ID</h4>
+                      <p className="font-bold font-mono text-sm">{sampleLicense.id}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <h4 className="text-sm text-muted-foreground">Issue Date</h4>
+                      <h4 className="text-xs text-muted-foreground uppercase tracking-wider">Issue Date</h4>
                       <p className="font-semibold">{sampleLicense.issueDate}</p>
                     </div>
                     <div>
-                      <h4 className="text-sm text-muted-foreground">Expiry Date</h4>
+                      <h4 className="text-xs text-muted-foreground uppercase tracking-wider">Expiry Date</h4>
                       <p className="font-semibold">{sampleLicense.expiryDate}</p>
                     </div>
                   </div>
                   
-                  <div>
-                    <h4 className="text-sm text-muted-foreground">Trading Platforms</h4>
-                    <p className="font-semibold">{sampleLicense.platforms}</p>
+                  <div className="p-3 bg-gradient-to-r from-primary/5 to-accent/5 rounded-lg border border-primary/20">
+                    <h4 className="text-xs text-muted-foreground uppercase tracking-wider mb-2">Authorized Platforms</h4>
+                    <p className="font-medium text-sm">{sampleLicense.platforms}</p>
                   </div>
                   
                   <div className="pt-4 flex items-center justify-between">
-                    <div className="text-xs text-muted-foreground">Verify at verify.apexcrypto.auth</div>
-                    <div className="border border-black h-16 w-16 flex items-center justify-center">
-                      <QrCode className="h-12 w-12" />
+                    <div className="text-xs text-muted-foreground">
+                      <p>Verify at:</p>
+                      <p className="font-mono">verify.apexcrypto.auth</p>
                     </div>
+                    <div className="qr-section">
+                      <QrCode className="h-12 w-12 text-primary" />
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-center pt-2">
+                    <div className="h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent w-full"></div>
+                  </div>
+                  
+                  <div className="text-center">
+                    <p className="text-xs text-muted-foreground">
+                      This license is valid and registered in the APEX regulatory database
+                    </p>
                   </div>
                 </div>
               </CardContent>

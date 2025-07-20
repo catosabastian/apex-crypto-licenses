@@ -32,7 +32,7 @@ const DynamicApplicationForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    // Real-time settings update handler
+    // Enhanced real-time settings update handler
     const handleSettingsUpdate = (updatedSettings: WebsiteSettings) => {
       console.log('Settings updated in form:', updatedSettings);
       setSettings(updatedSettings);
@@ -44,6 +44,7 @@ const DynamicApplicationForm = () => {
     // Listen to cross-tab events
     const handleStorageChange = (event: CustomEvent) => {
       if (event.type === 'apex_settings_updated') {
+        console.log('Cross-tab settings update detected:', event.detail);
         setSettings(event.detail);
       }
     };
@@ -53,6 +54,7 @@ const DynamicApplicationForm = () => {
     // Also listen to direct localStorage changes
     const handleStorageEvent = (event: StorageEvent) => {
       if (event.key === 'apex_settings' && event.newValue) {
+        console.log('Direct localStorage change detected');
         const newSettings = JSON.parse(event.newValue);
         setSettings(newSettings);
       }
@@ -60,10 +62,17 @@ const DynamicApplicationForm = () => {
 
     window.addEventListener('storage', handleStorageEvent);
 
+    // Periodic settings refresh as fallback
+    const refreshInterval = setInterval(() => {
+      const currentSettings = dataManager.getSettings();
+      setSettings(currentSettings);
+    }, 5000);
+
     return () => {
       dataManager.removeEventListener('settings_updated', handleSettingsUpdate);
       window.removeEventListener('apex_settings_updated', handleStorageChange as EventListener);
       window.removeEventListener('storage', handleStorageEvent);
+      clearInterval(refreshInterval);
     };
   }, []);
 
@@ -112,6 +121,16 @@ const DynamicApplicationForm = () => {
 
       const selectedCategory = licenseCategories.find(cat => cat.id === formData.category);
       console.log('Selected category:', selectedCategory);
+      
+      // Additional validation for sold-out categories
+      if (selectedCategory && !selectedCategory.available) {
+        toast({
+          title: "Category Unavailable",
+          description: "The selected license category is currently sold out. Please choose an available category.",
+          variant: "destructive",
+        });
+        return;
+      }
       
       const newApplication = dataManager.addApplication({
         name: formData.name,
@@ -190,7 +209,7 @@ const DynamicApplicationForm = () => {
             type="submit"
             size="lg"
             className="px-12 py-6 text-lg btn-primary"
-            disabled={!formData.name || !formData.email || !formData.category || isSubmitting}
+            disabled={!formData.name || !formData.email || !formData.category || isSubmitting || (selectedCategory && !selectedCategory.available)}
           >
             {isSubmitting ? (
               <>
