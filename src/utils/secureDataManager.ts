@@ -1,3 +1,4 @@
+
 import CryptoJS from 'crypto-js';
 import { crossTabCommunication } from './crossTabCommunication';
 
@@ -61,8 +62,8 @@ export interface WebsiteSettings {
   supportEmail: string;
   salesEmail: string;
   contactEmail: string;
-  phoneNumber: string;
-  address: string;
+  contactPhone: string;
+  companyAddress: string;
   city: string;
   country: string;
   website: string;
@@ -616,8 +617,8 @@ class SecureDataManager {
       supportEmail: "support@apexcrypto.reg",
       salesEmail: "sales@apexcrypto.reg",
       contactEmail: "contact@apexcrypto.reg",
-      phoneNumber: "+1 (555) 123-4567",
-      address: "123 Blockchain Avenue",
+      contactPhone: "+1 (555) 123-4567",
+      companyAddress: "123 Blockchain Avenue",
       city: "Digital City, DC 12345",
       country: "United States",
       website: "https://apexcrypto.reg"
