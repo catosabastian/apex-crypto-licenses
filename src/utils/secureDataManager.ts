@@ -213,12 +213,12 @@ class SecureDataManager {
       if (!encryptedData) return defaultValue;
       
       const decryptedData = this.decrypt(encryptedData);
-      return JSON.parse(decryptedData);
+      return JSON.parse(decryptedData) as T;
     } catch (error) {
       console.error(`Secure retrieval failed for ${key}:`, error);
       
       // Try to restore from backup
-      const backup = this.restoreFromBackup(key);
+      const backup = this.restoreFromBackup<T>(key);
       if (backup) return backup;
       
       return defaultValue;
@@ -249,7 +249,7 @@ class SecureDataManager {
         const encryptedData = localStorage.getItem(backupKey);
         if (encryptedData) {
           const decryptedData = this.decrypt(encryptedData);
-          return JSON.parse(decryptedData);
+          return JSON.parse(decryptedData) as T;
         }
       } catch (error) {
         continue;
