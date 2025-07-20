@@ -101,39 +101,77 @@ class SecureDataManager {
     return SecureDataManager.instance;
   }
 
-  // Enhanced Event System with Retry Logic
+  // Enhanced Event System with Comprehensive Logging and Multiple Channels
   addEventListener(event: string, callback: (data: any) => void): void {
     if (!this.eventListeners[event]) {
       this.eventListeners[event] = [];
     }
     this.eventListeners[event].push(callback);
+    console.log(`[SecureDataManager] Event listener added for: ${event}, total listeners: ${this.eventListeners[event].length}`);
   }
 
   removeEventListener(event: string, callback: (data: any) => void): void {
     if (this.eventListeners[event]) {
       this.eventListeners[event] = this.eventListeners[event].filter(cb => cb !== callback);
+      console.log(`[SecureDataManager] Event listener removed for: ${event}, remaining listeners: ${this.eventListeners[event].length}`);
     }
   }
 
   private emit(event: string, data: any, retryOnFailure: boolean = true): void {
+    console.log(`[SecureDataManager] Emitting event: ${event}`, data);
+    
     try {
-      // Emit to local listeners
+      // 1. Emit to local listeners first
       if (this.eventListeners[event]) {
-        this.eventListeners[event].forEach(callback => callback(data));
+        console.log(`[SecureDataManager] Triggering ${this.eventListeners[event].length} local listeners for ${event}`);
+        this.eventListeners[event].forEach((callback, index) => {
+          try {
+            callback(data);
+            console.log(`[SecureDataManager] Local listener ${index} executed successfully for ${event}`);
+          } catch (error) {
+            console.error(`[SecureDataManager] Local listener ${index} failed for ${event}:`, error);
+          }
+        });
+      } else {
+        console.log(`[SecureDataManager] No local listeners found for event: ${event}`);
       }
       
-      // Cross-tab communication
-      window.dispatchEvent(new CustomEvent(`apex_${event}`, { detail: data }));
+      // 2. Cross-tab communication via CustomEvent
+      const customEvent = new CustomEvent(`apex_${event}`, { detail: data });
+      window.dispatchEvent(customEvent);
+      console.log(`[SecureDataManager] CustomEvent dispatched: apex_${event}`);
       
-      // Cross-window communication for multiple admin sessions
-      localStorage.setItem(`apex_event_${Date.now()}`, JSON.stringify({
+      // 3. Cross-window communication via localStorage
+      const eventData = {
         event: `apex_${event}`,
+        data,
+        timestamp: Date.now(),
+        id: this.generateSecureId()
+      };
+      
+      const eventKey = `apex_event_${eventData.timestamp}_${eventData.id}`;
+      localStorage.setItem(eventKey, JSON.stringify(eventData));
+      console.log(`[SecureDataManager] localStorage event set: ${eventKey}`);
+      
+      // 4. Direct localStorage update for immediate detection
+      localStorage.setItem('apex_last_update', JSON.stringify({
+        event,
         data,
         timestamp: Date.now()
       }));
+      console.log(`[SecureDataManager] Direct localStorage update marker set`);
+      
+      // 5. Force storage event dispatch
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: 'apex_last_update',
+        newValue: JSON.stringify({ event, data, timestamp: Date.now() }),
+        oldValue: null,
+        storageArea: localStorage
+      }));
+      console.log(`[SecureDataManager] Manual StorageEvent dispatched`);
       
     } catch (error) {
-      console.error(`Event emission failed for ${event}:`, error);
+      console.error(`[SecureDataManager] Event emission failed for ${event}:`, error);
       if (retryOnFailure) {
         this.addToRetryQueue(event, data);
       }
@@ -142,18 +180,24 @@ class SecureDataManager {
 
   private addToRetryQueue(event: string, data: any): void {
     this.retryQueue.push({ event, data, attempts: 0 });
+    console.log(`[SecureDataManager] Event added to retry queue: ${event}`);
   }
 
   private startRetryQueue(): void {
     setInterval(() => {
-      this.retryQueue = this.retryQueue.filter(item => {
-        if (item.attempts < 3) {
-          item.attempts++;
-          this.emit(item.event, item.data, false);
-          return item.attempts < 3;
-        }
-        return false;
-      });
+      if (this.retryQueue.length > 0) {
+        console.log(`[SecureDataManager] Processing retry queue, ${this.retryQueue.length} items`);
+        this.retryQueue = this.retryQueue.filter(item => {
+          if (item.attempts < 3) {
+            item.attempts++;
+            console.log(`[SecureDataManager] Retrying event ${item.event}, attempt ${item.attempts}`);
+            this.emit(item.event, item.data, false);
+            return item.attempts < 3;
+          }
+          console.log(`[SecureDataManager] Event ${item.event} exceeded max retry attempts, removing from queue`);
+          return false;
+        });
+      }
     }, 5000);
   }
 
@@ -400,25 +444,67 @@ class SecureDataManager {
     return false;
   }
 
-  // Enhanced Settings with Immediate Propagation
+  // Enhanced Settings with Immediate Multi-Channel Propagation
   getSettings(): WebsiteSettings {
-    return this.secureGetItem('apex_settings', this.getDefaultSettings());
+    const settings = this.secureGetItem('apex_settings', this.getDefaultSettings());
+    console.log('[SecureDataManager] Retrieved settings:', settings);
+    return settings;
   }
 
   updateSettings(updates: Partial<WebsiteSettings>): WebsiteSettings {
+    console.log('[SecureDataManager] Updating settings with:', updates);
+    
     const currentSettings = this.getSettings();
     const newSettings = { ...currentSettings, ...updates };
-    this.secureSetItem('apex_settings', newSettings);
-    this.logSecurityEvent('data_change', 'Website settings updated');
     
-    // Immediate propagation with multiple channels
+    // Save to secure storage
+    this.secureSetItem('apex_settings', newSettings);
+    console.log('[SecureDataManager] Settings saved to secure storage');
+    
+    // Log security event
+    this.logSecurityEvent('data_change', `Website settings updated: ${Object.keys(updates).join(', ')}`);
+    
+    // Multi-channel immediate propagation
+    console.log('[SecureDataManager] Starting multi-channel settings propagation');
+    
+    // Channel 1: Primary event
     this.emit('settings_updated', newSettings);
     
-    // Force update all listeners immediately
+    // Channel 2: Force update event (immediate)
     setTimeout(() => {
+      console.log('[SecureDataManager] Emitting force update');
       this.emit('settings_force_update', newSettings);
-    }, 100);
+    }, 50);
     
+    // Channel 3: Backup broadcast after short delay
+    setTimeout(() => {
+      console.log('[SecureDataManager] Emitting backup broadcast');
+      this.emit('settings_backup_update', newSettings);
+    }, 200);
+    
+    // Channel 4: Direct window messaging
+    try {
+      if (window.parent && window.parent !== window) {
+        window.parent.postMessage({
+          type: 'apex_settings_updated',
+          data: newSettings,
+          timestamp: Date.now()
+        }, '*');
+        console.log('[SecureDataManager] Parent window message sent');
+      }
+    } catch (error) {
+      console.log('[SecureDataManager] Parent window messaging not available');
+    }
+    
+    // Channel 5: Manual localStorage trigger
+    localStorage.setItem('apex_settings_manual_trigger', JSON.stringify({
+      settings: newSettings,
+      timestamp: Date.now(),
+      trigger: 'manual_update'
+    }));
+    console.log('[SecureDataManager] Manual localStorage trigger set');
+    
+    console.log('[SecureDataManager] Settings update complete, returning:', newSettings);
     return newSettings;
   }
 

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
@@ -31,86 +32,154 @@ const SecureDynamicApplicationForm = () => {
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [updateCount, setUpdateCount] = useState(0);
+  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'syncing' | 'error'>('connected');
 
   useEffect(() => {
+    console.log('[SecureDynamicApplicationForm] Component mounted, setting up event listeners');
+    
     // Ensure data migration runs
     if (dataMigration.isMigrationNeeded()) {
       dataMigration.migrateToSecureStorage();
     }
 
-    // Enhanced real-time settings update handler with multiple channels
+    // Enhanced settings update handler with comprehensive logging
     const handleSettingsUpdate = (updatedSettings: WebsiteSettings) => {
-      console.log('Settings updated in secure form:', updatedSettings);
+      console.log('[SecureDynamicApplicationForm] Settings update received:', updatedSettings);
       setSettings(updatedSettings);
       setUpdateCount(prev => prev + 1);
+      setConnectionStatus('syncing');
       
-      // Visual feedback for settings update
+      setTimeout(() => setConnectionStatus('connected'), 1000);
+      
       toast({
         title: "Settings Updated",
-        description: "Pricing and availability have been refreshed",
+        description: "Pricing and availability have been refreshed automatically",
       });
     };
 
     const handleForceUpdate = (updatedSettings: WebsiteSettings) => {
-      console.log('Force settings update:', updatedSettings);
+      console.log('[SecureDynamicApplicationForm] Force update received:', updatedSettings);
+      setSettings(updatedSettings);
+      setUpdateCount(prev => prev + 1);
+      setConnectionStatus('syncing');
+      setTimeout(() => setConnectionStatus('connected'), 500);
+    };
+
+    const handleBackupUpdate = (updatedSettings: WebsiteSettings) => {
+      console.log('[SecureDynamicApplicationForm] Backup update received:', updatedSettings);
       setSettings(updatedSettings);
       setUpdateCount(prev => prev + 1);
     };
 
-    // Multiple event listeners for robust updates
+    // Register multiple event listeners for robust updates
     secureDataManager.addEventListener('settings_updated', handleSettingsUpdate);
     secureDataManager.addEventListener('settings_force_update', handleForceUpdate);
+    secureDataManager.addEventListener('settings_backup_update', handleBackupUpdate);
 
     // Cross-tab communication listener
-    const handleStorageChange = (event: CustomEvent) => {
-      if (event.type === 'apex_settings_updated') {
-        console.log('Cross-tab settings update detected:', event.detail);
+    const handleCustomEvent = (event: CustomEvent) => {
+      console.log('[SecureDynamicApplicationForm] Custom event received:', event.type, event.detail);
+      if (event.type === 'apex_settings_updated' || event.type === 'apex_settings_force_update') {
         setSettings(event.detail);
         setUpdateCount(prev => prev + 1);
+        setConnectionStatus('syncing');
+        setTimeout(() => setConnectionStatus('connected'), 500);
       }
     };
 
-    window.addEventListener('apex_settings_updated', handleStorageChange as EventListener);
+    window.addEventListener('apex_settings_updated', handleCustomEvent as EventListener);
+    window.addEventListener('apex_settings_force_update', handleCustomEvent as EventListener);
+    window.addEventListener('apex_settings_backup_update', handleCustomEvent as EventListener);
 
-    // Direct localStorage listener
+    // Direct localStorage listener for immediate updates
     const handleStorageEvent = (event: StorageEvent) => {
-      if (event.key === 'apex_settings' && event.newValue) {
-        console.log('Direct localStorage change detected');
+      console.log('[SecureDynamicApplicationForm] Storage event received:', event.key, event.newValue);
+      
+      if (event.key === 'apex_last_update' && event.newValue) {
         try {
-          const newSettings = JSON.parse(event.newValue);
-          setSettings(newSettings);
-          setUpdateCount(prev => prev + 1);
+          const updateData = JSON.parse(event.newValue);
+          if (updateData.event === 'settings_updated' || updateData.event === 'settings_force_update') {
+            console.log('[SecureDynamicApplicationForm] Direct storage update detected:', updateData);
+            setSettings(updateData.data);
+            setUpdateCount(prev => prev + 1);
+            setConnectionStatus('syncing');
+            setTimeout(() => setConnectionStatus('connected'), 500);
+          }
         } catch (error) {
-          console.error('Failed to parse settings from localStorage:', error);
+          console.error('[SecureDynamicApplicationForm] Failed to parse storage update:', error);
+        }
+      }
+      
+      if (event.key === 'apex_settings_manual_trigger' && event.newValue) {
+        try {
+          const triggerData = JSON.parse(event.newValue);
+          console.log('[SecureDynamicApplicationForm] Manual trigger detected:', triggerData);
+          setSettings(triggerData.settings);
+          setUpdateCount(prev => prev + 1);
+          setConnectionStatus('syncing');
+          setTimeout(() => setConnectionStatus('connected'), 500);
+        } catch (error) {
+          console.error('[SecureDynamicApplicationForm] Failed to parse manual trigger:', error);
         }
       }
     };
 
     window.addEventListener('storage', handleStorageEvent);
 
-    // Periodic settings refresh with visual indicator
-    const refreshInterval = setInterval(() => {
-      const currentSettings = secureDataManager.getSettings();
-      const settingsChanged = JSON.stringify(currentSettings) !== JSON.stringify(settings);
-      
-      if (settingsChanged) {
-        console.log('Periodic refresh detected settings change');
-        setSettings(currentSettings);
+    // Window message listener for cross-frame communication
+    const handleWindowMessage = (event: MessageEvent) => {
+      if (event.data && event.data.type === 'apex_settings_updated') {
+        console.log('[SecureDynamicApplicationForm] Window message received:', event.data);
+        setSettings(event.data.data);
         setUpdateCount(prev => prev + 1);
+        setConnectionStatus('syncing');
+        setTimeout(() => setConnectionStatus('connected'), 500);
       }
-    }, 3000); // More frequent checks
+    };
 
-    // Force initial refresh
+    window.addEventListener('message', handleWindowMessage);
+
+    // Aggressive periodic refresh with error handling
+    const refreshInterval = setInterval(() => {
+      try {
+        const currentSettings = secureDataManager.getSettings();
+        const settingsChanged = JSON.stringify(currentSettings) !== JSON.stringify(settings);
+        
+        if (settingsChanged) {
+          console.log('[SecureDynamicApplicationForm] Periodic refresh detected settings change');
+          setSettings(currentSettings);
+          setUpdateCount(prev => prev + 1);
+          setConnectionStatus('syncing');
+          setTimeout(() => setConnectionStatus('connected'), 500);
+        }
+      } catch (error) {
+        console.error('[SecureDynamicApplicationForm] Periodic refresh error:', error);
+        setConnectionStatus('error');
+        setTimeout(() => setConnectionStatus('connected'), 2000);
+      }
+    }, 2000); // Check every 2 seconds
+
+    // Force initial refresh after component mount
     setTimeout(() => {
-      const freshSettings = secureDataManager.getSettings();
-      setSettings(freshSettings);
+      try {
+        const freshSettings = secureDataManager.getSettings();
+        console.log('[SecureDynamicApplicationForm] Initial force refresh:', freshSettings);
+        setSettings(freshSettings);
+      } catch (error) {
+        console.error('[SecureDynamicApplicationForm] Initial refresh error:', error);
+      }
     }, 100);
 
     return () => {
+      console.log('[SecureDynamicApplicationForm] Cleaning up event listeners');
       secureDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
       secureDataManager.removeEventListener('settings_force_update', handleForceUpdate);
-      window.removeEventListener('apex_settings_updated', handleStorageChange as EventListener);
+      secureDataManager.removeEventListener('settings_backup_update', handleBackupUpdate);
+      window.removeEventListener('apex_settings_updated', handleCustomEvent as EventListener);
+      window.removeEventListener('apex_settings_force_update', handleCustomEvent as EventListener);
+      window.removeEventListener('apex_settings_backup_update', handleCustomEvent as EventListener);
       window.removeEventListener('storage', handleStorageEvent);
+      window.removeEventListener('message', handleWindowMessage);
       clearInterval(refreshInterval);
     };
   }, []);
@@ -125,12 +194,12 @@ const SecureDynamicApplicationForm = () => {
   ];
 
   const handleFieldChange = (field: string, value: string) => {
-    console.log(`${field} changed:`, value);
+    console.log(`[SecureDynamicApplicationForm] ${field} changed:`, value);
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleCopyAddress = (address: string, type: string) => {
-    console.log('Copying address:', type, address);
+    console.log('[SecureDynamicApplicationForm] Copying address:', type, address);
     navigator.clipboard.writeText(address);
     setCopiedAddress(type);
     toast({
@@ -142,14 +211,14 @@ const SecureDynamicApplicationForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Secure form submission started');
-    console.log('Form data:', formData);
+    console.log('[SecureDynamicApplicationForm] Form submission started');
+    console.log('[SecureDynamicApplicationForm] Form data:', formData);
     
     setIsSubmitting(true);
 
     try {
       if (!formData.name || !formData.email || !formData.category) {
-        console.error('Required fields missing:', { name: formData.name, email: formData.email, category: formData.category });
+        console.error('[SecureDynamicApplicationForm] Required fields missing:', { name: formData.name, email: formData.email, category: formData.category });
         toast({
           title: "Validation Error",
           description: "Please fill in all required fields (Name, Email, and License Category)",
@@ -159,7 +228,7 @@ const SecureDynamicApplicationForm = () => {
       }
 
       const selectedCategory = licenseCategories.find(cat => cat.id === formData.category);
-      console.log('Selected category:', selectedCategory);
+      console.log('[SecureDynamicApplicationForm] Selected category:', selectedCategory);
       
       // Additional validation for sold-out categories
       if (selectedCategory && !selectedCategory.available) {
@@ -183,7 +252,7 @@ const SecureDynamicApplicationForm = () => {
         notes: formData.notes
       });
 
-      console.log('Application added successfully:', newApplication);
+      console.log('[SecureDynamicApplicationForm] Application added successfully:', newApplication);
 
       toast({
         title: "Application Submitted Successfully",
@@ -199,7 +268,7 @@ const SecureDynamicApplicationForm = () => {
         notes: ''
       });
     } catch (error) {
-      console.error('Application submission error:', error);
+      console.error('[SecureDynamicApplicationForm] Application submission error:', error);
       toast({
         title: "Submission Failed",
         description: "There was an error submitting your application. Please try again.",
@@ -212,16 +281,37 @@ const SecureDynamicApplicationForm = () => {
 
   const selectedCategory = licenseCategories.find(cat => cat.id === formData.category);
 
+  const getConnectionStatusColor = () => {
+    switch (connectionStatus) {
+      case 'syncing': return 'text-yellow-600';
+      case 'error': return 'text-red-600';
+      default: return 'text-green-600';
+    }
+  };
+
+  const getConnectionStatusText = () => {
+    switch (connectionStatus) {
+      case 'syncing': return 'Syncing...';
+      case 'error': return 'Connection Error';
+      default: return 'Connected';
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold mb-2">Trading License Application</h2>
         <p className="text-muted-foreground">Submit your application for cryptocurrency trading certification</p>
-        {updateCount > 0 && (
-          <p className="text-xs text-green-600 mt-1">
-            ✓ Real-time pricing updates active (refresh #{updateCount})
+        <div className="flex items-center justify-center gap-4 mt-2">
+          {updateCount > 0 && (
+            <p className="text-xs text-green-600">
+              ✓ Real-time updates active (#{updateCount})
+            </p>
+          )}
+          <p className={`text-xs ${getConnectionStatusColor()}`}>
+            • {getConnectionStatusText()}
           </p>
-        )}
+        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">

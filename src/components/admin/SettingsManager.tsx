@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -6,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Edit, Save, DollarSign, Wallet } from 'lucide-react';
+import { Edit, Save, DollarSign, Wallet, CheckCircle, AlertCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { secureDataManager, WebsiteSettings } from '@/utils/secureDataManager';
 import { ContactSettingsManager } from './ContactSettingsManager';
@@ -16,32 +17,127 @@ export const SettingsManager = () => {
   const [isEditingPrices, setIsEditingPrices] = useState(false);
   const [isEditingWallets, setIsEditingWallets] = useState(false);
   const [tempSettings, setTempSettings] = useState<WebsiteSettings>(settings);
+  const [lastUpdateTime, setLastUpdateTime] = useState<Date>(new Date());
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'success' | 'error'>('idle');
+
+  useEffect(() => {
+    console.log('[SettingsManager] Component mounted, initializing settings');
+    
+    // Force refresh settings on mount
+    const currentSettings = secureDataManager.getSettings();
+    setSettings(currentSettings);
+    setTempSettings(currentSettings);
+  }, []);
 
   const handleSaveSettings = () => {
-    const updatedSettings = secureDataManager.updateSettings(tempSettings);
-    setSettings(updatedSettings);
-    setIsEditingPrices(false);
-    setIsEditingWallets(false);
-    toast({
-      title: "Settings Updated",
-      description: "Website settings have been updated successfully",
-    });
+    console.log('[SettingsManager] Saving settings:', tempSettings);
+    setSyncStatus('syncing');
+    
+    try {
+      const updatedSettings = secureDataManager.updateSettings(tempSettings);
+      console.log('[SettingsManager] Settings saved successfully:', updatedSettings);
+      
+      setSettings(updatedSettings);
+      setIsEditingPrices(false);
+      setIsEditingWallets(false);
+      setLastUpdateTime(new Date());
+      setSyncStatus('success');
+      
+      toast({
+        title: "Settings Updated Successfully",
+        description: "All changes have been saved and synchronized across the platform",
+      });
+      
+      // Reset sync status after showing success
+      setTimeout(() => setSyncStatus('idle'), 3000);
+      
+    } catch (error) {
+      console.error('[SettingsManager] Failed to save settings:', error);
+      setSyncStatus('error');
+      
+      toast({
+        title: "Settings Update Failed",
+        description: "There was an error saving your changes. Please try again.",
+        variant: "destructive",
+      });
+      
+      // Reset sync status after showing error
+      setTimeout(() => setSyncStatus('idle'), 3000);
+    }
   };
 
   const handleAvailabilityToggle = (category: keyof WebsiteSettings, value: boolean) => {
-    const updates = { [category]: value };
-    const updatedSettings = secureDataManager.updateSettings(updates);
-    setSettings(updatedSettings);
-    setTempSettings(updatedSettings);
-    toast({
-      title: "Availability Updated",
-      description: `${category} availability has been ${value ? 'enabled' : 'disabled'}`,
-    });
+    console.log(`[SettingsManager] Toggling availability for ${category}:`, value);
+    setSyncStatus('syncing');
+    
+    try {
+      const updates = { [category]: value };
+      const updatedSettings = secureDataManager.updateSettings(updates);
+      console.log('[SettingsManager] Availability updated:', updatedSettings);
+      
+      setSettings(updatedSettings);
+      setTempSettings(updatedSettings);
+      setLastUpdateTime(new Date());
+      setSyncStatus('success');
+      
+      toast({
+        title: "Availability Updated",
+        description: `${category} has been ${value ? 'enabled' : 'disabled'} successfully`,
+      });
+      
+      // Reset sync status after showing success
+      setTimeout(() => setSyncStatus('idle'), 2000);
+      
+    } catch (error) {
+      console.error('[SettingsManager] Failed to toggle availability:', error);
+      setSyncStatus('error');
+      
+      toast({
+        title: "Update Failed",
+        description: "Failed to update availability. Please try again.",
+        variant: "destructive",
+      });
+      
+      // Reset sync status after showing error
+      setTimeout(() => setSyncStatus('idle'), 3000);
+    }
+  };
+
+  const getSyncStatusIcon = () => {
+    switch (syncStatus) {
+      case 'syncing':
+        return <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full" />;
+      case 'success':
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case 'error':
+        return <AlertCircle className="h-4 w-4 text-red-500" />;
+      default:
+        return null;
+    }
+  };
+
+  const getSyncStatusText = () => {
+    switch (syncStatus) {
+      case 'syncing':
+        return 'Synchronizing...';
+      case 'success':
+        return 'Synchronized';
+      case 'error':
+        return 'Sync Failed';
+      default:
+        return `Last updated: ${lastUpdateTime.toLocaleTimeString()}`;
+    }
   };
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-semibold">Website Settings</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-semibold">Website Settings</h2>
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          {getSyncStatusIcon()}
+          <span>{getSyncStatusText()}</span>
+        </div>
+      </div>
       
       <div className="grid gap-6">
         {/* Contact Information Management */}
@@ -91,9 +187,18 @@ export const SettingsManager = () => {
                   <Button variant="outline" onClick={() => setIsEditingPrices(false)}>
                     Cancel
                   </Button>
-                  <Button onClick={handleSaveSettings} className="btn-primary">
-                    <Save className="h-4 w-4 mr-2" />
-                    Save Changes
+                  <Button onClick={handleSaveSettings} className="btn-primary" disabled={syncStatus === 'syncing'}>
+                    {syncStatus === 'syncing' ? (
+                      <>
+                        <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="h-4 w-4 mr-2" />
+                        Save Changes
+                      </>
+                    )}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -115,6 +220,7 @@ export const SettingsManager = () => {
                       onCheckedChange={(checked) => 
                         handleAvailabilityToggle(`category${category}Available` as keyof WebsiteSettings, checked)
                       }
+                      disabled={syncStatus === 'syncing'}
                     />
                     <Badge variant={settings[`category${category}Available` as keyof WebsiteSettings] ? "default" : "secondary"}>
                       {settings[`category${category}Available` as keyof WebsiteSettings] ? "Available" : "Sold Out"}
@@ -195,9 +301,18 @@ export const SettingsManager = () => {
                   <Button variant="outline" onClick={() => setIsEditingWallets(false)}>
                     Cancel
                   </Button>
-                  <Button onClick={handleSaveSettings} className="btn-primary">
-                    <Save className="h-4 w-4 mr-2" />
-                    Save Changes
+                  <Button onClick={handleSaveSettings} className="btn-primary" disabled={syncStatus === 'syncing'}>
+                    {syncStatus === 'syncing' ? (
+                      <>
+                        <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="h-4 w-4 mr-2" />
+                        Save Changes
+                      </>
+                    )}
                   </Button>
                 </DialogFooter>
               </DialogContent>
