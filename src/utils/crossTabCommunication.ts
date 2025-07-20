@@ -1,16 +1,14 @@
 
-// Cross-tab communication utility using BroadcastChannel API
+// Optimized Cross-tab communication utility
 class CrossTabCommunication {
   private static instance: CrossTabCommunication;
-  private channel: BroadcastChannel;
+  private channel: BroadcastChannel | null = null;
   private listeners: Map<string, Set<(data: any) => void>> = new Map();
   private fallbackInterval?: NodeJS.Timeout;
+  private isInitialized = false;
 
   private constructor() {
-    // Use BroadcastChannel for reliable cross-tab communication
-    this.channel = new BroadcastChannel('apex_settings_sync');
-    this.setupChannelListener();
-    this.setupFallbackPolling();
+    this.initialize();
   }
 
   static getInstance(): CrossTabCommunication {
@@ -20,10 +18,27 @@ class CrossTabCommunication {
     return CrossTabCommunication.instance;
   }
 
+  private initialize(): void {
+    if (this.isInitialized) return;
+    
+    try {
+      // Use BroadcastChannel for reliable cross-tab communication
+      this.channel = new BroadcastChannel('apex_settings_sync');
+      this.setupChannelListener();
+      this.setupFallbackPolling();
+      this.isInitialized = true;
+      console.log('[CrossTabCommunication] Initialized successfully');
+    } catch (error) {
+      console.error('[CrossTabCommunication] Initialization failed:', error);
+    }
+  }
+
   private setupChannelListener(): void {
+    if (!this.channel) return;
+
     this.channel.addEventListener('message', (event) => {
-      console.log('[CrossTabCommunication] BroadcastChannel message received:', event.data);
-      const { type, data, timestamp } = event.data;
+      console.log('[CrossTabCommunication] Message received:', event.data);
+      const { type, data } = event.data;
       
       if (this.listeners.has(type)) {
         this.listeners.get(type)?.forEach(callback => {
@@ -38,7 +53,7 @@ class CrossTabCommunication {
   }
 
   private setupFallbackPolling(): void {
-    // Aggressive fallback polling every 1 second
+    // Moderate fallback polling every 3 seconds (reduced from 1 second)
     this.fallbackInterval = setInterval(() => {
       const lastUpdate = localStorage.getItem('apex_force_sync_trigger');
       if (lastUpdate) {
@@ -46,16 +61,16 @@ class CrossTabCommunication {
           const updateData = JSON.parse(lastUpdate);
           const timeDiff = Date.now() - updateData.timestamp;
           
-          // If update is fresh (less than 2 seconds old), process it
-          if (timeDiff < 2000) {
-            console.log('[CrossTabCommunication] Fallback polling detected fresh update:', updateData);
-            this.emit(updateData.type, updateData.data, false); // Don't re-trigger storage
+          // If update is fresh (less than 5 seconds old), process it
+          if (timeDiff < 5000) {
+            console.log('[CrossTabCommunication] Fallback detected update:', updateData);
+            this.emit(updateData.type, updateData.data, false);
           }
         } catch (error) {
           console.error('[CrossTabCommunication] Fallback polling error:', error);
         }
       }
-    }, 1000);
+    }, 3000);
   }
 
   addEventListener(type: string, callback: (data: any) => void): void {
@@ -71,7 +86,7 @@ class CrossTabCommunication {
   }
 
   emit(type: string, data: any, triggerStorage: boolean = true): void {
-    console.log('[CrossTabCommunication] Emitting event:', type, data);
+    console.log('[CrossTabCommunication] Emitting event:', type);
     
     const eventData = {
       type,
@@ -82,8 +97,10 @@ class CrossTabCommunication {
 
     try {
       // 1. BroadcastChannel (primary)
-      this.channel.postMessage(eventData);
-      console.log('[CrossTabCommunication] BroadcastChannel message sent');
+      if (this.channel) {
+        this.channel.postMessage(eventData);
+        console.log('[CrossTabCommunication] BroadcastChannel message sent');
+      }
 
       // 2. Trigger local listeners immediately
       if (this.listeners.has(type)) {
@@ -96,18 +113,10 @@ class CrossTabCommunication {
         });
       }
 
-      // 3. localStorage fallback trigger
+      // 3. localStorage fallback trigger (only if requested)
       if (triggerStorage) {
         localStorage.setItem('apex_force_sync_trigger', JSON.stringify(eventData));
         console.log('[CrossTabCommunication] localStorage fallback trigger set');
-        
-        // Trigger storage event manually
-        window.dispatchEvent(new StorageEvent('storage', {
-          key: 'apex_force_sync_trigger',
-          newValue: JSON.stringify(eventData),
-          oldValue: null,
-          storageArea: localStorage
-        }));
       }
 
     } catch (error) {
@@ -116,10 +125,16 @@ class CrossTabCommunication {
   }
 
   destroy(): void {
-    this.channel.close();
+    if (this.channel) {
+      this.channel.close();
+      this.channel = null;
+    }
     if (this.fallbackInterval) {
       clearInterval(this.fallbackInterval);
     }
+    this.listeners.clear();
+    this.isInitialized = false;
+    console.log('[CrossTabCommunication] Destroyed');
   }
 }
 

@@ -86,24 +86,27 @@ class SecureDataManager {
   private eventListeners: { [key: string]: ((data: any) => void)[] } = {};
   private encryptionKey: string;
   private sessionCheckInterval?: NodeJS.Timeout;
+  private isInitialized = false;
   
   private constructor() {
+    if (SecureDataManager.instance) {
+      throw new Error('SecureDataManager is a singleton. Use getInstance() instead.');
+    }
     console.log('[SecureDataManager] Initializing singleton instance');
     this.encryptionKey = this.getOrCreateEncryptionKey();
     this.startSessionMonitoring();
+    this.isInitialized = true;
   }
   
   static getInstance(): SecureDataManager {
     if (!SecureDataManager.instance) {
       SecureDataManager.instance = new SecureDataManager();
       console.log('[SecureDataManager] New singleton instance created');
-    } else {
-      console.log('[SecureDataManager] Returning existing singleton instance');
     }
     return SecureDataManager.instance;
   }
 
-  // Simplified Event System using CrossTabCommunication
+  // Optimized Event System
   addEventListener(event: string, callback: (data: any) => void): void {
     if (!this.eventListeners[event]) {
       this.eventListeners[event] = [];
@@ -123,7 +126,7 @@ class SecureDataManager {
   }
 
   private emit(event: string, data: any): void {
-    console.log(`[SecureDataManager] Emitting event: ${event}`, data);
+    console.log(`[SecureDataManager] Emitting event: ${event}`);
     
     // Emit through cross-tab communication system
     crossTabCommunication.emit(event, data);
@@ -384,7 +387,7 @@ class SecureDataManager {
     return false;
   }
 
-  // Enhanced Settings with Bulletproof Propagation
+  // Enhanced Settings with Optimized Propagation
   getSettings(): WebsiteSettings {
     const settings = this.secureGetItem('apex_settings', this.getDefaultSettings());
     console.log('[SecureDataManager] Retrieved settings:', settings);
@@ -404,19 +407,13 @@ class SecureDataManager {
     // Log security event
     this.logSecurityEvent('data_change', `Website settings updated: ${Object.keys(updates).join(', ')}`);
     
-    // BULLETPROOF PROPAGATION - Multiple channels with immediate triggers
-    console.log('[SecureDataManager] Starting bulletproof settings propagation');
+    // Optimized propagation - single primary event with delayed confirmation
+    console.log('[SecureDataManager] Starting optimized settings propagation');
     
-    // Channel 1: Primary settings update
+    // Primary settings update
     this.emit('settings_updated', newSettings);
     
-    // Channel 2: Force update (immediate)
-    setTimeout(() => {
-      console.log('[SecureDataManager] Triggering force update');
-      this.emit('settings_force_refresh', newSettings);
-    }, 10);
-    
-    // Channel 3: Admin confirmation event
+    // Delayed confirmation to allow processing
     setTimeout(() => {
       console.log('[SecureDataManager] Triggering admin confirmation');
       this.emit('admin_settings_confirmed', { 
@@ -424,13 +421,7 @@ class SecureDataManager {
         timestamp: Date.now(),
         updateKeys: Object.keys(updates)
       });
-    }, 50);
-    
-    // Channel 4: Emergency broadcast
-    setTimeout(() => {
-      console.log('[SecureDataManager] Emergency broadcast');
-      crossTabCommunication.emit('emergency_settings_sync', newSettings);
-    }, 100);
+    }, 200);
     
     console.log('[SecureDataManager] Settings update complete, returning:', newSettings);
     return newSettings;
@@ -631,6 +622,7 @@ class SecureDataManager {
       clearInterval(this.sessionCheckInterval);
     }
     crossTabCommunication.destroy();
+    this.isInitialized = false;
   }
 }
 

@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { secureDataManager, WebsiteSettings } from '@/utils/secureDataManager';
@@ -34,17 +34,24 @@ const SecureDynamicApplicationForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [updateCount, setUpdateCount] = useState(0);
   const [lastUpdateTime, setLastUpdateTime] = useState<Date>(new Date());
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Use refs to prevent memory leaks and excessive re-renders
+  const mountedRef = useRef(true);
+  const pollingIntervalRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
-    console.log('[SecureDynamicApplicationForm] Component mounted, setting up bulletproof event listeners');
+    console.log('[SecureDynamicApplicationForm] Component mounted');
     
-    // Ensure data migration runs
+    // Ensure data migration runs once
     if (dataMigration.isMigrationNeeded()) {
       dataMigration.migrateToSecureStorage();
     }
 
-    // BULLETPROOF SETTINGS UPDATE HANDLER
+    // Single unified settings update handler
     const handleSettingsUpdate = (updatedSettings: WebsiteSettings) => {
+      if (!mountedRef.current) return;
+      
       console.log('[SecureDynamicApplicationForm] Settings update received:', updatedSettings);
       setSettings(updatedSettings);
       setUpdateCount(prev => prev + 1);
@@ -52,46 +59,25 @@ const SecureDynamicApplicationForm = () => {
       
       toast({
         title: "Pricing Updated",
-        description: "Latest pricing and availability loaded automatically",
+        description: "Latest pricing and availability loaded",
       });
     };
 
-    const handleForceRefresh = (updatedSettings: WebsiteSettings) => {
-      console.log('[SecureDynamicApplicationForm] Force refresh received:', updatedSettings);
-      setSettings(updatedSettings);
-      setUpdateCount(prev => prev + 1);
-      setLastUpdateTime(new Date());
-    };
-
-    const handleEmergencySync = (updatedSettings: WebsiteSettings) => {
-      console.log('[SecureDynamicApplicationForm] Emergency sync received:', updatedSettings);
-      setSettings(updatedSettings);
-      setUpdateCount(prev => prev + 1);
-      setLastUpdateTime(new Date());
-      
-      toast({
-        title: "Emergency Sync",
-        description: "Settings forcibly synchronized from admin",
-      });
-    };
-
-    // Register with secureDataManager
+    // Register event listeners
     secureDataManager.addEventListener('settings_updated', handleSettingsUpdate);
-    secureDataManager.addEventListener('settings_force_refresh', handleForceRefresh);
-    
-    // Register with cross-tab communication
     crossTabCommunication.addEventListener('settings_updated', handleSettingsUpdate);
-    crossTabCommunication.addEventListener('settings_force_refresh', handleForceRefresh);
-    crossTabCommunication.addEventListener('emergency_settings_sync', handleEmergencySync);
+    crossTabCommunication.addEventListener('settings_force_refresh', handleSettingsUpdate);
 
-    // Aggressive polling fallback (every 2 seconds)
-    const aggressivePolling = setInterval(() => {
+    // Moderate polling fallback (every 5 seconds instead of 2)
+    pollingIntervalRef.current = setInterval(() => {
+      if (!mountedRef.current) return;
+      
       try {
         const currentSettings = secureDataManager.getSettings();
         const settingsChanged = JSON.stringify(currentSettings) !== JSON.stringify(settings);
         
         if (settingsChanged) {
-          console.log('[SecureDynamicApplicationForm] Polling detected settings change');
+          console.log('[SecureDynamicApplicationForm] Polling detected change');
           setSettings(currentSettings);
           setUpdateCount(prev => prev + 1);
           setLastUpdateTime(new Date());
@@ -99,23 +85,28 @@ const SecureDynamicApplicationForm = () => {
       } catch (error) {
         console.error('[SecureDynamicApplicationForm] Polling error:', error);
       }
-    }, 2000);
+    }, 5000);
 
-    // Force initial refresh
+    // Initial load
     setTimeout(() => {
-      const freshSettings = secureDataManager.getSettings();
-      console.log('[SecureDynamicApplicationForm] Initial force refresh:', freshSettings);
-      setSettings(freshSettings);
+      if (mountedRef.current) {
+        const freshSettings = secureDataManager.getSettings();
+        setSettings(freshSettings);
+        setIsLoading(false);
+      }
     }, 100);
 
     return () => {
-      console.log('[SecureDynamicApplicationForm] Cleaning up event listeners');
+      console.log('[SecureDynamicApplicationForm] Cleaning up');
+      mountedRef.current = false;
+      
       secureDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
-      secureDataManager.removeEventListener('settings_force_refresh', handleForceRefresh);
       crossTabCommunication.removeEventListener('settings_updated', handleSettingsUpdate);
-      crossTabCommunication.removeEventListener('settings_force_refresh', handleForceRefresh);
-      crossTabCommunication.removeEventListener('emergency_settings_sync', handleEmergencySync);
-      clearInterval(aggressivePolling);
+      crossTabCommunication.removeEventListener('settings_force_refresh', handleSettingsUpdate);
+      
+      if (pollingIntervalRef.current) {
+        clearInterval(pollingIntervalRef.current);
+      }
     };
   }, []);
 
@@ -129,12 +120,10 @@ const SecureDynamicApplicationForm = () => {
   ];
 
   const handleFieldChange = (field: string, value: string) => {
-    console.log(`[SecureDynamicApplicationForm] ${field} changed:`, value);
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const handleCopyAddress = (address: string, type: string) => {
-    console.log('[SecureDynamicApplicationForm] Copying address:', type, address);
     navigator.clipboard.writeText(address);
     setCopiedAddress(type);
     toast({
@@ -146,15 +135,13 @@ const SecureDynamicApplicationForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('[SecureDynamicApplicationForm] Form submission started');
-    
     setIsSubmitting(true);
 
     try {
       if (!formData.name || !formData.email || !formData.category) {
         toast({
           title: "Validation Error",
-          description: "Please fill in all required fields (Name, Email, and License Category)",
+          description: "Please fill in all required fields",
           variant: "destructive",
         });
         return;
@@ -165,7 +152,7 @@ const SecureDynamicApplicationForm = () => {
       if (selectedCategory && !selectedCategory.available) {
         toast({
           title: "Category Unavailable",
-          description: "The selected license category is currently sold out. Please choose an available category.",
+          description: "The selected license category is currently sold out",
           variant: "destructive",
         });
         return;
@@ -183,11 +170,9 @@ const SecureDynamicApplicationForm = () => {
         notes: formData.notes
       });
 
-      console.log('[SecureDynamicApplicationForm] Application submitted successfully:', newApplication);
-
       toast({
         title: "Application Submitted Successfully",
-        description: `Your application has been submitted. Application ID: ${newApplication.id}`,
+        description: `Application ID: ${newApplication.id}`,
       });
 
       setFormData({
@@ -199,10 +184,10 @@ const SecureDynamicApplicationForm = () => {
         notes: ''
       });
     } catch (error) {
-      console.error('[SecureDynamicApplicationForm] Application submission error:', error);
+      console.error('[SecureDynamicApplicationForm] Submission error:', error);
       toast({
         title: "Submission Failed",
-        description: "There was an error submitting your application. Please try again.",
+        description: "Please try again",
         variant: "destructive",
       });
     } finally {
@@ -211,6 +196,15 @@ const SecureDynamicApplicationForm = () => {
   };
 
   const selectedCategory = licenseCategories.find(cat => cat.id === formData.category);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center p-8">
+        <div className="loading-spinner w-8 h-8"></div>
+        <span className="ml-3">Loading application form...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
