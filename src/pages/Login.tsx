@@ -6,14 +6,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ShieldCheck, AlertCircle, User, Key } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { ShieldCheck, AlertCircle, User, Key, Activity } from "lucide-react";
+import { useSecureAuth } from "@/contexts/SecureAuthContext";
+import { ConnectionStatus } from "@/components/ConnectionStatus";
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const { isAuthenticated, login } = useAuth();
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const { isAuthenticated, login, connectionStatus } = useSecureAuth();
   const location = useLocation();
   
   // Redirect if already authenticated
@@ -29,10 +31,22 @@ const Login = () => {
       setError("Please enter both username and password");
       return;
     }
+
+    // Rate limiting for security
+    if (loginAttempts >= 3) {
+      setError("Too many login attempts. Please wait before trying again.");
+      return;
+    }
     
     const success = login(username, password);
     if (!success) {
+      setLoginAttempts(prev => prev + 1);
       setError("Invalid username or password");
+      
+      // Reset attempts after 5 minutes
+      setTimeout(() => {
+        setLoginAttempts(0);
+      }, 300000);
     }
   };
 
@@ -40,13 +54,22 @@ const Login = () => {
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <div className="flex justify-center mb-2">
+          <div className="flex justify-center items-center gap-4 mb-2">
             <ShieldCheck className="h-10 w-10 text-primary" />
+            <ConnectionStatus />
           </div>
-          <CardTitle className="text-2xl font-bold text-center">Admin Login</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">Secure Admin Login</CardTitle>
           <CardDescription className="text-center">
-            Enter your credentials to access the admin dashboard
+            Enter your credentials to access the secure admin dashboard
           </CardDescription>
+          {connectionStatus !== 'connected' && (
+            <Alert className="mt-4">
+              <Activity className="h-4 w-4" />
+              <AlertDescription>
+                Connection status: {connectionStatus}. Some features may be limited.
+              </AlertDescription>
+            </Alert>
+          )}
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
@@ -54,6 +77,14 @@ const Login = () => {
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            {loginAttempts > 0 && (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Login attempts: {loginAttempts}/3. Account will be temporarily locked after 3 failed attempts.
+                </AlertDescription>
               </Alert>
             )}
             <div className="space-y-2">
@@ -66,6 +97,7 @@ const Login = () => {
                   className="pl-9" 
                   value={username} 
                   onChange={(e) => setUsername(e.target.value)} 
+                  disabled={loginAttempts >= 3}
                 />
               </div>
             </div>
@@ -80,13 +112,18 @@ const Login = () => {
                   className="pl-9" 
                   value={password} 
                   onChange={(e) => setPassword(e.target.value)} 
+                  disabled={loginAttempts >= 3}
                 />
               </div>
             </div>
           </CardContent>
           <CardFooter>
-            <Button type="submit" className="w-full">
-              Login
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={loginAttempts >= 3 || connectionStatus === 'disconnected'}
+            >
+              {connectionStatus === 'disconnected' ? 'Connection Required' : 'Login'}
             </Button>
           </CardFooter>
         </form>

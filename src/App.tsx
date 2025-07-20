@@ -4,11 +4,11 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { SecureAuthProvider } from "@/contexts/SecureAuthContext";
 import { ApplicationDialogProvider } from "@/components/ApplicationDialog";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-import Admin from "./pages/Admin";
+import SecureAdmin from "./pages/SecureAdmin";
 import Login from "./pages/Login";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SupportPage from "./pages/SupportPage";
@@ -31,7 +31,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <AuthProvider>
+      <SecureAuthProvider>
         <ApplicationDialogProvider>
           <BrowserRouter>
             <Routes>
@@ -51,14 +51,14 @@ const App = () => (
               <Route path="/support" element={<SupportPage />} />
               <Route path="/admin" element={
                 <ProtectedRoute>
-                  <Admin />
+                  <SecureAdmin />
                 </ProtectedRoute>
               } />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
         </ApplicationDialogProvider>
-      </AuthProvider>
+      </SecureAuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

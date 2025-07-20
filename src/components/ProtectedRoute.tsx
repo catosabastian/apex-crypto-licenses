@@ -1,13 +1,13 @@
 
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useSecureAuth } from "@/contexts/SecureAuthContext";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated } = useSecureAuth();
   const location = useLocation();
 
   if (!isAuthenticated) {
