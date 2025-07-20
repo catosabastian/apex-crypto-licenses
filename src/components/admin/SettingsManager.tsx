@@ -276,7 +276,10 @@ export const SettingsManager = () => {
                 <div>
                   <p className="font-medium">Category {category}</p>
                   <p className="text-sm text-muted-foreground">
-                    {settings[`category${category}Price` as keyof WebsiteSettings]}
+                    {(() => {
+                      const value = settings[`category${category}Price` as keyof WebsiteSettings];
+                      return typeof value === 'string' ? value : 'Not configured';
+                    })()}
                   </p>
                 </div>
                 <div className="flex items-center gap-4">
