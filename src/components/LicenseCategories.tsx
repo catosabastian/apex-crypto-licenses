@@ -31,7 +31,7 @@ const LicenseCategories = () => {
             </div>
           </div>
           
-          <div className="grid md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
+          <div className="grid md:grid-cols-2 gap-8 mb-8 max-w-5xl mx-auto">
             <LicenseCategory 
               category={1}
               title="Basic Trader"

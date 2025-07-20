@@ -44,7 +44,7 @@ const Hero = () => {
       />
       
       {/* Clear gradient overlay without cloudiness */}
-      <div className="absolute inset-0 bg-gradient-to-br from-background/95 via-background/90 to-primary/20" />
+      <div className="absolute inset-0 bg-gradient-to-br from-background/98 via-background/95 to-primary/30" />
       
       {/* Animated particles */}
       <div className="absolute inset-0 overflow-hidden">
