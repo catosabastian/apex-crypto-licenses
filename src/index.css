@@ -169,15 +169,25 @@
   }
 
   .stats-card {
-    @apply bg-gradient-to-br from-primary/8 to-accent/8 border border-primary/25 rounded-2xl p-8 text-center shadow-lg;
+    @apply border rounded-2xl p-8 text-center shadow-lg;
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.08), hsl(var(--accent) / 0.08));
+    border-color: hsl(var(--primary) / 0.25);
   }
 
   .feature-card {
-    @apply bg-gradient-to-br from-card to-muted/40 border border-border/60 rounded-2xl p-8 hover:shadow-xl transition-all duration-300 hover:border-primary/30;
+    @apply rounded-2xl p-8 hover:shadow-xl transition-all duration-300;
+    background: linear-gradient(135deg, hsl(var(--card)), hsl(var(--muted) / 0.4));
+    border: 1px solid hsl(var(--border) / 0.6);
+  }
+  
+  .feature-card:hover {
+    border-color: hsl(var(--primary) / 0.3);
   }
 
   .process-step {
-    @apply relative bg-gradient-to-br from-primary/8 to-accent/8 border-2 border-primary/25 rounded-2xl p-8 text-center shadow-lg;
+    @apply relative rounded-2xl p-8 text-center shadow-lg;
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.08), hsl(var(--accent) / 0.08));
+    border: 2px solid hsl(var(--primary) / 0.25);
   }
 
   .step-number {
