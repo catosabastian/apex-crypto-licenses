@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Shield, AlertCircle, Wifi } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { unifiedDataManager } from '@/utils/unifiedDataManager';
+import { supabaseDataManager } from '@/utils/supabaseDataManager';
 
 interface LicenseCategory {
   id: string;
@@ -11,6 +10,7 @@ interface LicenseCategory {
   price: string;
   available: boolean;
   minVolume: string;
+  status?: string;
 }
 
 interface LicenseCategorySectionProps {
@@ -19,71 +19,82 @@ interface LicenseCategorySectionProps {
 }
 
 const LicenseCategorySection = ({ selectedCategory, onCategorySelect }: LicenseCategorySectionProps) => {
-  const [settings, setSettings] = useState(unifiedDataManager.getSettings());
+  const [settings, setSettings] = useState<Record<string, any>>({});
   const [lastUpdateTime, setLastUpdateTime] = useState<Date>(new Date());
 
   useEffect(() => {
-    console.log('[LicenseCategorySection] Component mounted, listening for settings updates');
-    
-    const handleSettingsUpdate = (data: any) => {
-      console.log('[LicenseCategorySection] Settings update received:', data);
-      const newSettings = data.settings || data;
-      setSettings(newSettings);
+    const loadSettings = async () => {
+      const currentSettings = await supabaseDataManager.getSettings();
+      setSettings(currentSettings);
       setLastUpdateTime(new Date());
     };
 
-    unifiedDataManager.addEventListener('settings_updated', handleSettingsUpdate);
+    const handleSettingsUpdate = (data: any) => {
+      loadSettings();
+    };
+
+    supabaseDataManager.addEventListener('settings_updated', handleSettingsUpdate);
+    loadSettings();
 
     return () => {
-      unifiedDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
+      supabaseDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
     };
   }, []);
 
-  // Generate categories from settings
-  const categories: LicenseCategory[] = [
-    {
-      id: '1',
-      name: 'Basic Trader',
-      price: settings.category1Price,
-      available: settings.category1Available,
-      minVolume: '$50,000'
-    },
-    {
-      id: '2',
-      name: 'Standard Trader',
-      price: settings.category2Price,
-      available: settings.category2Available,
-      minVolume: '$100,000'
-    },
-    {
-      id: '3',
-      name: 'Advanced Trader',
-      price: settings.category3Price,
-      available: settings.category3Available,
-      minVolume: '$250,000'
-    },
-    {
-      id: '4',
-      name: 'Professional Trader',
-      price: settings.category4Price,
-      available: settings.category4Available,
-      minVolume: '$500,000'
-    },
-    {
-      id: '5',
-      name: 'Institutional Trader',
-      price: settings.category5Price,
-      available: settings.category5Available,
-      minVolume: '$1,000,000+'
-    },
-    {
-      id: '6',
-      name: 'Executive Trader',
-      price: settings.category6Price,
-      available: settings.category6Available,
-      minVolume: '$2,500,000+'
-    }
-  ];
+  const generateCategories = (): LicenseCategory[] => {
+    return [
+      {
+        id: "1", 
+        name: "Basic Trader",
+        price: settings.category1_price || "$25,000",
+        available: settings.category1_available !== false,
+        minVolume: "Up to $100K",
+        status: settings.category1_status || "SOLD OUT"
+      },
+      {
+        id: "2", 
+        name: "Standard Trader", 
+        price: settings.category2_price || "$50,000",
+        available: settings.category2_available !== false,
+        minVolume: "Up to $500K",
+        status: settings.category2_status || "SOLD OUT"
+      },
+      {
+        id: "3", 
+        name: "Advanced Trader",
+        price: settings.category3_price || "$70,000",
+        available: settings.category3_available !== false,
+        minVolume: "Up to $1M",
+        status: settings.category3_status || "RECOMMENDED"
+      },
+      {
+        id: "4", 
+        name: "Professional Trader",
+        price: settings.category4_price || "$150,000",
+        available: settings.category4_available !== false,
+        minVolume: "Up to $5M",
+        status: settings.category4_status || "SELLING FAST"
+      },
+      {
+        id: "5", 
+        name: "Institutional Trader",
+        price: settings.category5_price || "$250,000",
+        available: settings.category5_available !== false,
+        minVolume: "Up to $10M",
+        status: settings.category5_status || "SELLING FAST"
+      },
+      {
+        id: "6", 
+        name: "Executive Trader",
+        price: settings.category6_price || "$500,000",
+        available: settings.category6_available !== false,
+        minVolume: "Unlimited",
+        status: settings.category6_status || "SELLING FAST"
+      }
+    ];
+  };
+
+  const categories = generateCategories();
 
   return (
     <div className="form-section">
@@ -116,32 +127,32 @@ const LicenseCategorySection = ({ selectedCategory, onCategorySelect }: LicenseC
                     }
                   }}
                 >
-                  <div className="flex justify-between items-start mb-2">
-                    <h4 className="font-semibold flex items-center gap-2">
-                      {category.name}
-                      {!category.available && (
-                        <AlertCircle className="h-4 w-4 text-muted-foreground" />
+                  <div className="flex flex-col space-y-2">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold text-foreground">{category.name}</h3>
+                      {category.status && (
+                        <Badge 
+                          variant={
+                            category.status === "SOLD OUT" ? "secondary" :
+                            category.status === "RECOMMENDED" ? "default" : "outline"
+                          } 
+                          className="text-xs"
+                        >
+                          {category.status}
+                        </Badge>
                       )}
-                    </h4>
-                    {!category.available && (
-                      <Badge variant="destructive" className="text-xs">
-                        UNAVAILABLE
-                      </Badge>
-                    )}
-                    {category.available && selectedCategory === category.id && (
-                      <Badge className="text-xs">SELECTED</Badge>
-                    )}
+                    </div>
+                    <p className="text-2xl font-bold text-primary">{category.price}</p>
+                    <p className="text-sm text-muted-foreground">Min Volume: {category.minVolume}</p>
                   </div>
                   
-                  <p className={`text-2xl font-bold mb-2 ${
-                    !category.available ? 'text-muted-foreground' : 'text-primary'
-                  }`}>
-                    {category.price}
-                  </p>
-                  
-                  <p className="text-sm text-muted-foreground">
-                    Min Volume: {category.minVolume}
-                  </p>
+                  {selectedCategory === category.id && (
+                    <div className="mt-3 p-2 bg-primary/10 rounded-lg">
+                      <p className="text-xs text-primary font-medium">
+                        ✓ Selected
+                      </p>
+                    </div>
+                  )}
                   
                   {!category.available && (
                     <div className="mt-3 p-2 bg-muted/30 rounded-lg">

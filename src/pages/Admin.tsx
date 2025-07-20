@@ -13,7 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import { dataManager } from '@/utils/dataManager';
 import { ApplicationsManager } from '@/components/admin/ApplicationsManager';
 import { ContactsManager } from '@/components/admin/ContactsManager';
-import { UnifiedSettingsManager } from '@/components/admin/UnifiedSettingsManager';
+import { SettingsManager } from '@/components/admin/SettingsManager';
 import { LicenseManager } from '@/components/admin/LicenseManager';
 import { ContentManager } from '@/components/admin/ContentManager';
 import { PaymentAddressManager } from '@/components/admin/PaymentAddressManager';
@@ -223,7 +223,7 @@ const Admin = () => {
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-6">
-          <UnifiedSettingsManager />
+          <SettingsManager />
         </TabsContent>
 
         <TabsContent value="legacy" className="space-y-6">

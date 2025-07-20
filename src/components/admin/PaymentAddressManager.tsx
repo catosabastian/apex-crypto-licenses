@@ -1,57 +1,65 @@
-
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Copy, Check, Wallet, AlertCircle, Save } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
-import { unifiedDataManager, ContentSettings } from '@/utils/unifiedDataManager';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Copy, Check } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { supabaseDataManager, PaymentAddress } from '@/utils/supabaseDataManager';
 
-export const PaymentAddressManager = () => {
-  const [settings, setSettings] = useState<ContentSettings>(unifiedDataManager.getSettings());
-  const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
+export function PaymentAddressManager() {
+  const [addresses, setAddresses] = useState<PaymentAddress[]>([]);
+  const [editingAddress, setEditingAddress] = useState<string>('');
+  const [copiedAddress, setCopiedAddress] = useState<string>('');
   const [isDirty, setIsDirty] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
-    const handleSettingsUpdate = (data: { settings: ContentSettings }) => {
-      setSettings(data.settings);
+    const loadAddresses = async () => {
+      const addressData = await supabaseDataManager.getPaymentAddresses();
+      setAddresses(addressData);
+    };
+
+    const handleAddressUpdate = (data: PaymentAddress[]) => {
+      setAddresses(data);
       setIsDirty(false);
     };
 
-    unifiedDataManager.addEventListener('settings_updated', handleSettingsUpdate);
-    
+    supabaseDataManager.addEventListener('payment_addresses_updated', handleAddressUpdate);
+    loadAddresses();
+
     return () => {
-      unifiedDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
+      supabaseDataManager.removeEventListener('payment_addresses_updated', handleAddressUpdate);
     };
   }, []);
 
-  const handleAddressChange = (field: keyof ContentSettings, value: string) => {
-    setSettings(prev => ({ ...prev, [field]: value }));
+  const handleAddressChange = (cryptocurrency: string, value: string) => {
+    setAddresses(prev => prev.map(addr => 
+      addr.cryptocurrency === cryptocurrency 
+        ? { ...addr, address: value }
+        : addr
+    ));
+    setEditingAddress(value);
     setIsDirty(true);
   };
 
-  const handleSaveAddresses = () => {
+  const handleSaveAddresses = async () => {
     try {
-      unifiedDataManager.updateSettings({
-        bitcoinAddress: settings.bitcoinAddress,
-        ethereumAddress: settings.ethereumAddress,
-        usdtTronAddress: settings.usdtTronAddress,
-        usdtEthereumAddress: settings.usdtEthereumAddress,
-        xrpAddress: settings.xrpAddress,
-      });
-
-      toast({
-        title: "Payment Addresses Updated",
-        description: "All cryptocurrency addresses have been updated successfully",
-      });
-      
+      for (const address of addresses) {
+        await supabaseDataManager.updatePaymentAddress(address.cryptocurrency, {
+          address: address.address,
+          is_active: address.is_active
+        });
+      }
       setIsDirty(false);
+      toast({
+        title: "Success",
+        description: "Payment addresses updated successfully",
+      });
     } catch (error) {
       toast({
-        title: "Update Failed",
-        description: "Failed to update payment addresses. Please try again.",
+        title: "Error", 
+        description: "Failed to update payment addresses",
         variant: "destructive",
       });
     }
@@ -60,166 +68,107 @@ export const PaymentAddressManager = () => {
   const handleCopyAddress = async (address: string, type: string) => {
     try {
       await navigator.clipboard.writeText(address);
-      setCopiedAddress(type);
+      setCopiedAddress(address);
+      setTimeout(() => setCopiedAddress(''), 2000);
       toast({
-        title: "Address Copied",
+        title: "Copied!",
         description: `${type} address copied to clipboard`,
       });
-      setTimeout(() => setCopiedAddress(null), 2000);
     } catch (error) {
       toast({
-        title: "Copy Failed",
-        description: "Failed to copy address to clipboard",
+        title: "Error",
+        description: "Failed to copy address",
         variant: "destructive",
       });
     }
   };
 
   const validateAddress = (address: string, type: string): boolean => {
-    if (!address || address.trim() === '') return false;
+    if (!address) return false;
     
-    switch (type) {
-      case 'bitcoin':
-        return address.startsWith('bc1') || address.startsWith('1') || address.startsWith('3');
-      case 'ethereum':
-      case 'usdtEthereum':
-        return address.startsWith('0x') && address.length === 42;
-      case 'usdtTron':
-        return address.startsWith('T') && address.length === 34;
-      case 'xrp':
-        return address.startsWith('r') && address.length >= 25;
-      default:
-        return true;
-    }
+    const patterns = {
+      BTC: /^[13][a-km-zA-HJ-NP-Z1-9]{25,34}$|^bc1[a-z0-9]{39,59}$/,
+      ETH: /^0x[a-fA-F0-9]{40}$/,
+      USDT_TRON: /^T[A-Za-z1-9]{33}$/,
+      USDT_ETH: /^0x[a-fA-F0-9]{40}$/,
+      XRP: /^r[0-9a-zA-Z]{24,34}$/
+    };
+
+    return patterns[type as keyof typeof patterns]?.test(address) || false;
   };
 
-  const addressFields = [
-    {
-      key: 'bitcoinAddress' as keyof ContentSettings,
-      label: 'Bitcoin Address',
-      description: 'BTC wallet address for receiving payments',
-      placeholder: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
-      type: 'bitcoin'
-    },
-    {
-      key: 'ethereumAddress' as keyof ContentSettings,
-      label: 'Ethereum Address',
-      description: 'ETH wallet address for receiving payments',
-      placeholder: '0x742d35Cc6663C65C926d75d60e3B3d97c8a0e0e0',
-      type: 'ethereum'
-    },
-    {
-      key: 'usdtTronAddress' as keyof ContentSettings,
-      label: 'USDT (Tron) Address',
-      description: 'USDT-TRC20 wallet address for receiving payments',
-      placeholder: 'TG3XXyExBkPp9nzdajDGFahC9nyKERJpUN',
-      type: 'usdtTron'
-    },
-    {
-      key: 'usdtEthereumAddress' as keyof ContentSettings,
-      label: 'USDT (Ethereum) Address',
-      description: 'USDT-ERC20 wallet address for receiving payments',
-      placeholder: '0x742d35Cc6663C65C926d75d60e3B3d97c8a0e0e0',
-      type: 'usdtEthereum'
-    },
-    {
-      key: 'xrpAddress' as keyof ContentSettings,
-      label: 'XRP Address',
-      description: 'XRP wallet address for receiving payments',
-      placeholder: 'rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH',
-      type: 'xrp'
-    }
-  ];
+  const cryptoLabels = {
+    BTC: { name: 'Bitcoin (BTC)', desc: 'Native SegWit address starting with bc1 or legacy address' },
+    ETH: { name: 'Ethereum (ETH)', desc: 'ERC-20 compatible address starting with 0x' },
+    USDT_TRON: { name: 'USDT (TRC-20)', desc: 'Tron network address starting with T' },
+    USDT_ETH: { name: 'USDT (ERC-20)', desc: 'Ethereum network address starting with 0x' },
+    XRP: { name: 'Ripple (XRP)', desc: 'Classic address starting with r' }
+  };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-semibold">Payment Address Management</h2>
-          <p className="text-muted-foreground">Configure cryptocurrency wallet addresses for receiving payments</p>
-        </div>
-        <Button 
-          onClick={handleSaveAddresses} 
-          disabled={!isDirty}
-          className="flex items-center gap-2"
-        >
-          <Save className="h-4 w-4" />
-          Save All Addresses
-        </Button>
-      </div>
-
-      {isDirty && (
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            You have unsaved changes. Don't forget to save your updated addresses.
-          </AlertDescription>
-        </Alert>
-      )}
-
-      <div className="grid gap-6">
-        {addressFields.map((field) => {
-          const value = settings[field.key] as string;
-          const isValid = validateAddress(value, field.type);
+    <Card>
+      <CardHeader>
+        <CardTitle>Payment Addresses</CardTitle>
+        <CardDescription>
+          Manage cryptocurrency wallet addresses for receiving payments
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {addresses.map((address) => {
+          const crypto = address.cryptocurrency;
+          const label = cryptoLabels[crypto as keyof typeof cryptoLabels];
+          const isValid = validateAddress(address.address, crypto);
           
           return (
-            <Card key={field.key}>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Wallet className="h-5 w-5" />
-                  {field.label}
-                </CardTitle>
-                <CardDescription>{field.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor={field.key}>Wallet Address</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id={field.key}
-                      value={value}
-                      onChange={(e) => handleAddressChange(field.key, e.target.value)}
-                      placeholder={field.placeholder}
-                      className={`font-mono ${!isValid && value ? 'border-red-500' : ''}`}
-                    />
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleCopyAddress(value, field.label)}
-                      disabled={!value || !isValid}
-                    >
-                      {copiedAddress === field.label ? (
-                        <Check className="h-4 w-4" />
-                      ) : (
-                        <Copy className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                  {!isValid && value && (
-                    <p className="text-sm text-red-600">
-                      Invalid {field.label.toLowerCase()} format
-                    </p>
+            <div key={crypto} className="space-y-2">
+              <Label htmlFor={crypto} className="text-sm font-medium">
+                {label?.name || crypto}
+              </Label>
+              <p className="text-xs text-muted-foreground mb-2">
+                {label?.desc || `${crypto} wallet address`}
+              </p>
+              <div className="flex space-x-2">
+                <Input
+                  id={crypto}
+                  value={address.address}
+                  onChange={(e) => handleAddressChange(crypto, e.target.value)}
+                  placeholder={`Enter ${crypto} address`}
+                  className={`flex-1 ${!isValid && address.address ? 'border-destructive' : ''}`}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleCopyAddress(address.address, crypto)}
+                  disabled={!address.address}
+                  className="px-3"
+                >
+                  {copiedAddress === address.address ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
                   )}
-                  {!value && (
-                    <p className="text-sm text-amber-600">
-                      Address not configured - payments for this cryptocurrency will not be available
-                    </p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+                </Button>
+              </div>
+              {!isValid && address.address && (
+                <p className="text-xs text-destructive">
+                  Invalid {crypto} address format
+                </p>
+              )}
+            </div>
           );
         })}
-      </div>
-
-      <Alert>
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          <strong>Important:</strong> Double-check all addresses before saving. Incorrect addresses may result in lost payments. 
-          Always test with small amounts first.
-        </AlertDescription>
-      </Alert>
-    </div>
+        
+        <div className="flex justify-end pt-4">
+          <Button 
+            onClick={handleSaveAddresses}
+            disabled={!isDirty}
+            className="min-w-[120px]"
+          >
+            Save Changes
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
-};
+}
