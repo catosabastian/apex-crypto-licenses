@@ -1,4 +1,3 @@
-
 export interface Application {
   id: string;
   name: string;
@@ -52,10 +51,20 @@ export interface WebsiteSettings {
   bitcoinAddress: string;
   ethereumAddress: string;
   usdtAddress: string;
+  // Contact Information
+  companyName: string;
+  supportEmail: string;
+  salesEmail: string;
+  phoneNumber: string;
+  address: string;
+  city: string;
+  country: string;
+  website: string;
 }
 
 class DataManager {
   private static instance: DataManager;
+  private eventListeners: { [key: string]: ((data: any) => void)[] } = {};
   
   private constructor() {}
   
@@ -64,6 +73,28 @@ class DataManager {
       DataManager.instance = new DataManager();
     }
     return DataManager.instance;
+  }
+
+  // Event System for Real-time Updates
+  addEventListener(event: string, callback: (data: any) => void): void {
+    if (!this.eventListeners[event]) {
+      this.eventListeners[event] = [];
+    }
+    this.eventListeners[event].push(callback);
+  }
+
+  removeEventListener(event: string, callback: (data: any) => void): void {
+    if (this.eventListeners[event]) {
+      this.eventListeners[event] = this.eventListeners[event].filter(cb => cb !== callback);
+    }
+  }
+
+  private emit(event: string, data: any): void {
+    if (this.eventListeners[event]) {
+      this.eventListeners[event].forEach(callback => callback(data));
+    }
+    // Also dispatch custom event for cross-tab communication
+    window.dispatchEvent(new CustomEvent(`apex_${event}`, { detail: data }));
   }
 
   // Applications Management
@@ -185,7 +216,7 @@ class DataManager {
     return false;
   }
 
-  // Settings Management
+  // Enhanced Settings Management with Real-time Updates
   getSettings(): WebsiteSettings {
     const data = localStorage.getItem('apex_settings');
     return data ? JSON.parse(data) : this.getDefaultSettings();
@@ -193,6 +224,7 @@ class DataManager {
 
   saveSettings(settings: WebsiteSettings): void {
     localStorage.setItem('apex_settings', JSON.stringify(settings));
+    this.emit('settings_updated', settings);
   }
 
   updateSettings(updates: Partial<WebsiteSettings>): WebsiteSettings {
@@ -327,7 +359,16 @@ class DataManager {
       category6Available: true,
       bitcoinAddress: "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa",
       ethereumAddress: "0x742d35Cc6663C65C926d75d60e3B3d97c8a0e0e0",
-      usdtAddress: "TG3XXyExBkPp9nzdajDGFahC9nyKERJpUN"
+      usdtAddress: "TG3XXyExBkPp9nzdajDGFahC9nyKERJpUN",
+      // Contact Information Defaults
+      companyName: "APEX Crypto Licensing Regulatory",
+      supportEmail: "support@apexcrypto.reg",
+      salesEmail: "sales@apexcrypto.reg",
+      phoneNumber: "+1 (555) 123-4567",
+      address: "123 Blockchain Avenue",
+      city: "Digital City, DC 12345",
+      country: "United States",
+      website: "https://apexcrypto.reg"
     };
   }
 }

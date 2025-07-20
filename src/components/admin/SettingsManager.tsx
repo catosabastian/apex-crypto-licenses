@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,6 +10,7 @@ import { Switch } from '@/components/ui/switch';
 import { Edit, Save, DollarSign, Wallet } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { dataManager, WebsiteSettings } from '@/utils/dataManager';
+import { ContactSettingsManager } from './ContactSettingsManager';
 
 export const SettingsManager = () => {
   const [settings, setSettings] = useState<WebsiteSettings>(dataManager.getSettings());
@@ -43,8 +45,11 @@ export const SettingsManager = () => {
       <h2 className="text-2xl font-semibold">Website Settings</h2>
       
       <div className="grid gap-6">
+        {/* Contact Information Management */}
+        <ContactSettingsManager />
+
         {/* License Pricing Card */}
-        <Card>
+        <Card className="modern-card">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
@@ -55,7 +60,7 @@ export const SettingsManager = () => {
             </div>
             <Dialog open={isEditingPrices} onOpenChange={setIsEditingPrices}>
               <DialogTrigger asChild>
-                <Button variant="outline" size="sm" onClick={() => setTempSettings(settings)}>
+                <Button variant="outline" size="sm" onClick={() => setTempSettings(settings)} className="glass-button">
                   <Edit className="h-4 w-4 mr-2" />
                   Edit Prices
                 </Button>
@@ -78,6 +83,7 @@ export const SettingsManager = () => {
                           [`category${category}Price`]: e.target.value
                         }))}
                         placeholder="e.g., 25,000 USDT"
+                        className="glass-card"
                       />
                     </div>
                   ))}
@@ -86,7 +92,7 @@ export const SettingsManager = () => {
                   <Button variant="outline" onClick={() => setIsEditingPrices(false)}>
                     Cancel
                   </Button>
-                  <Button onClick={handleSaveSettings}>
+                  <Button onClick={handleSaveSettings} className="btn-primary">
                     <Save className="h-4 w-4 mr-2" />
                     Save Changes
                   </Button>
@@ -96,7 +102,7 @@ export const SettingsManager = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             {[1, 2, 3, 4, 5, 6].map((category) => (
-              <div key={category} className="flex items-center justify-between p-4 border rounded-lg">
+              <div key={category} className="flex items-center justify-between p-4 border rounded-lg glass-card">
                 <div>
                   <p className="font-medium">Category {category}</p>
                   <p className="text-sm text-muted-foreground">
@@ -122,7 +128,7 @@ export const SettingsManager = () => {
         </Card>
 
         {/* Payment Addresses Card */}
-        <Card>
+        <Card className="modern-card">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
@@ -133,7 +139,7 @@ export const SettingsManager = () => {
             </div>
             <Dialog open={isEditingWallets} onOpenChange={setIsEditingWallets}>
               <DialogTrigger asChild>
-                <Button variant="outline" size="sm" onClick={() => setTempSettings(settings)}>
+                <Button variant="outline" size="sm" onClick={() => setTempSettings(settings)} className="glass-button">
                   <Edit className="h-4 w-4 mr-2" />
                   Edit Addresses
                 </Button>
@@ -156,7 +162,7 @@ export const SettingsManager = () => {
                         bitcoinAddress: e.target.value
                       }))}
                       placeholder="Bitcoin wallet address"
-                      className="font-mono"
+                      className="font-mono glass-card"
                     />
                   </div>
                   <div>
@@ -169,7 +175,7 @@ export const SettingsManager = () => {
                         ethereumAddress: e.target.value
                       }))}
                       placeholder="Ethereum wallet address"
-                      className="font-mono"
+                      className="font-mono glass-card"
                     />
                   </div>
                   <div>
@@ -182,7 +188,7 @@ export const SettingsManager = () => {
                         usdtAddress: e.target.value
                       }))}
                       placeholder="USDT wallet address"
-                      className="font-mono"
+                      className="font-mono glass-card"
                     />
                   </div>
                 </div>
@@ -190,7 +196,7 @@ export const SettingsManager = () => {
                   <Button variant="outline" onClick={() => setIsEditingWallets(false)}>
                     Cancel
                   </Button>
-                  <Button onClick={handleSaveSettings}>
+                  <Button onClick={handleSaveSettings} className="btn-primary">
                     <Save className="h-4 w-4 mr-2" />
                     Save Changes
                   </Button>
@@ -199,19 +205,19 @@ export const SettingsManager = () => {
             </Dialog>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="flex items-center justify-between p-4 border rounded-lg">
+            <div className="flex items-center justify-between p-4 border rounded-lg glass-card">
               <div>
                 <p className="font-medium">Bitcoin</p>
                 <p className="text-sm text-muted-foreground font-mono break-all">{settings.bitcoinAddress}</p>
               </div>
             </div>
-            <div className="flex items-center justify-between p-4 border rounded-lg">
+            <div className="flex items-center justify-between p-4 border rounded-lg glass-card">
               <div>
                 <p className="font-medium">Ethereum</p>
                 <p className="text-sm text-muted-foreground font-mono break-all">{settings.ethereumAddress}</p>
               </div>
             </div>
-            <div className="flex items-center justify-between p-4 border rounded-lg">
+            <div className="flex items-center justify-between p-4 border rounded-lg glass-card">
               <div>
                 <p className="font-medium">USDT</p>
                 <p className="text-sm text-muted-foreground font-mono break-all">{settings.usdtAddress}</p>

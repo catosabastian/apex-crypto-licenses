@@ -32,24 +32,44 @@ const DynamicApplicationForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    const updateSettings = () => {
-      const newSettings = dataManager.getSettings();
-      console.log('Updated settings:', newSettings);
-      setSettings(newSettings);
+    // Real-time settings update handler
+    const handleSettingsUpdate = (updatedSettings: WebsiteSettings) => {
+      console.log('Settings updated in form:', updatedSettings);
+      setSettings(updatedSettings);
     };
-    
-    window.addEventListener('storage', updateSettings);
-    const interval = setInterval(updateSettings, 500);
-    
+
+    // Listen to dataManager events
+    dataManager.addEventListener('settings_updated', handleSettingsUpdate);
+
+    // Listen to cross-tab events
+    const handleStorageChange = (event: CustomEvent) => {
+      if (event.type === 'apex_settings_updated') {
+        setSettings(event.detail);
+      }
+    };
+
+    window.addEventListener('apex_settings_updated', handleStorageChange as EventListener);
+
+    // Also listen to direct localStorage changes
+    const handleStorageEvent = (event: StorageEvent) => {
+      if (event.key === 'apex_settings' && event.newValue) {
+        const newSettings = JSON.parse(event.newValue);
+        setSettings(newSettings);
+      }
+    };
+
+    window.addEventListener('storage', handleStorageEvent);
+
     return () => {
-      window.removeEventListener('storage', updateSettings);
-      clearInterval(interval);
+      dataManager.removeEventListener('settings_updated', handleSettingsUpdate);
+      window.removeEventListener('apex_settings_updated', handleStorageChange as EventListener);
+      window.removeEventListener('storage', handleStorageEvent);
     };
   }, []);
 
   const licenseCategories = [
-    { id: '1', name: 'Basic Trader', price: settings.category1Price, available: true, minVolume: '$50,000' },
-    { id: '2', name: 'Standard Trader', price: settings.category2Price, available: true, minVolume: '$100,000' },
+    { id: '1', name: 'Basic Trader', price: settings.category1Price, available: settings.category1Available, minVolume: '$50,000' },
+    { id: '2', name: 'Standard Trader', price: settings.category2Price, available: settings.category2Available, minVolume: '$100,000' },
     { id: '3', name: 'Advanced Trader', price: settings.category3Price, available: settings.category3Available, minVolume: '$250,000' },
     { id: '4', name: 'Professional Trader', price: settings.category4Price, available: settings.category4Available, minVolume: '$500,000' },
     { id: '5', name: 'Institutional Trader', price: settings.category5Price, available: settings.category5Available, minVolume: '$1,000,000+' },
@@ -169,7 +189,7 @@ const DynamicApplicationForm = () => {
           <Button
             type="submit"
             size="lg"
-            className="px-12 py-6 text-lg"
+            className="px-12 py-6 text-lg btn-primary"
             disabled={!formData.name || !formData.email || !formData.category || isSubmitting}
           >
             {isSubmitting ? (
