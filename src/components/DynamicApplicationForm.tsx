@@ -43,18 +43,20 @@ const DynamicApplicationForm = () => {
   const [settings, setSettings] = useState<WebsiteSettings>(dataManager.getSettings());
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Update settings when they change in admin
+  // Update settings when they change in admin with real-time updates
   useEffect(() => {
     const updateSettings = () => {
-      setSettings(dataManager.getSettings());
+      const newSettings = dataManager.getSettings();
+      setSettings(newSettings);
     };
     
     // Listen for storage changes
     window.addEventListener('storage', updateSettings);
     
-    // Check for updates periodically
-    const interval = setInterval(updateSettings, 1000);
+    // Check for updates more frequently for better real-time experience
+    const interval = setInterval(updateSettings, 500);
     
     return () => {
       window.removeEventListener('storage', updateSettings);
@@ -68,7 +70,7 @@ const DynamicApplicationForm = () => {
     { id: '3', name: 'Advanced Trader', price: settings.category3Price, available: settings.category3Available, minVolume: '$250,000' },
     { id: '4', name: 'Professional Trader', price: settings.category4Price, available: settings.category4Available, minVolume: '$500,000' },
     { id: '5', name: 'Institutional Trader', price: settings.category5Price, available: settings.category5Available, minVolume: '$1,000,000+' },
-    { id: '6', name: 'Executive Trader', price: '500,000 USDT', available: true, minVolume: '$2,500,000+' }
+    { id: '6', name: 'Executive Trader', price: settings.category6Price, available: settings.category6Available, minVolume: '$2,500,000+' }
   ];
 
   const handleCopyAddress = (address: string, type: string) => {
@@ -84,6 +86,7 @@ const DynamicApplicationForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setIsLoading(true);
 
     try {
       // Add application to dataManager
@@ -93,16 +96,16 @@ const DynamicApplicationForm = () => {
         email: formData.email,
         phone: formData.phone,
         company: formData.company,
-        category: formData.category,
-        status: 'pending',
+        category: selectedCategory?.name || `Category ${formData.category}`,
+        status: 'pending' as const,
         amount: selectedCategory?.price || '0',
         documents: formData.documents,
         notes: formData.notes
       });
 
       toast({
-        title: "Application Submitted",
-        description: `Your application has been submitted successfully. Application ID: ${newApplication.id}`,
+        title: "Application Submitted Successfully",
+        description: `Your application has been submitted. Application ID: ${newApplication.id}`,
       });
 
       // Reset form
@@ -120,6 +123,7 @@ const DynamicApplicationForm = () => {
         notes: ''
       });
     } catch (error) {
+      console.error('Application submission error:', error);
       toast({
         title: "Submission Failed",
         description: "There was an error submitting your application. Please try again.",
@@ -127,10 +131,22 @@ const DynamicApplicationForm = () => {
       });
     } finally {
       setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
   const selectedCategory = licenseCategories.find(cat => cat.id === formData.category);
+
+  if (isLoading) {
+    return (
+      <div className="max-w-4xl mx-auto p-6 space-y-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-muted-foreground">Loading application form...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto p-6 space-y-8">
@@ -158,6 +174,7 @@ const DynamicApplicationForm = () => {
                   value={formData.name}
                   onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
                   required
+                  className="mt-2"
                 />
               </div>
               <div>
@@ -168,6 +185,7 @@ const DynamicApplicationForm = () => {
                   value={formData.email}
                   onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                   required
+                  className="mt-2"
                 />
               </div>
             </div>
@@ -179,6 +197,7 @@ const DynamicApplicationForm = () => {
                   id="phone"
                   value={formData.phone}
                   onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                  className="mt-2"
                 />
               </div>
               <div>
@@ -187,6 +206,7 @@ const DynamicApplicationForm = () => {
                   id="company"
                   value={formData.company}
                   onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
+                  className="mt-2"
                 />
               </div>
             </div>
@@ -214,6 +234,7 @@ const DynamicApplicationForm = () => {
                 <div className="flex justify-between items-start mb-2">
                   <h4 className="font-semibold">{category.name}</h4>
                   {!category.available && <Badge variant="destructive">Sold Out</Badge>}
+                  {category.available && formData.category === category.id && <Badge>Selected</Badge>}
                 </div>
                 <p className="text-2xl font-bold text-accent mb-2">{category.price}</p>
                 <p className="text-sm text-muted-foreground">Min Volume: {category.minVolume}</p>
@@ -306,7 +327,7 @@ const DynamicApplicationForm = () => {
                 value={formData.notes}
                 onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
                 placeholder="Any additional information about your application..."
-                className="min-h-[120px]"
+                className="min-h-[120px] mt-2"
               />
             </div>
           </div>
@@ -320,7 +341,14 @@ const DynamicApplicationForm = () => {
             className="btn-primary px-12 py-6 text-lg"
             disabled={!formData.name || !formData.email || !formData.category || isSubmitting}
           >
-            {isSubmitting ? 'Submitting...' : 'Submit Application'}
+            {isSubmitting ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-current mr-2"></div>
+                Submitting...
+              </>
+            ) : (
+              'Submit Application'
+            )}
           </Button>
         </div>
       </form>

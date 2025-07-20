@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ApplicationDialogProvider } from "@/components/ApplicationDialog";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import Admin from "./pages/Admin";
@@ -31,30 +32,32 @@ const App = () => (
       <Toaster />
       <Sonner />
       <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/licenses" element={<LicenseTypesPage />} />
-            <Route path="/process" element={<ProcessPage />} />
-            <Route path="/verify" element={<VerifyPage />} />
-            <Route path="/faq" element={<FAQPage />} />
-            <Route path="/compliance" element={<CompliancePage />} />
-            <Route path="/news" element={<NewsPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/pricing" element={<PricingPage />} />
-            <Route path="/testimonials" element={<TestimonialsPage />} />
-            <Route path="/resources" element={<ResourcesPage />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/support" element={<SupportPage />} />
-            <Route path="/admin" element={
-              <ProtectedRoute>
-                <Admin />
-              </ProtectedRoute>
-            } />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
+        <ApplicationDialogProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/licenses" element={<LicenseTypesPage />} />
+              <Route path="/process" element={<ProcessPage />} />
+              <Route path="/verify" element={<VerifyPage />} />
+              <Route path="/faq" element={<FAQPage />} />
+              <Route path="/compliance" element={<CompliancePage />} />
+              <Route path="/news" element={<NewsPage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/pricing" element={<PricingPage />} />
+              <Route path="/testimonials" element={<TestimonialsPage />} />
+              <Route path="/resources" element={<ResourcesPage />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/support" element={<SupportPage />} />
+              <Route path="/admin" element={
+                <ProtectedRoute>
+                  <Admin />
+                </ProtectedRoute>
+              } />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </ApplicationDialogProvider>
       </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>

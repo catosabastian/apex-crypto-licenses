@@ -10,29 +10,26 @@ import StatsSection from "@/components/StatsSection";
 import VerificationSection from "@/components/VerificationSection";
 import ApplicationForm from "@/components/ApplicationForm";
 import Footer from "@/components/Footer";
-import { ApplicationDialogProvider } from "@/components/ApplicationDialog";
 
 const Index = () => {
   return (
-    <ApplicationDialogProvider>
-      <div className="min-h-screen flex flex-col">
-        <Header />
-        <main>
-          <Hero />
-          <AboutSection />
-          <WhatIsLicense />
-          <FeaturesSection />
-          <ProcessSteps />
-          <LicenseCategories />
-          <StatsSection />
-          <VerificationSection />
-          <div className="hidden">
-            <ApplicationForm />
-          </div>
-        </main>
-        <Footer />
-      </div>
-    </ApplicationDialogProvider>
+    <div className="min-h-screen flex flex-col">
+      <Header />
+      <main>
+        <Hero />
+        <AboutSection />
+        <WhatIsLicense />
+        <FeaturesSection />
+        <ProcessSteps />
+        <LicenseCategories />
+        <StatsSection />
+        <VerificationSection />
+        <div className="hidden">
+          <ApplicationForm />
+        </div>
+      </main>
+      <Footer />
+    </div>
   );
 };
 
