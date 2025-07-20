@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import UnifiedApplicationForm from '@/components/UnifiedApplicationForm';
+import ApplicationForm from '@/components/ApplicationForm';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
 interface ApplicationDialogContextType {
@@ -51,7 +51,7 @@ export const ApplicationDialogProvider = ({ children }: { children: ReactNode })
             <div className="px-8 pb-8">
               <ErrorBoundary>
                 <div className="py-6">
-                  <UnifiedApplicationForm />
+                  <ApplicationForm onClose={closeApplicationDialog} />
                 </div>
               </ErrorBoundary>
             </div>
