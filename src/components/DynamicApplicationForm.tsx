@@ -49,6 +49,7 @@ const DynamicApplicationForm = () => {
   useEffect(() => {
     const updateSettings = () => {
       const newSettings = dataManager.getSettings();
+      console.log('Updated settings:', newSettings);
       setSettings(newSettings);
     };
     
@@ -65,8 +66,8 @@ const DynamicApplicationForm = () => {
   }, []);
 
   const licenseCategories = [
-    { id: '1', name: 'Basic Trader', price: settings.category1Price, available: settings.category1Available, minVolume: '$50,000' },
-    { id: '2', name: 'Standard Trader', price: settings.category2Price, available: settings.category2Available, minVolume: '$100,000' },
+    { id: '1', name: 'Basic Trader', price: settings.category1Price, available: true, minVolume: '$50,000' },
+    { id: '2', name: 'Standard Trader', price: settings.category2Price, available: true, minVolume: '$100,000' },
     { id: '3', name: 'Advanced Trader', price: settings.category3Price, available: settings.category3Available, minVolume: '$250,000' },
     { id: '4', name: 'Professional Trader', price: settings.category4Price, available: settings.category4Available, minVolume: '$500,000' },
     { id: '5', name: 'Institutional Trader', price: settings.category5Price, available: settings.category5Available, minVolume: '$1,000,000+' },
@@ -74,6 +75,7 @@ const DynamicApplicationForm = () => {
   ];
 
   const handleCopyAddress = (address: string, type: string) => {
+    console.log('Copying address:', type, address);
     navigator.clipboard.writeText(address);
     setCopiedAddress(type);
     toast({
@@ -85,12 +87,28 @@ const DynamicApplicationForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Form submission started');
+    console.log('Form data:', formData);
+    
     setIsSubmitting(true);
     setIsLoading(true);
 
     try {
+      // Validate required fields
+      if (!formData.name || !formData.email || !formData.category) {
+        console.error('Required fields missing:', { name: formData.name, email: formData.email, category: formData.category });
+        toast({
+          title: "Validation Error",
+          description: "Please fill in all required fields (Name, Email, and License Category)",
+          variant: "destructive",
+        });
+        return;
+      }
+
       // Add application to dataManager
       const selectedCategory = licenseCategories.find(cat => cat.id === formData.category);
+      console.log('Selected category:', selectedCategory);
+      
       const newApplication = dataManager.addApplication({
         name: formData.name,
         email: formData.email,
@@ -102,6 +120,8 @@ const DynamicApplicationForm = () => {
         documents: formData.documents,
         notes: formData.notes
       });
+
+      console.log('Application added successfully:', newApplication);
 
       toast({
         title: "Application Submitted Successfully",
@@ -137,7 +157,7 @@ const DynamicApplicationForm = () => {
 
   const selectedCategory = licenseCategories.find(cat => cat.id === formData.category);
 
-  if (isLoading) {
+  if (isLoading && !isSubmitting) {
     return (
       <div className="max-w-4xl mx-auto p-6 space-y-8">
         <div className="text-center">
@@ -172,9 +192,13 @@ const DynamicApplicationForm = () => {
                 <Input
                   id="name"
                   value={formData.name}
-                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  onChange={(e) => {
+                    console.log('Name changed:', e.target.value);
+                    setFormData(prev => ({ ...prev, name: e.target.value }));
+                  }}
                   required
                   className="mt-2"
+                  placeholder="Enter your full name"
                 />
               </div>
               <div>
@@ -183,9 +207,13 @@ const DynamicApplicationForm = () => {
                   id="email"
                   type="email"
                   value={formData.email}
-                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                  onChange={(e) => {
+                    console.log('Email changed:', e.target.value);
+                    setFormData(prev => ({ ...prev, email: e.target.value }));
+                  }}
                   required
                   className="mt-2"
+                  placeholder="Enter your email address"
                 />
               </div>
             </div>
@@ -198,6 +226,7 @@ const DynamicApplicationForm = () => {
                   value={formData.phone}
                   onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
                   className="mt-2"
+                  placeholder="Enter your phone number"
                 />
               </div>
               <div>
@@ -207,6 +236,7 @@ const DynamicApplicationForm = () => {
                   value={formData.company}
                   onChange={(e) => setFormData(prev => ({ ...prev, company: e.target.value }))}
                   className="mt-2"
+                  placeholder="Enter your company name"
                 />
               </div>
             </div>
@@ -219,28 +249,38 @@ const DynamicApplicationForm = () => {
             <div className="section-icon">
               <Shield className="h-5 w-5" />
             </div>
-            <h3 className="text-xl font-semibold">License Category</h3>
+            <h3 className="text-xl font-semibold">License Category *</h3>
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {licenseCategories.map((category) => (
               <div
                 key={category.id}
-                className={`category-card cursor-pointer ${
-                  formData.category === category.id ? 'selected' : ''
+                className={`p-4 border rounded-lg cursor-pointer transition-all hover:shadow-md ${
+                  formData.category === category.id 
+                    ? 'border-primary bg-primary/10 ring-2 ring-primary' 
+                    : 'border-border hover:border-primary/50'
                 } ${!category.available ? 'opacity-50 cursor-not-allowed' : ''}`}
-                onClick={() => category.available && setFormData(prev => ({ ...prev, category: category.id }))}
+                onClick={() => {
+                  if (category.available) {
+                    console.log('Category selected:', category.id, category.name);
+                    setFormData(prev => ({ ...prev, category: category.id }));
+                  }
+                }}
               >
                 <div className="flex justify-between items-start mb-2">
                   <h4 className="font-semibold">{category.name}</h4>
                   {!category.available && <Badge variant="destructive">Sold Out</Badge>}
                   {category.available && formData.category === category.id && <Badge>Selected</Badge>}
                 </div>
-                <p className="text-2xl font-bold text-accent mb-2">{category.price}</p>
+                <p className="text-2xl font-bold text-primary mb-2">{category.price}</p>
                 <p className="text-sm text-muted-foreground">Min Volume: {category.minVolume}</p>
               </div>
             ))}
           </div>
+          {!formData.category && (
+            <p className="text-sm text-destructive mt-2">Please select a license category</p>
+          )}
         </div>
 
         {/* Payment Information */}
@@ -253,22 +293,22 @@ const DynamicApplicationForm = () => {
               <h3 className="text-xl font-semibold">Payment Information</h3>
             </div>
             
-            <div className="payment-notice">
+            <div className="p-4 bg-muted/30 rounded-lg mb-4">
               <p><strong>Selected License:</strong> {selectedCategory.name} - {selectedCategory.price}</p>
-              <p>Please send payment to one of the addresses below and include your application details.</p>
+              <p className="text-sm text-muted-foreground">Please send payment to one of the addresses below and include your application details.</p>
             </div>
             
             <div className="space-y-4">
               <div>
                 <Label className="text-base font-medium">Bitcoin Address</Label>
                 <div className="flex items-center gap-2 mt-2">
-                  <div className="wallet-address flex-1">{settings.bitcoinAddress}</div>
+                  <div className="flex-1 p-3 bg-muted rounded font-mono text-sm break-all">{settings.bitcoinAddress}</div>
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
                     onClick={() => handleCopyAddress(settings.bitcoinAddress, 'Bitcoin')}
-                    className={copiedAddress === 'Bitcoin' ? 'copy-button-success' : ''}
+                    className={copiedAddress === 'Bitcoin' ? 'bg-green-100 text-green-700' : ''}
                   >
                     {copiedAddress === 'Bitcoin' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                   </Button>
@@ -278,13 +318,13 @@ const DynamicApplicationForm = () => {
               <div>
                 <Label className="text-base font-medium">Ethereum Address</Label>
                 <div className="flex items-center gap-2 mt-2">
-                  <div className="wallet-address flex-1">{settings.ethereumAddress}</div>
+                  <div className="flex-1 p-3 bg-muted rounded font-mono text-sm break-all">{settings.ethereumAddress}</div>
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
                     onClick={() => handleCopyAddress(settings.ethereumAddress, 'Ethereum')}
-                    className={copiedAddress === 'Ethereum' ? 'copy-button-success' : ''}
+                    className={copiedAddress === 'Ethereum' ? 'bg-green-100 text-green-700' : ''}
                   >
                     {copiedAddress === 'Ethereum' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                   </Button>
@@ -294,13 +334,13 @@ const DynamicApplicationForm = () => {
               <div>
                 <Label className="text-base font-medium">USDT Address</Label>
                 <div className="flex items-center gap-2 mt-2">
-                  <div className="wallet-address flex-1">{settings.usdtAddress}</div>
+                  <div className="flex-1 p-3 bg-muted rounded font-mono text-sm break-all">{settings.usdtAddress}</div>
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
                     onClick={() => handleCopyAddress(settings.usdtAddress, 'USDT')}
-                    className={copiedAddress === 'USDT' ? 'copy-button-success' : ''}
+                    className={copiedAddress === 'USDT' ? 'bg-green-100 text-green-700' : ''}
                   >
                     {copiedAddress === 'USDT' ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                   </Button>
@@ -338,7 +378,7 @@ const DynamicApplicationForm = () => {
           <Button
             type="submit"
             size="lg"
-            className="btn-primary px-12 py-6 text-lg"
+            className="px-12 py-6 text-lg"
             disabled={!formData.name || !formData.email || !formData.category || isSubmitting}
           >
             {isSubmitting ? (

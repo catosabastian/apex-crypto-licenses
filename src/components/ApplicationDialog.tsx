@@ -3,6 +3,7 @@ import { createContext, useContext, ReactNode, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import DynamicApplicationForm from '@/components/DynamicApplicationForm';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 interface ApplicationDialogContextType {
   isOpen: boolean;
@@ -15,8 +16,15 @@ const ApplicationDialogContext = createContext<ApplicationDialogContextType | un
 export const ApplicationDialogProvider = ({ children }: { children: ReactNode }) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const openApplicationDialog = () => setIsOpen(true);
-  const closeApplicationDialog = () => setIsOpen(false);
+  const openApplicationDialog = () => {
+    console.log('Opening application dialog');
+    setIsOpen(true);
+  };
+  
+  const closeApplicationDialog = () => {
+    console.log('Closing application dialog');
+    setIsOpen(false);
+  };
 
   return (
     <ApplicationDialogContext.Provider value={{ isOpen, openApplicationDialog, closeApplicationDialog }}>
@@ -27,7 +35,9 @@ export const ApplicationDialogProvider = ({ children }: { children: ReactNode })
             <DialogTitle className="text-2xl font-bold">Trading License Application</DialogTitle>
           </DialogHeader>
           <ScrollArea className="px-8 pb-8">
-            <DynamicApplicationForm />
+            <ErrorBoundary>
+              <DynamicApplicationForm />
+            </ErrorBoundary>
           </ScrollArea>
         </DialogContent>
       </Dialog>
@@ -38,6 +48,7 @@ export const ApplicationDialogProvider = ({ children }: { children: ReactNode })
 export const useApplicationDialog = () => {
   const context = useContext(ApplicationDialogContext);
   if (!context) {
+    console.error('useApplicationDialog must be used within an ApplicationDialogProvider');
     throw new Error('useApplicationDialog must be used within an ApplicationDialogProvider');
   }
   return context;
