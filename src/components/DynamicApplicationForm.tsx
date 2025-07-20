@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
-import { unifiedDataManager, ContentSettings } from '@/utils/unifiedDataManager';
+import { dataManager, WebsiteSettings } from '@/utils/dataManager';
 import PersonalInfoSection from '@/components/form/PersonalInfoSection';
 import LicenseCategorySection from '@/components/form/LicenseCategorySection';
 import PaymentInfoSection from '@/components/form/PaymentInfoSection';
@@ -27,19 +27,19 @@ const DynamicApplicationForm = () => {
     notes: ''
   });
   
-  const [settings, setSettings] = useState<ContentSettings>(unifiedDataManager.getSettings());
+  const [settings, setSettings] = useState<WebsiteSettings>(dataManager.getSettings());
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     // Enhanced real-time settings update handler
-    const handleSettingsUpdate = (updatedSettings: ContentSettings) => {
+    const handleSettingsUpdate = (updatedSettings: WebsiteSettings) => {
       console.log('Settings updated in form:', updatedSettings);
       setSettings(updatedSettings);
     };
 
-    // Listen to unifiedDataManager events
-    unifiedDataManager.addEventListener('settings_updated', handleSettingsUpdate);
+    // Listen to dataManager events
+    dataManager.addEventListener('settings_updated', handleSettingsUpdate);
 
     // Listen to cross-tab events
     const handleStorageChange = (event: CustomEvent) => {
@@ -64,12 +64,12 @@ const DynamicApplicationForm = () => {
 
     // Periodic settings refresh as fallback
     const refreshInterval = setInterval(() => {
-      const currentSettings = unifiedDataManager.getSettings();
+      const currentSettings = dataManager.getSettings();
       setSettings(currentSettings);
     }, 5000);
 
     return () => {
-      unifiedDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
+      dataManager.removeEventListener('settings_updated', handleSettingsUpdate);
       window.removeEventListener('apex_settings_updated', handleStorageChange as EventListener);
       window.removeEventListener('storage', handleStorageEvent);
       clearInterval(refreshInterval);
@@ -132,13 +132,16 @@ const DynamicApplicationForm = () => {
         return;
       }
       
-      const newApplication = unifiedDataManager.addApplication({
+      const newApplication = dataManager.addApplication({
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
         company: formData.company,
-        licenseType: selectedCategory?.name || `Category ${formData.category}`,
-        additionalInfo: formData.notes
+        category: selectedCategory?.name || `Category ${formData.category}`,
+        status: 'pending' as const,
+        amount: selectedCategory?.price || '0',
+        documents: [],
+        notes: formData.notes
       });
 
       console.log('Application added successfully:', newApplication);

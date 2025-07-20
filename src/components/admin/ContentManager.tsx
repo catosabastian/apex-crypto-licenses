@@ -1,16 +1,16 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { EnhancedCard, EnhancedCardHeader, EnhancedCardContent } from '@/components/ui/enhanced-card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Save, Eye, RefreshCw, CheckCircle, AlertCircle, Activity, BarChart } from 'lucide-react';
+import { Edit, Save, Eye, Plus, Trash, RefreshCw, CheckCircle, AlertCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { unifiedDataManager } from '@/utils/unifiedDataManager';
-import { ContentTemplateManager } from './ContentTemplateManager';
 
 export const ContentManager = () => {
   const [content, setContent] = useState(unifiedDataManager.getContent());
@@ -18,19 +18,12 @@ export const ContentManager = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [liveUpdates, setLiveUpdates] = useState(true);
 
   useEffect(() => {
     const handleContentUpdate = () => {
-      if (!liveUpdates) return;
       const newContent = unifiedDataManager.getContent();
       setContent(newContent);
       setHasUnsavedChanges(false);
-      
-      toast({
-        title: "Content Synchronized",
-        description: "Content has been updated from another source",
-      });
     };
 
     unifiedDataManager.addEventListener('content_updated', handleContentUpdate);
@@ -38,7 +31,7 @@ export const ContentManager = () => {
     return () => {
       unifiedDataManager.removeEventListener('content_updated', handleContentUpdate);
     };
-  }, [liveUpdates]);
+  }, []);
 
   const contentSections = [
     { 
@@ -46,56 +39,49 @@ export const ContentManager = () => {
       title: 'Hero Section', 
       description: 'Main landing page header and call-to-action',
       status: 'active',
-      lastUpdated: 'Today',
-      priority: 'high'
+      lastUpdated: 'Today'
     },
     { 
       key: 'about', 
       title: 'About Section', 
       description: 'Company authority and credentials information',
       status: 'active',
-      lastUpdated: '2 days ago',
-      priority: 'medium'
+      lastUpdated: '2 days ago'
     },
     { 
       key: 'features', 
       title: 'Features Section', 
       description: 'Service features and key benefits',
       status: 'active',
-      lastUpdated: '1 week ago',
-      priority: 'high'
+      lastUpdated: '1 week ago'
     },
     { 
       key: 'stats', 
       title: 'Statistics Section', 
       description: 'Company metrics and performance data',
       status: 'active',
-      lastUpdated: '3 days ago',
-      priority: 'medium'
+      lastUpdated: '3 days ago'
     },
     { 
       key: 'process', 
       title: 'Process Section', 
       description: 'Application process steps and timeline',
       status: 'updated',
-      lastUpdated: 'Just now',
-      priority: 'high'
+      lastUpdated: 'Just now'
     },
     { 
       key: 'verification', 
       title: 'Verification Section', 
       description: 'License verification process and tools',
       status: 'active',
-      lastUpdated: '1 week ago',
-      priority: 'low'
+      lastUpdated: '1 week ago'
     },
     { 
       key: 'whatIsLicense', 
       title: 'License Information Section', 
       description: 'Educational content about crypto trading licenses',
       status: 'active',
-      lastUpdated: '5 days ago',
-      priority: 'medium'
+      lastUpdated: '5 days ago'
     }
   ];
 
@@ -111,7 +97,6 @@ export const ContentManager = () => {
       
       setIsEditDialogOpen(false);
       setSelectedSection(null);
-      setHasUnsavedChanges(false);
     } catch (error) {
       toast({
         title: "Update Failed",
@@ -121,36 +106,15 @@ export const ContentManager = () => {
     }
   };
 
-  const getStatusBadge = (section: any) => {
-    const statusConfig = {
-      updated: { color: 'bg-green-100 text-green-800', icon: CheckCircle, text: 'Recently Updated' },
-      active: { color: 'bg-blue-100 text-blue-800', icon: Activity, text: 'Active' },
-      draft: { color: 'bg-gray-100 text-gray-800', icon: AlertCircle, text: 'Draft' }
-    };
-    
-    const config = statusConfig[section.status as keyof typeof statusConfig] || statusConfig.active;
-    const Icon = config.icon;
-    
-    return (
-      <Badge className={config.color}>
-        <Icon className="h-3 w-3 mr-1" />
-        {config.text}
-      </Badge>
-    );
-  };
-
-  const getPriorityBadge = (priority: string) => {
-    const colors = {
-      high: 'bg-red-100 text-red-800 border-red-200',
-      medium: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-      low: 'bg-green-100 text-green-800 border-green-200'
-    };
-    
-    return (
-      <Badge variant="outline" className={colors[priority as keyof typeof colors]}>
-        {priority.toUpperCase()}
-      </Badge>
-    );
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'updated':
+        return <Badge className="bg-green-100 text-green-800">Recently Updated</Badge>;
+      case 'active':
+        return <Badge variant="outline">Active</Badge>;
+      default:
+        return <Badge variant="secondary">Draft</Badge>;
+    }
   };
 
   return (
@@ -162,113 +126,101 @@ export const ContentManager = () => {
           <p className="text-muted-foreground mt-2">Manage all website content with real-time updates and live preview</p>
         </div>
         <div className="flex gap-3">
-          <Button 
-            variant="outline" 
-            onClick={() => setIsPreviewMode(!isPreviewMode)}
-            className={isPreviewMode ? 'bg-primary text-primary-foreground' : ''}
-          >
+          <Button variant="outline" onClick={() => setIsPreviewMode(!isPreviewMode)}>
             <Eye className="h-4 w-4 mr-2" />
             {isPreviewMode ? 'Exit Preview' : 'Live Preview'}
           </Button>
-          <Button 
-            variant="outline"
-            onClick={() => setLiveUpdates(!liveUpdates)}
-            className={liveUpdates ? 'bg-green-100 text-green-800' : ''}
-          >
-            <RefreshCw className={`h-4 w-4 mr-2 ${liveUpdates ? 'animate-spin' : ''}`} />
-            Live Updates {liveUpdates ? 'ON' : 'OFF'}
+          <Button variant="outline">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh Content
           </Button>
         </div>
       </div>
 
       {/* Status Bar */}
       {hasUnsavedChanges && (
-        <EnhancedCard variant="glass" className="border-amber-200 bg-amber-50/50">
-          <EnhancedCardHeader className="pb-3">
+        <Card className="border-amber-200 bg-amber-50">
+          <CardHeader className="pb-3">
             <div className="flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-amber-600" />
-              <h3 className="font-semibold text-amber-800">Unsaved Changes</h3>
+              <CardTitle className="text-amber-800">Unsaved Changes</CardTitle>
             </div>
-            <p className="text-amber-700 text-sm">
+            <CardDescription className="text-amber-700">
               You have unsaved changes. Make sure to save before leaving this page.
-            </p>
-          </EnhancedCardHeader>
-        </EnhancedCard>
+            </CardDescription>
+          </CardHeader>
+        </Card>
       )}
 
       <Tabs defaultValue="sections" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="sections">Content Sections</TabsTrigger>
+          <TabsTrigger value="quick-edit">Quick Edit</TabsTrigger>
           <TabsTrigger value="templates">Templates</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
 
         <TabsContent value="sections" className="space-y-6">
           <div className="grid gap-6">
             {contentSections.map((section) => (
-              <EnhancedCard key={section.key} variant="elevated" className="group hover:shadow-lg transition-all">
-                <EnhancedCardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-2 flex-1">
-                      <div className="flex items-center gap-3">
-                        <h3 className="text-xl font-semibold">{section.title}</h3>
-                        {getStatusBadge(section)}
-                        {getPriorityBadge(section.priority)}
-                      </div>
-                      <p className="text-muted-foreground">{section.description}</p>
-                      <p className="text-sm text-muted-foreground">Last updated: {section.lastUpdated}</p>
+              <Card key={section.key} className="hover:shadow-md transition-shadow">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <CardTitle className="text-xl">{section.title}</CardTitle>
+                      {getStatusBadge(section.status)}
                     </div>
-                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button variant="outline" size="sm">
-                        <Eye className="h-4 w-4 mr-2" />
-                        Preview
-                      </Button>
-                      <Dialog open={isEditDialogOpen && selectedSection === section.key} onOpenChange={(open) => {
-                        setIsEditDialogOpen(open);
-                        if (!open) setSelectedSection(null);
-                      }}>
-                        <DialogTrigger asChild>
-                          <Button 
-                            size="sm"
-                            onClick={() => setSelectedSection(section.key)}
-                          >
-                            <Edit className="h-4 w-4 mr-2" />
-                            Edit Content
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-                          <DialogHeader>
-                            <DialogTitle className="flex items-center gap-2">
-                              <Edit className="h-5 w-5" />
-                              Edit {section.title}
-                            </DialogTitle>
-                            <DialogDescription>
-                              Make changes to this content section. Changes will be applied immediately to the live website.
-                            </DialogDescription>
-                          </DialogHeader>
-                          {selectedSection && (
-                            <ContentEditForm 
-                              sectionKey={selectedSection}
-                              content={content[selectedSection as keyof typeof content]}
-                              onUpdate={(newContent) => handleUpdateContent(selectedSection, newContent)}
-                              onCancel={() => {
-                                setIsEditDialogOpen(false);
-                                setSelectedSection(null);
-                              }}
-                            />
-                          )}
-                        </DialogContent>
-                      </Dialog>
-                    </div>
+                    <CardDescription className="text-base">{section.description}</CardDescription>
+                    <p className="text-sm text-muted-foreground">Last updated: {section.lastUpdated}</p>
                   </div>
-                </EnhancedCardHeader>
-                
-                <EnhancedCardContent>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm">
+                      <Eye className="h-4 w-4 mr-2" />
+                      Preview
+                    </Button>
+                    <Dialog open={isEditDialogOpen && selectedSection === section.key} onOpenChange={(open) => {
+                      setIsEditDialogOpen(open);
+                      if (!open) setSelectedSection(null);
+                    }}>
+                      <DialogTrigger asChild>
+                        <Button 
+                          size="sm"
+                          onClick={() => setSelectedSection(section.key)}
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit Content
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle className="flex items-center gap-2">
+                            <Edit className="h-5 w-5" />
+                            Edit {section.title}
+                          </DialogTitle>
+                          <DialogDescription>
+                            Make changes to this content section. Changes will be applied immediately to the live website.
+                          </DialogDescription>
+                        </DialogHeader>
+                        {selectedSection && (
+                          <ContentEditForm 
+                            sectionKey={selectedSection}
+                            content={content[selectedSection as keyof typeof content]}
+                            onUpdate={(newContent) => handleUpdateContent(selectedSection, newContent)}
+                            onCancel={() => {
+                              setIsEditDialogOpen(false);
+                              setSelectedSection(null);
+                            }}
+                          />
+                        )}
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                </CardHeader>
+                <CardContent>
                   <div className="grid md:grid-cols-2 gap-4 text-sm">
                     <div>
                       <strong className="text-foreground">Content Preview:</strong>
-                      <div className="mt-1 text-muted-foreground bg-muted/50 rounded p-2">
+                      <div className="mt-1 text-muted-foreground">
                         {section.key === 'hero' && (
                           <p>Headline: {content.hero?.headline?.substring(0, 50)}...</p>
                         )}
@@ -300,25 +252,22 @@ export const ContentManager = () => {
                       </div>
                     </div>
                   </div>
-                </EnhancedCardContent>
-              </EnhancedCard>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </TabsContent>
 
+        <TabsContent value="quick-edit" className="space-y-6">
+          <QuickEditPanel content={content} onUpdate={handleUpdateContent} />
+        </TabsContent>
+
         <TabsContent value="templates" className="space-y-6">
-          <ContentTemplateManager />
+          <TemplatesPanel />
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">
           <AnalyticsPanel />
-        </TabsContent>
-
-        <TabsContent value="settings" className="space-y-6">
-          <ContentSettingsPanel 
-            liveUpdates={liveUpdates}
-            onLiveUpdatesChange={setLiveUpdates}
-          />
         </TabsContent>
       </Tabs>
     </div>
@@ -434,136 +383,63 @@ const ContentEditForm = ({
   );
 };
 
-const AnalyticsPanel = () => {
-  const [analytics] = useState({
-    pageViews: 12450,
-    engagementRate: 67,
-    topSections: [
-      { name: 'Hero Section', views: 12450, engagement: 89 },
-      { name: 'License Categories', views: 8930, engagement: 76 },
-      { name: 'Process Steps', views: 7560, engagement: 82 },
-      { name: 'Features', views: 6890, engagement: 71 }
-    ]
-  });
-
+const QuickEditPanel = ({ content, onUpdate }: { content: any; onUpdate: (key: string, content: any) => void }) => {
   return (
     <div className="grid gap-6">
-      <div className="grid md:grid-cols-3 gap-4">
-        <EnhancedCard>
-          <EnhancedCardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-medium">Total Page Views</h4>
-              <BarChart className="h-4 w-4 text-muted-foreground" />
-            </div>
-          </EnhancedCardHeader>
-          <EnhancedCardContent>
-            <div className="text-2xl font-bold">{analytics.pageViews.toLocaleString()}</div>
-            <p className="text-xs text-green-600">+12% from last month</p>
-          </EnhancedCardContent>
-        </EnhancedCard>
-        
-        <EnhancedCard>
-          <EnhancedCardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-medium">Engagement Rate</h4>
-              <Activity className="h-4 w-4 text-muted-foreground" />
-            </div>
-          </EnhancedCardHeader>
-          <EnhancedCardContent>
-            <div className="text-2xl font-bold">{analytics.engagementRate}%</div>
-            <p className="text-xs text-green-600">+5% from last month</p>
-          </EnhancedCardContent>
-        </EnhancedCard>
-        
-        <EnhancedCard>
-          <EnhancedCardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <h4 className="text-sm font-medium">Active Sections</h4>
-              <CheckCircle className="h-4 w-4 text-muted-foreground" />
-            </div>
-          </EnhancedCardHeader>
-          <EnhancedCardContent>
-            <div className="text-2xl font-bold">{analytics.topSections.length}</div>
-            <p className="text-xs text-muted-foreground">All sections active</p>
-          </EnhancedCardContent>
-        </EnhancedCard>
-      </div>
-      
-      <EnhancedCard>
-        <EnhancedCardHeader>
-          <h4 className="text-lg font-semibold">Section Performance</h4>
-          <p className="text-sm text-muted-foreground">View and engagement metrics by content section</p>
-        </EnhancedCardHeader>
-        <EnhancedCardContent>
-          <div className="space-y-4">
-            {analytics.topSections.map((section) => (
-              <div key={section.name} className="flex items-center justify-between p-3 bg-muted/50 rounded">
-                <div>
-                  <h5 className="font-medium">{section.name}</h5>
-                  <p className="text-sm text-muted-foreground">{section.views.toLocaleString()} views</p>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold">{section.engagement}%</p>
-                  <p className="text-xs text-muted-foreground">engagement</p>
-                </div>
-              </div>
-            ))}
+      <Card>
+        <CardHeader>
+          <CardTitle>Quick Text Updates</CardTitle>
+          <CardDescription>Make quick changes to commonly updated content</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label>Hero Headline</Label>
+            <Input 
+              value={content.hero?.headline || ''} 
+              onChange={(e) => onUpdate('hero', { ...content.hero, headline: e.target.value })}
+            />
           </div>
-        </EnhancedCardContent>
-      </EnhancedCard>
+          <div>
+            <Label>Main CTA Button Text</Label>
+            <Input 
+              value={content.hero?.ctaText || ''} 
+              onChange={(e) => onUpdate('hero', { ...content.hero, ctaText: e.target.value })}
+            />
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
 
-const ContentSettingsPanel = ({ 
-  liveUpdates, 
-  onLiveUpdatesChange 
-}: { 
-  liveUpdates: boolean; 
-  onLiveUpdatesChange: (enabled: boolean) => void; 
-}) => {
+const TemplatesPanel = () => {
   return (
     <div className="grid gap-6">
-      <EnhancedCard>
-        <EnhancedCardHeader>
-          <h4 className="text-lg font-semibold">Content Management Settings</h4>
-          <p className="text-sm text-muted-foreground">Configure how content updates are handled</p>
-        </EnhancedCardHeader>
-        <EnhancedCardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <h5 className="font-medium">Live Updates</h5>
-              <p className="text-sm text-muted-foreground">Automatically sync content changes across all admin sessions</p>
-            </div>
-            <Button
-              variant={liveUpdates ? "default" : "outline"}
-              onClick={() => onLiveUpdatesChange(!liveUpdates)}
-            >
-              {liveUpdates ? 'Enabled' : 'Disabled'}
-            </Button>
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <div>
-              <h5 className="font-medium">Auto-save</h5>
-              <p className="text-sm text-muted-foreground">Automatically save changes as you type</p>
-            </div>
-            <Button variant="outline">
-              Configure
-            </Button>
-          </div>
-          
-          <div className="flex items-center justify-between">
-            <div>
-              <h5 className="font-medium">Version History</h5>
-              <p className="text-sm text-muted-foreground">Keep track of content changes over time</p>
-            </div>
-            <Button variant="outline">
-              View History
-            </Button>
-          </div>
-        </EnhancedCardContent>
-      </EnhancedCard>
+      <Card>
+        <CardHeader>
+          <CardTitle>Content Templates</CardTitle>
+          <CardDescription>Pre-designed content layouts and templates</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">Content templates coming soon...</p>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+const AnalyticsPanel = () => {
+  return (
+    <div className="grid gap-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Content Analytics</CardTitle>
+          <CardDescription>Track content performance and engagement</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <p className="text-muted-foreground">Content analytics coming soon...</p>
+        </CardContent>
+      </Card>
     </div>
   );
 };

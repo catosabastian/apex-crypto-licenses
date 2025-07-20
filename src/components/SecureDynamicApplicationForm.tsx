@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
-import { unifiedDataManager, ContentSettings } from '@/utils/unifiedDataManager';
+import { secureDataManager, WebsiteSettings } from '@/utils/secureDataManager';
 import { dataMigration } from '@/utils/dataMigration';
 import { crossTabCommunication } from '@/utils/crossTabCommunication';
 import PersonalInfoSection from '@/components/form/PersonalInfoSection';
@@ -29,7 +29,7 @@ const SecureDynamicApplicationForm = () => {
     notes: ''
   });
   
-  const [settings, setSettings] = useState<ContentSettings>(unifiedDataManager.getSettings());
+  const [settings, setSettings] = useState<WebsiteSettings>(secureDataManager.getSettings());
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [updateCount, setUpdateCount] = useState(0);
@@ -49,7 +49,7 @@ const SecureDynamicApplicationForm = () => {
     }
 
     // Single unified settings update handler
-    const handleSettingsUpdate = (updatedSettings: ContentSettings) => {
+    const handleSettingsUpdate = (updatedSettings: WebsiteSettings) => {
       if (!mountedRef.current) return;
       
       console.log('[SecureDynamicApplicationForm] Settings update received:', updatedSettings);
@@ -64,7 +64,7 @@ const SecureDynamicApplicationForm = () => {
     };
 
     // Register event listeners
-    unifiedDataManager.addEventListener('settings_updated', handleSettingsUpdate);
+    secureDataManager.addEventListener('settings_updated', handleSettingsUpdate);
     crossTabCommunication.addEventListener('settings_updated', handleSettingsUpdate);
     crossTabCommunication.addEventListener('settings_force_refresh', handleSettingsUpdate);
 
@@ -73,7 +73,7 @@ const SecureDynamicApplicationForm = () => {
       if (!mountedRef.current) return;
       
       try {
-        const currentSettings = unifiedDataManager.getSettings();
+        const currentSettings = secureDataManager.getSettings();
         const settingsChanged = JSON.stringify(currentSettings) !== JSON.stringify(settings);
         
         if (settingsChanged) {
@@ -90,7 +90,7 @@ const SecureDynamicApplicationForm = () => {
     // Initial load
     setTimeout(() => {
       if (mountedRef.current) {
-        const freshSettings = unifiedDataManager.getSettings();
+        const freshSettings = secureDataManager.getSettings();
         setSettings(freshSettings);
         setIsLoading(false);
       }
@@ -100,7 +100,7 @@ const SecureDynamicApplicationForm = () => {
       console.log('[SecureDynamicApplicationForm] Cleaning up');
       mountedRef.current = false;
       
-      unifiedDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
+      secureDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
       crossTabCommunication.removeEventListener('settings_updated', handleSettingsUpdate);
       crossTabCommunication.removeEventListener('settings_force_refresh', handleSettingsUpdate);
       
@@ -158,13 +158,16 @@ const SecureDynamicApplicationForm = () => {
         return;
       }
       
-      const newApplication = unifiedDataManager.addApplication({
+      const newApplication = secureDataManager.addApplication({
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
         company: formData.company,
-        licenseType: selectedCategory?.name || `Category ${formData.category}`,
-        additionalInfo: formData.notes
+        category: selectedCategory?.name || `Category ${formData.category}`,
+        status: 'pending' as const,
+        amount: selectedCategory?.price || '0',
+        documents: [],
+        notes: formData.notes
       });
 
       toast({

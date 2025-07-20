@@ -14,7 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { dataManager } from '@/utils/dataManager';
 import { ApplicationsManager } from '@/components/admin/ApplicationsManager';
 import { ContactsManager } from '@/components/admin/ContactsManager';
-import SettingsManager from '@/components/admin/SettingsManager';
+import { SettingsManager } from '@/components/admin/SettingsManager';
 import { LicenseManager } from '@/components/admin/LicenseManager';
 import { ContentManager } from '@/components/admin/ContentManager';
 
