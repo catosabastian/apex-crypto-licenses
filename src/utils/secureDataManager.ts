@@ -1,4 +1,3 @@
-
 import CryptoJS from 'crypto-js';
 import { crossTabCommunication } from './crossTabCommunication';
 
@@ -39,6 +38,15 @@ export interface License {
   platforms?: string;
 }
 
+export interface LicenseCategoryDetails {
+  name: string;
+  minVolume: string;
+  features: string[];
+  processingTime: string;
+  platforms: string[];
+  description: string;
+}
+
 export interface WebsiteSettings {
   category1Price: string;
   category2Price: string;
@@ -52,6 +60,15 @@ export interface WebsiteSettings {
   category4Available: boolean;
   category5Available: boolean;
   category6Available: boolean;
+  
+  // License category details
+  category1Details: LicenseCategoryDetails;
+  category2Details: LicenseCategoryDetails;
+  category3Details: LicenseCategoryDetails;
+  category4Details: LicenseCategoryDetails;
+  category5Details: LicenseCategoryDetails;
+  category6Details: LicenseCategoryDetails;
+  
   bitcoinAddress: string;
   ethereumAddress: string;
   usdtAddress: string;
@@ -67,6 +84,22 @@ export interface WebsiteSettings {
   city: string;
   country: string;
   website: string;
+  
+  // Performance metrics
+  processingTime: string;
+  successRate: string;
+  totalLicensed: string;
+  countriesServed: string;
+  
+  // Social media links
+  twitterUrl: string;
+  linkedinUrl: string;
+  telegramUrl: string;
+  
+  // Enterprise settings
+  enterpriseMinAmount: string;
+  enterpriseContactEmail: string;
+  enterpriseFeatures: string[];
 }
 
 export interface AdminSession {
@@ -607,7 +640,58 @@ class SecureDataManager {
       category4Available: true,
       category5Available: true,
       category6Available: true,
-      bitcoinAddress: "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa",
+      
+      // License category details
+      category1Details: {
+        name: 'Basic Trader',
+        minVolume: '$50,000',
+        features: ['Basic trading rights', 'Standard compliance', 'Email support'],
+        processingTime: '24-48 hours',
+        platforms: ['Binance', 'Coinbase'],
+        description: 'Entry-level license for individual traders'
+      },
+      category2Details: {
+        name: 'Standard Trader',
+        minVolume: '$100,000',
+        features: ['Extended trading rights', 'Enhanced compliance', 'Priority support'],
+        processingTime: '12-24 hours',
+        platforms: ['Binance', 'Coinbase', 'Kraken'],
+        description: 'Standard license for active traders'
+      },
+      category3Details: {
+        name: 'Advanced Trader',
+        minVolume: '$250,000',
+        features: ['Advanced trading rights', 'Full compliance suite', 'Phone support'],
+        processingTime: '6-12 hours',
+        platforms: ['Binance', 'Coinbase', 'Kraken', 'KuCoin'],
+        description: 'Advanced license for professional traders'
+      },
+      category4Details: {
+        name: 'Professional Trader',
+        minVolume: '$500,000',
+        features: ['Professional trading rights', 'Premium compliance', 'Dedicated support'],
+        processingTime: '3-6 hours',
+        platforms: ['Binance', 'Coinbase', 'Kraken', 'KuCoin', 'Bybit'],
+        description: 'Professional license for high-volume traders'
+      },
+      category5Details: {
+        name: 'Institutional Trader',
+        minVolume: '$1,000,000+',
+        features: ['Institutional trading rights', 'Enterprise compliance', 'Account manager'],
+        processingTime: '1-3 hours',
+        platforms: ['All major exchanges', 'OTC desks', 'Institutional platforms'],
+        description: 'Institutional license for large organizations'
+      },
+      category6Details: {
+        name: 'Executive Trader',
+        minVolume: '$2,500,000+',
+        features: ['Executive trading rights', 'White-glove service', 'Custom solutions'],
+        processingTime: '1 hour',
+        platforms: ['All exchanges', 'Private markets', 'Exclusive access'],
+        description: 'Executive license for ultra-high-net-worth clients'
+      },
+      
+      bitcoinAddress: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
       ethereumAddress: "0x742d35Cc6663C65C926d75d60e3B3d97c8a0e0e0",
       usdtAddress: "TG3XXyExBkPp9nzdajDGFahC9nyKERJpUN",
       usdtTronAddress: "TG3XXyExBkPp9nzdajDGFahC9nyKERJpUN",
@@ -621,7 +705,29 @@ class SecureDataManager {
       companyAddress: "123 Blockchain Avenue",
       city: "Digital City, DC 12345",
       country: "United States",
-      website: "https://apexcrypto.reg"
+      website: "https://apexcrypto.reg",
+      
+      // Performance metrics
+      processingTime: '18 hours avg',
+      successRate: '99.9%',
+      totalLicensed: '15,000+',
+      countriesServed: '180+',
+      
+      // Social media links
+      twitterUrl: 'https://twitter.com/apexcrypto',
+      linkedinUrl: 'https://linkedin.com/company/apexcrypto',
+      telegramUrl: 'https://t.me/apexcrypto',
+      
+      // Enterprise settings
+      enterpriseMinAmount: '1,000,000 USDT',
+      enterpriseContactEmail: 'enterprise@apexcrypto.reg',
+      enterpriseFeatures: [
+        'Custom compliance solutions',
+        'Dedicated account manager',
+        'Priority processing',
+        'Bulk licensing discounts',
+        'White-label solutions'
+      ]
     };
   }
 
