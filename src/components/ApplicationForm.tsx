@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Loader2, ShieldCheck, Copy, Check } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { sendAdminNotification } from "@/utils/emailService";
