@@ -42,11 +42,13 @@ export interface WebsiteSettings {
   category3Price: string;
   category4Price: string;
   category5Price: string;
+  category6Price: string;
   category1Available: boolean;
   category2Available: boolean;
   category3Available: boolean;
   category4Available: boolean;
   category5Available: boolean;
+  category6Available: boolean;
   bitcoinAddress: string;
   ethereumAddress: string;
   usdtAddress: string;
@@ -281,11 +283,13 @@ class DataManager {
       category3Price: '70,000 USDT',
       category4Price: '150,000 USDT',
       category5Price: '250,000 USDT',
+      category6Price: '500,000 USDT',
       category1Available: false,
       category2Available: false,
       category3Available: true,
       category4Available: true,
       category5Available: true,
+      category6Available: true,
       bitcoinAddress: "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa",
       ethereumAddress: "0x742d35Cc6663C65C926d75d60e3B3d97c8a0e0e0",
       usdtAddress: "TG3XXyExBkPp9nzdajDGFahC9nyKERJpUN"

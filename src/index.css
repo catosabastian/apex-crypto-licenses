@@ -14,31 +14,31 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 220 85% 25%;
+    --primary: 220 90% 28%;
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 220 30% 88%;
-    --secondary-foreground: 220 85% 15%;
+    --secondary: 220 25% 90%;
+    --secondary-foreground: 220 90% 15%;
 
-    --muted: 220 20% 96%;
-    --muted-foreground: 220 25% 45%;
+    --muted: 220 15% 94%;
+    --muted-foreground: 220 30% 40%;
 
-    --accent: 45 100% 51%;
-    --accent-foreground: 220 85% 15%;
+    --accent: 38 95% 48%;
+    --accent-foreground: 220 90% 15%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 220 25% 90%;
-    --input: 220 25% 90%;
-    --ring: 220 85% 25%;
+    --border: 220 20% 88%;
+    --input: 220 20% 88%;
+    --ring: 220 90% 28%;
 
     --radius: 0.5rem;
     
-    --government-blue: 220 85% 25%;
-    --government-green: 140 60% 35%;
-    --government-gold: 45 100% 51%;
-    --government-navy: 220 90% 15%;
+    --government-blue: 220 90% 28%;
+    --government-green: 140 65% 35%;
+    --government-gold: 38 95% 48%;
+    --government-navy: 220 95% 18%;
   }
 
   * {
@@ -50,43 +50,43 @@
   }
 
   .license-card {
-    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255,255,255,0.18);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.08) 100%);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.25);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
   
   .license-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+    transform: translateY(-8px);
+    box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12);
+    border-color: rgba(255,255,255,0.35);
   }
 
   .bubble {
     position: absolute;
     border-radius: 50%;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-    backdrop-filter: blur(3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    backdrop-filter: blur(6px);
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0.5;
-    animation: float 8s ease-in-out infinite;
-    transition: opacity 0.3s ease;
+    opacity: 0.4;
+    animation: float 10s ease-in-out infinite;
+    transition: all 0.3s ease;
   }
   
   .bubble:hover {
     opacity: 0.8;
+    transform: scale(1.1);
   }
 
   @keyframes float {
-    0% {
+    0%, 100% {
       transform: translatey(0px);
     }
     50% {
-      transform: translatey(-20px);
-    }
-    100% {
-      transform: translatey(0px);
+      transform: translatey(-25px);
     }
   }
 
@@ -94,28 +94,30 @@
     position: absolute;
     right: 20px;
     top: 20px;
-    transform: rotate(12deg);
+    transform: rotate(15deg);
     font-size: 1.5rem;
     font-weight: 700;
     padding: 0.5rem 1rem;
     border: 3px solid;
     border-radius: 8px;
-    opacity: 0.7;
-    color: theme('colors.primary.DEFAULT');
+    opacity: 0.8;
+    color: hsl(var(--accent));
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
   
   .glass-card {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
-    border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(16px);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
   }
   
   .gradient-text {
-    background: linear-gradient(90deg, hsl(var(--accent)) 0%, hsl(var(--primary)) 100%);
+    background: linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(var(--primary)) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
   
   .government-gradient {
@@ -123,65 +125,71 @@
   }
   
   .gold-accent {
-    background: linear-gradient(90deg, hsl(var(--government-gold)) 0%, #fbbf24 100%);
+    background: linear-gradient(135deg, hsl(var(--government-gold)) 0%, #f59e0b 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
   
-  /* Form and Application Styles */
+  /* Modern Form Styles */
   .form-section {
-    @apply bg-card border border-border rounded-xl p-6 shadow-sm transition-all duration-300;
-  }
-  
-  .form-section:hover {
-    @apply shadow-md border-primary/20;
+    @apply bg-card border border-border/60 rounded-2xl p-8 shadow-sm transition-all duration-300 hover:shadow-lg hover:border-primary/20;
   }
   
   .section-heading {
-    @apply flex items-center gap-3 mb-4 pb-2 border-b border-border;
+    @apply flex items-center gap-3 mb-6 pb-3 border-b border-border/60;
   }
 
   .section-icon {
-    @apply p-2 rounded-full bg-primary/10 text-primary;
+    @apply p-2.5 rounded-xl bg-primary/10 text-primary;
   }
   
   .form-field-group {
-    @apply grid gap-6;
+    @apply grid gap-8;
   }
   
   .copy-button-success {
-    @apply bg-green-100 text-green-700 border-green-300;
+    @apply bg-green-100 text-green-700 border-green-300 shadow-sm;
   }
   
   .wallet-address {
-    @apply font-mono text-xs md:text-sm break-all bg-muted/50 p-3 rounded border border-muted;
+    @apply font-mono text-sm break-all bg-muted/60 p-4 rounded-lg border border-muted-foreground/20;
   }
   
   .category-card {
-    @apply border bg-card rounded-lg p-4 transition-all duration-300 hover:shadow-md;
+    @apply border border-border/60 bg-card rounded-xl p-6 transition-all duration-300 hover:shadow-lg hover:border-primary/30;
   }
   
   .category-card.selected {
-    @apply border-primary bg-primary/5 shadow-md;
+    @apply border-primary bg-primary/5 shadow-lg ring-2 ring-primary/20;
   }
   
   .payment-notice {
-    @apply bg-amber-50 border-l-4 border-amber-400 p-3 text-amber-800 text-sm mb-4;
+    @apply bg-amber-50 border-l-4 border-amber-400 p-4 text-amber-900 text-sm mb-6 rounded-r-lg;
   }
 
   .stats-card {
-    @apply bg-gradient-to-br from-primary/5 to-accent/5 border border-primary/20 rounded-xl p-6 text-center;
+    @apply bg-gradient-to-br from-primary/8 to-accent/8 border border-primary/25 rounded-2xl p-8 text-center shadow-lg;
   }
 
   .feature-card {
-    @apply bg-gradient-to-br from-card to-muted/30 border border-border rounded-xl p-6 hover:shadow-lg transition-all duration-300;
+    @apply bg-gradient-to-br from-card to-muted/40 border border-border/60 rounded-2xl p-8 hover:shadow-xl transition-all duration-300 hover:border-primary/30;
   }
 
   .process-step {
-    @apply relative bg-gradient-to-br from-primary/5 to-accent/5 border-2 border-primary/20 rounded-xl p-6 text-center;
+    @apply relative bg-gradient-to-br from-primary/8 to-accent/8 border-2 border-primary/25 rounded-2xl p-8 text-center shadow-lg;
   }
 
   .step-number {
-    @apply absolute -top-4 left-1/2 transform -translate-x-1/2 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center font-bold text-sm;
+    @apply absolute -top-4 left-1/2 transform -translate-x-1/2 w-10 h-10 bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-full flex items-center justify-center font-bold text-lg shadow-lg;
+  }
+
+  /* Enhanced Button Styles */
+  .btn-primary {
+    @apply bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105;
+  }
+
+  .btn-accent {
+    @apply bg-gradient-to-r from-accent to-accent/90 text-accent-foreground shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105;
   }
 }

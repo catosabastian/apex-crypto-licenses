@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, ChevronRight, MessageSquareText, XCircle } from 'lucide-react';
+import { CheckCircle, ChevronRight, MessageSquareText, XCircle, Shield, Star, Crown, Building, Zap, Trophy } from 'lucide-react';
 import { useApplicationDialog } from '@/components/ApplicationDialog';
 import SupportDialog from '@/components/SupportDialog';
 
@@ -12,37 +12,42 @@ const LicenseCategories = () => {
   const [isSupportDialogOpen, setSupportDialogOpen] = useState(false);
   
   return (
-    <section id="licenses" className="py-20 bg-muted/30">
+    <section id="licenses" className="py-24 bg-muted/20">
       <div className="container">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="h-1 w-12 bg-primary"></div>
-            <span className="text-sm text-muted-foreground uppercase tracking-wider">License Categories</span>
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="h-1 w-16 bg-gradient-to-r from-primary to-accent rounded-full"></div>
+            <span className="text-sm text-muted-foreground uppercase tracking-wider font-semibold">License Categories</span>
           </div>
           
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold">
-                Regulatory Licensing Categories
+              <h2 className="text-4xl md:text-5xl font-bold mb-4">
+                Comprehensive Licensing
+                <span className="block gradient-text">Solutions</span>
               </h2>
-              <p className="text-lg text-muted-foreground mt-2">
-                Select the appropriate license category based on your trade volume and activity.
+              <p className="text-xl text-muted-foreground max-w-2xl leading-relaxed">
+                Choose from our six specialized license categories, each designed to meet different trading volumes and regulatory requirements.
               </p>
             </div>
           </div>
           
-          <div className="grid md:grid-cols-2 gap-8 mb-8 max-w-5xl mx-auto">
+          {/* Main License Categories - 3x2 Grid */}
+          <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-8 mb-12">
             <LicenseCategory 
               category={1}
               title="Basic Trader"
               price="25,000 USDT"
               minVolume="$50,000"
+              icon={Shield}
+              color="blue"
               features={[
                 "1-year validity period",
                 "Individual trader verification",
                 "Basic compliance certification",
                 "Standard support response",
-                "Recognized on all exchanges"
+                "Recognized on major exchanges",
+                "Email support during business hours"
               ]}
               soldOut={true}
             />
@@ -52,13 +57,16 @@ const LicenseCategories = () => {
               title="Standard Trader"
               price="50,000 USDT"
               minVolume="$100,000"
+              icon={CheckCircle}
+              color="green"
               features={[
                 "1-year validity period",
                 "Enhanced verification process",
                 "Standard compliance certification",
                 "Priority support response",
-                "Recognized on all exchanges",
-                "Basic trading protection"
+                "Recognized on major exchanges",
+                "Basic trading protection coverage",
+                "Phone support during business hours"
               ]}
               soldOut={true}
             />
@@ -68,33 +76,41 @@ const LicenseCategories = () => {
               title="Advanced Trader"
               price="70,000 USDT"
               minVolume="$250,000"
+              icon={Star}
+              color="purple"
               features={[
                 "1-year validity period",
                 "Priority verification process",
                 "Advanced compliance certification",
                 "24/7 support response",
-                "Recognized on all exchanges",
-                "Trading strategy protection"
-               ]}
-               onApplyClick={openApplicationDialog}
-             />
+                "Recognized on major exchanges",
+                "Trading strategy protection",
+                "Dedicated account manager",
+                "Advanced risk management tools"
+              ]}
+              onApplyClick={openApplicationDialog}
+            />
 
-             <LicenseCategory 
-               category={4}
-               title="Professional Trader"
-               price="150,000 USDT"
-               minVolume="$500,000"
-               features={[
-                 "1-year validity period",
-                 "Fast-track verification",
-                 "Professional compliance cert",
-                 "Dedicated support line",
-                 "Global regulatory recognition",
-                 "Advanced trading protection",
-                 "Multi-exchange access"
-               ]}
-               popular
-               onApplyClick={openApplicationDialog}
+            <LicenseCategory 
+              category={4}
+              title="Professional Trader"
+              price="150,000 USDT"
+              minVolume="$500,000"
+              icon={Crown}
+              color="gold"
+              features={[
+                "1-year validity period",
+                "Fast-track verification",
+                "Professional compliance cert",
+                "Dedicated support line",
+                "Global regulatory recognition",
+                "Advanced trading protection",
+                "Multi-exchange access privileges",
+                "Custom compliance framework",
+                "Premium trading tools access"
+              ]}
+              popular
+              onApplyClick={openApplicationDialog}
             />
             
             <LicenseCategory 
@@ -102,6 +118,8 @@ const LicenseCategories = () => {
               title="Institutional Trader"
               price="250,000 USDT"
               minVolume="$1,000,000+"
+              icon={Building}
+              color="platinum"
               features={[
                 "1-year validity period",
                 "Expedited verification process",
@@ -110,44 +128,81 @@ const LicenseCategories = () => {
                 "Global regulatory recognition",
                 "Full trading strategy protection",
                 "Multi-user access controls",
-                "Custom compliance framework"
+                "Custom compliance framework",
+                "White-label solutions available",
+                "API access for system integration"
               ]}
+              onApplyClick={openApplicationDialog}
+            />
+
+            <LicenseCategory 
+              category={6}
+              title="Executive Trader"
+              price="500,000 USDT"
+              minVolume="$2,500,000+"
+              icon={Trophy}
+              color="diamond"
+              features={[
+                "1-year validity period",
+                "Instant verification process",
+                "Executive compliance certification",
+                "Personal account executive",
+                "Worldwide regulatory recognition",
+                "Complete trading ecosystem protection",
+                "Unlimited user access controls",
+                "Bespoke compliance framework",
+                "Private trading infrastructure",
+                "Direct regulatory liaison",
+                "Custom integration solutions"
+              ]}
+              exclusive
               onApplyClick={openApplicationDialog}
             />
           </div>
           
-          <Card className="mt-8">
+          {/* Enterprise Solution Card */}
+          <Card className="border-2 border-accent/30 shadow-xl">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MessageSquareText className="h-5 w-5" />
+              <CardTitle className="flex items-center gap-3 text-2xl">
+                <MessageSquareText className="h-6 w-6 text-accent" />
                 Enterprise Solution
               </CardTitle>
-              <CardDescription>For corporate entities and institutional clients requiring customized licensing</CardDescription>
+              <CardDescription className="text-lg">
+                Tailored licensing solutions for large corporations and institutional clients requiring customized regulatory frameworks
+              </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-primary" />
-                    <span>Corporate entity verification</span>
+              <div className="grid md:grid-cols-2 gap-8">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <span className="font-medium">Corporate entity verification</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-primary" />
-                    <span>Custom compliance framework</span>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <span className="font-medium">Custom compliance framework</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-primary" />
-                    <span>Dedicated legal advisors</span>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <span className="font-medium">Dedicated legal advisors</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-500" />
+                    <span className="font-medium">Global regulatory coordination</span>
                   </div>
                 </div>
-                <Button 
-                  variant="outline" 
-                  className="gap-2" 
-                  onClick={() => setSupportDialogOpen(true)}
-                >
-                  Contact Support
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
+                <div className="flex items-center justify-center">
+                  <Button 
+                    size="lg"
+                    variant="outline" 
+                    className="gap-3 border-2 border-accent/30 hover:bg-accent/10 px-8 py-6" 
+                    onClick={() => setSupportDialogOpen(true)}
+                  >
+                    <MessageSquareText className="h-5 w-5" />
+                    Contact Enterprise Team
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -164,62 +219,113 @@ interface LicenseCategoryProps {
   title: string;
   price: string;
   minVolume: string;
+  icon: any;
+  color: string;
   features: string[];
   popular?: boolean;
+  exclusive?: boolean;
   soldOut?: boolean;
   onApplyClick?: () => void;
 }
 
-const LicenseCategory = ({ category, title, price, minVolume, features, popular, soldOut, onApplyClick }: LicenseCategoryProps) => {
+const LicenseCategory = ({ category, title, price, minVolume, icon: Icon, color, features, popular, exclusive, soldOut, onApplyClick }: LicenseCategoryProps) => {
+  const getColorClasses = (color: string) => {
+    const colorMap = {
+      blue: 'from-blue-500/20 to-blue-600/20 border-blue-500/30',
+      green: 'from-green-500/20 to-green-600/20 border-green-500/30',
+      purple: 'from-purple-500/20 to-purple-600/20 border-purple-500/30',
+      gold: 'from-yellow-500/20 to-orange-500/20 border-yellow-500/30',
+      platinum: 'from-gray-400/20 to-gray-600/20 border-gray-500/30',
+      diamond: 'from-cyan-500/20 to-purple-500/20 border-cyan-500/30'
+    };
+    return colorMap[color as keyof typeof colorMap] || colorMap.blue;
+  };
+
   return (
-    <Card className={`relative h-full ${popular ? 'border-accent shadow-lg' : ''} ${soldOut ? 'opacity-60' : ''}`}>
+    <Card className={`relative h-full transition-all duration-300 hover:shadow-2xl hover:scale-[1.02] ${
+      popular ? 'border-2 border-accent shadow-xl' : 
+      exclusive ? 'border-2 border-gradient-to-r from-cyan-500 to-purple-500 shadow-2xl' : 
+      'border border-border/60'
+    } ${soldOut ? 'opacity-70' : ''}`}>
       {popular && !soldOut && (
         <div className="absolute -top-4 left-0 right-0 flex justify-center">
-          <Badge variant="secondary" className="bg-accent text-white border-0">Recommended</Badge>
+          <Badge className="bg-accent text-white border-0 px-4 py-1 text-sm font-semibold">
+            <Star className="h-4 w-4 mr-1" />
+            Most Popular
+          </Badge>
+        </div>
+      )}
+      
+      {exclusive && !soldOut && (
+        <div className="absolute -top-4 left-0 right-0 flex justify-center">
+          <Badge className="bg-gradient-to-r from-cyan-500 to-purple-500 text-white border-0 px-4 py-1 text-sm font-semibold">
+            <Zap className="h-4 w-4 mr-1" />
+            Exclusive
+          </Badge>
         </div>
       )}
       
       {soldOut && (
         <div className="absolute -top-4 left-0 right-0 flex justify-center">
-          <Badge variant="destructive" className="bg-red-500 text-white border-0">Sold Out</Badge>
+          <Badge variant="destructive" className="bg-red-500 text-white border-0 px-4 py-1 text-sm font-semibold">
+            <XCircle className="h-4 w-4 mr-1" />
+            Sold Out
+          </Badge>
         </div>
       )}
       
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <Badge variant="outline" className="mb-2">Category {category}</Badge>
-          {popular && !soldOut && <CheckCircle className="h-5 w-5 text-accent" />}
-          {soldOut && <XCircle className="h-5 w-5 text-red-500" />}
+      <CardHeader className="pb-4">
+        <div className="flex items-center justify-between mb-4">
+          <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${getColorClasses(color)} border-2 flex items-center justify-center`}>
+            <Icon className="h-7 w-7 text-foreground" />
+          </div>
+          <Badge variant="outline" className="text-sm font-medium">
+            Category {category}
+          </Badge>
         </div>
-        <CardTitle>{title}</CardTitle>
-        <CardDescription>Trade Volume: {minVolume} minimum</CardDescription>
+        <CardTitle className="text-xl font-bold">{title}</CardTitle>
+        <CardDescription className="text-base">
+          Trade Volume: {minVolume} minimum
+        </CardDescription>
       </CardHeader>
       
-      <CardContent>
+      <CardContent className="pb-4">
         <div className="mb-6">
-          <div className="text-3xl font-bold">{price}</div>
-          <p className="text-sm text-muted-foreground">1-year license validity</p>
+          <div className="text-4xl font-bold text-accent mb-2">{price}</div>
+          <p className="text-sm text-muted-foreground font-medium">1-year license validity</p>
         </div>
         
-        <ul className="space-y-2">
+        <div className="space-y-3">
           {features.map((feature, index) => (
-            <li key={index} className="flex items-start gap-2">
-              <CheckCircle className="h-4 w-4 text-primary mt-1 shrink-0" />
-              <span className="text-sm">{feature}</span>
-            </li>
+            <div key={index} className="flex items-start gap-3">
+              <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+              <span className="text-sm leading-relaxed">{feature}</span>
+            </div>
           ))}
-        </ul>
+        </div>
       </CardContent>
       
       <CardFooter>
         <Button 
-          className="w-full gap-2" 
-          variant={popular && !soldOut ? "default" : "outline"} 
+          className={`w-full gap-2 py-3 font-semibold ${
+            popular && !soldOut ? 'btn-primary' : 
+            exclusive && !soldOut ? 'bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600' : 
+            'variant-outline'
+          }`}
           onClick={onApplyClick}
           disabled={soldOut}
         >
-          {soldOut ? "Sold Out" : "Apply Now"}
-          {!soldOut && <ChevronRight className="h-4 w-4" />}
+          {soldOut ? (
+            <>
+              <XCircle className="h-4 w-4" />
+              Sold Out
+            </>
+          ) : (
+            <>
+              Apply Now
+              <ChevronRight className="h-4 w-4" />
+            </>
+          )}
         </Button>
       </CardFooter>
     </Card>

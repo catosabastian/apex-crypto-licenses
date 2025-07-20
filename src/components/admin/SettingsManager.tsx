@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -69,7 +68,7 @@ export const SettingsManager = () => {
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4">
-                  {[1, 2, 3, 4, 5].map((category) => (
+                  {[1, 2, 3, 4, 5, 6].map((category) => (
                     <div key={category} className="flex items-center gap-4">
                       <Label className="w-24">Category {category}</Label>
                       <Input
@@ -96,7 +95,7 @@ export const SettingsManager = () => {
             </Dialog>
           </CardHeader>
           <CardContent className="space-y-4">
-            {[1, 2, 3, 4, 5].map((category) => (
+            {[1, 2, 3, 4, 5, 6].map((category) => (
               <div key={category} className="flex items-center justify-between p-4 border rounded-lg">
                 <div>
                   <p className="font-medium">Category {category}</p>
