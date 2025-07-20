@@ -10,7 +10,7 @@ import { CheckCircle, Clock, Shield, TrendingUp, Users, Globe, Wallet, Copy, Che
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import QRCode from 'react-qr-code';
-import { unifiedDataManager, ContentSettings } from '@/utils/unifiedDataManager';
+import { supabaseDataManager } from '@/utils/supabaseDataManager';
 import EnhancedPersonalInfoSection from '@/components/form/EnhancedPersonalInfoSection';
 import EnhancedLicenseCategorySection from '@/components/form/EnhancedLicenseCategorySection';
 import EnhancedPaymentSection from '@/components/form/EnhancedPaymentSection';
@@ -43,7 +43,8 @@ const EnhancedApplicationForm = () => {
     paymentMethod: 'BTC'
   });
   
-  const [settings, setSettings] = useState<ContentSettings>(unifiedDataManager.getSettings());
+  const [settings, setSettings] = useState<any>({});
+  const [paymentAddresses, setPaymentAddresses] = useState<any[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
@@ -54,13 +55,22 @@ const EnhancedApplicationForm = () => {
 
   const mountedRef = useRef(true);
 
-  // Real-time settings updates
+  // Load initial data and set up real-time updates
   useEffect(() => {
-    const handleSettingsUpdate = (data: any) => {
+    const loadData = async () => {
+      const [settingsData, addressesData] = await Promise.all([
+        supabaseDataManager.getSettings(),
+        supabaseDataManager.getPaymentAddresses()
+      ]);
+      
+      setSettings(settingsData);
+      setPaymentAddresses(addressesData);
+    };
+
+    const handleSettingsUpdate = () => {
       if (!mountedRef.current) return;
       
-      const newSettings = data.settings || data;
-      setSettings(newSettings);
+      loadData();
       setUpdateCount(prev => prev + 1);
       
       toast({
@@ -69,11 +79,14 @@ const EnhancedApplicationForm = () => {
       });
     };
 
-    unifiedDataManager.addEventListener('settings_updated', handleSettingsUpdate);
+    loadData();
+    supabaseDataManager.addEventListener('settings_updated', handleSettingsUpdate);
+    supabaseDataManager.addEventListener('payment_addresses_updated', handleSettingsUpdate);
 
     return () => {
       mountedRef.current = false;
-      unifiedDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
+      supabaseDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
+      supabaseDataManager.removeEventListener('payment_addresses_updated', handleSettingsUpdate);
     };
   }, []);
 
@@ -152,13 +165,19 @@ const EnhancedApplicationForm = () => {
     }
   ];
 
-  const paymentOptions = [
-    { id: 'BTC', name: 'Bitcoin', address: settings.bitcoinAddress, icon: '₿' },
-    { id: 'ETH', name: 'Ethereum', address: settings.ethereumAddress, icon: 'Ξ' },
-    { id: 'USDT_TRON', name: 'USDT (Tron)', address: settings.usdtTronAddress, icon: '₮' },
-    { id: 'USDT_ETH', name: 'USDT (Ethereum)', address: settings.usdtEthereumAddress, icon: '₮' },
-    { id: 'XRP', name: 'XRP', address: settings.xrpAddress, icon: '◉' }
-  ];
+  const paymentOptions = paymentAddresses.map(addr => ({
+    id: addr.cryptocurrency,
+    name: addr.cryptocurrency === 'BTC' ? 'Bitcoin' :
+          addr.cryptocurrency === 'ETH' ? 'Ethereum' :
+          addr.cryptocurrency === 'USDT_TRON' ? 'USDT (Tron)' :
+          addr.cryptocurrency === 'USDT_ETH' ? 'USDT (Ethereum)' :
+          addr.cryptocurrency === 'XRP' ? 'XRP' : addr.cryptocurrency,
+    address: addr.address,
+    icon: addr.cryptocurrency === 'BTC' ? '₿' :
+          addr.cryptocurrency === 'ETH' ? 'Ξ' :
+          addr.cryptocurrency.includes('USDT') ? '₮' :
+          addr.cryptocurrency === 'XRP' ? '◉' : '₿'
+  }));
 
   const handleFieldChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -229,18 +248,26 @@ const EnhancedApplicationForm = () => {
         return;
       }
       
-      const newApplication = unifiedDataManager.addApplication({
+      const newApplication = await supabaseDataManager.createApplication({
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
         company: formData.company,
-        licenseType: selectedCategory?.name || `Category ${formData.category}`
+        category: selectedCategory?.name || `Category ${formData.category}`,
+        notes: formData.notes,
+        status: 'pending',
+        payment_method: formData.paymentMethod,
+        amount: selectedCategory?.price || 'Contact for pricing'
       });
 
-      toast({
-        title: "Application Submitted Successfully",
-        description: `Application ID: ${newApplication.id}. You will receive confirmation shortly.`,
-      });
+      if (newApplication) {
+        toast({
+          title: "Application Submitted Successfully",
+          description: `Application ID: ${newApplication.id}. You will receive confirmation shortly.`,
+        });
+      } else {
+        throw new Error('Failed to create application');
+      }
 
       // Reset form
       setFormData({

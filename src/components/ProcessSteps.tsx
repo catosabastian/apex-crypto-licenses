@@ -4,21 +4,39 @@ import { Button } from '@/components/ui/button';
 import { CreditCard, Upload, Award, ArrowRight } from 'lucide-react';
 import { useApplicationDialog } from '@/components/ApplicationDialog';
 import { useEffect, useState } from 'react';
-import { unifiedDataManager } from '@/utils/unifiedDataManager';
+import { supabaseDataManager } from '@/utils/supabaseDataManager';
 
 const ProcessSteps = () => {
-  const [content, setContent] = useState(unifiedDataManager.getContent().process);
+  const [content, setContent] = useState({
+    title: 'How to Get Your License',
+    subtitle: 'Simple Process',
+    description: 'Follow our streamlined 3-step process to obtain your cryptocurrency trading license quickly and efficiently.',
+    steps: [],
+    ctaText: 'Start Your Application'
+  });
   const { openApplicationDialog } = useApplicationDialog();
 
   useEffect(() => {
-    const handleContentUpdate = () => {
-      setContent(unifiedDataManager.getContent().process);
+    const loadContent = async () => {
+      const processContent = await supabaseDataManager.getContent('process');
+      setContent({
+        title: processContent.title || 'How to Get Your License',
+        subtitle: processContent.subtitle || 'Simple Process',
+        description: processContent.description || 'Follow our streamlined 3-step process to obtain your cryptocurrency trading license quickly and efficiently.',
+        steps: processContent.steps || [],
+        ctaText: processContent.ctaText || 'Start Your Application'
+      });
     };
 
-    unifiedDataManager.addEventListener('content_updated', handleContentUpdate);
+    const handleContentUpdate = () => {
+      loadContent();
+    };
+
+    loadContent();
+    supabaseDataManager.addEventListener('content_updated', handleContentUpdate);
     
     return () => {
-      unifiedDataManager.removeEventListener('content_updated', handleContentUpdate);
+      supabaseDataManager.removeEventListener('content_updated', handleContentUpdate);
     };
   }, []);
 

@@ -8,26 +8,54 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useState, useEffect } from 'react';
-import { isValidLicense, sampleLicense } from '@/utils/licenseData';
 import { toast } from '@/components/ui/use-toast';
-import { unifiedDataManager } from '@/utils/unifiedDataManager';
+import { supabaseDataManager } from '@/utils/supabaseDataManager';
 
 const VerificationSection = () => {
-  const [content, setContent] = useState(unifiedDataManager.getContent().verification);
+  const [content, setContent] = useState({
+    subtitle: 'License Verification',
+    title: 'Verify Any Trading License',
+    description: 'Use our secure verification system to check the authenticity of any cryptocurrency trading license.',
+    cards: [
+      { icon: 'Shield', title: 'Secure Verification', description: 'Advanced cryptographic verification ensures authenticity.' },
+      { icon: 'Search', title: 'Instant Results', description: 'Get verification results in seconds with our real-time system.' },
+      { icon: 'Clock', title: 'Always Available', description: 'Our verification system is available 24/7 for your convenience.' }
+    ],
+    timeline: {
+      title: 'Verification Process Timeline',
+      steps: [
+        { number: 1, title: 'License Submission', description: 'Submit your license ID for verification', badge: 'Instant', isCompleted: true },
+        { number: 2, title: 'Database Check', description: 'System checks our secure license database', badge: '< 5 seconds', isCompleted: true },
+        { number: 3, title: 'Verification Result', description: 'Receive detailed verification report', badge: 'Complete', isCompleted: true }
+      ]
+    }
+  });
   const [licenseId, setLicenseId] = useState('');
   const [isVerified, setIsVerified] = useState<boolean | null>(null);
   const [verifiedLicense, setVerifiedLicense] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [sampleLicense] = useState({
+    id: 'CL-2023-8294-T2',
+    holder: 'APEX Trading Solutions Ltd.',
+    type: 'Professional Trader',
+    issueDate: '2023-11-15',
+    expiryDate: '2024-11-15',
+    platforms: 'Binance, Coinbase Pro, Kraken, FTX'
+  });
 
   useEffect(() => {
-    const handleContentUpdate = () => {
-      setContent(unifiedDataManager.getContent().verification);
+    const loadContent = async () => {
+      const verificationContent = await supabaseDataManager.getContent('verification');
+      if (verificationContent && Object.keys(verificationContent).length > 0) {
+        setContent(prev => ({ ...prev, ...verificationContent }));
+      }
     };
 
-    unifiedDataManager.addEventListener('content_updated', handleContentUpdate);
+    loadContent();
+    supabaseDataManager.addEventListener('content_updated', loadContent);
     
     return () => {
-      unifiedDataManager.removeEventListener('content_updated', handleContentUpdate);
+      supabaseDataManager.removeEventListener('content_updated', loadContent);
     };
   }, []);
 
@@ -37,7 +65,7 @@ const VerificationSection = () => {
     Clock
   };
 
-  const handleVerify = () => {
+  const handleVerify = async () => {
     if (!licenseId.trim()) {
       toast({
         title: "Error",
@@ -47,19 +75,19 @@ const VerificationSection = () => {
       return;
     }
 
-    const verified = isValidLicense(licenseId.trim());
+    const license = await supabaseDataManager.verifyLicense(licenseId.trim());
+    const verified = license !== null;
     setIsVerified(verified);
     
-    if (verified) {
-      // Set verified license data for display
+    if (verified && license) {
       setVerifiedLicense({
-        id: licenseId.trim(),
-        holder: sampleLicense.holder,
-        type: sampleLicense.type,
-        issueDate: sampleLicense.issueDate,
-        expiryDate: sampleLicense.expiryDate,
-        platforms: sampleLicense.platforms,
-        status: "Active"
+        id: license.license_id,
+        holder: license.holder_name,
+        type: license.license_type,
+        issueDate: license.issue_date,
+        expiryDate: license.expiry_date,
+        platforms: license.platforms || 'All major exchanges',
+        status: license.status === 'active' ? 'Active' : license.status
       });
       
       toast({
