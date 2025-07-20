@@ -1,54 +1,32 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { validLicenses, generateLicenseId } from '@/utils/licenseData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Shield, Copy, Search, Download, Filter, LogOut, Users, FileText, Settings, BarChart3, Mail, Plus, Edit, Trash2, Eye } from 'lucide-react';
-import { toast } from '@/components/ui/use-toast';
+import { Shield, Copy, Search, Download, Filter, LogOut, BarChart3, FileText, Settings, Mail } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { dataManager } from '@/utils/dataManager';
+import { ApplicationsManager } from '@/components/admin/ApplicationsManager';
+import { ContactsManager } from '@/components/admin/ContactsManager';
+import { SettingsManager } from '@/components/admin/SettingsManager';
 
 const Admin = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTier, setFilterTier] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState('licenses');
+  const [analytics, setAnalytics] = useState(dataManager.getAnalytics());
   const { logout } = useAuth();
   const navigate = useNavigate();
-  
-  // Mock wallet addresses data
-  const WALLET_ADDRESSES = {
-    Bitcoin: "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa",
-    Ethereum: "0x742d35Cc6663C65C926d75d60e3B3d97c8a0e0e0",
-    USDT: "TG3XXyExBkPp9nzdajDGFahC9nyKERJpUN"
-  };
-  
-  // Mock data for demonstration
-  const [applications] = useState([
-    { id: 1, name: 'John Doe', email: 'john@example.com', category: '3', status: 'pending', date: '2024-01-15', amount: '70,000 USDT' },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com', category: '4', status: 'approved', date: '2024-01-14', amount: '150,000 USDT' },
-    { id: 3, name: 'Acme Corp', email: 'admin@acme.com', category: '5', status: 'review', date: '2024-01-13', amount: '250,000 USDT' },
-  ]);
 
-  const [contacts] = useState([
-    { id: 1, name: 'Alice Johnson', email: 'alice@example.com', subject: 'License Inquiry', message: 'I need help with my application...', date: '2024-01-15', status: 'new' },
-    { id: 2, name: 'Bob Wilson', email: 'bob@example.com', subject: 'Payment Issue', message: 'My payment was not processed...', date: '2024-01-14', status: 'replied' },
-  ]);
-
-  const [websiteSettings] = useState({
-    category1Price: '25,000 USDT',
-    category2Price: '50,000 USDT',
-    category3Price: '70,000 USDT',
-    category4Price: '150,000 USDT',
-    category5Price: '250,000 USDT',
-    category1Available: false,
-    category2Available: false,
-    category3Available: true,
-    category4Available: true,
-    category5Available: true,
-  });
+  // Update analytics when tab changes
+  useEffect(() => {
+    setAnalytics(dataManager.getAnalytics());
+  }, [activeTab]);
 
   // Copy license ID to clipboard
   const handleCopy = (licenseId: string) => {
@@ -104,18 +82,6 @@ const Admin = () => {
   const handleLogout = () => {
     logout();
     navigate('/login');
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'approved': return 'bg-green-100 text-green-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'review': return 'bg-blue-100 text-blue-800';
-      case 'rejected': return 'bg-red-100 text-red-800';
-      case 'new': return 'bg-purple-100 text-purple-800';
-      case 'replied': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
   };
 
   return (
@@ -241,152 +207,15 @@ const Admin = () => {
         </TabsContent>
 
         <TabsContent value="applications" className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-semibold">License Applications</h2>
-            <Button className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              New Application
-            </Button>
-          </div>
-
-          <div className="grid gap-4">
-            {applications.map((app) => (
-              <Card key={app.id}>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <div>
-                    <CardTitle className="text-lg">{app.name}</CardTitle>
-                    <CardDescription>{app.email}</CardDescription>
-                  </div>
-                  <Badge className={getStatusColor(app.status)}>
-                    {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
-                  </Badge>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                    <div>
-                      <p className="font-medium">Category</p>
-                      <p className="text-muted-foreground">Category {app.category}</p>
-                    </div>
-                    <div>
-                      <p className="font-medium">Amount</p>
-                      <p className="text-muted-foreground">{app.amount}</p>
-                    </div>
-                    <div>
-                      <p className="font-medium">Date</p>
-                      <p className="text-muted-foreground">{app.date}</p>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button size="sm" variant="outline" className="flex items-center gap-1">
-                        <Eye className="h-4 w-4" />
-                        View
-                      </Button>
-                      <Button size="sm" variant="outline" className="flex items-center gap-1">
-                        <Edit className="h-4 w-4" />
-                        Edit
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <ApplicationsManager />
         </TabsContent>
 
         <TabsContent value="contacts" className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-semibold">Contact Messages</h2>
-            <Button variant="outline" className="flex items-center gap-2">
-              <Mail className="h-4 w-4" />
-              Compose Email
-            </Button>
-          </div>
-
-          <div className="grid gap-4">
-            {contacts.map((contact) => (
-              <Card key={contact.id}>
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <div>
-                    <CardTitle className="text-lg">{contact.name}</CardTitle>
-                    <CardDescription>{contact.email}</CardDescription>
-                  </div>
-                  <Badge className={getStatusColor(contact.status)}>
-                    {contact.status.charAt(0).toUpperCase() + contact.status.slice(1)}
-                  </Badge>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    <p className="font-medium">{contact.subject}</p>
-                    <p className="text-muted-foreground text-sm">{contact.message}</p>
-                    <p className="text-xs text-muted-foreground">{contact.date}</p>
-                  </div>
-                </CardContent>
-                <CardFooter className="pt-0">
-                  <div className="flex gap-2">
-                    <Button size="sm" className="flex items-center gap-1">
-                      <Mail className="h-4 w-4" />
-                      Reply
-                    </Button>
-                    <Button size="sm" variant="outline">
-                      Mark Read
-                    </Button>
-                  </div>
-                </CardFooter>
-              </Card>
-            ))}
-          </div>
+          <ContactsManager />
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-6">
-          <h2 className="text-2xl font-semibold">Website Settings</h2>
-          
-          <div className="grid gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>License Pricing</CardTitle>
-                <CardDescription>Manage license pricing and availability</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {[1, 2, 3, 4, 5].map((category) => (
-                  <div key={category} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div>
-                      <p className="font-medium">Category {category}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {websiteSettings[`category${category}Price` as keyof typeof websiteSettings]}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <Badge variant={websiteSettings[`category${category}Available` as keyof typeof websiteSettings] ? "default" : "secondary"}>
-                        {websiteSettings[`category${category}Available` as keyof typeof websiteSettings] ? "Available" : "Sold Out"}
-                      </Badge>
-                      <Button size="sm" variant="outline">
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Payment Addresses</CardTitle>
-                <CardDescription>Manage cryptocurrency wallet addresses</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {Object.entries(WALLET_ADDRESSES).map(([crypto, address]) => (
-                  <div key={crypto} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div>
-                      <p className="font-medium">{crypto}</p>
-                      <p className="text-sm text-muted-foreground font-mono">{address as string}</p>
-                    </div>
-                    <Button size="sm" variant="outline">
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-          </div>
+          <SettingsManager />
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-6">
@@ -399,8 +228,10 @@ const Admin = () => {
                 <FileText className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">126</div>
-                <p className="text-xs text-muted-foreground">+12% from last month</p>
+                <div className="text-2xl font-bold">{analytics.totalApplications}</div>
+                <p className="text-xs text-muted-foreground">
+                  {analytics.pendingApplications} pending review
+                </p>
               </CardContent>
             </Card>
             
@@ -410,8 +241,10 @@ const Admin = () => {
                 <Shield className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">89</div>
-                <p className="text-xs text-muted-foreground">+5% from last month</p>
+                <div className="text-2xl font-bold">{analytics.activeLicenses}</div>
+                <p className="text-xs text-muted-foreground">
+                  {analytics.approvedApplications} approved this month
+                </p>
               </CardContent>
             </Card>
             
@@ -421,19 +254,19 @@ const Admin = () => {
                 <BarChart3 className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">$2.4M</div>
-                <p className="text-xs text-muted-foreground">+18% from last month</p>
+                <div className="text-2xl font-bold">${analytics.totalRevenue.toLocaleString()}</div>
+                <p className="text-xs text-muted-foreground">From approved applications</p>
               </CardContent>
             </Card>
             
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Pending Reviews</CardTitle>
-                <Users className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium">New Messages</CardTitle>
+                <Mail className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">24</div>
-                <p className="text-xs text-muted-foreground">-8% from last month</p>
+                <div className="text-2xl font-bold">{analytics.newContacts}</div>
+                <p className="text-xs text-muted-foreground">Requiring attention</p>
               </CardContent>
             </Card>
           </div>
