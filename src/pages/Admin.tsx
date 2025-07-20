@@ -18,6 +18,13 @@ const Admin = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
   
+  // Mock wallet addresses data
+  const WALLET_ADDRESSES = {
+    Bitcoin: "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa",
+    Ethereum: "0x742d35Cc6663C65C926d75d60e3B3d97c8a0e0e0",
+    USDT: "TG3XXyExBkPp9nzdajDGFahC9nyKERJpUN"
+  };
+  
   // Mock data for demonstration
   const [applications] = useState([
     { id: 1, name: 'John Doe', email: 'john@example.com', category: '3', status: 'pending', date: '2024-01-15', amount: '70,000 USDT' },
@@ -370,7 +377,7 @@ const Admin = () => {
                   <div key={crypto} className="flex items-center justify-between p-4 border rounded-lg">
                     <div>
                       <p className="font-medium">{crypto}</p>
-                      <p className="text-sm text-muted-foreground font-mono">{address}</p>
+                      <p className="text-sm text-muted-foreground font-mono">{address as string}</p>
                     </div>
                     <Button size="sm" variant="outline">
                       <Edit className="h-4 w-4" />
