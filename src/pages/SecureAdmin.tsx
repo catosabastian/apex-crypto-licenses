@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Shield, LogOut, BarChart3, FileText, Settings, Mail, Globe, Layers, Download } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/SecureAuthContext';
+import { useSecureAuth } from '@/contexts/SecureAuthContext';
 import { useNavigate } from 'react-router-dom';
 import { unifiedDataManager } from '@/utils/unifiedDataManager';
 import { ApplicationsManager } from '@/components/admin/ApplicationsManager';
@@ -17,7 +17,7 @@ import { ContentManager } from '@/components/admin/ContentManager';
 const SecureAdmin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [analytics, setAnalytics] = useState(unifiedDataManager.getAnalytics());
-  const { logout } = useAuth();
+  const { logout } = useSecureAuth();
   const navigate = useNavigate();
 
   // Update analytics when tab changes
