@@ -4,33 +4,23 @@ import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
 import { useApplicationDialog } from "./ApplicationDialog";
 import { useState, useEffect } from "react";
-import { dataManager, WebsiteSettings } from "@/utils/dataManager";
+import { unifiedDataManager, ContentSettings } from "@/utils/unifiedDataManager";
 
 const Footer = () => {
   const { openApplicationDialog } = useApplicationDialog();
-  const [settings, setSettings] = useState<WebsiteSettings>(dataManager.getSettings());
+  const [settings, setSettings] = useState<ContentSettings>(unifiedDataManager.getSettings());
   
   useEffect(() => {
     // Real-time settings update handler
-    const handleSettingsUpdate = (updatedSettings: WebsiteSettings) => {
-      setSettings(updatedSettings);
+    const handleSettingsUpdate = (data: { settings: ContentSettings }) => {
+      setSettings(data.settings);
     };
 
-    // Listen to dataManager events
-    dataManager.addEventListener('settings_updated', handleSettingsUpdate);
-    
-    // Listen to cross-tab events
-    const handleStorageChange = (event: CustomEvent) => {
-      if (event.type === 'apex_settings_updated') {
-        setSettings(event.detail);
-      }
-    };
-
-    window.addEventListener('apex_settings_updated', handleStorageChange as EventListener);
+    // Listen to unified data manager events
+    unifiedDataManager.addEventListener('settings_updated', handleSettingsUpdate);
 
     return () => {
-      dataManager.removeEventListener('settings_updated', handleSettingsUpdate);
-      window.removeEventListener('apex_settings_updated', handleStorageChange as EventListener);
+      unifiedDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
     };
   }, []);
   
@@ -81,6 +71,14 @@ const Footer = () => {
                   <div>{settings.country}</div>
                 </div>
               </li>
+              {settings.website && (
+                <li className="flex items-center gap-2">
+                  <Globe className="h-4 w-4 opacity-80" />
+                  <a href={settings.website} target="_blank" rel="noopener noreferrer" className="opacity-80 hover:opacity-100 transition-opacity">
+                    Visit Website
+                  </a>
+                </li>
+              )}
             </ul>
           </div>
         </div>

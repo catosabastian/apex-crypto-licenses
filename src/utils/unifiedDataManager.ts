@@ -37,6 +37,15 @@ export interface License {
   expiryDate: string;
 }
 
+export interface LicenseCategoryDetails {
+  name: string;
+  minVolume: string;
+  features: string[];
+  processingTime: string;
+  platforms: string[];
+  description: string;
+}
+
 export interface ContentSettings {
   // License pricing
   category1Price: string;
@@ -54,7 +63,15 @@ export interface ContentSettings {
   category5Available: boolean;
   category6Available: boolean;
   
-  // Payment addresses - expanded to include all supported cryptocurrencies
+  // License category details
+  category1Details: LicenseCategoryDetails;
+  category2Details: LicenseCategoryDetails;
+  category3Details: LicenseCategoryDetails;
+  category4Details: LicenseCategoryDetails;
+  category5Details: LicenseCategoryDetails;
+  category6Details: LicenseCategoryDetails;
+  
+  // Payment addresses - standardized and consistent
   bitcoinAddress: string;
   ethereumAddress: string;
   usdtTronAddress: string;
@@ -65,7 +82,28 @@ export interface ContentSettings {
   contactEmail: string;
   contactPhone: string;
   supportEmail: string;
+  salesEmail: string;
   companyAddress: string;
+  companyName: string;
+  website: string;
+  city: string;
+  country: string;
+  
+  // Performance metrics (now dynamic)
+  processingTime: string;
+  successRate: string;
+  totalLicensed: string;
+  countriesServed: string;
+  
+  // Social media links
+  twitterUrl: string;
+  linkedinUrl: string;
+  telegramUrl: string;
+  
+  // Enterprise settings
+  enterpriseMinAmount: string;
+  enterpriseContactEmail: string;
+  enterpriseFeatures: string[];
 }
 
 export interface Analytics {
@@ -77,7 +115,7 @@ export interface Analytics {
   newContacts: number;
 }
 
-// Default content structure
+// Default content structure with dynamic capabilities
 const defaultContent = {
   hero: {
     headline: "World's Leading Crypto Trading License Provider",
@@ -316,29 +354,113 @@ class UnifiedDataManager {
   private contentKey = 'apex_content';
   private eventListeners: { [key: string]: Function[] } = {};
   
-  // Updated default settings with all 5 cryptocurrency addresses
+  // Updated comprehensive default settings
   private defaultSettings: ContentSettings = {
+    // License pricing
     category1Price: '10,000 USDT',
     category2Price: '25,000 USDT',
     category3Price: '50,000 USDT',
     category4Price: '100,000 USDT',
     category5Price: '250,000 USDT',
     category6Price: '500,000 USDT',
+    
+    // Availability
     category1Available: true,
     category2Available: true,
     category3Available: true,
     category4Available: true,
     category5Available: true,
     category6Available: true,
-    bitcoinAddress: 'bc1qnsrsf0jr8aam9ngnu64c5s7rxue6gdjpauz6w4',
-    ethereumAddress: '0x7226A9A66E9e4f58fBcB67c9F1F7d52AFA9F8E2B',
-    usdtTronAddress: 'TCPUeoFf4QsfjWEMTFX25PW5FHxQtBBTM1',
-    usdtEthereumAddress: '0x7226A9A66E9e4f58fBcB67c9F1F7d52AFA9F8E2B',
-    xrpAddress: '0x7226A9A66E9e4f58fBcB67c9F1F7d52AFA9F8E2B',
+    
+    // License category details
+    category1Details: {
+      name: 'Basic Trader',
+      minVolume: '$50,000',
+      features: ['Basic trading rights', 'Standard compliance', 'Email support'],
+      processingTime: '24-48 hours',
+      platforms: ['Binance', 'Coinbase'],
+      description: 'Entry-level license for individual traders'
+    },
+    category2Details: {
+      name: 'Standard Trader',
+      minVolume: '$100,000',
+      features: ['Extended trading rights', 'Enhanced compliance', 'Priority support'],
+      processingTime: '12-24 hours',
+      platforms: ['Binance', 'Coinbase', 'Kraken'],
+      description: 'Standard license for active traders'
+    },
+    category3Details: {
+      name: 'Advanced Trader',
+      minVolume: '$250,000',
+      features: ['Advanced trading rights', 'Full compliance suite', 'Phone support'],
+      processingTime: '6-12 hours',
+      platforms: ['Binance', 'Coinbase', 'Kraken', 'KuCoin'],
+      description: 'Advanced license for professional traders'
+    },
+    category4Details: {
+      name: 'Professional Trader',
+      minVolume: '$500,000',
+      features: ['Professional trading rights', 'Premium compliance', 'Dedicated support'],
+      processingTime: '3-6 hours',
+      platforms: ['Binance', 'Coinbase', 'Kraken', 'KuCoin', 'Bybit'],
+      description: 'Professional license for high-volume traders'
+    },
+    category5Details: {
+      name: 'Institutional Trader',
+      minVolume: '$1,000,000+',
+      features: ['Institutional trading rights', 'Enterprise compliance', 'Account manager'],
+      processingTime: '1-3 hours',
+      platforms: ['All major exchanges', 'OTC desks', 'Institutional platforms'],
+      description: 'Institutional license for large organizations'
+    },
+    category6Details: {
+      name: 'Executive Trader',
+      minVolume: '$2,500,000+',
+      features: ['Executive trading rights', 'White-glove service', 'Custom solutions'],
+      processingTime: '1 hour',
+      platforms: ['All exchanges', 'Private markets', 'Exclusive access'],
+      description: 'Executive license for ultra-high-net-worth clients'
+    },
+    
+    // Standardized payment addresses (real format examples - admins should replace)
+    bitcoinAddress: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+    ethereumAddress: '0x742d35Cc6663C65C926d75d60e3B3d97c8a0e0e0',
+    usdtTronAddress: 'TG3XXyExBkPp9nzdajDGFahC9nyKERJpUN',
+    usdtEthereumAddress: '0x742d35Cc6663C65C926d75d60e3B3d97c8a0e0e0',
+    xrpAddress: 'rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH',
+    
+    // Contact information
     contactEmail: 'info@apexlicensing.com',
     contactPhone: '+1 (555) 123-4567',
     supportEmail: 'support@apexlicensing.com',
-    companyAddress: '123 Business District, Financial City, FC 12345'
+    salesEmail: 'sales@apexlicensing.com',
+    companyAddress: '123 Business District, Financial City, FC 12345',
+    companyName: 'APEX Crypto Licensing Regulatory',
+    website: 'https://apexcrypto.reg',
+    city: 'Financial City, FC 12345',
+    country: 'United States',
+    
+    // Performance metrics (now dynamic)
+    processingTime: '18 hours avg',
+    successRate: '99.9%',
+    totalLicensed: '15,000+',
+    countriesServed: '180+',
+    
+    // Social media links
+    twitterUrl: 'https://twitter.com/apexcrypto',
+    linkedinUrl: 'https://linkedin.com/company/apexcrypto',
+    telegramUrl: 'https://t.me/apexcrypto',
+    
+    // Enterprise settings
+    enterpriseMinAmount: '1,000,000 USDT',
+    enterpriseContactEmail: 'enterprise@apexlicensing.com',
+    enterpriseFeatures: [
+      'Custom compliance solutions',
+      'Dedicated account manager',
+      'Priority processing',
+      'Bulk licensing discounts',
+      'White-label solutions'
+    ]
   };
 
   constructor() {

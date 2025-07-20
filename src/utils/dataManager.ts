@@ -361,7 +361,8 @@ class DataManager {
       category4Available: true,
       category5Available: true,
       category6Available: true,
-      bitcoinAddress: "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa",
+      // Standardized payment addresses (consistent with unifiedDataManager)
+      bitcoinAddress: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
       ethereumAddress: "0x742d35Cc6663C65C926d75d60e3B3d97c8a0e0e0",
       usdtAddress: "TG3XXyExBkPp9nzdajDGFahC9nyKERJpUN",
       usdtTronAddress: "TG3XXyExBkPp9nzdajDGFahC9nyKERJpUN",

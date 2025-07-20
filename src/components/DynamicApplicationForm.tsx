@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
-import { dataManager, WebsiteSettings } from '@/utils/dataManager';
+import { unifiedDataManager, ContentSettings } from '@/utils/unifiedDataManager';
 import PersonalInfoSection from '@/components/form/PersonalInfoSection';
 import LicenseCategorySection from '@/components/form/LicenseCategorySection';
 import PaymentInfoSection from '@/components/form/PaymentInfoSection';
@@ -27,62 +27,80 @@ const DynamicApplicationForm = () => {
     notes: ''
   });
   
-  const [settings, setSettings] = useState<WebsiteSettings>(dataManager.getSettings());
+  const [settings, setSettings] = useState<ContentSettings>(unifiedDataManager.getSettings());
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     // Enhanced real-time settings update handler
-    const handleSettingsUpdate = (updatedSettings: WebsiteSettings) => {
-      console.log('Settings updated in form:', updatedSettings);
-      setSettings(updatedSettings);
+    const handleSettingsUpdate = (updatedData: { settings: ContentSettings }) => {
+      console.log('Settings updated in form:', updatedData.settings);
+      setSettings(updatedData.settings);
     };
 
-    // Listen to dataManager events
-    dataManager.addEventListener('settings_updated', handleSettingsUpdate);
-
-    // Listen to cross-tab events
-    const handleStorageChange = (event: CustomEvent) => {
-      if (event.type === 'apex_settings_updated') {
-        console.log('Cross-tab settings update detected:', event.detail);
-        setSettings(event.detail);
-      }
-    };
-
-    window.addEventListener('apex_settings_updated', handleStorageChange as EventListener);
-
-    // Also listen to direct localStorage changes
-    const handleStorageEvent = (event: StorageEvent) => {
-      if (event.key === 'apex_settings' && event.newValue) {
-        console.log('Direct localStorage change detected');
-        const newSettings = JSON.parse(event.newValue);
-        setSettings(newSettings);
-      }
-    };
-
-    window.addEventListener('storage', handleStorageEvent);
-
-    // Periodic settings refresh as fallback
-    const refreshInterval = setInterval(() => {
-      const currentSettings = dataManager.getSettings();
-      setSettings(currentSettings);
-    }, 5000);
+    // Listen to unified data manager events
+    unifiedDataManager.addEventListener('settings_updated', handleSettingsUpdate);
 
     return () => {
-      dataManager.removeEventListener('settings_updated', handleSettingsUpdate);
-      window.removeEventListener('apex_settings_updated', handleStorageChange as EventListener);
-      window.removeEventListener('storage', handleStorageEvent);
-      clearInterval(refreshInterval);
+      unifiedDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
     };
   }, []);
 
   const licenseCategories = [
-    { id: '1', name: 'Basic Trader', price: settings.category1Price, available: settings.category1Available, minVolume: '$50,000' },
-    { id: '2', name: 'Standard Trader', price: settings.category2Price, available: settings.category2Available, minVolume: '$100,000' },
-    { id: '3', name: 'Advanced Trader', price: settings.category3Price, available: settings.category3Available, minVolume: '$250,000' },
-    { id: '4', name: 'Professional Trader', price: settings.category4Price, available: settings.category4Available, minVolume: '$500,000' },
-    { id: '5', name: 'Institutional Trader', price: settings.category5Price, available: settings.category5Available, minVolume: '$1,000,000+' },
-    { id: '6', name: 'Executive Trader', price: settings.category6Price, available: settings.category6Available, minVolume: '$2,500,000+' }
+    { 
+      id: '1', 
+      name: settings.category1Details.name, 
+      price: settings.category1Price, 
+      available: settings.category1Available, 
+      minVolume: settings.category1Details.minVolume,
+      features: settings.category1Details.features,
+      processingTime: settings.category1Details.processingTime
+    },
+    { 
+      id: '2', 
+      name: settings.category2Details.name, 
+      price: settings.category2Price, 
+      available: settings.category2Available, 
+      minVolume: settings.category2Details.minVolume,
+      features: settings.category2Details.features,
+      processingTime: settings.category2Details.processingTime
+    },
+    { 
+      id: '3', 
+      name: settings.category3Details.name, 
+      price: settings.category3Price, 
+      available: settings.category3Available, 
+      minVolume: settings.category3Details.minVolume,
+      features: settings.category3Details.features,
+      processingTime: settings.category3Details.processingTime
+    },
+    { 
+      id: '4', 
+      name: settings.category4Details.name, 
+      price: settings.category4Price, 
+      available: settings.category4Available, 
+      minVolume: settings.category4Details.minVolume,
+      features: settings.category4Details.features,
+      processingTime: settings.category4Details.processingTime
+    },
+    { 
+      id: '5', 
+      name: settings.category5Details.name, 
+      price: settings.category5Price, 
+      available: settings.category5Available, 
+      minVolume: settings.category5Details.minVolume,
+      features: settings.category5Details.features,
+      processingTime: settings.category5Details.processingTime
+    },
+    { 
+      id: '6', 
+      name: settings.category6Details.name, 
+      price: settings.category6Price, 
+      available: settings.category6Available, 
+      minVolume: settings.category6Details.minVolume,
+      features: settings.category6Details.features,
+      processingTime: settings.category6Details.processingTime
+    }
   ];
 
   const handleFieldChange = (field: string, value: string) => {
@@ -132,16 +150,15 @@ const DynamicApplicationForm = () => {
         return;
       }
       
-      const newApplication = dataManager.addApplication({
+      const newApplication = unifiedDataManager.addApplication({
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
         company: formData.company,
-        category: selectedCategory?.name || `Category ${formData.category}`,
-        status: 'pending' as const,
-        amount: selectedCategory?.price || '0',
-        documents: [],
-        notes: formData.notes
+        country: '',
+        licenseType: selectedCategory?.name || `Category ${formData.category}`,
+        walletAddress: '',
+        additionalInfo: formData.notes
       });
 
       console.log('Application added successfully:', newApplication);

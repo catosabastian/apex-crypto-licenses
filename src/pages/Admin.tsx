@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { validLicenses, generateLicenseId } from '@/utils/licenseData';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,7 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Shield, Copy, Search, Download, Filter, LogOut, BarChart3, FileText, Settings, Mail, Globe, Layers } from 'lucide-react';
+import { Shield, Copy, Search, Download, Filter, LogOut, BarChart3, FileText, Settings, Mail, Globe, Layers, Wallet } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -17,6 +16,7 @@ import { ContactsManager } from '@/components/admin/ContactsManager';
 import { UnifiedSettingsManager } from '@/components/admin/UnifiedSettingsManager';
 import { LicenseManager } from '@/components/admin/LicenseManager';
 import { ContentManager } from '@/components/admin/ContentManager';
+import { PaymentAddressManager } from '@/components/admin/PaymentAddressManager';
 
 const Admin = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -113,7 +113,7 @@ const Admin = () => {
       </header>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="dashboard" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             Dashboard
@@ -133,6 +133,10 @@ const Admin = () => {
           <TabsTrigger value="content" className="flex items-center gap-2">
             <Globe className="h-4 w-4" />
             Content
+          </TabsTrigger>
+          <TabsTrigger value="payments" className="flex items-center gap-2">
+            <Wallet className="h-4 w-4" />
+            Payments
           </TabsTrigger>
           <TabsTrigger value="settings" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
@@ -212,6 +216,10 @@ const Admin = () => {
 
         <TabsContent value="content" className="space-y-6">
           <ContentManager />
+        </TabsContent>
+
+        <TabsContent value="payments" className="space-y-6">
+          <PaymentAddressManager />
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-6">
