@@ -10,12 +10,11 @@ import FeaturesSection from '@/components/FeaturesSection';
 import StatsSection from '@/components/StatsSection';
 import VerificationSection from '@/components/VerificationSection';
 import Footer from '@/components/Footer';
-import ApplicationDialog from '@/components/ApplicationDialog';
+import { ApplicationDialogProvider } from '@/components/ApplicationDialog';
 import SupportDialog from '@/components/SupportDialog';
 import UnifiedApplicationForm from '@/components/UnifiedApplicationForm';
 
 const Index = () => {
-  const [showApplicationDialog, setShowApplicationDialog] = useState(false);
   const [showSupportDialog, setShowSupportDialog] = useState(false);
 
   // Scroll to hash if present
@@ -32,35 +31,27 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen">
-      <Header 
-        onApplyClick={() => setShowApplicationDialog(true)}
-        onSupportClick={() => setShowSupportDialog(true)}
-      />
-      <main>
-        <Hero onApplyClick={() => setShowApplicationDialog(true)} />
-        <AboutSection />
-        <WhatIsLicense />
-        <LicenseCategories onApplyClick={() => setShowApplicationDialog(true)} />
-        <ProcessSteps />
-        <FeaturesSection />
-        <StatsSection />
-        <VerificationSection />
-      </main>
-      <Footer />
-      
-      <ApplicationDialog 
-        isOpen={showApplicationDialog} 
-        onClose={() => setShowApplicationDialog(false)}
-      >
-        <UnifiedApplicationForm />
-      </ApplicationDialog>
-      
-      <SupportDialog 
-        isOpen={showSupportDialog}
-        onClose={() => setShowSupportDialog(false)}
-      />
-    </div>
+    <ApplicationDialogProvider>
+      <div className="min-h-screen">
+        <Header />
+        <main>
+          <Hero />
+          <AboutSection />
+          <WhatIsLicense />
+          <LicenseCategories />
+          <ProcessSteps />
+          <FeaturesSection />
+          <StatsSection />
+          <VerificationSection />
+        </main>
+        <Footer />
+        
+        <SupportDialog 
+          open={showSupportDialog}
+          onOpenChange={setShowSupportDialog}
+        />
+      </div>
+    </ApplicationDialogProvider>
   );
 };
 
