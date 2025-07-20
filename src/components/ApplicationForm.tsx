@@ -1,3 +1,4 @@
+
 import { useState, useEffect, FormEvent } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -444,6 +445,7 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
             selectedCrypto={selectedCrypto}
             onCryptoChange={(crypto) => setSelectedCrypto(crypto as 'BTC' | 'ETH' | 'USDT_TRON' | 'USDT_ETH' | 'XRP')}
             selectedCategory={selectedCategory}
+            settings={settings}
           />
           
           {/* Additional Information */}
@@ -510,7 +512,7 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
               <>
                 <ShieldCheck className="h-4 w-4" />
                 Submit Application
-              </ShieldCheck>
+              </>
             )}
           </Button>
         </div>
