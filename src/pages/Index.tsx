@@ -10,7 +10,7 @@ import FeaturesSection from '@/components/FeaturesSection';
 import StatsSection from '@/components/StatsSection';
 import VerificationSection from '@/components/VerificationSection';
 import Footer from '@/components/Footer';
-import { ApplicationDialogProvider } from '@/components/ApplicationDialog';
+
 import SupportDialog from '@/components/SupportDialog';
 
 const Index = () => {
@@ -30,27 +30,25 @@ const Index = () => {
   }, []);
 
   return (
-    <ApplicationDialogProvider>
-      <div className="min-h-screen">
-        <Header />
-        <main>
-          <Hero />
-          <AboutSection />
-          <WhatIsLicense />
-          <LicenseCategories />
-          <ProcessSteps />
-          <FeaturesSection />
-          <StatsSection />
-          <VerificationSection />
-        </main>
-        <Footer />
-        
-        <SupportDialog 
-          open={showSupportDialog}
-          onOpenChange={setShowSupportDialog}
-        />
-      </div>
-    </ApplicationDialogProvider>
+    <div className="min-h-screen">
+      <Header />
+      <main>
+        <Hero />
+        <AboutSection />
+        <WhatIsLicense />
+        <LicenseCategories />
+        <ProcessSteps />
+        <FeaturesSection />
+        <StatsSection />
+        <VerificationSection />
+      </main>
+      <Footer />
+      
+      <SupportDialog 
+        open={showSupportDialog}
+        onOpenChange={setShowSupportDialog}
+      />
+    </div>
   );
 };
 
