@@ -1,4 +1,3 @@
-
 interface Application {
   id: string;
   name: string;
@@ -62,6 +61,98 @@ interface WebsiteSettings {
   website: string;
 }
 
+interface ContentSettings {
+  hero: {
+    headline: string;
+    subheadline: string;
+    ctaText: string;
+    ctaSecondaryText: string;
+    trustBadges: Array<{
+      name: string;
+      verified: boolean;
+      color: string;
+    }>;
+    stats: Array<{
+      value: string;
+      label: string;
+      icon: string;
+      color: string;
+    }>;
+  };
+  about: {
+    title: string;
+    subtitle: string;
+    description: string[];
+    features: Array<{
+      title: string;
+      description: string;
+      icon: string;
+    }>;
+    legalNotice: string;
+  };
+  features: {
+    title: string;
+    subtitle: string;
+    description: string;
+    items: Array<{
+      title: string;
+      description: string;
+      icon: string;
+    }>;
+  };
+  stats: {
+    title: string;
+    subtitle: string;
+    description: string;
+    items: Array<{
+      number: string;
+      label: string;
+      description: string;
+      icon: string;
+      color: string;
+      bgColor: string;
+    }>;
+  };
+  process: {
+    title: string;
+    subtitle: string;
+    description: string;
+    steps: Array<{
+      number: string;
+      title: string;
+      description: string;
+      icon: string;
+    }>;
+  };
+  verification: {
+    title: string;
+    subtitle: string;
+    description: string;
+    verificationCards: Array<{
+      title: string;
+      description: string;
+      icon: string;
+    }>;
+    timeline: Array<{
+      number: number;
+      title: string;
+      description: string;
+      badge: string;
+      isCompleted: boolean;
+    }>;
+  };
+  whatIsLicense: {
+    title: string;
+    subtitle: string;
+    description: string[];
+    features: Array<{
+      title: string;
+      description: string;
+      icon: string;
+    }>;
+  };
+}
+
 class UnifiedDataManager {
   private static instance: UnifiedDataManager;
   private eventListeners: Map<string, Set<(data: any) => void>> = new Map();
@@ -113,6 +204,36 @@ class UnifiedDataManager {
     
     // Trigger local listeners
     this.triggerLocalListeners(event, data);
+  }
+
+  // Content Management
+  getContent(): ContentSettings {
+    const stored = localStorage.getItem('apex_unified_content');
+    if (stored) {
+      try {
+        return JSON.parse(stored);
+      } catch (error) {
+        console.error('Content parse error:', error);
+      }
+    }
+    return this.getDefaultContent();
+  }
+
+  updateContent(updates: Partial<ContentSettings>): ContentSettings {
+    const current = this.getContent();
+    const newContent = { ...current, ...updates };
+    
+    // Save immediately
+    localStorage.setItem('apex_unified_content', JSON.stringify(newContent));
+    
+    // Emit with timestamp for tracking
+    this.emit('content_updated', {
+      content: newContent,
+      timestamp: Date.now(),
+      updateKeys: Object.keys(updates)
+    });
+    
+    return newContent;
   }
 
   // Settings Management with Immediate Sync
@@ -289,6 +410,238 @@ class UnifiedDataManager {
     };
   }
 
+  private getDefaultContent(): ContentSettings {
+    return {
+      hero: {
+        headline: "World's Leading Crypto Trading License Provider",
+        subheadline: "Secure your regulatory compliance with our internationally recognized trading certificates. Join 45,000+ successful traders worldwide.",
+        ctaText: "Start Your Application",
+        ctaSecondaryText: "Verify License",
+        trustBadges: [
+          { name: 'SEC Approved', verified: true, color: 'bg-primary/10 text-primary' },
+          { name: 'CFTC Certified', verified: true, color: 'bg-accent/10 text-accent' },
+          { name: 'FCA Licensed', verified: true, color: 'bg-accent-emerald/10 text-accent-emerald' },
+          { name: 'MiCA Compliant', verified: true, color: 'bg-accent-amber/10 text-accent-amber' }
+        ],
+        stats: [
+          { value: '45,000+', label: 'Licensed Traders', icon: 'Users', color: 'text-primary' },
+          { value: '180+', label: 'Countries Served', icon: 'Globe', color: 'text-accent' },
+          { value: '99.9%', label: 'Success Rate', icon: 'Award', color: 'text-accent-emerald' },
+          { value: '24/7', label: 'Support Available', icon: 'Shield', color: 'text-accent-amber' }
+        ]
+      },
+      about: {
+        title: "Ensuring Regulatory Compliance for Digital Asset Trading",
+        subtitle: "About the Authority",
+        description: [
+          "The APEX Crypto Licensing Authority is the premier regulatory body ensuring compliance, security, and legitimacy in digital asset trading operations worldwide.",
+          "Our licensing framework establishes a foundation for traders and institutions to operate within recognized legal standards, ensuring both consumer protection and market integrity."
+        ],
+        features: [
+          {
+            title: "Regulatory Protection",
+            description: "Operate with confidence under our internationally recognized licensing framework.",
+            icon: "Shield"
+          },
+          {
+            title: "Verified Status",
+            description: "Enhance trust with clients and platforms through verified trader status.",
+            icon: "CheckCircle"
+          },
+          {
+            title: "Official Documentation",
+            description: "Receive tamper-proof documentation recognized by major trading platforms.",
+            icon: "FileCheck"
+          }
+        ],
+        legalNotice: "APEX Crypto Licensing Authority provides official licensing documentation for cryptocurrency traders and institutions based on verification of trading activity and identity. Our licenses are designed to ensure compliance with evolving digital asset regulations worldwide."
+      },
+      features: {
+        title: "Why Choose Our Licensing Services",
+        subtitle: "Our Features",
+        description: "We provide comprehensive licensing solutions with unmatched expertise and support",
+        items: [
+          {
+            title: "Fast Licensing",
+            description: "Get your trading certificate quickly with our streamlined process",
+            icon: "Zap"
+          },
+          {
+            title: "Regulatory Compliance",
+            description: "Ensure full adherence to local and international regulations",
+            icon: "Shield"
+          },
+          {
+            title: "Expert Assistance",
+            description: "Our team guides you through every step for a hassle-free experience",
+            icon: "Users"
+          },
+          {
+            title: "Secure Document Handling",
+            description: "Your sensitive information is protected with top-tier security",
+            icon: "Lock"
+          },
+          {
+            title: "Multi-Industry Support",
+            description: "Suitable for businesses across various sectors",
+            icon: "Building"
+          },
+          {
+            title: "24/7 Support",
+            description: "Round-the-clock assistance for all your licensing needs",
+            icon: "HeadphonesIcon"
+          }
+        ]
+      },
+      stats: {
+        title: "Trusted Globally",
+        subtitle: "Proven Track Record",
+        description: "Our track record speaks for itself - delivering excellence in regulatory compliance worldwide",
+        items: [
+          {
+            number: "60+",
+            label: "Support Countries",
+            description: "Global regulatory coverage",
+            icon: "Globe",
+            color: "text-primary",
+            bgColor: "bg-primary/10"
+          },
+          {
+            number: "30K+",
+            label: "Certifications",
+            description: "Successfully issued licenses",
+            icon: "Award",
+            color: "text-accent",
+            bgColor: "bg-accent/10"
+          },
+          {
+            number: "15K+",
+            label: "Businesses",
+            description: "Trusted by companies worldwide",
+            icon: "Users",
+            color: "text-accent-emerald",
+            bgColor: "bg-accent-emerald/10"
+          },
+          {
+            number: "24+",
+            label: "Years of Experience",
+            description: "Industry expertise and knowledge",
+            icon: "TrendingUp",
+            color: "text-accent-amber",
+            bgColor: "bg-accent-amber/10"
+          }
+        ]
+      },
+      process: {
+        title: "Get Started With APEX",
+        subtitle: "Simple Process",
+        description: "Our seamless platform helps you obtain the necessary permits quickly and efficiently.",
+        steps: [
+          {
+            number: "1",
+            title: "Choose a Plan",
+            description: "Explore and select the best licensing plan for your needs.",
+            icon: "CreditCard"
+          },
+          {
+            number: "2",
+            title: "Make Payment & Upload Documents",
+            description: "Securely pay for your plan and submit the required documents.",
+            icon: "Upload"
+          },
+          {
+            number: "3",
+            title: "Get Certified",
+            description: "Our experts process your application, ensuring quick approval.",
+            icon: "Award"
+          }
+        ]
+      },
+      verification: {
+        title: "Rigorous Verification Standards",
+        subtitle: "Verification Process",
+        description: "Our comprehensive verification process ensures only qualified traders receive official licensing, maintaining the integrity of the regulatory framework.",
+        verificationCards: [
+          {
+            title: "Identity Verification",
+            description: "Secure multi-factor identity verification using governmental databases and biometric verification systems.",
+            icon: "Shield"
+          },
+          {
+            title: "Trading History Analysis",
+            description: "Comprehensive review of trading history, volume, and patterns to determine appropriate licensing category.",
+            icon: "Search"
+          },
+          {
+            title: "Compliance Review",
+            description: "Assessment of trading practices against regulatory standards to ensure alignment with legal requirements.",
+            icon: "Clock"
+          }
+        ],
+        timeline: [
+          {
+            number: 1,
+            title: "Application Submission",
+            description: "Complete the application form with all required documentation and submit payment.",
+            badge: "Day 1",
+            isCompleted: true
+          },
+          {
+            number: 2,
+            title: "Initial Review",
+            description: "Our system performs automated checks on submitted information and documentation.",
+            badge: "Day 1",
+            isCompleted: true
+          },
+          {
+            number: 3,
+            title: "Detailed Verification",
+            description: "Our compliance team manually reviews your application, trading history, and identity documentation.",
+            badge: "Day 2",
+            isCompleted: false
+          },
+          {
+            number: 4,
+            title: "License Issuance",
+            description: "Upon successful verification, your official license is generated and sent via email.",
+            badge: "Day 3",
+            isCompleted: false
+          }
+        ]
+      },
+      whatIsLicense: {
+        title: "What is a Trading License?",
+        subtitle: "Understanding Licensing",
+        description: [
+          "A crypto trading certificate is a regulatory permit that allows a company to legally operate a cryptocurrency exchange or trading platform. It ensures compliance with financial laws, anti-money laundering (AML), and know-your-customer (KYC) regulations.",
+          "Requirements vary by jurisdiction, with some countries having strict licensing frameworks. Obtaining one enhances credibility and legal security for crypto businesses."
+        ],
+        features: [
+          {
+            title: "Legal Compliance",
+            description: "Full adherence to financial regulations and legal requirements",
+            icon: "FileText"
+          },
+          {
+            title: "AML & KYC",
+            description: "Anti-money laundering and know-your-customer compliance",
+            icon: "Shield"
+          },
+          {
+            title: "Global Recognition",
+            description: "Accepted across multiple jurisdictions and platforms",
+            icon: "Globe"
+          },
+          {
+            title: "Enhanced Credibility",
+            description: "Builds trust with clients and business partners",
+            icon: "CheckCircle"
+          }
+        ]
+      }
+    };
+  }
+
   private getDefaultApplications(): Application[] {
     return [
       { 
@@ -366,4 +719,4 @@ class UnifiedDataManager {
 }
 
 export const unifiedDataManager = UnifiedDataManager.getInstance();
-export type { Application, Contact, License, WebsiteSettings };
+export type { Application, Contact, License, WebsiteSettings, ContentSettings };

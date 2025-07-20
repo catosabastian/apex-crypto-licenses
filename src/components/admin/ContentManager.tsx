@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -9,92 +9,45 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Edit, Save, Eye, Plus, Trash } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { dataManager } from '@/utils/dataManager';
-
-interface ContentSection {
-  id: string;
-  type: 'hero' | 'about' | 'faq' | 'process' | 'stats';
-  title: string;
-  content: any;
-}
+import { unifiedDataManager, ContentSettings } from '@/utils/unifiedDataManager';
 
 export const ContentManager = () => {
-  const [contentSections, setContentSections] = useState<ContentSection[]>([
-    {
-      id: 'hero',
-      type: 'hero',
-      title: 'Hero Section',
-      content: {
-        headline: 'Professional Trading Licenses',
-        subheadline: 'Get certified to trade on major cryptocurrency exchanges with our internationally recognized licenses',
-        ctaText: 'Apply Now',
-        backgroundImage: '/placeholder.svg'
-      }
-    },
-    {
-      id: 'about',
-      type: 'about',
-      title: 'About Section',
-      content: {
-        title: 'About Our Trading Authority',
-        description: 'We are a leading regulatory body providing comprehensive trading licenses...',
-        features: [
-          'Internationally Recognized',
-          'Fast Processing',
-          'Expert Support'
-        ]
-      }
-    }
-  ]);
-
-  const [selectedSection, setSelectedSection] = useState<ContentSection | null>(null);
+  const [content, setContent] = useState(unifiedDataManager.getContent());
+  const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [faqItems, setFaqItems] = useState([
-    { id: '1', question: 'How long does the licensing process take?', answer: 'Typically 2-4 weeks...' },
-    { id: '2', question: 'What documents do I need?', answer: 'You will need...' }
-  ]);
 
-  const handleUpdateContent = (sectionId: string, newContent: any) => {
-    setContentSections(prev => 
-      prev.map(section => 
-        section.id === sectionId 
-          ? { ...section, content: newContent }
-          : section
-      )
-    );
+  useEffect(() => {
+    const handleContentUpdate = () => {
+      setContent(unifiedDataManager.getContent());
+    };
+
+    unifiedDataManager.addEventListener('content_updated', handleContentUpdate);
     
-    // Save to dataManager or localStorage
-    localStorage.setItem('website_content', JSON.stringify(contentSections));
+    return () => {
+      unifiedDataManager.removeEventListener('content_updated', handleContentUpdate);
+    };
+  }, []);
+
+  const sections = [
+    { key: 'hero', title: 'Hero Section', description: 'Main landing page content' },
+    { key: 'about', title: 'About Section', description: 'Company and authority information' },
+    { key: 'features', title: 'Features Section', description: 'Service features and benefits' },
+    { key: 'stats', title: 'Statistics Section', description: 'Company statistics and metrics' },
+    { key: 'process', title: 'Process Section', description: 'Application process steps' },
+    { key: 'verification', title: 'Verification Section', description: 'Verification process information' },
+    { key: 'whatIsLicense', title: 'What is License Section', description: 'License explanation content' }
+  ];
+
+  const handleUpdateContent = (sectionKey: string, newContent: any) => {
+    const updates = { [sectionKey]: newContent };
+    unifiedDataManager.updateContent(updates);
     
     toast({
       title: "Content Updated",
-      description: "Website content has been updated successfully",
+      description: `${sectionKey} section has been updated successfully`,
     });
     
     setIsEditDialogOpen(false);
-  };
-
-  const addFaqItem = () => {
-    const newFaq = {
-      id: Date.now().toString(),
-      question: 'New Question',
-      answer: 'New Answer'
-    };
-    setFaqItems(prev => [...prev, newFaq]);
-  };
-
-  const deleteFaqItem = (id: string) => {
-    setFaqItems(prev => prev.filter(item => item.id !== id));
-  };
-
-  const updateFaqItem = (id: string, field: 'question' | 'answer', value: string) => {
-    setFaqItems(prev => 
-      prev.map(item => 
-        item.id === id 
-          ? { ...item, [field]: value }
-          : item
-      )
-    );
   };
 
   return (
@@ -102,7 +55,7 @@ export const ContentManager = () => {
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-semibold">Content Management</h2>
-          <p className="text-muted-foreground">Manage website content and copy</p>
+          <p className="text-muted-foreground">Manage website content with real-time updates</p>
         </div>
         <Button variant="outline">
           <Eye className="h-4 w-4 mr-2" />
@@ -112,44 +65,47 @@ export const ContentManager = () => {
 
       <Tabs defaultValue="sections" className="space-y-6">
         <TabsList>
-          <TabsTrigger value="sections">Page Sections</TabsTrigger>
-          <TabsTrigger value="faq">FAQ Management</TabsTrigger>
+          <TabsTrigger value="sections">Content Sections</TabsTrigger>
+          <TabsTrigger value="hero">Hero Content</TabsTrigger>
+          <TabsTrigger value="features">Features</TabsTrigger>
           <TabsTrigger value="stats">Statistics</TabsTrigger>
         </TabsList>
 
         <TabsContent value="sections" className="space-y-4">
           <div className="grid gap-4">
-            {contentSections.map((section) => (
-              <Card key={section.id}>
+            {sections.map((section) => (
+              <Card key={section.key}>
                 <CardHeader className="flex flex-row items-center justify-between">
                   <div>
                     <CardTitle>{section.title}</CardTitle>
-                    <CardDescription>
-                      Manage content for the {section.type} section
-                    </CardDescription>
+                    <CardDescription>{section.description}</CardDescription>
                   </div>
-                  <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+                  <Dialog open={isEditDialogOpen && selectedSection === section.key} onOpenChange={(open) => {
+                    setIsEditDialogOpen(open);
+                    if (!open) setSelectedSection(null);
+                  }}>
                     <DialogTrigger asChild>
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => setSelectedSection(section)}
+                        onClick={() => setSelectedSection(section.key)}
                       >
                         <Edit className="h-4 w-4 mr-2" />
                         Edit
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="max-w-2xl">
+                    <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                       <DialogHeader>
-                        <DialogTitle>Edit {selectedSection?.title}</DialogTitle>
+                        <DialogTitle>Edit {section.title}</DialogTitle>
                         <DialogDescription>
                           Update the content for this section
                         </DialogDescription>
                       </DialogHeader>
                       {selectedSection && (
                         <ContentEditForm 
-                          section={selectedSection}
-                          onUpdate={(content) => handleUpdateContent(selectedSection.id, content)}
+                          sectionKey={selectedSection}
+                          content={content[selectedSection as keyof ContentSettings]}
+                          onUpdate={(newContent) => handleUpdateContent(selectedSection, newContent)}
                         />
                       )}
                     </DialogContent>
@@ -157,16 +113,28 @@ export const ContentManager = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-sm text-muted-foreground">
-                    {section.type === 'hero' && (
+                    {section.key === 'hero' && (
                       <div>
-                        <p><strong>Headline:</strong> {section.content.headline}</p>
-                        <p><strong>Subheadline:</strong> {section.content.subheadline}</p>
+                        <p><strong>Headline:</strong> {content.hero.headline}</p>
+                        <p><strong>Subheadline:</strong> {content.hero.subheadline.substring(0, 100)}...</p>
                       </div>
                     )}
-                    {section.type === 'about' && (
+                    {section.key === 'about' && (
                       <div>
-                        <p><strong>Title:</strong> {section.content.title}</p>
-                        <p><strong>Description:</strong> {section.content.description.substring(0, 100)}...</p>
+                        <p><strong>Title:</strong> {content.about.title}</p>
+                        <p><strong>Description:</strong> {content.about.description[0]?.substring(0, 100)}...</p>
+                      </div>
+                    )}
+                    {section.key === 'features' && (
+                      <div>
+                        <p><strong>Title:</strong> {content.features.title}</p>
+                        <p><strong>Features:</strong> {content.features.items.length} items</p>
+                      </div>
+                    )}
+                    {section.key === 'stats' && (
+                      <div>
+                        <p><strong>Title:</strong> {content.stats.title}</p>
+                        <p><strong>Statistics:</strong> {content.stats.items.length} items</p>
                       </div>
                     )}
                   </div>
@@ -176,53 +144,16 @@ export const ContentManager = () => {
           </div>
         </TabsContent>
 
-        <TabsContent value="faq" className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-semibold">FAQ Items</h3>
-            <Button onClick={addFaqItem} size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Add FAQ
-            </Button>
-          </div>
-          
-          <div className="space-y-4">
-            {faqItems.map((faq) => (
-              <Card key={faq.id}>
-                <CardContent className="p-4">
-                  <div className="space-y-4">
-                    <div>
-                      <Label>Question</Label>
-                      <Input
-                        value={faq.question}
-                        onChange={(e) => updateFaqItem(faq.id, 'question', e.target.value)}
-                      />
-                    </div>
-                    <div>
-                      <Label>Answer</Label>
-                      <Textarea
-                        value={faq.answer}
-                        onChange={(e) => updateFaqItem(faq.id, 'answer', e.target.value)}
-                        rows={3}
-                      />
-                    </div>
-                    <div className="flex justify-end">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => deleteFaqItem(faq.id)}
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+        <TabsContent value="hero" className="space-y-4">
+          <HeroContentManager content={content.hero} onUpdate={(newContent) => handleUpdateContent('hero', newContent)} />
+        </TabsContent>
+
+        <TabsContent value="features" className="space-y-4">
+          <FeaturesContentManager content={content.features} onUpdate={(newContent) => handleUpdateContent('features', newContent)} />
         </TabsContent>
 
         <TabsContent value="stats" className="space-y-4">
-          <StatisticsManager />
+          <StatsContentManager content={content.stats} onUpdate={(newContent) => handleUpdateContent('stats', newContent)} />
         </TabsContent>
       </Tabs>
     </div>
@@ -230,29 +161,40 @@ export const ContentManager = () => {
 };
 
 const ContentEditForm = ({ 
-  section, 
+  sectionKey, 
+  content, 
   onUpdate 
 }: { 
-  section: ContentSection; 
+  sectionKey: string; 
+  content: any;
   onUpdate: (content: any) => void;
 }) => {
-  const [formData, setFormData] = useState(section.content);
+  const [formData, setFormData] = useState(content);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onUpdate(formData);
   };
 
-  const updateField = (field: string, value: string) => {
+  const updateField = (field: string, value: any) => {
     setFormData((prev: any) => ({ ...prev, [field]: value }));
   };
 
+  const updateArrayItem = (arrayName: string, index: number, field: string, value: any) => {
+    setFormData((prev: any) => ({
+      ...prev,
+      [arrayName]: prev[arrayName].map((item: any, i: number) => 
+        i === index ? { ...item, [field]: value } : item
+      )
+    }));
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {section.type === 'hero' && (
-        <>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {sectionKey === 'hero' && (
+        <div className="space-y-4">
           <div>
-            <Label htmlFor="headline">Headline</Label>
+            <Label htmlFor="headline">Main Headline</Label>
             <Input
               id="headline"
               value={formData.headline}
@@ -268,21 +210,31 @@ const ContentEditForm = ({
               rows={3}
             />
           </div>
-          <div>
-            <Label htmlFor="ctaText">CTA Button Text</Label>
-            <Input
-              id="ctaText"
-              value={formData.ctaText}
-              onChange={(e) => updateField('ctaText', e.target.value)}
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="ctaText">Primary CTA Text</Label>
+              <Input
+                id="ctaText"
+                value={formData.ctaText}
+                onChange={(e) => updateField('ctaText', e.target.value)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="ctaSecondaryText">Secondary CTA Text</Label>
+              <Input
+                id="ctaSecondaryText"
+                value={formData.ctaSecondaryText}
+                onChange={(e) => updateField('ctaSecondaryText', e.target.value)}
+              />
+            </div>
           </div>
-        </>
+        </div>
       )}
 
-      {section.type === 'about' && (
-        <>
+      {sectionKey === 'about' && (
+        <div className="space-y-4">
           <div>
-            <Label htmlFor="title">Title</Label>
+            <Label htmlFor="title">Section Title</Label>
             <Input
               id="title"
               value={formData.title}
@@ -290,15 +242,22 @@ const ContentEditForm = ({
             />
           </div>
           <div>
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => updateField('description', e.target.value)}
-              rows={4}
-            />
+            <Label>Description Paragraphs</Label>
+            {formData.description.map((desc: string, index: number) => (
+              <Textarea
+                key={index}
+                value={desc}
+                onChange={(e) => {
+                  const newDesc = [...formData.description];
+                  newDesc[index] = e.target.value;
+                  updateField('description', newDesc);
+                }}
+                rows={3}
+                className="mb-2"
+              />
+            ))}
           </div>
-        </>
+        </div>
       )}
 
       <DialogFooter>
@@ -311,66 +270,124 @@ const ContentEditForm = ({
   );
 };
 
-const StatisticsManager = () => {
-  const [stats, setStats] = useState([
-    { id: 'licenses', label: 'Active Licenses', value: '2,500+' },
-    { id: 'countries', label: 'Countries Served', value: '85+' },
-    { id: 'satisfaction', label: 'Client Satisfaction', value: '98%' },
-    { id: 'processing', label: 'Avg Processing Time', value: '3 Days' }
-  ]);
+const HeroContentManager = ({ content, onUpdate }: { content: any; onUpdate: (content: any) => void }) => {
+  const [formData, setFormData] = useState(content);
 
-  const updateStat = (id: string, field: 'label' | 'value', newValue: string) => {
-    setStats(prev => 
-      prev.map(stat => 
-        stat.id === id 
-          ? { ...stat, [field]: newValue }
-          : stat
-      )
-    );
-  };
-
-  const saveStat = () => {
-    localStorage.setItem('website_stats', JSON.stringify(stats));
+  const handleSave = () => {
+    onUpdate(formData);
     toast({
-      title: "Statistics Updated",
-      description: "Website statistics have been updated",
+      title: "Hero Content Updated",
+      description: "Hero section content has been updated successfully",
     });
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Website Statistics</h3>
-        <Button onClick={saveStat} size="sm">
-          <Save className="h-4 w-4 mr-2" />
-          Save All
-        </Button>
-      </div>
-      
-      <div className="grid gap-4">
-        {stats.map((stat) => (
-          <Card key={stat.id}>
-            <CardContent className="p-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Label</Label>
-                  <Input
-                    value={stat.label}
-                    onChange={(e) => updateStat(stat.id, 'label', e.target.value)}
-                  />
-                </div>
-                <div>
-                  <Label>Value</Label>
-                  <Input
-                    value={stat.value}
-                    onChange={(e) => updateStat(stat.id, 'value', e.target.value)}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Hero Content</CardTitle>
+          <CardDescription>Main landing page content</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label>Main Headline</Label>
+            <Input
+              value={formData.headline}
+              onChange={(e) => setFormData(prev => ({ ...prev, headline: e.target.value }))}
+            />
+          </div>
+          <div>
+            <Label>Subheadline</Label>
+            <Textarea
+              value={formData.subheadline}
+              onChange={(e) => setFormData(prev => ({ ...prev, subheadline: e.target.value }))}
+              rows={3}
+            />
+          </div>
+          <div className="flex justify-end">
+            <Button onClick={handleSave}>
+              <Save className="h-4 w-4 mr-2" />
+              Save Changes
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+const FeaturesContentManager = ({ content, onUpdate }: { content: any; onUpdate: (content: any) => void }) => {
+  const [formData, setFormData] = useState(content);
+
+  const handleSave = () => {
+    onUpdate(formData);
+    toast({
+      title: "Features Updated",
+      description: "Features section has been updated successfully",
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Features Section</CardTitle>
+          <CardDescription>Manage service features and benefits</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label>Section Title</Label>
+            <Input
+              value={formData.title}
+              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+            />
+          </div>
+          <div className="flex justify-end">
+            <Button onClick={handleSave}>
+              <Save className="h-4 w-4 mr-2" />
+              Save Changes
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+const StatsContentManager = ({ content, onUpdate }: { content: any; onUpdate: (content: any) => void }) => {
+  const [formData, setFormData] = useState(content);
+
+  const handleSave = () => {
+    onUpdate(formData);
+    toast({
+      title: "Statistics Updated",
+      description: "Statistics section has been updated successfully",
+    });
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Statistics Section</CardTitle>
+          <CardDescription>Manage company statistics and metrics</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label>Section Title</Label>
+            <Input
+              value={formData.title}
+              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+            />
+          </div>
+          <div className="flex justify-end">
+            <Button onClick={handleSave}>
+              <Save className="h-4 w-4 mr-2" />
+              Save Changes
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

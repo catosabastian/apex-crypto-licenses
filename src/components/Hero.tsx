@@ -3,10 +3,12 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, Shield, Award, Users, Globe, CheckCircle, Star, Zap, Sparkles } from 'lucide-react';
 import { useApplicationDialog } from '@/components/ApplicationDialog';
+import { unifiedDataManager } from '@/utils/unifiedDataManager';
 
 const Hero = () => {
   const [scrolled, setScrolled] = useState(false);
   const [currentStat, setCurrentStat] = useState(0);
+  const [content, setContent] = useState(unifiedDataManager.getContent().hero);
   const { openApplicationDialog } = useApplicationDialog();
   
   useEffect(() => {
@@ -18,26 +20,31 @@ const Hero = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const stats = [
-    { value: '45,000+', label: 'Licensed Traders', icon: Users, color: 'text-primary' },
-    { value: '180+', label: 'Countries Served', icon: Globe, color: 'text-accent' },
-    { value: '99.9%', label: 'Success Rate', icon: Award, color: 'text-accent-emerald' },
-    { value: '24/7', label: 'Support Available', icon: Shield, color: 'text-accent-amber' }
-  ];
+  useEffect(() => {
+    const handleContentUpdate = () => {
+      setContent(unifiedDataManager.getContent().hero);
+    };
 
-  const trustBadges = [
-    { name: 'SEC Approved', verified: true, color: 'bg-primary/10 text-primary' },
-    { name: 'CFTC Certified', verified: true, color: 'bg-accent/10 text-accent' },
-    { name: 'FCA Licensed', verified: true, color: 'bg-accent-emerald/10 text-accent-emerald' },
-    { name: 'MiCA Compliant', verified: true, color: 'bg-accent-amber/10 text-accent-amber' }
-  ];
+    unifiedDataManager.addEventListener('content_updated', handleContentUpdate);
+    
+    return () => {
+      unifiedDataManager.removeEventListener('content_updated', handleContentUpdate);
+    };
+  }, []);
+
+  const iconMap: Record<string, any> = {
+    Users,
+    Globe,
+    Award,
+    Shield
+  };
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentStat((prev) => (prev + 1) % stats.length);
+      setCurrentStat((prev) => (prev + 1) % content.stats.length);
     }, 3000);
     return () => clearInterval(interval);
-  }, []);
+  }, [content.stats.length]);
 
   return (
     <section className="relative min-h-screen pt-16 flex flex-col overflow-hidden">
@@ -76,8 +83,7 @@ const Hero = () => {
               </h1>
               
               <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-2xl animate-fade-in" style={{animationDelay: '0.2s'}}>
-                Secure your regulatory compliance with our internationally recognized trading certificates. 
-                Join <span className="font-bold text-primary">45,000+</span> successful traders worldwide.
+                {content.subheadline}
               </p>
               
               <div className="flex flex-col sm:flex-row gap-6 justify-center lg:justify-start animate-fade-in" style={{animationDelay: '0.4s'}}>
@@ -87,7 +93,7 @@ const Hero = () => {
                   onClick={openApplicationDialog}
                 >
                   <Zap className="h-6 w-6" />
-                  Start Your Application
+                  {content.ctaText}
                 </Button>
                 <Button 
                   size="lg" 
@@ -96,13 +102,13 @@ const Hero = () => {
                   onClick={() => document.getElementById('verification')?.scrollIntoView({ behavior: 'smooth' })}
                 >
                   <Award className="h-6 w-6" />
-                  Verify License
+                  {content.ctaSecondaryText}
                 </Button>
               </div>
               
               {/* Trust Indicators */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-8 animate-fade-in" style={{animationDelay: '0.6s'}}>
-                {trustBadges.map((badge, index) => (
+                {content.trustBadges.map((badge, index) => (
                   <div key={index} className={`flex items-center gap-3 justify-center lg:justify-start p-4 rounded-xl ${badge.color} glass-card hover-lift`}>
                     <CheckCircle className="h-5 w-5 text-accent-emerald" />
                     <span className="text-sm font-semibold">{badge.name}</span>
@@ -120,8 +126,8 @@ const Hero = () => {
                 </div>
                 
                 <div className="grid grid-cols-2 gap-6 mb-10">
-                  {stats.map((stat, index) => {
-                    const IconComponent = stat.icon;
+                  {content.stats.map((stat, index) => {
+                    const IconComponent = iconMap[stat.icon];
                     return (
                       <div 
                         key={index}
@@ -132,9 +138,9 @@ const Hero = () => {
                         }`}
                       >
                         <div className="flex justify-center mb-4">
-                          <IconComponent className={`h-8 w-8 ${
+                          {IconComponent && <IconComponent className={`h-8 w-8 ${
                             index === currentStat ? 'text-primary' : stat.color
-                          }`} />
+                          }`} />}
                         </div>
                         <div className="text-3xl font-bold text-primary mb-2">{stat.value}</div>
                         <div className="text-sm text-muted-foreground font-medium">{stat.label}</div>
