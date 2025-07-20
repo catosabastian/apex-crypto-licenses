@@ -214,7 +214,7 @@ export const UnifiedSettingsManager = () => {
           </CardContent>
         </Card>
 
-        {/* Payment Addresses Card */}
+        {/* Enhanced Payment Addresses Card */}
         <Card className="modern-card">
           <CardHeader className="flex flex-row items-center justify-between">
             <div>
@@ -225,7 +225,7 @@ export const UnifiedSettingsManager = () => {
                   Live ✓
                 </Badge>
               </CardTitle>
-              <CardDescription>Manage cryptocurrency wallet addresses</CardDescription>
+              <CardDescription>Manage all cryptocurrency wallet addresses</CardDescription>
             </div>
             <Dialog open={isEditingWallets} onOpenChange={setIsEditingWallets}>
               <DialogTrigger asChild>
@@ -243,10 +243,10 @@ export const UnifiedSettingsManager = () => {
                 </DialogHeader>
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="bitcoin">Bitcoin Address</Label>
+                    <Label htmlFor="bitcoin">Bitcoin (BTC) Address</Label>
                     <Input
                       id="bitcoin"
-                      value={(tempSettings as any).bitcoinAddress || ''}
+                      value={tempSettings.bitcoinAddress || ''}
                       onChange={(e) => setTempSettings(prev => ({
                         ...prev,
                         bitcoinAddress: e.target.value
@@ -256,10 +256,10 @@ export const UnifiedSettingsManager = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="ethereum">Ethereum Address</Label>
+                    <Label htmlFor="ethereum">Ethereum (ETH) Address</Label>
                     <Input
                       id="ethereum"
-                      value={(tempSettings as any).ethereumAddress || ''}
+                      value={tempSettings.ethereumAddress || ''}
                       onChange={(e) => setTempSettings(prev => ({
                         ...prev,
                         ethereumAddress: e.target.value
@@ -269,15 +269,41 @@ export const UnifiedSettingsManager = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="usdt">USDT Address</Label>
+                    <Label htmlFor="usdtTron">USDT (Tron Network) Address</Label>
                     <Input
-                      id="usdt"
-                      value={(tempSettings as any).usdtAddress || ''}
+                      id="usdtTron"
+                      value={tempSettings.usdtTronAddress || ''}
                       onChange={(e) => setTempSettings(prev => ({
                         ...prev,
-                        usdtAddress: e.target.value
+                        usdtTronAddress: e.target.value
                       }))}
-                      placeholder="USDT wallet address"
+                      placeholder="USDT Tron wallet address"
+                      className="font-mono glass-card"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="usdtEthereum">USDT (Ethereum Network) Address</Label>
+                    <Input
+                      id="usdtEthereum"
+                      value={tempSettings.usdtEthereumAddress || ''}
+                      onChange={(e) => setTempSettings(prev => ({
+                        ...prev,
+                        usdtEthereumAddress: e.target.value
+                      }))}
+                      placeholder="USDT Ethereum wallet address"
+                      className="font-mono glass-card"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="xrp">XRP Address</Label>
+                    <Input
+                      id="xrp"
+                      value={tempSettings.xrpAddress || ''}
+                      onChange={(e) => setTempSettings(prev => ({
+                        ...prev,
+                        xrpAddress: e.target.value
+                      }))}
+                      placeholder="XRP wallet address"
                       className="font-mono glass-card"
                     />
                   </div>
@@ -297,8 +323,8 @@ export const UnifiedSettingsManager = () => {
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between p-4 border rounded-lg glass-card">
               <div>
-                <p className="font-medium">Bitcoin</p>
-                <p className="text-sm text-muted-foreground font-mono break-all">{(settings as any).bitcoinAddress}</p>
+                <p className="font-medium">Bitcoin (BTC)</p>
+                <p className="text-sm text-muted-foreground font-mono break-all">{settings.bitcoinAddress}</p>
               </div>
               <Badge variant="outline" className="text-green-600 border-green-600">
                 Live ✓
@@ -306,8 +332,8 @@ export const UnifiedSettingsManager = () => {
             </div>
             <div className="flex items-center justify-between p-4 border rounded-lg glass-card">
               <div>
-                <p className="font-medium">Ethereum</p>
-                <p className="text-sm text-muted-foreground font-mono break-all">{(settings as any).ethereumAddress}</p>
+                <p className="font-medium">Ethereum (ETH)</p>
+                <p className="text-sm text-muted-foreground font-mono break-all">{settings.ethereumAddress}</p>
               </div>
               <Badge variant="outline" className="text-green-600 border-green-600">
                 Live ✓
@@ -315,8 +341,26 @@ export const UnifiedSettingsManager = () => {
             </div>
             <div className="flex items-center justify-between p-4 border rounded-lg glass-card">
               <div>
-                <p className="font-medium">USDT</p>
-                <p className="text-sm text-muted-foreground font-mono break-all">{(settings as any).usdtAddress}</p>
+                <p className="font-medium">USDT (Tron Network)</p>
+                <p className="text-sm text-muted-foreground font-mono break-all">{settings.usdtTronAddress}</p>
+              </div>
+              <Badge variant="outline" className="text-green-600 border-green-600">
+                Live ✓
+              </Badge>
+            </div>
+            <div className="flex items-center justify-between p-4 border rounded-lg glass-card">
+              <div>
+                <p className="font-medium">USDT (Ethereum Network)</p>
+                <p className="text-sm text-muted-foreground font-mono break-all">{settings.usdtEthereumAddress}</p>
+              </div>
+              <Badge variant="outline" className="text-green-600 border-green-600">
+                Live ✓
+              </Badge>
+            </div>
+            <div className="flex items-center justify-between p-4 border rounded-lg glass-card">
+              <div>
+                <p className="font-medium">XRP</p>
+                <p className="text-sm text-muted-foreground font-mono break-all">{settings.xrpAddress}</p>
               </div>
               <Badge variant="outline" className="text-green-600 border-green-600">
                 Live ✓

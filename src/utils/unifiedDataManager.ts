@@ -1,3 +1,4 @@
+
 import { BehaviorSubject } from 'rxjs';
 
 // Types
@@ -53,10 +54,12 @@ export interface ContentSettings {
   category5Available: boolean;
   category6Available: boolean;
   
-  // Payment addresses
+  // Payment addresses - expanded to include all supported cryptocurrencies
   bitcoinAddress: string;
   ethereumAddress: string;
-  usdtAddress: string;
+  usdtTronAddress: string;
+  usdtEthereumAddress: string;
+  xrpAddress: string;
   
   // Contact information
   contactEmail: string;
@@ -313,7 +316,7 @@ class UnifiedDataManager {
   private contentKey = 'apex_content';
   private eventListeners: { [key: string]: Function[] } = {};
   
-  // Default settings with proper pricing
+  // Updated default settings with all 5 cryptocurrency addresses
   private defaultSettings: ContentSettings = {
     category1Price: '10,000 USDT',
     category2Price: '25,000 USDT',
@@ -327,9 +330,11 @@ class UnifiedDataManager {
     category4Available: true,
     category5Available: true,
     category6Available: true,
-    bitcoinAddress: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
-    ethereumAddress: '0x742d35Cc6634C0532925a3b8D404E2a8e2eEb9',
-    usdtAddress: 'TQn9Y2khEsLJW1ChVWFMSMeRDow5oMANA',
+    bitcoinAddress: 'bc1qnsrsf0jr8aam9ngnu64c5s7rxue6gdjpauz6w4',
+    ethereumAddress: '0x7226A9A66E9e4f58fBcB67c9F1F7d52AFA9F8E2B',
+    usdtTronAddress: 'TCPUeoFf4QsfjWEMTFX25PW5FHxQtBBTM1',
+    usdtEthereumAddress: '0x7226A9A66E9e4f58fBcB67c9F1F7d52AFA9F8E2B',
+    xrpAddress: '0x7226A9A66E9e4f58fBcB67c9F1F7d52AFA9F8E2B',
     contactEmail: 'info@apexlicensing.com',
     contactPhone: '+1 (555) 123-4567',
     supportEmail: 'support@apexlicensing.com',

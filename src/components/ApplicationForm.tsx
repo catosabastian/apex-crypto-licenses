@@ -1,4 +1,4 @@
-import { useState, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -8,25 +8,11 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Loader2, ShieldCheck, Copy, Check } from "lucide-react";
+import { AlertTriangle, Loader2, ShieldCheck } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { sendAdminNotification } from "@/utils/emailService";
-
-interface WalletAddresses {
-  BTC: string;
-  ETH: string;
-  USDT_TRON: string;
-  USDT_ETH: string;
-  XRP: string;
-}
-
-const WALLET_ADDRESSES: WalletAddresses = {
-  BTC: "bc1qnsrsf0jr8aam9ngnu64c5s7rxue6gdjpauz6w4",
-  ETH: "0x7226A9A66E9e4f58fBcB67c9F1F7d52AFA9F8E2B",
-  USDT_TRON: "TCPUeoFf4QsfjWEMTFX25PW5FHxQtBBTM1",
-  USDT_ETH: "0x7226A9A66E9e4f58fBcB67c9F1F7d52AFA9F8E2B",
-  XRP: "0x7226A9A66E9e4f58fBcB67c9F1F7d52AFA9F8E2B"
-};
+import { unifiedDataManager, ContentSettings } from "@/utils/unifiedDataManager";
+import PaymentSection from "@/components/form/PaymentSection";
 
 const ADMIN_EMAIL = "catosabastian@gmail.com";
 
@@ -39,23 +25,37 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
   const [applicantType, setApplicantType] = useState<'individual' | 'corporate'>('individual');
   const [selectedCategory, setSelectedCategory] = useState<'3' | '4' | '5'>('3');
   const [selectedCrypto, setSelectedCrypto] = useState<'BTC' | 'ETH' | 'USDT_TRON' | 'USDT_ETH' | 'XRP'>('BTC');
-  const [copySuccess, setCopySuccess] = useState<string | null>(null);
-  
-  const handleCopyWallet = (crypto: string) => {
-    navigator.clipboard.writeText(WALLET_ADDRESSES[crypto as keyof WalletAddresses]).then(() => {
-      setCopySuccess(crypto);
-      setTimeout(() => setCopySuccess(null), 2000);
-    });
+  const [settings, setSettings] = useState<ContentSettings>(unifiedDataManager.getSettings());
+
+  // Listen for settings updates
+  useEffect(() => {
+    const handleSettingsUpdate = (data: any) => {
+      const newSettings = data.settings || data;
+      setSettings(newSettings);
+      console.log('[ApplicationForm] Settings updated:', newSettings);
+    };
+
+    unifiedDataManager.addEventListener('settings_updated', handleSettingsUpdate);
+    return () => {
+      unifiedDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
+    };
+  }, []);
+
+  const getCategoryPrice = (category: string): string => {
+    switch (category) {
+      case '3': return settings.category3Price || '70,000 USDT';
+      case '4': return settings.category4Price || '150,000 USDT';
+      case '5': return settings.category5Price || '250,000 USDT';
+      default: return 'Price not available';
+    }
   };
-  
-  const getCryptoLabel = (crypto: string): string => {
-    switch (crypto) {
-      case 'BTC': return 'Bitcoin (BTC)';
-      case 'ETH': return 'Ethereum (ETH)';
-      case 'USDT_TRON': return 'Tether (USDT) - Tron Network';
-      case 'USDT_ETH': return 'Tether (USDT) - Ethereum Network';
-      case 'XRP': return 'XRP';
-      default: return crypto;
+
+  const isCategoryAvailable = (category: string): boolean => {
+    switch (category) {
+      case '3': return settings.category3Available ?? true;
+      case '4': return settings.category4Available ?? true;
+      case '5': return settings.category5Available ?? true;
+      default: return false;
     }
   };
   
@@ -67,12 +67,24 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
     const formDataObj = Object.fromEntries(formData.entries());
     
     try {
+      // Validate that the selected category is still available
+      if (!isCategoryAvailable(selectedCategory)) {
+        toast({
+          title: "Category Unavailable",
+          description: "The selected license category is currently sold out. Please choose another category.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const completeFormData = {
         ...formDataObj,
         submissionTime: new Date().toISOString(),
         applicantType,
         selectedCategory,
-        selectedCrypto
+        selectedCrypto,
+        categoryPrice: getCategoryPrice(selectedCategory),
+        walletAddress: getSelectedWalletAddress()
       };
       
       const notificationSent = await sendAdminNotification(
@@ -109,6 +121,17 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const getSelectedWalletAddress = (): string => {
+    switch (selectedCrypto) {
+      case 'BTC': return settings.bitcoinAddress || '';
+      case 'ETH': return settings.ethereumAddress || '';
+      case 'USDT_TRON': return settings.usdtTronAddress || '';
+      case 'USDT_ETH': return settings.usdtEthereumAddress || '';
+      case 'XRP': return settings.xrpAddress || '';
+      default: return '';
     }
   };
 
@@ -360,118 +383,68 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
               required
               onValueChange={(value) => setSelectedCategory(value as '3' | '4' | '5')}
             >
-              <div className={`border rounded-lg p-4 ${selectedCategory === '3' ? 'border-primary bg-primary/5' : ''}`}>
+              <div className={`border rounded-lg p-4 ${selectedCategory === '3' ? 'border-primary bg-primary/5' : ''} ${!isCategoryAvailable('3') ? 'opacity-50' : ''}`}>
                 <div className="flex items-start gap-2">
-                  <RadioGroupItem value="3" id="category3" className="mt-1" />
+                  <RadioGroupItem value="3" id="category3" className="mt-1" disabled={!isCategoryAvailable('3')} />
                   <div>
                     <Label htmlFor="category3" className="font-semibold">Category 3 - Advanced Trader</Label>
-                    <p className="text-sm text-muted-foreground">$70,000 USDT</p>
+                    <p className="text-sm text-muted-foreground">{getCategoryPrice('3')}</p>
                     <p className="text-xs text-muted-foreground mt-2">For trade volumes of $250,000+ minimum</p>
-                    <Badge variant="secondary" className="mt-2 bg-accent text-white">Popular</Badge>
+                    <div className="flex gap-2 mt-2">
+                      {isCategoryAvailable('3') ? (
+                        <Badge variant="secondary" className="bg-accent text-white">Popular</Badge>
+                      ) : (
+                        <Badge variant="destructive">Sold Out</Badge>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
               
-              <div className={`border rounded-lg p-4 ${selectedCategory === '4' ? 'border-primary bg-primary/5' : ''}`}>
+              <div className={`border rounded-lg p-4 ${selectedCategory === '4' ? 'border-primary bg-primary/5' : ''} ${!isCategoryAvailable('4') ? 'opacity-50' : ''}`}>
                 <div className="flex items-start gap-2">
-                  <RadioGroupItem value="4" id="category4" className="mt-1" />
+                  <RadioGroupItem value="4" id="category4" className="mt-1" disabled={!isCategoryAvailable('4')} />
                   <div>
                     <Label htmlFor="category4" className="font-semibold">Category 4 - Professional Trader</Label>
-                    <p className="text-sm text-muted-foreground">$150,000 USDT</p>
+                    <p className="text-sm text-muted-foreground">{getCategoryPrice('4')}</p>
                     <p className="text-xs text-muted-foreground mt-2">For trade volumes of $500,000+ minimum</p>
-                    <Badge variant="outline" className="mt-2">Premium</Badge>
+                    <div className="flex gap-2 mt-2">
+                      {isCategoryAvailable('4') ? (
+                        <Badge variant="outline">Premium</Badge>
+                      ) : (
+                        <Badge variant="destructive">Sold Out</Badge>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
               
-              <div className={`border rounded-lg p-4 ${selectedCategory === '5' ? 'border-primary bg-primary/5' : ''}`}>
+              <div className={`border rounded-lg p-4 ${selectedCategory === '5' ? 'border-primary bg-primary/5' : ''} ${!isCategoryAvailable('5') ? 'opacity-50' : ''}`}>
                 <div className="flex items-start gap-2">
-                  <RadioGroupItem value="5" id="category5" className="mt-1" />
+                  <RadioGroupItem value="5" id="category5" className="mt-1" disabled={!isCategoryAvailable('5')} />
                   <div>
                     <Label htmlFor="category5" className="font-semibold">Category 5 - Institutional Trader</Label>
-                    <p className="text-sm text-muted-foreground">$250,000 USDT</p>
+                    <p className="text-sm text-muted-foreground">{getCategoryPrice('5')}</p>
                     <p className="text-xs text-muted-foreground mt-2">For trade volumes of $1,000,000+ minimum</p>
-                    <Badge variant="outline" className="mt-2">Enterprise</Badge>
+                    <div className="flex gap-2 mt-2">
+                      {isCategoryAvailable('5') ? (
+                        <Badge variant="outline">Enterprise</Badge>
+                      ) : (
+                        <Badge variant="destructive">Sold Out</Badge>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
             </RadioGroup>
           </div>
           
-          {/* Payment Information */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Payment Information</h3>
-            
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="paymentMethod">Select Payment Cryptocurrency</Label>
-                <Select 
-                  name="paymentCrypto" 
-                  defaultValue="BTC"
-                  required
-                  onValueChange={(value) => setSelectedCrypto(value as 'BTC' | 'ETH' | 'USDT_TRON' | 'USDT_ETH' | 'XRP')}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select cryptocurrency" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="BTC">Bitcoin (BTC)</SelectItem>
-                    <SelectItem value="ETH">Ethereum (ETH)</SelectItem>
-                    <SelectItem value="USDT_TRON">Tether (USDT) - Tron Network</SelectItem>
-                    <SelectItem value="USDT_ETH">Tether (USDT) - Ethereum Network</SelectItem>
-                    <SelectItem value="XRP">XRP</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="p-6 border bg-muted/30 rounded-lg">
-                <h4 className="font-semibold mb-2">Payment Instructions</h4>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Please send the exact amount corresponding to your selected license tier to the wallet address below:
-                </p>
-                
-                <div className="space-y-4">
-                  <div className="p-3 bg-background border rounded-md">
-                    <div className="flex items-center justify-between mb-1">
-                      <Label className="text-xs text-muted-foreground">
-                        {getCryptoLabel(selectedCrypto)} Wallet Address
-                      </Label>
-                      <Button 
-                        type="button" 
-                        variant="ghost" 
-                        size="sm" 
-                        className="h-8 gap-1 text-xs"
-                        onClick={() => handleCopyWallet(selectedCrypto)}
-                      >
-                        {copySuccess === selectedCrypto ? (
-                          <>
-                            <Check className="h-3 w-3" />
-                            Copied
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="h-3 w-3" />
-                            Copy
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                    <div className="font-mono text-xs sm:text-sm break-all bg-muted/50 p-2 rounded border">
-                      {WALLET_ADDRESSES[selectedCrypto]}
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="transactionId" className="text-sm">Transaction ID/Hash</Label>
-                    <p className="text-xs text-muted-foreground mb-2">
-                      Enter the transaction ID after sending the payment
-                    </p>
-                    <Input id="transactionId" name="transactionId" className="font-mono" required />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          {/* Enhanced Payment Section */}
+          <PaymentSection
+            selectedCrypto={selectedCrypto}
+            onCryptoChange={(crypto) => setSelectedCrypto(crypto as 'BTC' | 'ETH' | 'USDT_TRON' | 'USDT_ETH' | 'XRP')}
+            selectedCategory={selectedCategory}
+          />
           
           {/* Additional Information */}
           <div className="space-y-2">
@@ -526,7 +499,7 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
             className="w-full gap-2" 
             size="lg"
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !isCategoryAvailable(selectedCategory)}
           >
             {isSubmitting ? (
               <>
@@ -537,7 +510,7 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
               <>
                 <ShieldCheck className="h-4 w-4" />
                 Submit Application
-              </>
+              </ShieldCheck>
             )}
           </Button>
         </div>
