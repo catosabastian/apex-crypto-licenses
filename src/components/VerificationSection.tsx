@@ -7,14 +7,35 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { isValidLicense, sampleLicense } from '@/utils/licenseData';
 import { toast } from '@/components/ui/use-toast';
+import { unifiedDataManager } from '@/utils/unifiedDataManager';
 
 const VerificationSection = () => {
+  const [content, setContent] = useState(unifiedDataManager.getContent().verification);
   const [licenseId, setLicenseId] = useState('');
   const [isVerified, setIsVerified] = useState<boolean | null>(null);
+  const [verifiedLicense, setVerifiedLicense] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  useEffect(() => {
+    const handleContentUpdate = () => {
+      setContent(unifiedDataManager.getContent().verification);
+    };
+
+    unifiedDataManager.addEventListener('content_updated', handleContentUpdate);
+    
+    return () => {
+      unifiedDataManager.removeEventListener('content_updated', handleContentUpdate);
+    };
+  }, []);
+
+  const iconMap: Record<string, any> = {
+    Shield,
+    Search,
+    Clock
+  };
 
   const handleVerify = () => {
     if (!licenseId.trim()) {
@@ -30,11 +51,23 @@ const VerificationSection = () => {
     setIsVerified(verified);
     
     if (verified) {
+      // Set verified license data for display
+      setVerifiedLicense({
+        id: licenseId.trim(),
+        holder: sampleLicense.holder,
+        type: sampleLicense.type,
+        issueDate: sampleLicense.issueDate,
+        expiryDate: sampleLicense.expiryDate,
+        platforms: sampleLicense.platforms,
+        status: "Active"
+      });
+      
       toast({
         title: "License Verified",
         description: "The license is valid and in our database.",
       });
     } else {
+      setVerifiedLicense(null);
       toast({
         title: "Verification Failed",
         description: "This license ID was not found in our database.",
@@ -47,6 +80,7 @@ const VerificationSection = () => {
     setIsDialogOpen(open);
     if (!open) {
       setIsVerified(null);
+      setVerifiedLicense(null);
       setLicenseId('');
     }
   };
@@ -57,72 +91,45 @@ const VerificationSection = () => {
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-2 mb-4">
             <div className="h-1 w-12 bg-primary"></div>
-            <span className="text-sm text-muted-foreground uppercase tracking-wider">Verification Process</span>
+            <span className="text-sm text-muted-foreground uppercase tracking-wider">{content.subtitle}</span>
           </div>
           
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            Rigorous Verification Standards
+            {content.title}
           </h2>
           
           <p className="text-lg text-muted-foreground mb-10">
-            Our comprehensive verification process ensures only qualified traders receive official licensing, maintaining the integrity of the regulatory framework.
+            {content.description}
           </p>
           
           <div className="grid md:grid-cols-3 gap-8 mb-12">
-            <VerificationCard 
-              icon={<Shield className="h-6 w-6" />}
-              title="Identity Verification"
-              description="Secure multi-factor identity verification using governmental databases and biometric verification systems."
-            />
-            
-            <VerificationCard 
-              icon={<Search className="h-6 w-6" />}
-              title="Trading History Analysis"
-              description="Comprehensive review of trading history, volume, and patterns to determine appropriate licensing category."
-            />
-            
-            <VerificationCard 
-              icon={<Clock className="h-6 w-6" />}
-              title="Compliance Review"
-              description="Assessment of trading practices against regulatory standards to ensure alignment with legal requirements."
-            />
+            {content.cards.map((card, index) => {
+              const IconComponent = iconMap[card.icon];
+              return (
+                <VerificationCard 
+                  key={index}
+                  icon={IconComponent && <IconComponent className="h-6 w-6" />}
+                  title={card.title}
+                  description={card.description}
+                />
+              );
+            })}
           </div>
           
           <div className="bg-muted/30 border rounded-lg p-6">
-            <h3 className="text-xl font-semibold mb-4">Verification Timeline</h3>
+            <h3 className="text-xl font-semibold mb-4">{content.timeline.title}</h3>
             
             <div className="space-y-6">
-              <VerificationStep 
-                number={1}
-                title="Application Submission"
-                description="Complete the application form with all required documentation and submit payment."
-                badge="Day 1"
-                isCompleted={true}
-              />
-              
-              <VerificationStep 
-                number={2}
-                title="Initial Review"
-                description="Our system performs automated checks on submitted information and documentation."
-                badge="Day 1"
-                isCompleted={true}
-              />
-              
-              <VerificationStep 
-                number={3}
-                title="Detailed Verification"
-                description="Our compliance team manually reviews your application, trading history, and identity documentation."
-                badge="Day 2"
-                isCompleted={false}
-              />
-              
-              <VerificationStep 
-                number={4}
-                title="License Issuance"
-                description="Upon successful verification, your official license is generated and sent via email."
-                badge="Day 3"
-                isCompleted={false}
-              />
+              {content.timeline.steps.map((step, index) => (
+                <VerificationStep 
+                  key={index}
+                  number={step.number}
+                  title={step.title}
+                  description={step.description}
+                  badge={step.badge}
+                  isCompleted={step.isCompleted}
+                />
+              ))}
             </div>
           </div>
           
@@ -131,7 +138,7 @@ const VerificationSection = () => {
               <DialogTrigger asChild>
                 <Button className="mx-auto block">Verify a License</Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="max-w-4xl">
                 <DialogHeader>
                   <DialogTitle>License Verification</DialogTitle>
                   <DialogDescription>
@@ -153,18 +160,28 @@ const VerificationSection = () => {
                   </div>
                   
                   {isVerified !== null && (
-                    <Alert variant={isVerified ? "default" : "destructive"} className={isVerified ? "bg-green-50 border-green-200" : ""}>
-                      <div className="flex items-center gap-2">
-                        {isVerified ? (
-                          <Check className="h-4 w-4 text-green-500" />
-                        ) : (
-                          <X className="h-4 w-4" />
-                        )}
-                        <AlertDescription>
-                          {isVerified ? "License verified successfully." : "License verification failed. No matching license found."}
-                        </AlertDescription>
-                      </div>
-                    </Alert>
+                    <div className="space-y-4">
+                      <Alert variant={isVerified ? "default" : "destructive"} className={isVerified ? "bg-green-50 border-green-200" : ""}>
+                        <div className="flex items-center gap-2">
+                          {isVerified ? (
+                            <Check className="h-4 w-4 text-green-500" />
+                          ) : (
+                            <X className="h-4 w-4" />
+                          )}
+                          <AlertDescription>
+                            {isVerified ? "License verified successfully." : "License verification failed. No matching license found."}
+                          </AlertDescription>
+                        </div>
+                      </Alert>
+                      
+                      {/* Enhanced License Display */}
+                      {isVerified && verifiedLicense && (
+                        <div className="mt-6">
+                          <h4 className="text-lg font-semibold mb-4">Verified License Details</h4>
+                          <LicenseCard license={verifiedLicense} />
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
                 <DialogFooter>
@@ -253,6 +270,82 @@ const VerificationSection = () => {
         </div>
       </div>
     </section>
+  );
+};
+
+// Enhanced License Card Component
+const LicenseCard = ({ license }: { license: any }) => {
+  return (
+    <Card className="license-card w-full max-w-2xl mx-auto relative border-2 border-green-200 bg-green-50">
+      <div className="watermark">VERIFIED</div>
+      
+      <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-600 to-green-500">
+        <div className="flex items-center gap-2">
+          <Shield className="h-6 w-6 text-white" />
+          <h3 className="text-lg font-bold text-white">APEX CRYPTO LICENSE</h3>
+        </div>
+        <Badge className="bg-white/20 text-white border-white/30">{license.status}</Badge>
+      </div>
+      
+      <CardContent className="p-6">
+        <div className="stamp text-green-600">VERIFIED</div>
+        
+        <div className="space-y-4">
+          <div className="flex items-center gap-3">
+            <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center">
+              <Shield className="h-6 w-6 text-green-600" />
+            </div>
+            <div>
+              <h4 className="text-sm text-green-700">License Holder</h4>
+              <p className="font-bold text-lg text-green-800">{license.holder}</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="p-3 bg-green-100 rounded-lg">
+              <h4 className="text-xs text-green-700 uppercase tracking-wider">Category</h4>
+              <p className="font-bold text-green-800">{license.type}</p>
+            </div>
+            <div className="p-3 bg-green-100 rounded-lg">
+              <h4 className="text-xs text-green-700 uppercase tracking-wider">License ID</h4>
+              <p className="font-bold font-mono text-sm text-green-800">{license.id}</p>
+            </div>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <h4 className="text-xs text-green-700 uppercase tracking-wider">Issue Date</h4>
+              <p className="font-semibold text-green-800">{license.issueDate}</p>
+            </div>
+            <div>
+              <h4 className="text-xs text-green-700 uppercase tracking-wider">Expiry Date</h4>
+              <p className="font-semibold text-green-800">{license.expiryDate}</p>
+            </div>
+          </div>
+          
+          <div className="p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg border border-green-200">
+            <h4 className="text-xs text-green-700 uppercase tracking-wider mb-2">Authorized Platforms</h4>
+            <p className="font-medium text-sm text-green-800">{license.platforms}</p>
+          </div>
+          
+          <div className="pt-4 flex items-center justify-between">
+            <div className="text-xs text-green-700">
+              <p>Verify at:</p>
+              <p className="font-mono">verify.apexcrypto.auth</p>
+            </div>
+            <div className="qr-section">
+              <QrCode className="h-12 w-12 text-green-600" />
+            </div>
+          </div>
+          
+          <div className="text-center">
+            <p className="text-xs text-green-700">
+              ✓ This license is valid and registered in the APEX regulatory database
+            </p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

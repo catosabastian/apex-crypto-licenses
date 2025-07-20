@@ -1,42 +1,32 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { TrendingUp, Users, Globe, Award, Shield, Star } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { unifiedDataManager } from '@/utils/unifiedDataManager';
 
 const StatsSection = () => {
-  const stats = [
-    {
-      number: "60+",
-      label: "Support Countries",
-      description: "Global regulatory coverage",
-      icon: Globe,
-      color: "text-primary",
-      bgColor: "bg-primary/10"
-    },
-    {
-      number: "30K+",
-      label: "Certifications",
-      description: "Successfully issued licenses",
-      icon: Award,
-      color: "text-accent",
-      bgColor: "bg-accent/10"
-    },
-    {
-      number: "15K+",
-      label: "Businesses",
-      description: "Trusted by companies worldwide",
-      icon: Users,
-      color: "text-accent-emerald",
-      bgColor: "bg-accent-emerald/10"
-    },
-    {
-      number: "24+",
-      label: "Years of Experience",
-      description: "Industry expertise and knowledge",
-      icon: TrendingUp,
-      color: "text-accent-amber",
-      bgColor: "bg-accent-amber/10"
-    }
-  ];
+  const [content, setContent] = useState(unifiedDataManager.getContent().stats);
+
+  useEffect(() => {
+    const handleContentUpdate = () => {
+      setContent(unifiedDataManager.getContent().stats);
+    };
+
+    unifiedDataManager.addEventListener('content_updated', handleContentUpdate);
+    
+    return () => {
+      unifiedDataManager.removeEventListener('content_updated', handleContentUpdate);
+    };
+  }, []);
+
+  const iconMap: Record<string, any> = {
+    TrendingUp,
+    Users,
+    Globe,
+    Award,
+    Shield,
+    Star
+  };
 
   return (
     <section className="py-24 bg-gradient-to-br from-primary/5 via-background to-accent/5 relative overflow-hidden">
@@ -48,24 +38,24 @@ const StatsSection = () => {
           <div className="text-center mb-20 animate-fade-in">
             <div className="inline-flex items-center gap-3 glass-card px-6 py-3 rounded-full text-sm font-medium mb-6">
               <Star className="h-5 w-5 text-primary" />
-              <span className="text-primary font-semibold">Proven Track Record</span>
+              <span className="text-primary font-semibold">{content.subtitle}</span>
             </div>
             <h2 className="text-section gradient-text mb-8">
-              Trusted Globally
+              {content.title}
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Our track record speaks for itself - delivering excellence in regulatory compliance worldwide
+              {content.description}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {stats.map((stat, index) => {
-              const IconComponent = stat.icon;
+            {content.items.map((stat, index) => {
+              const IconComponent = iconMap[stat.icon];
               return (
                 <Card key={index} className="modern-card hover-lift group border-0 shadow-lg">
                   <CardContent className="p-8 text-center">
                     <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl ${stat.bgColor} mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                      <IconComponent className={`h-8 w-8 ${stat.color}`} />
+                      {IconComponent && <IconComponent className={`h-8 w-8 ${stat.color}`} />}
                     </div>
                     <div className="text-4xl md:text-5xl font-bold text-primary mb-3 group-hover:scale-105 transition-transform duration-300">
                       {stat.number}
@@ -87,10 +77,10 @@ const StatsSection = () => {
             <div className="glass-card p-8 rounded-3xl max-w-4xl mx-auto">
               <div className="flex items-center justify-center gap-3 mb-4">
                 <Shield className="h-6 w-6 text-primary" />
-                <h3 className="text-xl font-bold text-primary">Regulatory Excellence</h3>
+                <h3 className="text-xl font-bold text-primary">{content.trustIndicator.title}</h3>
               </div>
               <p className="text-muted-foreground">
-                Certified by leading regulatory bodies worldwide, ensuring the highest standards of compliance and security for all our licensed traders.
+                {content.trustIndicator.description}
               </p>
             </div>
           </div>

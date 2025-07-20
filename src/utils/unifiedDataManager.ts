@@ -1,98 +1,89 @@
+import { BehaviorSubject } from 'rxjs';
+
 interface Application {
   id: string;
   name: string;
   email: string;
-  phone?: string;
-  company?: string;
-  category: string;
-  status: 'pending' | 'approved' | 'rejected' | 'review';
+  phone: string;
+  country: string;
+  licenseType: string;
+  status: string;
   date: string;
-  amount: string;
-  documents?: string[];
-  notes?: string;
-  licenseId?: string;
 }
 
 interface Contact {
   id: string;
   name: string;
   email: string;
-  subject: string;
   message: string;
+  status: string;
   date: string;
-  status: 'new' | 'replied' | 'closed';
-  response?: string;
 }
 
 interface License {
   id: string;
   holder: string;
   type: string;
-  category: number;
   issueDate: string;
   expiryDate: string;
-  status: 'active' | 'expired' | 'suspended';
-  platforms?: string;
+  status: string;
+  platforms: string;
 }
 
-interface WebsiteSettings {
-  category1Price: string;
-  category2Price: string;
-  category3Price: string;
-  category4Price: string;
-  category5Price: string;
-  category6Price: string;
-  category1Available: boolean;
-  category2Available: boolean;
-  category3Available: boolean;
-  category4Available: boolean;
-  category5Available: boolean;
-  category6Available: boolean;
-  bitcoinAddress: string;
-  ethereumAddress: string;
-  usdtAddress: string;
-  companyName: string;
-  supportEmail: string;
-  salesEmail: string;
-  phoneNumber: string;
-  address: string;
-  city: string;
-  country: string;
-  website: string;
-}
-
-interface ContentSettings {
+export interface ContentSettings {
   hero: {
     headline: string;
     subheadline: string;
     ctaText: string;
     ctaSecondaryText: string;
-    trustBadges: Array<{
-      name: string;
-      verified: boolean;
-      color: string;
-    }>;
     stats: Array<{
       value: string;
       label: string;
       icon: string;
       color: string;
     }>;
+    trustBadges: Array<{
+      name: string;
+      color: string;
+    }>;
   };
   about: {
-    title: string;
     subtitle: string;
+    title: string;
     description: string[];
+    legalNotice: string;
     features: Array<{
       title: string;
       description: string;
       icon: string;
     }>;
-    legalNotice: string;
+  };
+  whatIsLicense: {
+    subtitle: string;
+    title: string;
+    description: string[];
+    ctaText: string;
+    features: Array<{
+      title: string;
+      description: string;
+      icon: string;
+    }>;
+  };
+  process: {
+    subtitle: string;
+    title: string;
+    description: string;
+    ctaText: string;
+    steps: Array<{
+      number: string;
+      title: string;
+      description: string;
+      icon: string;
+    }>;
   };
   features: {
-    title: string;
     subtitle: string;
+    title: string;
     description: string;
     items: Array<{
       title: string;
@@ -112,353 +103,407 @@ interface ContentSettings {
       color: string;
       bgColor: string;
     }>;
-  };
-  process: {
-    title: string;
-    subtitle: string;
-    description: string;
-    steps: Array<{
-      number: string;
+    trustIndicator: {
       title: string;
       description: string;
-      icon: string;
-    }>;
+    };
   };
   verification: {
-    title: string;
     subtitle: string;
+    title: string;
     description: string;
-    verificationCards: Array<{
+    cards: Array<{
       title: string;
       description: string;
       icon: string;
     }>;
-    timeline: Array<{
-      number: number;
+    timeline: {
+      title: string;
+      steps: Array<{
+        number: number;
+        title: string;
+        description: string;
+        badge: string;
+        isCompleted: boolean;
+      }>;
+    };
+    sampleLicense: {
       title: string;
       description: string;
-      badge: string;
-      isCompleted: boolean;
-    }>;
-  };
-  whatIsLicense: {
-    title: string;
-    subtitle: string;
-    description: string[];
-    features: Array<{
-      title: string;
-      description: string;
-      icon: string;
-    }>;
+    };
   };
 }
 
-class UnifiedDataManager {
-  private static instance: UnifiedDataManager;
-  private eventListeners: Map<string, Set<(data: any) => void>> = new Map();
-  private broadcastChannel: BroadcastChannel;
-  
-  private constructor() {
-    this.broadcastChannel = new BroadcastChannel('apex_unified_sync');
-    this.setupMessageListener();
-  }
-  
-  static getInstance(): UnifiedDataManager {
-    if (!UnifiedDataManager.instance) {
-      UnifiedDataManager.instance = new UnifiedDataManager();
+interface AnalyticsData {
+  totalApplications: number;
+  pendingApplications: number;
+  approvedApplications: number;
+  totalRevenue: number;
+  newContacts: number;
+  activeLicenses: number;
+}
+
+interface SettingsData {
+  applicationFee: number;
+  licenseFee: number;
+  renewalFee: number;
+  taxRate: number;
+  supportEmail: string;
+  companyName: string;
+}
+
+class DataManager {
+  private listeners: { [event: string]: Function[] } = {};
+  private applicationsSubject = new BehaviorSubject<Application[]>(this.getDefaultApplications());
+  private contactsSubject = new BehaviorSubject<Contact[]>(this.getDefaultContacts());
+  private licensesSubject = new BehaviorSubject<License[]>(this.getDefaultLicenses());
+
+  // Event Listener Methods
+  addEventListener(event: string, listener: Function): void {
+    if (!this.listeners[event]) {
+      this.listeners[event] = [];
     }
-    return UnifiedDataManager.instance;
+    this.listeners[event].push(listener);
   }
 
-  private setupMessageListener(): void {
-    this.broadcastChannel.addEventListener('message', (event) => {
-      const { type, data } = event.data;
-      this.triggerLocalListeners(type, data);
-    });
-  }
-
-  addEventListener(event: string, callback: (data: any) => void): void {
-    if (!this.eventListeners.has(event)) {
-      this.eventListeners.set(event, new Set());
+  removeEventListener(event: string, listener: Function): void {
+    if (this.listeners[event]) {
+      this.listeners[event] = this.listeners[event].filter(l => l !== listener);
     }
-    this.eventListeners.get(event)?.add(callback);
   }
 
-  removeEventListener(event: string, callback: (data: any) => void): void {
-    this.eventListeners.get(event)?.delete(callback);
-  }
-
-  private triggerLocalListeners(event: string, data: any): void {
-    this.eventListeners.get(event)?.forEach(callback => {
-      try {
-        callback(data);
-      } catch (error) {
-        console.error('Event listener error:', error);
-      }
-    });
-  }
-
-  private emit(event: string, data: any): void {
-    // Broadcast to other tabs/windows
-    this.broadcastChannel.postMessage({ type: event, data });
-    
-    // Trigger local listeners
-    this.triggerLocalListeners(event, data);
-  }
-
-  // Content Management
-  getContent(): ContentSettings {
-    const stored = localStorage.getItem('apex_unified_content');
-    if (stored) {
-      try {
-        return JSON.parse(stored);
-      } catch (error) {
-        console.error('Content parse error:', error);
-      }
+  private notifyListeners(event: string, data?: any): void {
+    if (this.listeners[event]) {
+      this.listeners[event].forEach(listener => listener(data));
     }
-    return this.getDefaultContent();
   }
 
-  updateContent(updates: Partial<ContentSettings>): ContentSettings {
-    const current = this.getContent();
-    const newContent = { ...current, ...updates };
-    
-    // Save immediately
-    localStorage.setItem('apex_unified_content', JSON.stringify(newContent));
-    
-    // Emit with timestamp for tracking
-    this.emit('content_updated', {
-      content: newContent,
-      timestamp: Date.now(),
-      updateKeys: Object.keys(updates)
-    });
-    
-    return newContent;
-  }
-
-  // Settings Management with Immediate Sync
-  getSettings(): WebsiteSettings {
-    const stored = localStorage.getItem('apex_unified_settings');
-    if (stored) {
-      try {
-        return JSON.parse(stored);
-      } catch (error) {
-        console.error('Settings parse error:', error);
-      }
-    }
-    return this.getDefaultSettings();
-  }
-
-  updateSettings(updates: Partial<WebsiteSettings>): WebsiteSettings {
-    const current = this.getSettings();
-    const newSettings = { ...current, ...updates };
-    
-    // Save immediately
-    localStorage.setItem('apex_unified_settings', JSON.stringify(newSettings));
-    
-    // Emit with timestamp for tracking
-    this.emit('settings_updated', {
-      settings: newSettings,
-      timestamp: Date.now(),
-      updateKeys: Object.keys(updates)
-    });
-    
-    return newSettings;
-  }
-
-  // Applications Management
+  // Application Management Methods
   getApplications(): Application[] {
-    const stored = localStorage.getItem('apex_unified_applications');
+    const stored = localStorage.getItem('apex_applications');
     return stored ? JSON.parse(stored) : this.getDefaultApplications();
   }
 
-  addApplication(application: Omit<Application, 'id' | 'date'>): Application {
-    const applications = this.getApplications();
-    const newApplication: Application = {
-      ...application,
-      id: this.generateId(),
-      date: new Date().toISOString().split('T')[0],
-    };
-    applications.push(newApplication);
-    localStorage.setItem('apex_unified_applications', JSON.stringify(applications));
-    this.emit('applications_updated', applications);
-    return newApplication;
+  addApplication(application: Application): void {
+    const applications = [...this.getApplications(), application];
+    localStorage.setItem('apex_applications', JSON.stringify(applications));
+    this.applicationsSubject.next(applications);
+    this.notifyListeners('application_added', application);
   }
 
-  updateApplication(id: string, updates: Partial<Application>): boolean {
-    const applications = this.getApplications();
-    const index = applications.findIndex(app => app.id === id);
-    if (index !== -1) {
-      applications[index] = { ...applications[index], ...updates };
-      localStorage.setItem('apex_unified_applications', JSON.stringify(applications));
-      this.emit('applications_updated', applications);
-      return true;
-    }
-    return false;
+  updateApplication(id: string, updates: Partial<Application>): void {
+    const applications = this.getApplications().map(app =>
+      app.id === id ? { ...app, ...updates } : app
+    );
+    localStorage.setItem('apex_applications', JSON.stringify(applications));
+    this.applicationsSubject.next(applications);
+    this.notifyListeners('application_updated', { id, updates });
   }
 
-  // Contacts Management
+  deleteApplication(id: string): void {
+    const applications = this.getApplications().filter(app => app.id !== id);
+    localStorage.setItem('apex_applications', JSON.stringify(applications));
+    this.applicationsSubject.next(applications);
+    this.notifyListeners('application_deleted', id);
+  }
+
+  private getDefaultApplications(): Application[] {
+    return [
+      {
+        id: 'APP-2024-0001',
+        name: 'Alice Johnson',
+        email: 'alice.j@example.com',
+        phone: '555-0001',
+        country: 'USA',
+        licenseType: 'Basic',
+        status: 'Pending',
+        date: '2024-05-01'
+      },
+      {
+        id: 'APP-2024-0002',
+        name: 'Bob Williams',
+        email: 'bob.w@example.com',
+        phone: '555-0002',
+        country: 'Canada',
+        licenseType: 'Standard',
+        status: 'Approved',
+        date: '2024-05-01'
+      },
+    ];
+  }
+
+  // Contact Management Methods
   getContacts(): Contact[] {
-    const stored = localStorage.getItem('apex_unified_contacts');
+    const stored = localStorage.getItem('apex_contacts');
     return stored ? JSON.parse(stored) : this.getDefaultContacts();
   }
 
-  addContact(contact: Omit<Contact, 'id' | 'date' | 'status'>): Contact {
-    const contacts = this.getContacts();
-    const newContact: Contact = {
-      ...contact,
-      id: this.generateId(),
-      date: new Date().toISOString().split('T')[0],
-      status: 'new',
-    };
-    contacts.push(newContact);
-    localStorage.setItem('apex_unified_contacts', JSON.stringify(contacts));
-    this.emit('contacts_updated', contacts);
-    return newContact;
+  addContact(contact: Contact): void {
+    const contacts = [...this.getContacts(), contact];
+    localStorage.setItem('apex_contacts', JSON.stringify(contacts));
+    this.contactsSubject.next(contacts);
+    this.notifyListeners('contact_added', contact);
   }
 
-  updateContact(id: string, updates: Partial<Contact>): boolean {
-    const contacts = this.getContacts();
-    const index = contacts.findIndex(contact => contact.id === id);
-    if (index !== -1) {
-      contacts[index] = { ...contacts[index], ...updates };
-      localStorage.setItem('apex_unified_contacts', JSON.stringify(contacts));
-      this.emit('contacts_updated', contacts);
-      return true;
-    }
-    return false;
+   updateContact(id: string, updates: Partial<Contact>): void {
+    const contacts = this.getContacts().map(contact =>
+      contact.id === id ? { ...contact, ...updates } : contact
+    );
+    localStorage.setItem('apex_contacts', JSON.stringify(contacts));
+    this.contactsSubject.next(contacts);
+    this.notifyListeners('contact_updated', { id, updates });
   }
 
-  // Licenses Management
+  deleteContact(id: string): void {
+    const contacts = this.getContacts().filter(contact => contact.id !== id);
+    localStorage.setItem('apex_contacts', JSON.stringify(contacts));
+    this.contactsSubject.next(contacts);
+    this.notifyListeners('contact_deleted', id);
+  }
+
+  private getDefaultContacts(): Contact[] {
+    return [
+      {
+        id: 'CON-2024-0001',
+        name: 'Charlie Brown',
+        email: 'charlie.b@example.com',
+        message: 'Inquiry about licensing',
+        status: 'New',
+        date: '2024-05-02'
+      },
+      {
+        id: 'CON-2024-0002',
+        name: 'Diana Green',
+        email: 'diana.g@example.com',
+        message: 'Question about application process',
+        status: 'Replied',
+        date: '2024-05-02'
+      },
+    ];
+  }
+
+  // License Management Methods
   getLicenses(): License[] {
-    const stored = localStorage.getItem('apex_unified_licenses');
+    const stored = localStorage.getItem('apex_licenses');
     return stored ? JSON.parse(stored) : this.getDefaultLicenses();
   }
 
-  addLicense(license: Omit<License, 'id'>): License {
-    const licenses = this.getLicenses();
-    const newLicense: License = {
-      ...license,
-      id: this.generateLicenseId(license.category),
-    };
-    licenses.push(newLicense);
-    localStorage.setItem('apex_unified_licenses', JSON.stringify(licenses));
-    this.emit('licenses_updated', licenses);
-    return newLicense;
+  addLicense(license: License): void {
+    const licenses = [...this.getLicenses(), license];
+    localStorage.setItem('apex_licenses', JSON.stringify(licenses));
+    this.licensesSubject.next(licenses);
+    this.notifyListeners('license_added', license);
   }
 
-  updateLicense(id: string, updates: Partial<License>): boolean {
-    const licenses = this.getLicenses();
-    const index = licenses.findIndex(license => license.id === id);
-    if (index !== -1) {
-      licenses[index] = { ...licenses[index], ...updates };
-      localStorage.setItem('apex_unified_licenses', JSON.stringify(licenses));
-      this.emit('licenses_updated', licenses);
-      return true;
-    }
-    return false;
+  updateLicense(id: string, updates: Partial<License>): void {
+    const licenses = this.getLicenses().map(license =>
+      license.id === id ? { ...license, ...updates } : license
+    );
+    localStorage.setItem('apex_licenses', JSON.stringify(licenses));
+    this.licensesSubject.next(licenses);
+    this.notifyListeners('license_updated', { id, updates });
   }
 
-  deleteLicense(id: string): boolean {
-    const licenses = this.getLicenses();
-    const filtered = licenses.filter(license => license.id !== id);
-    if (filtered.length !== licenses.length) {
-      localStorage.setItem('apex_unified_licenses', JSON.stringify(filtered));
-      this.emit('licenses_updated', filtered);
-      return true;
-    }
-    return false;
+  deleteLicense(id: string): void {
+    const licenses = this.getLicenses().filter(license => license.id !== id);
+    localStorage.setItem('apex_licenses', JSON.stringify(licenses));
+    this.licensesSubject.next(licenses);
+    this.notifyListeners('license_deleted', id);
   }
 
-  // Utility Methods
-  private generateId(): string {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+  private getDefaultLicenses(): License[] {
+    return [
+      {
+        id: 'LIC-2024-0001',
+        holder: 'Eve White',
+        type: 'Premium',
+        issueDate: '2024-05-03',
+        expiryDate: '2025-05-03',
+        status: 'Active',
+        platforms: 'All'
+      },
+      {
+        id: 'LIC-2024-0002',
+        holder: 'Frank Black',
+        type: 'Standard',
+        issueDate: '2024-05-03',
+        expiryDate: '2025-05-03',
+        status: 'Inactive',
+        platforms: 'Limited'
+      },
+    ];
   }
 
-  private generateLicenseId(category: number): string {
-    const year = new Date().getFullYear();
-    const randomNum = Math.floor(Math.random() * 9999).toString().padStart(4, '0');
-    return `CL-${year}-${randomNum}-T${category}`;
+  // Settings Management Methods
+  getSettings(): SettingsData {
+    const stored = localStorage.getItem('apex_settings');
+    return stored ? JSON.parse(stored) : this.getDefaultSettings();
   }
 
-  // Default Data
-  private getDefaultSettings(): WebsiteSettings {
+  updateSettings(updates: Partial<SettingsData>): void {
+    const currentSettings = this.getSettings();
+    const newSettings = { ...currentSettings, ...updates };
+    localStorage.setItem('apex_settings', JSON.stringify(newSettings));
+    this.notifyListeners('settings_updated');
+  }
+
+  private getDefaultSettings(): SettingsData {
     return {
-      category1Price: '25,000 USDT',
-      category2Price: '50,000 USDT',
-      category3Price: '70,000 USDT',
-      category4Price: '150,000 USDT',
-      category5Price: '250,000 USDT',
-      category6Price: '500,000 USDT',
-      category1Available: false,
-      category2Available: false,
-      category3Available: true,
-      category4Available: true,
-      category5Available: true,
-      category6Available: true,
-      bitcoinAddress: "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa",
-      ethereumAddress: "0x742d35Cc6663C65C926d75d60e3B3d97c8a0e0e0",
-      usdtAddress: "TG3XXyExBkPp9nzdajDGFahC9nyKERJpUN",
-      companyName: "APEX Crypto Licensing Regulatory",
-      supportEmail: "support@apexcrypto.reg",
-      salesEmail: "sales@apexcrypto.reg",
-      phoneNumber: "+1 (555) 123-4567",
-      address: "123 Blockchain Avenue",
-      city: "Digital City, DC 12345",
-      country: "United States",
-      website: "https://apexcrypto.reg"
+      applicationFee: 100,
+      licenseFee: 500,
+      renewalFee: 200,
+      taxRate: 0.05,
+      supportEmail: 'support@apex.com',
+      companyName: 'Apex Regulations Ltd'
     };
+  }
+
+  // Analytics Methods
+  getAnalytics(): AnalyticsData {
+    const applications = this.getApplications();
+    const licenses = this.getLicenses();
+    const contacts = this.getContacts();
+    const settings = this.getSettings();
+
+    const totalRevenue = licenses.length * settings.licenseFee;
+    const pendingApplications = applications.filter(app => app.status === 'Pending').length;
+    const approvedApplications = applications.filter(app => app.status === 'Approved').length;
+    const activeLicenses = licenses.filter(license => license.status === 'Active').length;
+    const newContacts = contacts.filter(contact => contact.status === 'New').length;
+
+    return {
+      totalApplications: applications.length,
+      pendingApplications: pendingApplications,
+      approvedApplications: approvedApplications,
+      totalRevenue: totalRevenue,
+      newContacts: newContacts,
+      activeLicenses: activeLicenses
+    };
+  }
+
+  // Content Management Methods
+  getContent(): ContentSettings {
+    const stored = localStorage.getItem('apex_content_settings');
+    if (stored) {
+      return JSON.parse(stored);
+    }
+    
+    return this.getDefaultContent();
+  }
+
+  updateContent(updates: Partial<ContentSettings>): void {
+    const currentContent = this.getContent();
+    const newContent = { ...currentContent, ...updates };
+    localStorage.setItem('apex_content_settings', JSON.stringify(newContent));
+    this.notifyListeners('content_updated');
   }
 
   private getDefaultContent(): ContentSettings {
     return {
       hero: {
         headline: "World's Leading Crypto Trading License Provider",
-        subheadline: "Secure your regulatory compliance with our internationally recognized trading certificates. Join 45,000+ successful traders worldwide.",
-        ctaText: "Start Your Application",
+        subheadline: "Get your official cryptocurrency trading license with our streamlined regulatory compliance process. Join thousands of certified traders worldwide.",
+        ctaText: "Get Licensed Now",
         ctaSecondaryText: "Verify License",
-        trustBadges: [
-          { name: 'SEC Approved', verified: true, color: 'bg-primary/10 text-primary' },
-          { name: 'CFTC Certified', verified: true, color: 'bg-accent/10 text-accent' },
-          { name: 'FCA Licensed', verified: true, color: 'bg-accent-emerald/10 text-accent-emerald' },
-          { name: 'MiCA Compliant', verified: true, color: 'bg-accent-amber/10 text-accent-amber' }
-        ],
         stats: [
-          { value: '45,000+', label: 'Licensed Traders', icon: 'Users', color: 'text-primary' },
-          { value: '180+', label: 'Countries Served', icon: 'Globe', color: 'text-accent' },
-          { value: '99.9%', label: 'Success Rate', icon: 'Award', color: 'text-accent-emerald' },
-          { value: '24/7', label: 'Support Available', icon: 'Shield', color: 'text-accent-amber' }
+          { value: "15K+", label: "Licensed Traders", icon: "Users", color: "text-primary" },
+          { value: "60+", label: "Countries", icon: "Globe", color: "text-accent" },
+          { value: "99.9%", label: "Success Rate", icon: "Award", color: "text-accent-emerald" },
+          { value: "24/7", label: "Support", icon: "Shield", color: "text-accent-amber" }
+        ],
+        trustBadges: [
+          { name: "ISO Certified", color: "bg-accent-emerald/10" },
+          { name: "GDPR Compliant", color: "bg-primary/10" },
+          { name: "SSL Secured", color: "bg-accent/10" },
+          { name: "24/7 Support", color: "bg-accent-amber/10" }
         ]
       },
       about: {
-        title: "Ensuring Regulatory Compliance for Digital Asset Trading",
-        subtitle: "About the Authority",
+        subtitle: "About APEX",
+        title: "The Leading Cryptocurrency Trading License Authority",
         description: [
-          "The APEX Crypto Licensing Authority is the premier regulatory body ensuring compliance, security, and legitimacy in digital asset trading operations worldwide.",
-          "Our licensing framework establishes a foundation for traders and institutions to operate within recognized legal standards, ensuring both consumer protection and market integrity."
+          "APEX is a globally recognized regulatory authority specializing in cryptocurrency trading licenses and compliance. We provide comprehensive licensing solutions that ensure traders and businesses operate within legal frameworks across multiple jurisdictions.",
+          "Our expert team has processed thousands of applications, maintaining the highest standards of regulatory compliance while streamlining the certification process for our clients."
         ],
+        legalNotice: "APEX operates as an independent regulatory body. All licenses issued are subject to local jurisdiction requirements and ongoing compliance obligations.",
         features: [
           {
-            title: "Regulatory Protection",
-            description: "Operate with confidence under our internationally recognized licensing framework.",
+            title: "Global Recognition",
+            description: "Our licenses are recognized and accepted by major exchanges worldwide",
             icon: "Shield"
           },
           {
-            title: "Verified Status",
-            description: "Enhance trust with clients and platforms through verified trader status.",
+            title: "Fast Processing",
+            description: "Average processing time of 2-3 business days for complete applications",
             icon: "CheckCircle"
           },
           {
-            title: "Official Documentation",
-            description: "Receive tamper-proof documentation recognized by major trading platforms.",
+            title: "Full Compliance",
+            description: "Comprehensive regulatory framework ensuring full legal compliance",
             icon: "FileCheck"
           }
+        ]
+      },
+      whatIsLicense: {
+        subtitle: "Understanding Licensing",
+        title: "What is a Trading License?",
+        ctaText: "Get Certified",
+        description: [
+          "A crypto trading certificate is a regulatory permit that allows a company to legally operate a cryptocurrency exchange or trading platform. It ensures compliance with financial laws, anti-money laundering (AML), and know-your-customer (KYC) regulations.",
+          "Requirements vary by jurisdiction, with some countries having strict licensing frameworks. Obtaining one enhances credibility and legal security for crypto businesses."
         ],
-        legalNotice: "APEX Crypto Licensing Authority provides official licensing documentation for cryptocurrency traders and institutions based on verification of trading activity and identity. Our licenses are designed to ensure compliance with evolving digital asset regulations worldwide."
+        features: [
+          {
+            title: "Legal Compliance",
+            description: "Full adherence to financial regulations and legal requirements",
+            icon: "FileText"
+          },
+          {
+            title: "AML & KYC",
+            description: "Anti-money laundering and know-your-customer compliance",
+            icon: "Shield"
+          },
+          {
+            title: "Global Recognition",
+            description: "Accepted across multiple jurisdictions and platforms",
+            icon: "Globe"
+          },
+          {
+            title: "Enhanced Credibility",
+            description: "Builds trust with clients and business partners",
+            icon: "CheckCircle"
+          }
+        ]
+      },
+      process: {
+        subtitle: "Simple Process",
+        title: "Get Started With APEX",
+        description: "Our seamless platform helps you obtain the necessary permits quickly and efficiently.",
+        ctaText: "Start Your Application",
+        steps: [
+          {
+            number: "1",
+            title: "Choose a Plan",
+            description: "Explore and select the best licensing plan for your needs.",
+            icon: "CreditCard"
+          },
+          {
+            number: "2",
+            title: "Make Payment & Upload Documents",
+            description: "Securely pay for your plan and submit the required documents.",
+            icon: "Upload"
+          },
+          {
+            number: "3",
+            title: "Get Certified",
+            description: "Our experts process your application, ensuring quick approval.",
+            icon: "Award"
+          }
+        ]
       },
       features: {
-        title: "Why Choose Our Licensing Services",
         subtitle: "Our Features",
+        title: "Why Choose Our Licensing Services",
         description: "We provide comprehensive licensing solutions with unmatched expertise and support",
         items: [
           {
@@ -530,38 +575,17 @@ class UnifiedDataManager {
             color: "text-accent-amber",
             bgColor: "bg-accent-amber/10"
           }
-        ]
-      },
-      process: {
-        title: "Get Started With APEX",
-        subtitle: "Simple Process",
-        description: "Our seamless platform helps you obtain the necessary permits quickly and efficiently.",
-        steps: [
-          {
-            number: "1",
-            title: "Choose a Plan",
-            description: "Explore and select the best licensing plan for your needs.",
-            icon: "CreditCard"
-          },
-          {
-            number: "2",
-            title: "Make Payment & Upload Documents",
-            description: "Securely pay for your plan and submit the required documents.",
-            icon: "Upload"
-          },
-          {
-            number: "3",
-            title: "Get Certified",
-            description: "Our experts process your application, ensuring quick approval.",
-            icon: "Award"
-          }
-        ]
+        ],
+        trustIndicator: {
+          title: "Regulatory Excellence",
+          description: "Certified by leading regulatory bodies worldwide, ensuring the highest standards of compliance and security for all our licensed traders."
+        }
       },
       verification: {
-        title: "Rigorous Verification Standards",
         subtitle: "Verification Process",
+        title: "Rigorous Verification Standards",
         description: "Our comprehensive verification process ensures only qualified traders receive official licensing, maintaining the integrity of the regulatory framework.",
-        verificationCards: [
+        cards: [
           {
             title: "Identity Verification",
             description: "Secure multi-factor identity verification using governmental databases and biometric verification systems.",
@@ -578,145 +602,46 @@ class UnifiedDataManager {
             icon: "Clock"
           }
         ],
-        timeline: [
-          {
-            number: 1,
-            title: "Application Submission",
-            description: "Complete the application form with all required documentation and submit payment.",
-            badge: "Day 1",
-            isCompleted: true
-          },
-          {
-            number: 2,
-            title: "Initial Review",
-            description: "Our system performs automated checks on submitted information and documentation.",
-            badge: "Day 1",
-            isCompleted: true
-          },
-          {
-            number: 3,
-            title: "Detailed Verification",
-            description: "Our compliance team manually reviews your application, trading history, and identity documentation.",
-            badge: "Day 2",
-            isCompleted: false
-          },
-          {
-            number: 4,
-            title: "License Issuance",
-            description: "Upon successful verification, your official license is generated and sent via email.",
-            badge: "Day 3",
-            isCompleted: false
-          }
-        ]
-      },
-      whatIsLicense: {
-        title: "What is a Trading License?",
-        subtitle: "Understanding Licensing",
-        description: [
-          "A crypto trading certificate is a regulatory permit that allows a company to legally operate a cryptocurrency exchange or trading platform. It ensures compliance with financial laws, anti-money laundering (AML), and know-your-customer (KYC) regulations.",
-          "Requirements vary by jurisdiction, with some countries having strict licensing frameworks. Obtaining one enhances credibility and legal security for crypto businesses."
-        ],
-        features: [
-          {
-            title: "Legal Compliance",
-            description: "Full adherence to financial regulations and legal requirements",
-            icon: "FileText"
-          },
-          {
-            title: "AML & KYC",
-            description: "Anti-money laundering and know-your-customer compliance",
-            icon: "Shield"
-          },
-          {
-            title: "Global Recognition",
-            description: "Accepted across multiple jurisdictions and platforms",
-            icon: "Globe"
-          },
-          {
-            title: "Enhanced Credibility",
-            description: "Builds trust with clients and business partners",
-            icon: "CheckCircle"
-          }
-        ]
+        timeline: {
+          title: "Verification Timeline",
+          steps: [
+            {
+              number: 1,
+              title: "Application Submission",
+              description: "Complete the application form with all required documentation and submit payment.",
+              badge: "Day 1",
+              isCompleted: true
+            },
+            {
+              number: 2,
+              title: "Initial Review",
+              description: "Our system performs automated checks on submitted information and documentation.",
+              badge: "Day 1",
+              isCompleted: true
+            },
+            {
+              number: 3,
+              title: "Detailed Verification",
+              description: "Our compliance team manually reviews your application, trading history, and identity documentation.",
+              badge: "Day 2",
+              isCompleted: false
+            },
+            {
+              number: 4,
+              title: "License Issuance",
+              description: "Upon successful verification, your official license is generated and sent via email.",
+              badge: "Day 3",
+              isCompleted: false
+            }
+          ]
+        },
+        sampleLicense: {
+          title: "Sample License Verification",
+          description: "Try verifying this sample license to see how the system works"
+        }
       }
     };
   }
-
-  private getDefaultApplications(): Application[] {
-    return [
-      { 
-        id: '1', 
-        name: 'John Doe', 
-        email: 'john@example.com', 
-        category: '3', 
-        status: 'pending', 
-        date: '2024-01-15', 
-        amount: '70,000 USDT' 
-      },
-      { 
-        id: '2', 
-        name: 'Jane Smith', 
-        email: 'jane@example.com', 
-        category: '4', 
-        status: 'approved', 
-        date: '2024-01-14', 
-        amount: '150,000 USDT' 
-      },
-    ];
-  }
-
-  private getDefaultContacts(): Contact[] {
-    return [
-      { 
-        id: '1', 
-        name: 'Alice Johnson', 
-        email: 'alice@example.com', 
-        subject: 'License Inquiry', 
-        message: 'I need help with my application...', 
-        date: '2024-01-15', 
-        status: 'new' 
-      },
-    ];
-  }
-
-  private getDefaultLicenses(): License[] {
-    return [
-      {
-        id: 'CL-2024-0001-T3',
-        holder: 'Thomas Anderson',
-        type: 'Category 3 - Advanced Trading',
-        category: 3,
-        issueDate: '2024-01-15',
-        expiryDate: '2025-01-15',
-        status: 'active',
-        platforms: 'Binance, Kraken, Coinbase, KuCoin'
-      },
-    ];
-  }
-
-  // Analytics
-  getAnalytics() {
-    const applications = this.getApplications();
-    const contacts = this.getContacts();
-    const licenses = this.getLicenses();
-
-    return {
-      totalApplications: applications.length,
-      pendingApplications: applications.filter(app => app.status === 'pending').length,
-      approvedApplications: applications.filter(app => app.status === 'approved').length,
-      activeLicenses: licenses.filter(license => license.status === 'active').length,
-      newContacts: contacts.filter(contact => contact.status === 'new').length,
-      totalRevenue: applications
-        .filter(app => app.status === 'approved')
-        .reduce((sum, app) => sum + parseFloat(app.amount.replace(/[^0-9.]/g, '')), 0),
-    };
-  }
-
-  destroy(): void {
-    this.broadcastChannel.close();
-    this.eventListeners.clear();
-  }
 }
 
-export const unifiedDataManager = UnifiedDataManager.getInstance();
-export type { Application, Contact, License, WebsiteSettings, ContentSettings };
+export const unifiedDataManager = new DataManager();
