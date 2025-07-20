@@ -12,7 +12,6 @@ import VerificationSection from '@/components/VerificationSection';
 import Footer from '@/components/Footer';
 import { ApplicationDialogProvider } from '@/components/ApplicationDialog';
 import SupportDialog from '@/components/SupportDialog';
-import UnifiedApplicationForm from '@/components/UnifiedApplicationForm';
 
 const Index = () => {
   const [showSupportDialog, setShowSupportDialog] = useState(false);

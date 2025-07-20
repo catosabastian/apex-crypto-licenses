@@ -1,146 +1,187 @@
 
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { BarChart3, Users, FileText, Award, Settings, Shield, Activity } from 'lucide-react';
-import { useSecureAuth } from '@/contexts/SecureAuthContext';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Shield, LogOut, BarChart3, FileText, Settings, Mail, Globe, Layers, Download } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/SecureAuthContext';
+import { useNavigate } from 'react-router-dom';
 import { unifiedDataManager } from '@/utils/unifiedDataManager';
-import { UnifiedSettingsManager } from '@/components/admin/UnifiedSettingsManager';
 import { ApplicationsManager } from '@/components/admin/ApplicationsManager';
 import { ContactsManager } from '@/components/admin/ContactsManager';
+import { UnifiedSettingsManager } from '@/components/admin/UnifiedSettingsManager';
 import { LicenseManager } from '@/components/admin/LicenseManager';
+import { ContentManager } from '@/components/admin/ContentManager';
 
 const SecureAdmin = () => {
-  const { logout } = useSecureAuth();
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [analytics, setAnalytics] = useState(unifiedDataManager.getAnalytics());
+  const { logout } = useAuth();
+  const navigate = useNavigate();
 
+  // Update analytics when tab changes
   useEffect(() => {
-    // Update analytics when data changes
-    const updateAnalytics = () => {
-      setAnalytics(unifiedDataManager.getAnalytics());
-    };
+    setAnalytics(unifiedDataManager.getAnalytics());
+  }, [activeTab]);
 
-    unifiedDataManager.addEventListener('applications_updated', updateAnalytics);
-    unifiedDataManager.addEventListener('contacts_updated', updateAnalytics);
-    unifiedDataManager.addEventListener('licenses_updated', updateAnalytics);
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
-    return () => {
-      unifiedDataManager.removeEventListener('applications_updated', updateAnalytics);
-      unifiedDataManager.removeEventListener('contacts_updated', updateAnalytics);
-      unifiedDataManager.removeEventListener('licenses_updated', updateAnalytics);
-    };
-  }, []);
+  const exportData = () => {
+    const applications = unifiedDataManager.getApplications();
+    const contacts = unifiedDataManager.getContacts();
+    const licenses = unifiedDataManager.getLicenses();
+    
+    const csvContent = "data:text/csv;charset=utf-8," 
+      + "Type,ID,Name,Email,Status,Date\n" 
+      + applications.map(app => `Application,${app.id},${app.name},${app.email},${app.status},${app.date}`).join("\n")
+      + "\n"
+      + contacts.map(contact => `Contact,${contact.id},${contact.name},${contact.email},${contact.status},${contact.date}`).join("\n");
+    
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "apex_admin_data.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    toast({
+      title: "Data Exported!",
+      description: "All data exported as CSV",
+    });
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      <div className="container mx-auto p-6">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-3">
-            <Shield className="h-8 w-8 text-purple-400" />
-            <div>
-              <h1 className="text-3xl font-bold text-white">APEX Admin Panel</h1>
-              <p className="text-purple-200">Secure Administrative Dashboard</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-4">
-            <Badge variant="default" className="bg-green-500 text-white">
-              <Activity className="h-4 w-4 mr-1" />
-              System Online
-            </Badge>
-            <button
-              onClick={logout}
-              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-            >
-              Logout
-            </button>
-          </div>
+    <div className="container mx-auto py-10 px-4">
+      <header className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+        <div>
+          <h1 className="text-3xl font-bold flex items-center gap-2">
+            <Shield className="text-primary" />
+            APEX Admin Dashboard
+          </h1>
+          <p className="text-muted-foreground mt-2">
+            Unified business management system with real-time sync
+          </p>
         </div>
-
-        {/* Analytics Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Card className="modern-card">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
-              <FileText className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{analytics.totalApplications}</div>
-              <p className="text-xs text-muted-foreground">
-                {analytics.pendingApplications} pending
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="modern-card">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Licenses</CardTitle>
-              <Award className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{analytics.activeLicenses}</div>
-              <p className="text-xs text-muted-foreground">
-                Currently active
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="modern-card">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">New Contacts</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{analytics.newContacts}</div>
-              <p className="text-xs text-muted-foreground">
-                Awaiting response
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="modern-card">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-              <BarChart3 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">${analytics.totalRevenue.toLocaleString()}</div>
-              <p className="text-xs text-muted-foreground">
-                From approved applications
-              </p>
-            </CardContent>
-          </Card>
+        
+        <div className="flex gap-3">
+          <Button onClick={exportData} className="flex items-center gap-2">
+            <Download className="h-4 w-4" />
+            Export Data
+          </Button>
+          <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
+            <LogOut className="h-4 w-4" />
+            Logout
+          </Button>
         </div>
+      </header>
 
-        {/* Main Content Tabs */}
-        <Tabs defaultValue="settings" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:w-[400px]">
-            <TabsTrigger value="settings">
-              <Settings className="h-4 w-4 mr-2" />
-              Settings
-            </TabsTrigger>
-            <TabsTrigger value="applications">Applications</TabsTrigger>
-            <TabsTrigger value="contacts">Contacts</TabsTrigger>
-            <TabsTrigger value="licenses">Licenses</TabsTrigger>
-          </TabsList>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-6">
+          <TabsTrigger value="dashboard" className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Dashboard
+          </TabsTrigger>
+          <TabsTrigger value="applications" className="flex items-center gap-2">
+            <FileText className="h-4 w-4" />
+            Applications
+          </TabsTrigger>
+          <TabsTrigger value="contacts" className="flex items-center gap-2">
+            <Mail className="h-4 w-4" />
+            Contacts
+          </TabsTrigger>
+          <TabsTrigger value="licenses" className="flex items-center gap-2">
+            <Shield className="h-4 w-4" />
+            Licenses
+          </TabsTrigger>
+          <TabsTrigger value="content" className="flex items-center gap-2">
+            <Globe className="h-4 w-4" />
+            Content
+          </TabsTrigger>
+          <TabsTrigger value="settings" className="flex items-center gap-2">
+            <Settings className="h-4 w-4" />
+            Settings
+          </TabsTrigger>
+        </TabsList>
 
-          <TabsContent value="settings">
-            <UnifiedSettingsManager />
-          </TabsContent>
+        <TabsContent value="dashboard" className="space-y-6">
+          <h2 className="text-2xl font-semibold">Analytics Dashboard</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
+                <FileText className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{analytics.totalApplications}</div>
+                <p className="text-xs text-muted-foreground">
+                  {analytics.pendingApplications} pending review
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Active Licenses</CardTitle>
+                <Shield className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{analytics.activeLicenses}</div>
+                <p className="text-xs text-muted-foreground">
+                  {analytics.approvedApplications} approved this month
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Revenue</CardTitle>
+                <BarChart3 className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">${analytics.totalRevenue.toLocaleString()}</div>
+                <p className="text-xs text-muted-foreground">From approved applications</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">New Messages</CardTitle>
+                <Mail className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{analytics.newContacts}</div>
+                <p className="text-xs text-muted-foreground">Requiring attention</p>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
 
-          <TabsContent value="applications">
-            <ApplicationsManager />
-          </TabsContent>
+        <TabsContent value="applications" className="space-y-6">
+          <ApplicationsManager />
+        </TabsContent>
 
-          <TabsContent value="contacts">
-            <ContactsManager />
-          </TabsContent>
+        <TabsContent value="contacts" className="space-y-6">
+          <ContactsManager />
+        </TabsContent>
 
-          <TabsContent value="licenses">
-            <LicenseManager />
-          </TabsContent>
-        </Tabs>
-      </div>
+        <TabsContent value="licenses" className="space-y-6">
+          <LicenseManager />
+        </TabsContent>
+
+        <TabsContent value="content" className="space-y-6">
+          <ContentManager />
+        </TabsContent>
+
+        <TabsContent value="settings" className="space-y-6">
+          <UnifiedSettingsManager />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

@@ -21,11 +21,10 @@ const Header = () => {
     <header className="fixed top-0 left-0 right-0 bg-background/95 backdrop-blur-sm z-50 border-b border-border py-4">
       <div className="container flex items-center justify-between">
         <Logo />
-        <DesktopNav onApplyClick={openApplicationDialog} />
+        <DesktopNav />
         <MobileNav 
           isOpen={isMenuOpen} 
           onToggle={toggleMenu} 
-          onApplyClick={openApplicationDialog} 
           onNavItemClick={closeMenu} 
         />
       </div>

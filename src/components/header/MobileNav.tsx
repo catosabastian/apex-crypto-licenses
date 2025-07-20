@@ -2,17 +2,19 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { X, Menu } from 'lucide-react';
+import { useApplicationDialog } from '@/components/ApplicationDialog';
 
 interface MobileNavProps {
   isOpen: boolean;
   onToggle: () => void;
-  onApplyClick: () => void;
   onNavItemClick: () => void;
 }
 
-const MobileNav = ({ isOpen, onToggle, onApplyClick, onNavItemClick }: MobileNavProps) => {
+const MobileNav = ({ isOpen, onToggle, onNavItemClick }: MobileNavProps) => {
+  const { openApplicationDialog } = useApplicationDialog();
+  
   const handleApplyClick = () => {
-    onApplyClick();
+    openApplicationDialog();
     onNavItemClick();
   };
 
