@@ -128,8 +128,10 @@
   }
   
   .modern-card {
-    @apply bg-card/98 backdrop-blur-md border border-border/60 shadow-2xl shadow-black/8 rounded-2xl p-6;
+    @apply backdrop-blur-md border rounded-2xl p-6 shadow-2xl;
     background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--card)) 50%, hsl(var(--secondary)) 100%);
+    border-color: hsl(var(--border) / 0.6);
+    box-shadow: 0 25px 50px -12px hsl(var(--glass-shadow));
   }
   
   .gradient-text {
