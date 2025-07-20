@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
 import { CheckCircle, Star, TrendingUp, Shield, Users, DollarSign, Zap, Crown } from 'lucide-react';
 import { unifiedDataManager } from '@/utils/unifiedDataManager';
-import { UnifiedApplicationForm } from './UnifiedApplicationForm';
+import UnifiedApplicationForm from './UnifiedApplicationForm';
 
 const LicenseCategories = () => {
   const [settings, setSettings] = useState(unifiedDataManager.getSettings());
@@ -167,7 +167,7 @@ const LicenseCategories = () => {
           </p>
         </div>
 
-        {/* License Grid */}
+        {/* License Grid with Enhanced Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {categories.map((category, index) => {
             const IconComponent = category.icon;
@@ -176,16 +176,16 @@ const LicenseCategories = () => {
               <Card 
                 key={category.id} 
                 className={`
-                  relative overflow-hidden glass-card border-2 hover:border-primary/40 
+                  relative overflow-visible glass-card border-2 hover:border-primary/40 
                   transition-all duration-500 hover:scale-105 hover:shadow-2xl
-                  ${category.popularity ? 'border-primary/50 shadow-xl' : 'border-border/50'}
-                  animate-fade-in-up group
+                  ${category.popularity ? 'border-primary/50 shadow-xl ring-2 ring-primary/20' : 'border-border/50'}
+                  animate-fade-in-up group h-full flex flex-col
                 `}
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 {/* Popularity Badge */}
                 {category.popularity && (
-                  <div className="absolute -right-12 top-8 bg-gradient-to-r from-primary to-accent text-white px-12 py-2 rotate-45 text-sm font-semibold">
+                  <div className="absolute -right-12 top-8 bg-gradient-to-r from-primary to-accent text-white px-12 py-2 rotate-45 text-xs font-semibold z-10">
                     Most Popular
                   </div>
                 )}
@@ -199,7 +199,7 @@ const LicenseCategories = () => {
                   </div>
                 )}
 
-                <CardHeader className="pb-4">
+                <CardHeader className="pb-4 flex-shrink-0">
                   {/* Icon and Badge */}
                   <div className="flex items-center justify-between mb-4">
                     <div className={`p-3 rounded-xl bg-gradient-to-r ${category.color} shadow-lg group-hover:scale-110 transition-transform duration-300`}>
@@ -212,47 +212,47 @@ const LicenseCategories = () => {
 
                   {/* Title and Price */}
                   <div className="space-y-2">
-                    <CardTitle className="text-xl font-bold group-hover:text-primary transition-colors duration-300">
+                    <CardTitle className="text-xl font-bold group-hover:text-primary transition-colors duration-300 break-words">
                       {category.name}
                     </CardTitle>
-                    <div className="flex items-baseline gap-2">
-                      <span className={`text-2xl font-bold ${category.available ? 'text-primary' : 'text-muted-foreground'}`}>
+                    <div className="flex items-baseline gap-2 flex-wrap">
+                      <span className={`text-2xl font-bold ${category.available ? 'text-primary' : 'text-muted-foreground'} break-words`}>
                         {category.price}
                       </span>
                       <span className="text-sm text-muted-foreground">one-time</span>
                     </div>
                   </div>
 
-                  <CardDescription className="text-sm text-muted-foreground leading-relaxed mt-3">
+                  <CardDescription className="text-sm text-muted-foreground leading-relaxed mt-3 break-words">
                     {category.description}
                   </CardDescription>
                 </CardHeader>
 
-                <CardContent className="space-y-6">
+                <CardContent className="space-y-6 flex-grow flex flex-col overflow-visible">
                   {/* Key Stats */}
                   <div className="grid grid-cols-2 gap-4 py-4 border-t border-b border-border/50">
                     <div className="text-center">
-                      <div className="text-sm font-semibold text-primary">{category.minVolume}</div>
+                      <div className="text-sm font-semibold text-primary break-words">{category.minVolume}</div>
                       <div className="text-xs text-muted-foreground">Min Volume</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-sm font-semibold text-accent">{category.processingTime}</div>
+                      <div className="text-sm font-semibold text-accent break-words">{category.processingTime}</div>
                       <div className="text-xs text-muted-foreground">Processing</div>
                     </div>
                   </div>
 
                   {/* Features List */}
-                  <ul className="space-y-3">
+                  <ul className="space-y-3 flex-grow overflow-visible">
                     {category.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-start gap-3 text-sm">
+                      <li key={idx} className="flex items-start gap-3 text-sm overflow-visible">
                         <CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                        <span className="text-muted-foreground leading-relaxed">{feature}</span>
+                        <span className="text-muted-foreground leading-relaxed break-words hyphens-auto">{feature}</span>
                       </li>
                     ))}
                   </ul>
 
                   {/* CTA Button */}
-                  <div className="pt-4">
+                  <div className="pt-4 mt-auto">
                     {category.available ? (
                       <Dialog>
                         <DialogTrigger asChild>
@@ -294,12 +294,12 @@ const LicenseCategories = () => {
 
         {/* Bottom CTA */}
         <div className="text-center mt-16">
-          <div className="glass-card p-8 rounded-2xl border border-primary/20 max-w-2xl mx-auto">
+          <div className="glass-card p-8 rounded-2xl border border-primary/20 max-w-2xl mx-auto hover:shadow-xl transition-all duration-300">
             <h3 className="text-2xl font-bold mb-4">Not sure which license is right for you?</h3>
-            <p className="text-muted-foreground mb-6">
+            <p className="text-muted-foreground mb-6 break-words">
               Our expert team can help you choose the perfect license category based on your trading experience and goals.
             </p>
-            <Button variant="outline" size="lg" className="glass-button border-primary/30 hover:bg-primary/10">
+            <Button variant="outline" size="lg" className="glass-button border-primary/30 hover:bg-primary/10 hover:scale-105 transition-all duration-300">
               Get Free Consultation
             </Button>
           </div>

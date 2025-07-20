@@ -13,6 +13,8 @@ const EnhancedCard = React.forwardRef<
     ref={ref}
     className={cn(
       "rounded-xl border bg-card text-card-foreground shadow-sm transition-all duration-300",
+      "overflow-visible", // Ensure content is never cut off
+      "h-full flex flex-col", // Ensure full height and flex layout
       {
         'default': "border-border",
         'glass': "glass-card border-border/50 backdrop-blur-sm",
@@ -20,7 +22,6 @@ const EnhancedCard = React.forwardRef<
         'elevated': "shadow-lg border-border/50"
       }[variant],
       hover && "hover:shadow-xl hover:scale-[1.02] hover:border-primary/30",
-      "overflow-visible", // Ensure content is never cut off
       className
     )}
     {...props}
@@ -36,7 +37,8 @@ const EnhancedCardHeader = React.forwardRef<
     ref={ref}
     className={cn(
       "flex flex-col space-y-1.5 p-6 pb-4",
-      "min-h-fit", // Ensure header takes needed space
+      "flex-shrink-0", // Prevent header from shrinking
+      "overflow-visible", // Ensure header content is visible
       className
     )}
     {...props}
@@ -55,7 +57,8 @@ const EnhancedCardTitle = React.forwardRef<
     className={cn(
       "font-semibold leading-none tracking-tight",
       "text-lg sm:text-xl", // Responsive text sizing
-      "break-words hyphens-auto", // Prevent text overflow
+      "break-words hyphens-auto overflow-visible", // Prevent text overflow
+      "min-h-fit", // Allow natural height
       gradient ? "gradient-text bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent" : "",
       className
     )}
@@ -72,7 +75,7 @@ const EnhancedCardDescription = React.forwardRef<
     ref={ref}
     className={cn(
       "text-sm text-muted-foreground leading-relaxed",
-      "break-words hyphens-auto", // Prevent text overflow
+      "break-words hyphens-auto overflow-visible", // Prevent text overflow
       "min-h-fit", // Allow natural height
       className
     )}
@@ -82,15 +85,16 @@ const EnhancedCardDescription = React.forwardRef<
 EnhancedCardDescription.displayName = "EnhancedCardDescription"
 
 const EnhancedCardContent = React.forwardRef<
-  HTMLDivElement,
+  HTMLDivContainer,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
     className={cn(
       "p-6 pt-0 space-y-4",
-      "flex-1", // Take remaining space
+      "flex-1 flex flex-col", // Take remaining space and use flex
       "overflow-visible", // Ensure content is never clipped
+      "min-h-0", // Allow content to shrink if needed
       className
     )}
     {...props}
@@ -106,8 +110,8 @@ const EnhancedCardFooter = React.forwardRef<
     ref={ref}
     className={cn(
       "flex items-center p-6 pt-0",
-      "mt-auto", // Push to bottom
-      "min-h-fit", // Ensure footer takes needed space
+      "mt-auto flex-shrink-0", // Push to bottom and prevent shrinking
+      "overflow-visible", // Ensure footer content is visible
       className
     )}
     {...props}
