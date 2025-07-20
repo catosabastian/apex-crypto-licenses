@@ -110,8 +110,10 @@
 /* Enhanced Glass Morphism Components */
 @layer components {
   .glass-card {
-    @apply bg-white/12 backdrop-blur-lg border border-white/25 shadow-2xl shadow-black/10;
+    @apply backdrop-blur-lg border shadow-2xl;
     background: linear-gradient(135deg, hsl(var(--glass-bg)), hsl(var(--glass-bg)) 50%, transparent);
+    border-color: hsl(var(--glass-border));
+    box-shadow: 0 25px 50px -12px hsl(var(--glass-shadow));
   }
   
   .glass-button {
