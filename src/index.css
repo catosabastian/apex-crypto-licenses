@@ -117,7 +117,14 @@
   }
   
   .glass-button {
-    @apply bg-primary/95 backdrop-blur-md border border-primary/25 shadow-xl shadow-primary/25 hover:bg-primary/98 transition-all duration-300 hover:scale-105;
+    @apply backdrop-blur-md border shadow-xl transition-all duration-300 hover:scale-105;
+    background-color: hsl(var(--primary) / 0.95);
+    border-color: hsl(var(--primary) / 0.25);
+    box-shadow: 0 20px 25px -5px hsl(var(--primary) / 0.25);
+  }
+  
+  .glass-button:hover {
+    background-color: hsl(var(--primary) / 0.98);
   }
   
   .modern-card {
