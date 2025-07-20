@@ -7,18 +7,23 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Edit, Save, Eye, Plus, Trash } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Edit, Save, Eye, Plus, Trash, RefreshCw, CheckCircle, AlertCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { unifiedDataManager, ContentSettings } from '@/utils/unifiedDataManager';
+import { unifiedDataManager } from '@/utils/unifiedDataManager';
 
 export const ContentManager = () => {
   const [content, setContent] = useState(unifiedDataManager.getContent());
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   useEffect(() => {
     const handleContentUpdate = () => {
-      setContent(unifiedDataManager.getContent());
+      const newContent = unifiedDataManager.getContent();
+      setContent(newContent);
+      setHasUnsavedChanges(false);
     };
 
     unifiedDataManager.addEventListener('content_updated', handleContentUpdate);
@@ -28,115 +33,224 @@ export const ContentManager = () => {
     };
   }, []);
 
-  const sections = [
-    { key: 'hero', title: 'Hero Section', description: 'Main landing page content' },
-    { key: 'about', title: 'About Section', description: 'Company and authority information' },
-    { key: 'features', title: 'Features Section', description: 'Service features and benefits' },
-    { key: 'stats', title: 'Statistics Section', description: 'Company statistics and metrics' },
-    { key: 'process', title: 'Process Section', description: 'Application process steps' },
-    { key: 'verification', title: 'Verification Section', description: 'Verification process information' },
-    { key: 'whatIsLicense', title: 'What is License Section', description: 'License explanation content' }
+  const contentSections = [
+    { 
+      key: 'hero', 
+      title: 'Hero Section', 
+      description: 'Main landing page header and call-to-action',
+      status: 'active',
+      lastUpdated: 'Today'
+    },
+    { 
+      key: 'about', 
+      title: 'About Section', 
+      description: 'Company authority and credentials information',
+      status: 'active',
+      lastUpdated: '2 days ago'
+    },
+    { 
+      key: 'features', 
+      title: 'Features Section', 
+      description: 'Service features and key benefits',
+      status: 'active',
+      lastUpdated: '1 week ago'
+    },
+    { 
+      key: 'stats', 
+      title: 'Statistics Section', 
+      description: 'Company metrics and performance data',
+      status: 'active',
+      lastUpdated: '3 days ago'
+    },
+    { 
+      key: 'process', 
+      title: 'Process Section', 
+      description: 'Application process steps and timeline',
+      status: 'updated',
+      lastUpdated: 'Just now'
+    },
+    { 
+      key: 'verification', 
+      title: 'Verification Section', 
+      description: 'License verification process and tools',
+      status: 'active',
+      lastUpdated: '1 week ago'
+    },
+    { 
+      key: 'whatIsLicense', 
+      title: 'License Information Section', 
+      description: 'Educational content about crypto trading licenses',
+      status: 'active',
+      lastUpdated: '5 days ago'
+    }
   ];
 
   const handleUpdateContent = (sectionKey: string, newContent: any) => {
-    const updates = { [sectionKey]: newContent };
-    unifiedDataManager.updateContent(updates);
-    
-    toast({
-      title: "Content Updated",
-      description: `${sectionKey} section has been updated successfully`,
-    });
-    
-    setIsEditDialogOpen(false);
+    try {
+      const updates = { [sectionKey]: newContent };
+      unifiedDataManager.updateContent(updates);
+      
+      toast({
+        title: "Content Updated Successfully",
+        description: `${sectionKey} section has been updated and is live on the website`,
+      });
+      
+      setIsEditDialogOpen(false);
+      setSelectedSection(null);
+    } catch (error) {
+      toast({
+        title: "Update Failed",
+        description: "There was an error updating the content. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'updated':
+        return <Badge className="bg-green-100 text-green-800">Recently Updated</Badge>;
+      case 'active':
+        return <Badge variant="outline">Active</Badge>;
+      default:
+        return <Badge variant="secondary">Draft</Badge>;
+    }
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex justify-between items-start">
         <div>
-          <h2 className="text-2xl font-semibold">Content Management</h2>
-          <p className="text-muted-foreground">Manage website content with real-time updates</p>
+          <h2 className="text-3xl font-bold">Content Management System</h2>
+          <p className="text-muted-foreground mt-2">Manage all website content with real-time updates and live preview</p>
         </div>
-        <Button variant="outline">
-          <Eye className="h-4 w-4 mr-2" />
-          Preview Changes
-        </Button>
+        <div className="flex gap-3">
+          <Button variant="outline" onClick={() => setIsPreviewMode(!isPreviewMode)}>
+            <Eye className="h-4 w-4 mr-2" />
+            {isPreviewMode ? 'Exit Preview' : 'Live Preview'}
+          </Button>
+          <Button variant="outline">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh Content
+          </Button>
+        </div>
       </div>
 
+      {/* Status Bar */}
+      {hasUnsavedChanges && (
+        <Card className="border-amber-200 bg-amber-50">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-amber-600" />
+              <CardTitle className="text-amber-800">Unsaved Changes</CardTitle>
+            </div>
+            <CardDescription className="text-amber-700">
+              You have unsaved changes. Make sure to save before leaving this page.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+      )}
+
       <Tabs defaultValue="sections" className="space-y-6">
-        <TabsList>
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="sections">Content Sections</TabsTrigger>
-          <TabsTrigger value="hero">Hero Content</TabsTrigger>
-          <TabsTrigger value="features">Features</TabsTrigger>
-          <TabsTrigger value="stats">Statistics</TabsTrigger>
+          <TabsTrigger value="quick-edit">Quick Edit</TabsTrigger>
+          <TabsTrigger value="templates">Templates</TabsTrigger>
+          <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="sections" className="space-y-4">
-          <div className="grid gap-4">
-            {sections.map((section) => (
-              <Card key={section.key}>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div>
-                    <CardTitle>{section.title}</CardTitle>
-                    <CardDescription>{section.description}</CardDescription>
+        <TabsContent value="sections" className="space-y-6">
+          <div className="grid gap-6">
+            {contentSections.map((section) => (
+              <Card key={section.key} className="hover:shadow-md transition-shadow">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <CardTitle className="text-xl">{section.title}</CardTitle>
+                      {getStatusBadge(section.status)}
+                    </div>
+                    <CardDescription className="text-base">{section.description}</CardDescription>
+                    <p className="text-sm text-muted-foreground">Last updated: {section.lastUpdated}</p>
                   </div>
-                  <Dialog open={isEditDialogOpen && selectedSection === section.key} onOpenChange={(open) => {
-                    setIsEditDialogOpen(open);
-                    if (!open) setSelectedSection(null);
-                  }}>
-                    <DialogTrigger asChild>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => setSelectedSection(section.key)}
-                      >
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle>Edit {section.title}</DialogTitle>
-                        <DialogDescription>
-                          Update the content for this section
-                        </DialogDescription>
-                      </DialogHeader>
-                      {selectedSection && (
-                        <ContentEditForm 
-                          sectionKey={selectedSection}
-                          content={content[selectedSection as keyof ContentSettings]}
-                          onUpdate={(newContent) => handleUpdateContent(selectedSection, newContent)}
-                        />
-                      )}
-                    </DialogContent>
-                  </Dialog>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm">
+                      <Eye className="h-4 w-4 mr-2" />
+                      Preview
+                    </Button>
+                    <Dialog open={isEditDialogOpen && selectedSection === section.key} onOpenChange={(open) => {
+                      setIsEditDialogOpen(open);
+                      if (!open) setSelectedSection(null);
+                    }}>
+                      <DialogTrigger asChild>
+                        <Button 
+                          size="sm"
+                          onClick={() => setSelectedSection(section.key)}
+                        >
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit Content
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle className="flex items-center gap-2">
+                            <Edit className="h-5 w-5" />
+                            Edit {section.title}
+                          </DialogTitle>
+                          <DialogDescription>
+                            Make changes to this content section. Changes will be applied immediately to the live website.
+                          </DialogDescription>
+                        </DialogHeader>
+                        {selectedSection && (
+                          <ContentEditForm 
+                            sectionKey={selectedSection}
+                            content={content[selectedSection as keyof typeof content]}
+                            onUpdate={(newContent) => handleUpdateContent(selectedSection, newContent)}
+                            onCancel={() => {
+                              setIsEditDialogOpen(false);
+                              setSelectedSection(null);
+                            }}
+                          />
+                        )}
+                      </DialogContent>
+                    </Dialog>
+                  </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-sm text-muted-foreground">
-                    {section.key === 'hero' && (
-                      <div>
-                        <p><strong>Headline:</strong> {content.hero.headline}</p>
-                        <p><strong>Subheadline:</strong> {content.hero.subheadline.substring(0, 100)}...</p>
+                  <div className="grid md:grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <strong className="text-foreground">Content Preview:</strong>
+                      <div className="mt-1 text-muted-foreground">
+                        {section.key === 'hero' && (
+                          <p>Headline: {content.hero?.headline?.substring(0, 50)}...</p>
+                        )}
+                        {section.key === 'about' && (
+                          <p>Title: {content.about?.title}</p>
+                        )}
+                        {section.key === 'features' && (
+                          <p>Features: {content.features?.items?.length || 0} items</p>
+                        )}
+                        {section.key === 'stats' && (
+                          <p>Statistics: {content.stats?.items?.length || 0} metrics</p>
+                        )}
+                        {section.key === 'process' && (
+                          <p>Steps: {content.process?.steps?.length || 0} process steps</p>
+                        )}
+                        {section.key === 'verification' && (
+                          <p>Title: {content.verification?.title}</p>
+                        )}
+                        {section.key === 'whatIsLicense' && (
+                          <p>Title: {content.whatIsLicense?.title}</p>
+                        )}
                       </div>
-                    )}
-                    {section.key === 'about' && (
-                      <div>
-                        <p><strong>Title:</strong> {content.about.title}</p>
-                        <p><strong>Description:</strong> {content.about.description[0]?.substring(0, 100)}...</p>
+                    </div>
+                    <div>
+                      <strong className="text-foreground">Section Status:</strong>
+                      <div className="mt-1 flex items-center gap-2 text-muted-foreground">
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                        <span>Published and live</span>
                       </div>
-                    )}
-                    {section.key === 'features' && (
-                      <div>
-                        <p><strong>Title:</strong> {content.features.title}</p>
-                        <p><strong>Features:</strong> {content.features.items.length} items</p>
-                      </div>
-                    )}
-                    {section.key === 'stats' && (
-                      <div>
-                        <p><strong>Title:</strong> {content.stats.title}</p>
-                        <p><strong>Statistics:</strong> {content.stats.items.length} items</p>
-                      </div>
-                    )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>
@@ -144,16 +258,16 @@ export const ContentManager = () => {
           </div>
         </TabsContent>
 
-        <TabsContent value="hero" className="space-y-4">
-          <HeroContentManager content={content.hero} onUpdate={(newContent) => handleUpdateContent('hero', newContent)} />
+        <TabsContent value="quick-edit" className="space-y-6">
+          <QuickEditPanel content={content} onUpdate={handleUpdateContent} />
         </TabsContent>
 
-        <TabsContent value="features" className="space-y-4">
-          <FeaturesContentManager content={content.features} onUpdate={(newContent) => handleUpdateContent('features', newContent)} />
+        <TabsContent value="templates" className="space-y-6">
+          <TemplatesPanel />
         </TabsContent>
 
-        <TabsContent value="stats" className="space-y-4">
-          <StatsContentManager content={content.stats} onUpdate={(newContent) => handleUpdateContent('stats', newContent)} />
+        <TabsContent value="analytics" className="space-y-6">
+          <AnalyticsPanel />
         </TabsContent>
       </Tabs>
     </div>
@@ -163,13 +277,16 @@ export const ContentManager = () => {
 const ContentEditForm = ({ 
   sectionKey, 
   content, 
-  onUpdate 
+  onUpdate,
+  onCancel
 }: { 
   sectionKey: string; 
   content: any;
   onUpdate: (content: any) => void;
+  onCancel: () => void;
 }) => {
-  const [formData, setFormData] = useState(content);
+  const [formData, setFormData] = useState(content || {});
+  const [hasChanges, setHasChanges] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -178,90 +295,86 @@ const ContentEditForm = ({
 
   const updateField = (field: string, value: any) => {
     setFormData((prev: any) => ({ ...prev, [field]: value }));
-  };
-
-  const updateArrayItem = (arrayName: string, index: number, field: string, value: any) => {
-    setFormData((prev: any) => ({
-      ...prev,
-      [arrayName]: prev[arrayName].map((item: any, i: number) => 
-        i === index ? { ...item, [field]: value } : item
-      )
-    }));
+    setHasChanges(true);
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {sectionKey === 'hero' && (
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="headline">Main Headline</Label>
-            <Input
-              id="headline"
-              value={formData.headline}
-              onChange={(e) => updateField('headline', e.target.value)}
-            />
+        <div className="grid gap-6">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="headline">Main Headline</Label>
+              <Input
+                id="headline"
+                value={formData.headline || ''}
+                onChange={(e) => updateField('headline', e.target.value)}
+                placeholder="Enter main headline"
+              />
+            </div>
+            <div>
+              <Label htmlFor="ctaText">Primary CTA Text</Label>
+              <Input
+                id="ctaText"
+                value={formData.ctaText || ''}
+                onChange={(e) => updateField('ctaText', e.target.value)}
+                placeholder="Enter CTA button text"
+              />
+            </div>
           </div>
           <div>
             <Label htmlFor="subheadline">Subheadline</Label>
             <Textarea
               id="subheadline"
-              value={formData.subheadline}
+              value={formData.subheadline || ''}
               onChange={(e) => updateField('subheadline', e.target.value)}
+              rows={4}
+              placeholder="Enter subheadline text"
+            />
+          </div>
+        </div>
+      )}
+
+      {sectionKey === 'process' && (
+        <div className="space-y-6">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="title">Section Title</Label>
+              <Input
+                id="title"
+                value={formData.title || ''}
+                onChange={(e) => updateField('title', e.target.value)}
+                placeholder="Enter section title"
+              />
+            </div>
+            <div>
+              <Label htmlFor="subtitle">Section Subtitle</Label>
+              <Input
+                id="subtitle"
+                value={formData.subtitle || ''}
+                onChange={(e) => updateField('subtitle', e.target.value)}
+                placeholder="Enter section subtitle"
+              />
+            </div>
+          </div>
+          <div>
+            <Label htmlFor="description">Section Description</Label>
+            <Textarea
+              id="description"
+              value={formData.description || ''}
+              onChange={(e) => updateField('description', e.target.value)}
               rows={3}
+              placeholder="Enter section description"
             />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="ctaText">Primary CTA Text</Label>
-              <Input
-                id="ctaText"
-                value={formData.ctaText}
-                onChange={(e) => updateField('ctaText', e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="ctaSecondaryText">Secondary CTA Text</Label>
-              <Input
-                id="ctaSecondaryText"
-                value={formData.ctaSecondaryText}
-                onChange={(e) => updateField('ctaSecondaryText', e.target.value)}
-              />
-            </div>
           </div>
         </div>
       )}
 
-      {sectionKey === 'about' && (
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="title">Section Title</Label>
-            <Input
-              id="title"
-              value={formData.title}
-              onChange={(e) => updateField('title', e.target.value)}
-            />
-          </div>
-          <div>
-            <Label>Description Paragraphs</Label>
-            {formData.description.map((desc: string, index: number) => (
-              <Textarea
-                key={index}
-                value={desc}
-                onChange={(e) => {
-                  const newDesc = [...formData.description];
-                  newDesc[index] = e.target.value;
-                  updateField('description', newDesc);
-                }}
-                rows={3}
-                className="mb-2"
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      <DialogFooter>
-        <Button type="submit">
+      <DialogFooter className="flex gap-2">
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button type="submit" disabled={!hasChanges}>
           <Save className="h-4 w-4 mr-2" />
           Save Changes
         </Button>
@@ -270,45 +383,28 @@ const ContentEditForm = ({
   );
 };
 
-const HeroContentManager = ({ content, onUpdate }: { content: any; onUpdate: (content: any) => void }) => {
-  const [formData, setFormData] = useState(content);
-
-  const handleSave = () => {
-    onUpdate(formData);
-    toast({
-      title: "Hero Content Updated",
-      description: "Hero section content has been updated successfully",
-    });
-  };
-
+const QuickEditPanel = ({ content, onUpdate }: { content: any; onUpdate: (key: string, content: any) => void }) => {
   return (
-    <div className="space-y-6">
+    <div className="grid gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Hero Content</CardTitle>
-          <CardDescription>Main landing page content</CardDescription>
+          <CardTitle>Quick Text Updates</CardTitle>
+          <CardDescription>Make quick changes to commonly updated content</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label>Main Headline</Label>
-            <Input
-              value={formData.headline}
-              onChange={(e) => setFormData(prev => ({ ...prev, headline: e.target.value }))}
+            <Label>Hero Headline</Label>
+            <Input 
+              value={content.hero?.headline || ''} 
+              onChange={(e) => onUpdate('hero', { ...content.hero, headline: e.target.value })}
             />
           </div>
           <div>
-            <Label>Subheadline</Label>
-            <Textarea
-              value={formData.subheadline}
-              onChange={(e) => setFormData(prev => ({ ...prev, subheadline: e.target.value }))}
-              rows={3}
+            <Label>Main CTA Button Text</Label>
+            <Input 
+              value={content.hero?.ctaText || ''} 
+              onChange={(e) => onUpdate('hero', { ...content.hero, ctaText: e.target.value })}
             />
-          </div>
-          <div className="flex justify-end">
-            <Button onClick={handleSave}>
-              <Save className="h-4 w-4 mr-2" />
-              Save Changes
-            </Button>
           </div>
         </CardContent>
       </Card>
@@ -316,76 +412,32 @@ const HeroContentManager = ({ content, onUpdate }: { content: any; onUpdate: (co
   );
 };
 
-const FeaturesContentManager = ({ content, onUpdate }: { content: any; onUpdate: (content: any) => void }) => {
-  const [formData, setFormData] = useState(content);
-
-  const handleSave = () => {
-    onUpdate(formData);
-    toast({
-      title: "Features Updated",
-      description: "Features section has been updated successfully",
-    });
-  };
-
+const TemplatesPanel = () => {
   return (
-    <div className="space-y-6">
+    <div className="grid gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Features Section</CardTitle>
-          <CardDescription>Manage service features and benefits</CardDescription>
+          <CardTitle>Content Templates</CardTitle>
+          <CardDescription>Pre-designed content layouts and templates</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label>Section Title</Label>
-            <Input
-              value={formData.title}
-              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-            />
-          </div>
-          <div className="flex justify-end">
-            <Button onClick={handleSave}>
-              <Save className="h-4 w-4 mr-2" />
-              Save Changes
-            </Button>
-          </div>
+        <CardContent>
+          <p className="text-muted-foreground">Content templates coming soon...</p>
         </CardContent>
       </Card>
     </div>
   );
 };
 
-const StatsContentManager = ({ content, onUpdate }: { content: any; onUpdate: (content: any) => void }) => {
-  const [formData, setFormData] = useState(content);
-
-  const handleSave = () => {
-    onUpdate(formData);
-    toast({
-      title: "Statistics Updated",
-      description: "Statistics section has been updated successfully",
-    });
-  };
-
+const AnalyticsPanel = () => {
   return (
-    <div className="space-y-6">
+    <div className="grid gap-6">
       <Card>
         <CardHeader>
-          <CardTitle>Statistics Section</CardTitle>
-          <CardDescription>Manage company statistics and metrics</CardDescription>
+          <CardTitle>Content Analytics</CardTitle>
+          <CardDescription>Track content performance and engagement</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label>Section Title</Label>
-            <Input
-              value={formData.title}
-              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-            />
-          </div>
-          <div className="flex justify-end">
-            <Button onClick={handleSave}>
-              <Save className="h-4 w-4 mr-2" />
-              Save Changes
-            </Button>
-          </div>
+        <CardContent>
+          <p className="text-muted-foreground">Content analytics coming soon...</p>
         </CardContent>
       </Card>
     </div>
