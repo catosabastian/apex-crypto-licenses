@@ -1,9 +1,9 @@
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { EnhancedCard, EnhancedCardHeader, EnhancedCardContent, EnhancedCardFooter } from '@/components/ui/enhanced-card';
 import { useApplicationDialog } from '@/components/ApplicationDialog';
-import { CheckCircle, Star, Crown, Zap, Clock, AlertTriangle, TrendingUp } from 'lucide-react';
+import { CheckCircle, Star, Crown, Zap, Clock, AlertTriangle, TrendingUp, Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { unifiedDataManager } from '@/utils/unifiedDataManager';
 
@@ -30,11 +30,11 @@ const LicenseCategories = () => {
       subtitle: 'Individual Retail Trading',
       price: settings.category1Price,
       originalPrice: '15,000 USDT',
-      available: false, // Sold out
+      available: false,
       popular: false,
       recommended: false,
       urgency: 'Sold Out',
-      description: 'Perfect for individual crypto traders starting their journey',
+      description: 'Entry-level trading certification for individual crypto traders',
       features: [
         'Personal trading authorization',
         'Basic compliance coverage',
@@ -42,14 +42,8 @@ const LicenseCategories = () => {
         'Standard processing time',
         'Single jurisdiction validity'
       ],
-      limitations: [
-        'Limited trading volume',
-        'Basic support only',
-        'No priority processing'
-      ],
       processingTime: '72 hours',
-      icon: 'user',
-      color: 'from-gray-500 to-gray-600',
+      color: 'from-gray-400 to-gray-500',
       status: 'soldout'
     },
     {
@@ -58,7 +52,7 @@ const LicenseCategories = () => {
       subtitle: 'Enhanced Individual Trading',
       price: settings.category2Price,
       originalPrice: '35,000 USDT',
-      available: false, // Sold out
+      available: false,
       popular: false,
       recommended: false,
       urgency: 'Sold Out',
@@ -70,13 +64,8 @@ const LicenseCategories = () => {
         'Faster processing',
         'Regional validity'
       ],
-      limitations: [
-        'Medium trading volume cap',
-        'Limited institutional features'
-      ],
       processingTime: '48 hours',
-      icon: 'trending-up',
-      color: 'from-gray-500 to-gray-600',
+      color: 'from-gray-400 to-gray-500',
       status: 'soldout'
     },
     {
@@ -85,10 +74,10 @@ const LicenseCategories = () => {
       subtitle: 'Professional Trading',
       price: settings.category3Price,
       originalPrice: '75,000 USDT',
-      available: true,
+      available: false,
       popular: false,
       recommended: false,
-      urgency: 'Limited Availability',
+      urgency: 'Sold Out - High Demand',
       description: 'Professional-grade licensing for advanced traders',
       features: [
         'High-volume trading authorization',
@@ -98,24 +87,20 @@ const LicenseCategories = () => {
         'Multi-jurisdiction validity',
         'Risk management tools'
       ],
-      limitations: [
-        'Higher compliance requirements'
-      ],
       processingTime: '48 hours',
-      icon: 'star',
-      color: 'from-blue-500 to-cyan-500',
-      status: 'limited'
+      color: 'from-gray-400 to-gray-500',
+      status: 'soldout'
     },
     {
       id: 'category4',
       title: 'Professional Trader License',
       subtitle: 'High-Volume Professional',
       price: settings.category4Price,
-      originalPrice: '150,000 USDT',
+      originalPrice: '200,000 USDT',
       available: true,
       popular: true,
       recommended: false,
-      urgency: 'Most Popular',
+      urgency: 'Most Popular Choice',
       description: 'Premium licensing for high-volume professional traders',
       features: [
         'Unlimited trading volume',
@@ -128,7 +113,6 @@ const LicenseCategories = () => {
         'White-glove onboarding'
       ],
       processingTime: '24 hours',
-      icon: 'crown',
       color: 'from-purple-500 to-pink-500',
       status: 'popular'
     },
@@ -137,11 +121,11 @@ const LicenseCategories = () => {
       title: 'Institutional License',
       subtitle: 'Enterprise & Institutions',
       price: settings.category5Price,
-      originalPrice: '350,000 USDT',
+      originalPrice: '500,000 USDT',
       available: true,
       popular: false,
       recommended: true,
-      urgency: 'Best Value',
+      urgency: 'Best Value - Premium',
       description: 'Comprehensive institutional-grade licensing solution',
       features: [
         'Enterprise-level authorization',
@@ -155,20 +139,19 @@ const LicenseCategories = () => {
         'Regulatory consulting included'
       ],
       processingTime: '12 hours',
-      icon: 'building',
       color: 'from-amber-500 to-orange-500',
       status: 'recommended'
     },
     {
       id: 'category6',
       title: 'Elite Enterprise License',
-      subtitle: 'Premium Enterprise Solution',
+      subtitle: 'Ultimate Premium Solution',
       price: settings.category6Price,
-      originalPrice: '750,000 USDT',
+      originalPrice: '1,000,000 USDT',
       available: true,
       popular: false,
       recommended: true,
-      urgency: 'Premium Choice',
+      urgency: 'Exclusive Premium Choice',
       description: 'The ultimate licensing solution for elite enterprises',
       features: [
         'Unlimited enterprise authorization',
@@ -183,7 +166,6 @@ const LicenseCategories = () => {
         'International legal team access'
       ],
       processingTime: '6 hours',
-      icon: 'crown',
       color: 'from-gradient-start to-gradient-end',
       status: 'premium'
     }
@@ -193,21 +175,14 @@ const LicenseCategories = () => {
     switch (category.status) {
       case 'soldout':
         return (
-          <Badge className="bg-red-100 text-red-800 border-red-200">
+          <Badge className="bg-red-100 text-red-800 border-red-200 animate-pulse">
             <AlertTriangle className="h-3 w-3 mr-1" />
             Sold Out
           </Badge>
         );
-      case 'limited':
-        return (
-          <Badge className="bg-orange-100 text-orange-800 border-orange-200">
-            <Clock className="h-3 w-3 mr-1" />
-            Limited Availability
-          </Badge>
-        );
       case 'popular':
         return (
-          <Badge className="bg-purple-100 text-purple-800 border-purple-200">
+          <Badge className="bg-purple-100 text-purple-800 border-purple-200 animate-bounce">
             <TrendingUp className="h-3 w-3 mr-1" />
             Most Popular
           </Badge>
@@ -223,7 +198,7 @@ const LicenseCategories = () => {
         return (
           <Badge className="bg-gradient-to-r from-amber-100 to-yellow-100 text-amber-800 border-amber-200">
             <Crown className="h-3 w-3 mr-1" />
-            Premium Choice
+            <Sparkles className="h-3 w-3 ml-1" />
           </Badge>
         );
       default:
@@ -231,17 +206,11 @@ const LicenseCategories = () => {
     }
   };
 
-  const getCardStyles = (category: any) => {
-    if (!category.available) {
-      return "opacity-60 border-gray-200 bg-gray-50";
-    }
-    if (category.recommended) {
-      return "border-2 border-gradient-to-r from-amber-400 to-orange-400 shadow-xl shadow-amber-100 relative overflow-hidden";
-    }
-    if (category.popular) {
-      return "border-2 border-purple-400 shadow-xl shadow-purple-100 relative overflow-hidden";
-    }
-    return "border border-gray-200 hover:border-primary/50 hover:shadow-lg transition-all duration-300";
+  const getCardVariant = (category: any) => {
+    if (!category.available) return "default";
+    if (category.recommended || category.status === 'premium') return "gradient";
+    if (category.popular) return "elevated";
+    return "default";
   };
 
   const handleApplyNow = (categoryId: string) => {
@@ -270,21 +239,31 @@ const LicenseCategories = () => {
           </div>
 
           {/* Urgency Banner */}
-          <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg p-4 mb-12 text-center">
+          <div className="bg-gradient-to-r from-red-500 to-orange-500 text-white rounded-lg p-4 mb-12 text-center animate-pulse">
             <div className="flex items-center justify-center gap-2 mb-2">
               <AlertTriangle className="h-5 w-5" />
               <span className="font-semibold">Limited Time Availability</span>
             </div>
             <p className="text-sm opacity-90">
-              Basic and Standard licenses are currently sold out. Secure your Professional or Institutional license today!
+              Entry-level licenses are sold out due to high demand. Secure your Professional or Institutional license today!
             </p>
           </div>
 
           {/* License Grid */}
           <div className="grid lg:grid-cols-3 gap-8">
             {categories.map((category) => (
-              <Card key={category.id} className={`relative ${getCardStyles(category)}`}>
-                {/* Recommended/Popular Ribbons */}
+              <EnhancedCard 
+                key={category.id} 
+                variant={getCardVariant(category)}
+                className={`relative transition-all duration-300 hover:scale-105 ${
+                  !category.available ? 'opacity-60' : ''
+                } ${
+                  category.recommended ? 'ring-2 ring-amber-400 ring-offset-2' : ''
+                } ${
+                  category.popular ? 'ring-2 ring-purple-400 ring-offset-2' : ''
+                }`}
+              >
+                {/* Ribbons */}
                 {category.recommended && (
                   <div className="absolute -top-3 -right-3 bg-gradient-to-r from-amber-400 to-orange-400 text-white px-4 py-1 rounded-full text-sm font-medium z-10">
                     Recommended
@@ -296,13 +275,13 @@ const LicenseCategories = () => {
                   </div>
                 )}
 
-                <CardHeader className="pb-4">
+                <EnhancedCardHeader>
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex-1">
-                      <CardTitle className="text-2xl mb-2">{category.title}</CardTitle>
-                      <CardDescription className="text-base font-medium text-muted-foreground">
+                      <h3 className="text-2xl font-bold mb-2">{category.title}</h3>
+                      <p className="text-base font-medium text-muted-foreground">
                         {category.subtitle}
-                      </CardDescription>
+                      </p>
                     </div>
                     {getStatusBadge(category)}
                   </div>
@@ -310,7 +289,9 @@ const LicenseCategories = () => {
                   {/* Pricing */}
                   <div className="space-y-2">
                     <div className="flex items-baseline gap-2">
-                      <span className={`text-3xl font-bold ${!category.available ? 'text-gray-400' : 'text-foreground'}`}>
+                      <span className={`text-3xl font-bold ${
+                        !category.available ? 'text-gray-400' : 'text-foreground'
+                      }`}>
                         {category.price}
                       </span>
                       {category.originalPrice !== category.price && category.available && (
@@ -324,10 +305,10 @@ const LicenseCategories = () => {
                       <span>Processing: {category.processingTime}</span>
                     </div>
                   </div>
-                </CardHeader>
+                </EnhancedCardHeader>
 
-                <CardContent className="space-y-6">
-                  <p className="text-muted-foreground">{category.description}</p>
+                <EnhancedCardContent scrollable>
+                  <p className="text-muted-foreground mb-6">{category.description}</p>
 
                   {/* Features */}
                   <div className="space-y-3">
@@ -347,41 +328,44 @@ const LicenseCategories = () => {
                       ))}
                     </div>
                   </div>
+                </EnhancedCardContent>
 
-                  {/* Action Button */}
-                  <Button 
-                    className="w-full" 
-                    size="lg"
-                    disabled={!category.available}
-                    onClick={() => handleApplyNow(category.id)}
-                    variant={category.recommended ? "default" : category.popular ? "default" : "outline"}
-                  >
-                    {!category.available ? (
-                      <>
-                        <AlertTriangle className="h-4 w-4 mr-2" />
-                        Sold Out
-                      </>
-                    ) : (
-                      <>
-                        Apply Now
-                        <Zap className="h-4 w-4 ml-2" />
-                      </>
+                <EnhancedCardFooter>
+                  <div className="w-full space-y-4">
+                    <Button 
+                      className="w-full" 
+                      size="lg"
+                      disabled={!category.available}
+                      onClick={() => handleApplyNow(category.id)}
+                      variant={category.recommended ? "default" : category.popular ? "default" : "outline"}
+                    >
+                      {!category.available ? (
+                        <>
+                          <AlertTriangle className="h-4 w-4 mr-2" />
+                          Sold Out
+                        </>
+                      ) : (
+                        <>
+                          Apply Now
+                          <Zap className="h-4 w-4 ml-2" />
+                        </>
+                      )}
+                    </Button>
+
+                    {category.available && (
+                      <p className="text-xs text-center text-muted-foreground">
+                        Secure payment • Instant processing • Money-back guarantee
+                      </p>
                     )}
-                  </Button>
-
-                  {category.available && (
-                    <p className="text-xs text-center text-muted-foreground">
-                      Secure payment • Instant processing • Money-back guarantee
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
+                  </div>
+                </EnhancedCardFooter>
+              </EnhancedCard>
             ))}
           </div>
 
           {/* Bottom CTA */}
           <div className="text-center mt-16">
-            <div className="bg-gradient-to-r from-primary to-accent rounded-2xl p-8 text-white">
+            <EnhancedCard variant="gradient" className="p-8 text-center">
               <h3 className="text-2xl font-bold mb-4">Need Help Choosing?</h3>
               <p className="mb-6 opacity-90">
                 Our licensing experts are here to help you select the perfect license for your needs
@@ -389,7 +373,7 @@ const LicenseCategories = () => {
               <Button variant="secondary" size="lg">
                 Schedule Consultation
               </Button>
-            </div>
+            </EnhancedCard>
           </div>
         </div>
       </div>
