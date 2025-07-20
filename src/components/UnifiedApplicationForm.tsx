@@ -10,7 +10,7 @@ import PersonalInfoSection from '@/components/form/PersonalInfoSection';
 import LicenseCategorySection from '@/components/form/LicenseCategorySection';
 import PaymentInfoSection from '@/components/form/PaymentInfoSection';
 import AdditionalInfoSection from '@/components/form/AdditionalInfoSection';
-import { Save, Send, CheckCircle } from 'lucide-react';
+import { Save, Send, CheckCircle, AlertTriangle, ArrowLeft, ArrowRight } from 'lucide-react';
 
 interface ApplicationFormData {
   name: string;
@@ -80,6 +80,10 @@ const UnifiedApplicationForm = () => {
         const parsedDraft = JSON.parse(savedDraft);
         setFormData(parsedDraft);
         setIsDraftSaved(true);
+        toast({
+          title: "Draft Loaded",
+          description: "Your previous application draft has been restored",
+        });
       } catch (error) {
         console.error('Failed to load draft:', error);
       }
@@ -123,7 +127,7 @@ const UnifiedApplicationForm = () => {
       const updatedData = { ...formData, [field]: value };
       localStorage.setItem('application_draft', JSON.stringify(updatedData));
       setIsDraftSaved(true);
-    }, 1000);
+    }, 1500);
   };
 
   const handleCopyAddress = (address: string, type: string) => {
@@ -138,9 +142,13 @@ const UnifiedApplicationForm = () => {
 
   const getCompletedSteps = () => {
     const completed = [];
-    if (formData.name && formData.email) completed.push(1);
-    if (formData.category) completed.push(2);
-    if (formData.category) completed.push(3); // Payment info is auto-filled based on category
+    if (formData.name && formData.email && validation.name?.isValid !== false && validation.email?.isValid !== false) {
+      completed.push(1);
+    }
+    if (formData.category) {
+      completed.push(2);
+      completed.push(3); // Payment info is auto-filled based on category
+    }
     return completed;
   };
 
@@ -149,11 +157,30 @@ const UnifiedApplicationForm = () => {
       case 1:
         return formData.name && formData.email && validation.name?.isValid !== false && validation.email?.isValid !== false;
       case 2:
-        return formData.category;
+        const selectedCategory = licenseCategories.find(cat => cat.id === formData.category);
+        return formData.category && selectedCategory?.available;
       case 3:
         return true; // Payment info is display-only
       default:
         return true;
+    }
+  };
+
+  const getStepValidationMessage = (step: number) => {
+    switch (step) {
+      case 1:
+        if (!formData.name) return "Please enter your name";
+        if (!formData.email) return "Please enter your email";
+        if (validation.name?.isValid === false) return validation.name.message;
+        if (validation.email?.isValid === false) return validation.email.message;
+        return null;
+      case 2:
+        if (!formData.category) return "Please select a license category";
+        const selectedCategory = licenseCategories.find(cat => cat.id === formData.category);
+        if (selectedCategory && !selectedCategory.available) return "Selected category is sold out. Please choose an available option.";
+        return null;
+      default:
+        return null;
     }
   };
 
@@ -187,17 +214,19 @@ const UnifiedApplicationForm = () => {
         email: formData.email,
         phone: formData.phone,
         company: formData.company,
-        licenseType: selectedCategory?.name || `Category ${formData.category}`
+        licenseType: selectedCategory?.name || `Category ${formData.category}`,
+        additionalInfo: formData.notes
       });
 
       // Clear draft
       localStorage.removeItem('application_draft');
 
       toast({
-        title: "Application Submitted Successfully",
-        description: `Application ID: ${newApplication.id}`,
+        title: "Application Submitted Successfully!",
+        description: `Your application has been received. Application ID: ${newApplication.id}`,
       });
 
+      // Reset form
       setFormData({
         name: '',
         email: '',
@@ -208,11 +237,12 @@ const UnifiedApplicationForm = () => {
       });
       setCurrentStep(1);
       setValidation({});
+      setIsDraftSaved(false);
     } catch (error) {
       console.error('[UnifiedApplicationForm] Submission error:', error);
       toast({
         title: "Submission Failed",
-        description: "Please try again",
+        description: "Please try again or contact support if the issue persists",
         variant: "destructive",
       });
     } finally {
@@ -221,6 +251,7 @@ const UnifiedApplicationForm = () => {
   };
 
   const selectedCategory = licenseCategories.find(cat => cat.id === formData.category);
+  const stepValidationMessage = getStepValidationMessage(currentStep);
 
   return (
     <EnhancedCard variant="elevated" className="max-w-4xl mx-auto">
@@ -228,19 +259,19 @@ const UnifiedApplicationForm = () => {
         <div className="text-center mb-6">
           <h2 className="text-2xl font-bold mb-2">Trading License Application</h2>
           <p className="text-muted-foreground">Submit your application for cryptocurrency trading certification</p>
-          <div className="flex items-center justify-center gap-4 mt-2">
-            <p className="text-xs text-green-600 flex items-center gap-1">
+          <div className="flex items-center justify-center gap-4 mt-4 text-xs">
+            <div className="flex items-center gap-1 text-green-600">
               <CheckCircle className="h-3 w-3" />
-              Real-time sync active (Updates: {updateCount})
-            </p>
-            <p className="text-xs text-blue-600">
+              <span>Real-time sync (Updates: {updateCount})</span>
+            </div>
+            <div className="text-blue-600">
               Last update: {lastUpdateTime.toLocaleTimeString()}
-            </p>
+            </div>
             {isDraftSaved && (
-              <p className="text-xs text-green-600 flex items-center gap-1">
+              <div className="flex items-center gap-1 text-green-600">
                 <Save className="h-3 w-3" />
-                Draft saved
-              </p>
+                <span>Draft saved</span>
+              </div>
             )}
           </div>
         </div>
@@ -261,19 +292,20 @@ const UnifiedApplicationForm = () => {
                 formData={formData}
                 onChange={handleFieldChange}
               />
-              {validation.name && !validation.name.isValid && (
-                <ValidationMessage type="error" message={validation.name.message} />
+              
+              {stepValidationMessage && (
+                <ValidationMessage type="error" message={stepValidationMessage} />
               )}
-              {validation.email && !validation.email.isValid && (
-                <ValidationMessage type="error" message={validation.email.message} />
-              )}
+              
               <div className="flex justify-end">
                 <Button 
                   type="button"
                   onClick={() => setCurrentStep(2)}
                   disabled={!canProceedToNextStep(1)}
+                  className="flex items-center gap-2"
                 >
                   Next: Choose License
+                  <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
             </div>
@@ -285,20 +317,29 @@ const UnifiedApplicationForm = () => {
                 selectedCategory={formData.category}
                 onCategorySelect={(categoryId) => handleFieldChange('category', categoryId)}
               />
+              
+              {stepValidationMessage && (
+                <ValidationMessage type="error" message={stepValidationMessage} />
+              )}
+              
               <div className="flex justify-between">
                 <Button 
                   type="button"
                   variant="outline"
                   onClick={() => setCurrentStep(1)}
+                  className="flex items-center gap-2"
                 >
+                  <ArrowLeft className="h-4 w-4" />
                   Previous
                 </Button>
                 <Button 
                   type="button"
                   onClick={() => setCurrentStep(3)}
                   disabled={!canProceedToNextStep(2)}
+                  className="flex items-center gap-2"
                 >
                   Next: Payment Info
+                  <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
             </div>
@@ -317,14 +358,18 @@ const UnifiedApplicationForm = () => {
                   type="button"
                   variant="outline"
                   onClick={() => setCurrentStep(2)}
+                  className="flex items-center gap-2"
                 >
+                  <ArrowLeft className="h-4 w-4" />
                   Previous
                 </Button>
                 <Button 
                   type="button"
                   onClick={() => setCurrentStep(4)}
+                  className="flex items-center gap-2"
                 >
                   Next: Review & Submit
+                  <ArrowRight className="h-4 w-4" />
                 </Button>
               </div>
             </div>
@@ -332,8 +377,11 @@ const UnifiedApplicationForm = () => {
 
           {currentStep === 4 && (
             <div className="space-y-6">
-              <div className="bg-muted/50 rounded-lg p-6">
-                <h3 className="text-lg font-semibold mb-4">Application Summary</h3>
+              <div className="bg-muted/30 rounded-lg p-6">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <CheckCircle className="h-5 w-5 text-green-500" />
+                  Application Summary
+                </h3>
                 <div className="grid md:grid-cols-2 gap-4 text-sm">
                   <div><strong>Name:</strong> {formData.name}</div>
                   <div><strong>Email:</strong> {formData.email}</div>
@@ -342,6 +390,16 @@ const UnifiedApplicationForm = () => {
                   <div><strong>License:</strong> {selectedCategory?.name}</div>
                   <div><strong>Price:</strong> {selectedCategory?.price}</div>
                 </div>
+                
+                {selectedCategory && !selectedCategory.available && (
+                  <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2">
+                    <AlertTriangle className="h-4 w-4 text-red-600 mt-0.5 shrink-0" />
+                    <div className="text-sm text-red-800">
+                      <strong>Warning:</strong> The selected category is currently sold out. 
+                      Please go back and select an available category.
+                    </div>
+                  </div>
+                )}
               </div>
 
               <AdditionalInfoSection
@@ -354,23 +412,25 @@ const UnifiedApplicationForm = () => {
                   type="button"
                   variant="outline"
                   onClick={() => setCurrentStep(3)}
+                  className="flex items-center gap-2"
                 >
+                  <ArrowLeft className="h-4 w-4" />
                   Previous
                 </Button>
                 <Button
                   type="submit"
                   size="lg"
-                  className="px-8"
+                  className="px-8 flex items-center gap-2"
                   disabled={!formData.name || !formData.email || !formData.category || isSubmitting || (selectedCategory && !selectedCategory.available)}
                 >
                   {isSubmitting ? (
                     <>
-                      <div className="loading-spinner w-5 h-5 mr-2"></div>
+                      <div className="loading-spinner w-5 h-5"></div>
                       Submitting...
                     </>
                   ) : (
                     <>
-                      <Send className="h-4 w-4 mr-2" />
+                      <Send className="h-4 w-4" />
                       Submit Application
                     </>
                   )}
