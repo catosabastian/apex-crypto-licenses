@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
-import { CheckCircle, Star, TrendingUp, Shield, Users, DollarSign, Zap, Crown } from 'lucide-react';
+import { CheckCircle, Star, TrendingUp, Shield, Users, DollarSign, Crown } from 'lucide-react';
 import { unifiedDataManager } from '@/utils/unifiedDataManager';
 import UnifiedApplicationForm from './UnifiedApplicationForm';
 
@@ -39,7 +39,6 @@ const LicenseCategories = () => {
       minVolume: '$50,000',
       processingTime: '5-7 days',
       icon: Shield,
-      color: 'from-blue-500 to-cyan-500',
       badge: 'Beginner',
       popularity: false
     },
@@ -59,7 +58,6 @@ const LicenseCategories = () => {
       minVolume: '$100,000',
       processingTime: '3-5 days',
       icon: TrendingUp,
-      color: 'from-green-500 to-emerald-500',
       badge: 'Popular',
       popularity: true
     },
@@ -79,7 +77,6 @@ const LicenseCategories = () => {
       minVolume: '$250,000',
       processingTime: '2-3 days',
       icon: Star,
-      color: 'from-purple-500 to-pink-500',
       badge: 'Professional',
       popularity: false
     },
@@ -99,7 +96,6 @@ const LicenseCategories = () => {
       minVolume: '$500,000',
       processingTime: '1-2 days',
       icon: Users,
-      color: 'from-orange-500 to-red-500',
       badge: 'Premium',
       popularity: false
     },
@@ -119,7 +115,6 @@ const LicenseCategories = () => {
       minVolume: '$1,000,000+',
       processingTime: '24-48 hours',
       icon: DollarSign,
-      color: 'from-indigo-500 to-purple-500',
       badge: 'Enterprise',
       popularity: false
     },
@@ -139,132 +134,122 @@ const LicenseCategories = () => {
       minVolume: '$2,500,000+',
       processingTime: '12-24 hours',
       icon: Crown,
-      color: 'from-yellow-500 to-orange-500',
       badge: 'Elite',
       popularity: false
     }
   ];
 
   return (
-    <section id="license-categories" className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-background to-accent/5">
+    <section id="license-categories" className="py-20 px-4 sm:px-6 lg:px-8">
       <div className="container mx-auto max-w-7xl">
         {/* Section Header */}
         <div className="text-center mb-16">
-          <Badge variant="outline" className="mb-4 px-4 py-2 glass-card border-primary/30">
-            <Zap className="w-4 h-4 mr-2" />
+          <Badge variant="outline" className="mb-4 px-4 py-2 border-primary/30">
             Choose Your Level
           </Badge>
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
-            <span className="gradient-text bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Trading License
+          <h2 className="text-3xl sm:text-4xl font-bold mb-6">
+            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              Trading License Categories
             </span>
-            <br />
-            Categories
           </h2>
-          <p className="text-lg text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            Select the perfect license category that matches your trading experience and volume requirements. 
-            Each tier offers specialized tools and support for your trading journey.
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Select the perfect license category that matches your trading experience and volume requirements.
           </p>
         </div>
 
-        {/* License Grid with Enhanced Cards */}
+        {/* License Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {categories.map((category, index) => {
+          {categories.map((category) => {
             const IconComponent = category.icon;
             
             return (
               <Card 
                 key={category.id} 
                 className={`
-                  relative overflow-visible glass-card border-2 hover:border-primary/40 
-                  transition-all duration-500 hover:scale-105 hover:shadow-2xl
-                  ${category.popularity ? 'border-primary/50 shadow-xl ring-2 ring-primary/20' : 'border-border/50'}
-                  animate-fade-in-up group h-full flex flex-col
+                  relative border transition-all duration-300 hover:shadow-lg
+                  ${category.popularity ? 'border-primary/50 shadow-md' : 'border-border'}
+                  ${!category.available ? 'opacity-60' : ''}
                 `}
-                style={{ animationDelay: `${index * 0.1}s` }}
               >
                 {/* Popularity Badge */}
                 {category.popularity && (
-                  <div className="absolute -right-12 top-8 bg-gradient-to-r from-primary to-accent text-white px-12 py-2 rotate-45 text-xs font-semibold z-10">
-                    Most Popular
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                    <Badge className="bg-primary text-primary-foreground">
+                      Most Popular
+                    </Badge>
                   </div>
                 )}
 
                 {/* Availability Badge */}
                 {!category.available && (
-                  <div className="absolute top-4 right-4 z-10">
-                    <Badge variant="secondary" className="bg-muted text-muted-foreground">
+                  <div className="absolute top-4 right-4">
+                    <Badge variant="secondary">
                       Sold Out
                     </Badge>
                   </div>
                 )}
 
-                <CardHeader className="pb-4 flex-shrink-0">
+                <CardHeader className="pb-4">
                   {/* Icon and Badge */}
                   <div className="flex items-center justify-between mb-4">
-                    <div className={`p-3 rounded-xl bg-gradient-to-r ${category.color} shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                      <IconComponent className="w-6 h-6 text-white" />
+                    <div className="p-2 rounded-lg bg-primary/10">
+                      <IconComponent className="w-6 h-6 text-primary" />
                     </div>
-                    <Badge variant="outline" className="text-xs font-medium px-3 py-1">
+                    <Badge variant="outline" className="text-xs">
                       {category.badge}
                     </Badge>
                   </div>
 
-                  {/* Title and Price */}
-                  <div className="space-y-2">
-                    <CardTitle className="text-xl font-bold group-hover:text-primary transition-colors duration-300 break-words">
-                      {category.name}
-                    </CardTitle>
-                    <div className="flex items-baseline gap-2 flex-wrap">
-                      <span className={`text-2xl font-bold ${category.available ? 'text-primary' : 'text-muted-foreground'} break-words`}>
-                        {category.price}
-                      </span>
-                      <span className="text-sm text-muted-foreground">one-time</span>
-                    </div>
+                  <CardTitle className="text-xl mb-2">
+                    {category.name}
+                  </CardTitle>
+                  
+                  <div className="text-2xl font-bold text-primary mb-2">
+                    {category.price}
                   </div>
 
-                  <CardDescription className="text-sm text-muted-foreground leading-relaxed mt-3 break-words">
+                  <CardDescription className="text-sm">
                     {category.description}
                   </CardDescription>
                 </CardHeader>
 
-                <CardContent className="space-y-6 flex-grow flex flex-col overflow-visible">
+                <CardContent className="space-y-4">
                   {/* Key Stats */}
-                  <div className="grid grid-cols-2 gap-4 py-4 border-t border-b border-border/50">
+                  <div className="grid grid-cols-2 gap-4 py-4 border-t border-b">
                     <div className="text-center">
-                      <div className="text-sm font-semibold text-primary break-words">{category.minVolume}</div>
+                      <div className="text-sm font-semibold text-primary">{category.minVolume}</div>
                       <div className="text-xs text-muted-foreground">Min Volume</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-sm font-semibold text-accent break-words">{category.processingTime}</div>
+                      <div className="text-sm font-semibold text-accent">{category.processingTime}</div>
                       <div className="text-xs text-muted-foreground">Processing</div>
                     </div>
                   </div>
 
                   {/* Features List */}
-                  <ul className="space-y-3 flex-grow overflow-visible">
+                  <ul className="space-y-2">
                     {category.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-start gap-3 text-sm overflow-visible">
+                      <li key={idx} className="flex items-start gap-2 text-sm">
                         <CheckCircle className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-                        <span className="text-muted-foreground leading-relaxed break-words hyphens-auto">{feature}</span>
+                        <span className="text-muted-foreground">{feature}</span>
                       </li>
                     ))}
                   </ul>
 
                   {/* CTA Button */}
-                  <div className="pt-4 mt-auto">
+                  <div className="pt-4">
                     {category.available ? (
                       <Dialog>
                         <DialogTrigger asChild>
                           <Button 
                             className={`
-                              w-full py-3 font-semibold transition-all duration-300
+                              w-full
                               ${category.popularity 
-                                ? 'bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 shadow-lg' 
-                                : 'bg-primary hover:bg-primary/90'
+                                ? 'bg-gradient-to-r from-primary to-accent hover:opacity-90' 
+                                : ''
                               }
-                              hover:scale-105 hover:shadow-xl
                             `}
+                            variant={category.popularity ? 'default' : 'default'}
                           >
                             Apply Now
                           </Button>
@@ -280,7 +265,7 @@ const LicenseCategories = () => {
                       <Button 
                         disabled 
                         variant="secondary" 
-                        className="w-full py-3 font-semibold opacity-50 cursor-not-allowed"
+                        className="w-full opacity-50"
                       >
                         Currently Unavailable
                       </Button>
@@ -294,15 +279,15 @@ const LicenseCategories = () => {
 
         {/* Bottom CTA */}
         <div className="text-center mt-16">
-          <div className="glass-card p-8 rounded-2xl border border-primary/20 max-w-2xl mx-auto hover:shadow-xl transition-all duration-300">
+          <Card className="p-8 max-w-2xl mx-auto">
             <h3 className="text-2xl font-bold mb-4">Not sure which license is right for you?</h3>
-            <p className="text-muted-foreground mb-6 break-words">
+            <p className="text-muted-foreground mb-6">
               Our expert team can help you choose the perfect license category based on your trading experience and goals.
             </p>
-            <Button variant="outline" size="lg" className="glass-button border-primary/30 hover:bg-primary/10 hover:scale-105 transition-all duration-300">
+            <Button variant="outline" size="lg">
               Get Free Consultation
             </Button>
-          </div>
+          </Card>
         </div>
       </div>
     </section>
