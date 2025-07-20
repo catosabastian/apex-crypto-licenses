@@ -71,9 +71,9 @@
   }
 }
 
-/* Custom form styling */
+/* Form Components */
 .form-section {
-  @apply space-y-6 p-6 bg-card rounded-lg border;
+  @apply space-y-4 p-6 bg-card rounded-xl border border-border shadow-sm;
 }
 
 .section-heading {
@@ -81,57 +81,50 @@
 }
 
 .section-icon {
-  @apply p-2 bg-primary/10 rounded-full;
+  @apply p-2 bg-primary/10 rounded-lg;
 }
 
 .form-field-group {
   @apply space-y-4;
 }
 
-/* Enhanced button styling */
-.btn-primary {
-  @apply bg-primary text-primary-foreground hover:bg-primary/90 transition-colors;
-}
-
-/* Wallet address styling */
-.wallet-address {
-  @apply p-3 bg-muted rounded font-mono text-sm break-all border;
-}
-
-/* Copy button success state */
-.copy-button-success {
-  @apply bg-green-100 text-green-700 border-green-300;
-}
-
-/* Payment notice styling */
-.payment-notice {
-  @apply p-4 bg-muted/30 rounded-lg mb-4 space-y-2;
-}
-
-/* Category card styling */
+/* Category Cards */
 .category-card {
-  @apply p-4 border rounded-lg transition-all hover:shadow-md;
-}
-
-.category-card:hover:not(.opacity-50) {
-  @apply border-primary/50;
+  @apply p-4 border border-border rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md hover:border-primary/50;
 }
 
 .category-card.selected {
-  @apply border-primary bg-primary/10 ring-2 ring-primary;
+  @apply border-primary bg-primary/5 ring-1 ring-primary shadow-md;
 }
 
-/* Enhanced form validation styling */
+/* Payment Components */
+.payment-notice {
+  @apply p-4 bg-muted/50 rounded-lg mb-4 space-y-2 border border-border/50;
+}
+
+.wallet-address {
+  @apply p-3 bg-muted/30 rounded-lg font-mono text-sm break-all border border-border/50;
+}
+
+.copy-button-success {
+  @apply bg-green-50 text-green-700 border-green-200 hover:bg-green-100;
+}
+
+/* Form States */
 .form-error {
   @apply text-sm text-destructive mt-1;
 }
 
-/* Loading states */
 .loading-spinner {
-  @apply animate-spin rounded-full border-b-2 border-current;
+  @apply animate-spin rounded-full border-2 border-transparent border-t-current;
 }
 
-/* Responsive improvements */
+/* Enhanced Button Styling */
+.btn-primary {
+  @apply bg-primary text-primary-foreground hover:bg-primary/90 transition-colors duration-200;
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
   .form-section {
     @apply p-4;
@@ -139,5 +132,20 @@
   
   .wallet-address {
     @apply text-xs;
+  }
+  
+  .category-card {
+    @apply p-3;
+  }
+}
+
+/* Accessibility Improvements */
+@media (prefers-reduced-motion: reduce) {
+  .loading-spinner {
+    @apply animate-none;
+  }
+  
+  .category-card {
+    @apply transition-none;
   }
 }

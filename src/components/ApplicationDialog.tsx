@@ -30,14 +30,16 @@ export const ApplicationDialogProvider = ({ children }: { children: ReactNode })
     <ApplicationDialogContext.Provider value={{ isOpen, openApplicationDialog, closeApplicationDialog }}>
       {children}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-5xl max-h-[90vh] p-0">
-          <DialogHeader className="px-8 pt-8 pb-4">
+        <DialogContent className="max-w-6xl max-h-[95vh] p-0 overflow-hidden">
+          <DialogHeader className="px-6 pt-6 pb-4 border-b">
             <DialogTitle className="text-2xl font-bold">Trading License Application</DialogTitle>
           </DialogHeader>
-          <ScrollArea className="px-8 pb-8">
-            <ErrorBoundary>
-              <DynamicApplicationForm />
-            </ErrorBoundary>
+          <ScrollArea className="flex-1 max-h-[calc(95vh-120px)]">
+            <div className="px-6 pb-6">
+              <ErrorBoundary>
+                <DynamicApplicationForm />
+              </ErrorBoundary>
+            </div>
           </ScrollArea>
         </DialogContent>
       </Dialog>
