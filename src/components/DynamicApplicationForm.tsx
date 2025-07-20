@@ -187,7 +187,6 @@ const DynamicApplicationForm = () => {
         />
 
         <LicenseCategorySection
-          categories={licenseCategories}
           selectedCategory={formData.category}
           onCategorySelect={(categoryId) => handleFieldChange('category', categoryId)}
         />
