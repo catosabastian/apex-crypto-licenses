@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
@@ -115,9 +114,7 @@ const UnifiedApplicationForm = () => {
         email: formData.email,
         phone: formData.phone,
         company: formData.company,
-        country: 'Unknown',
-        licenseType: selectedCategory?.name || `Category ${formData.category}`,
-        status: 'pending'
+        licenseType: selectedCategory?.name || `Category ${formData.category}`
       });
 
       toast({

@@ -1,4 +1,3 @@
-
 import { BehaviorSubject } from 'rxjs';
 
 // Types
@@ -8,6 +7,7 @@ export interface Application {
   email: string;
   phone: string;
   company: string;
+  country?: string;
   licenseType: string;
   status: 'pending' | 'approved' | 'rejected';
   date: string;
@@ -74,9 +74,243 @@ export interface Analytics {
   newContacts: number;
 }
 
+// Default content structure
+const defaultContent = {
+  hero: {
+    headline: "World's Leading Crypto Trading License Provider",
+    subheadline: "Get your official cryptocurrency trading license from a globally recognized regulatory authority. Fast, secure, and compliant with international standards.",
+    ctaText: "Get Licensed Now",
+    ctaSecondaryText: "Verify License",
+    stats: [
+      { icon: 'Users', value: '10,000+', label: 'Licensed Traders', color: 'text-blue-500' },
+      { icon: 'Globe', value: '150+', label: 'Countries Served', color: 'text-green-500' },
+      { icon: 'Award', value: '99.9%', label: 'Success Rate', color: 'text-purple-500' },
+      { icon: 'Shield', value: '24/7', label: 'Support Available', color: 'text-orange-500' }
+    ],
+    trustBadges: [
+      { name: 'ISO Certified', color: 'bg-green-50' },
+      { name: 'Regulatory Approved', color: 'bg-blue-50' },
+      { name: 'Globally Recognized', color: 'bg-purple-50' },
+      { name: 'Secure Platform', color: 'bg-orange-50' }
+    ]
+  },
+  about: {
+    subtitle: "About Our Authority",
+    title: "The Global Standard for Crypto Trading Compliance",
+    description: [
+      "As the world's leading cryptocurrency regulatory authority, we provide comprehensive licensing solutions for traders, exchanges, and financial institutions operating in the digital asset space.",
+      "Our licenses are recognized globally and ensure full compliance with international cryptocurrency trading regulations, giving you the confidence to operate legally in any jurisdiction."
+    ],
+    features: [
+      {
+        icon: 'Shield',
+        title: 'Regulatory Compliance',
+        description: 'Full compliance with international crypto trading laws and regulations.'
+      },
+      {
+        icon: 'CheckCircle',
+        title: 'Global Recognition',
+        description: 'Our licenses are accepted and recognized in over 150 countries worldwide.'
+      },
+      {
+        icon: 'FileCheck',
+        title: 'Legal Protection',
+        description: 'Complete legal protection for your trading activities and business operations.'
+      }
+    ],
+    legalNotice: "This regulatory authority is duly authorized to issue cryptocurrency trading licenses under international financial regulations. All licenses issued are legally binding and provide full regulatory compliance for cryptocurrency trading activities."
+  },
+  features: {
+    subtitle: "Why Choose Us",
+    title: "Comprehensive Licensing Solutions",
+    description: "Our platform offers everything you need to obtain and maintain your cryptocurrency trading license.",
+    items: [
+      {
+        icon: 'Zap',
+        title: 'Fast Processing',
+        description: 'Get your license approved in as little as 24 hours with our streamlined process.'
+      },
+      {
+        icon: 'Shield',
+        title: 'Secure & Compliant',
+        description: 'Bank-level security with full regulatory compliance and legal backing.'
+      },
+      {
+        icon: 'Users',
+        title: 'Expert Support',
+        description: '24/7 dedicated support from our team of regulatory and compliance experts.'
+      },
+      {
+        icon: 'Lock',
+        title: 'Data Protection',
+        description: 'Your sensitive information is protected with military-grade encryption.'
+      },
+      {
+        icon: 'Building',
+        title: 'Institutional Grade',
+        description: 'Solutions designed for both individual traders and large institutions.'
+      },
+      {
+        icon: 'HeadphonesIcon',
+        title: 'Ongoing Support',
+        description: 'Continuous support and guidance throughout your licensing journey.'
+      }
+    ]
+  },
+  stats: {
+    subtitle: "Our Impact",
+    title: "Trusted by Thousands Worldwide",
+    description: "Join the growing community of licensed cryptocurrency traders and institutions.",
+    items: [
+      {
+        icon: 'TrendingUp',
+        number: '15,000+',
+        label: 'Active Licenses',
+        description: 'Currently active trading licenses',
+        bgColor: 'bg-primary/10',
+        color: 'text-primary'
+      },
+      {
+        icon: 'Users',
+        number: '8,500+',
+        label: 'Licensed Traders',
+        description: 'Individual traders licensed',
+        bgColor: 'bg-accent-emerald/10',
+        color: 'text-accent-emerald'
+      },
+      {
+        icon: 'Globe',
+        number: '180+',
+        label: 'Countries',
+        description: 'Global market coverage',
+        bgColor: 'bg-accent-amber/10',
+        color: 'text-accent-amber'
+      },
+      {
+        icon: 'Award',
+        number: '99.8%',
+        label: 'Success Rate',
+        description: 'Application approval rate',
+        bgColor: 'bg-accent/10',
+        color: 'text-accent'
+      }
+    ],
+    trustIndicator: {
+      title: "Regulatory Authority Certification",
+      description: "All licenses are issued under the authority of international cryptocurrency regulatory frameworks and are legally binding in participating jurisdictions."
+    }
+  },
+  process: {
+    subtitle: "How It Works",
+    title: "Simple 3-Step Process",
+    description: "Getting your cryptocurrency trading license is easier than ever with our streamlined process.",
+    steps: [
+      {
+        number: 1,
+        icon: 'CreditCard',
+        title: 'Submit Application',
+        description: 'Complete our secure online application form with your details and trading requirements.'
+      },
+      {
+        number: 2,
+        icon: 'Upload',
+        title: 'Document Review',
+        description: 'Our compliance team reviews your application and supporting documents within 24 hours.'
+      },
+      {
+        number: 3,
+        icon: 'Award',
+        title: 'License Issued',
+        description: 'Receive your official cryptocurrency trading license and start trading legally.'
+      }
+    ],
+    ctaText: "Start Your Application"
+  },
+  verification: {
+    subtitle: "License Verification",
+    title: "Verify Any Trading License",
+    description: "Use our secure verification system to check the authenticity of any cryptocurrency trading license.",
+    cards: [
+      {
+        icon: 'Shield',
+        title: 'Secure Verification',
+        description: 'Advanced cryptographic verification ensures authenticity.'
+      },
+      {
+        icon: 'Search',
+        title: 'Instant Results',
+        description: 'Get verification results in seconds with our real-time system.'
+      },
+      {
+        icon: 'Clock',
+        title: 'Always Available',
+        description: 'Our verification system is available 24/7 for your convenience.'
+      }
+    ],
+    timeline: {
+      title: "Verification Process Timeline",
+      steps: [
+        {
+          number: 1,
+          title: 'License Submission',
+          description: 'Submit your license ID for verification',
+          badge: 'Instant',
+          isCompleted: true
+        },
+        {
+          number: 2,
+          title: 'Database Check',
+          description: 'System checks our secure license database',
+          badge: '< 5 seconds',
+          isCompleted: true
+        },
+        {
+          number: 3,
+          title: 'Verification Result',
+          description: 'Receive detailed verification report',
+          badge: 'Complete',
+          isCompleted: true
+        }
+      ]
+    }
+  },
+  whatIsLicense: {
+    subtitle: "Understanding Licenses",
+    title: "What is a Crypto Trading License?",
+    description: [
+      "A cryptocurrency trading license is an official authorization that allows individuals and organizations to legally trade digital assets in compliance with regulatory requirements.",
+      "Our licenses provide comprehensive legal coverage, ensuring your trading activities are fully compliant with international cryptocurrency regulations and local jurisdiction requirements."
+    ],
+    features: [
+      {
+        icon: 'Shield',
+        title: 'Legal Protection',
+        description: 'Complete legal framework for your trading operations'
+      },
+      {
+        icon: 'FileText',
+        title: 'Regulatory Compliance',
+        description: 'Full compliance with international crypto regulations'
+      },
+      {
+        icon: 'Globe',
+        title: 'Global Recognition',
+        description: 'Accepted in 180+ countries worldwide'
+      },
+      {
+        icon: 'CheckCircle',
+        title: 'Verified Status',
+        description: 'Officially verified and registered license status'
+      }
+    ],
+    ctaText: "Apply for License"
+  }
+};
+
 class UnifiedDataManager {
   private storageKey = 'apex_unified_data';
   private settingsKey = 'apex_settings';
+  private contentKey = 'apex_content';
   private eventListeners: { [key: string]: Function[] } = {};
   
   // Default settings with proper pricing
@@ -115,6 +349,13 @@ class UnifiedDataManager {
         console.log('[UnifiedDataManager] Initialized with default settings');
       }
       
+      // Initialize content if it doesn't exist
+      const existingContent = localStorage.getItem(this.contentKey);
+      if (!existingContent) {
+        this.updateContent(defaultContent);
+        console.log('[UnifiedDataManager] Initialized with default content');
+      }
+      
       // Initialize data structure if it doesn't exist
       const existingData = localStorage.getItem(this.storageKey);
       if (!existingData) {
@@ -128,8 +369,42 @@ class UnifiedDataManager {
       }
     } catch (error) {
       console.error('[UnifiedDataManager] Failed to initialize:', error);
-      // Fallback: ensure we have valid settings
+      // Fallback: ensure we have valid settings and content
       this.updateSettings(this.defaultSettings);
+      this.updateContent(defaultContent);
+    }
+  }
+
+  // Content management
+  getContent(): any {
+    try {
+      const content = localStorage.getItem(this.contentKey);
+      if (content) {
+        const parsed = JSON.parse(content);
+        // Merge with defaults to ensure all properties exist
+        return { ...defaultContent, ...parsed };
+      }
+    } catch (error) {
+      console.error('[UnifiedDataManager] Failed to get content:', error);
+    }
+    return defaultContent;
+  }
+
+  updateContent(updates: any): any {
+    try {
+      const currentContent = this.getContent();
+      const newContent = { ...currentContent, ...updates };
+      
+      localStorage.setItem(this.contentKey, JSON.stringify(newContent));
+      console.log('[UnifiedDataManager] Content updated:', newContent);
+      
+      // Emit update event
+      this.emit('content_updated', { content: newContent });
+      
+      return newContent;
+    } catch (error) {
+      console.error('[UnifiedDataManager] Failed to update content:', error);
+      throw error;
     }
   }
 
@@ -320,9 +595,11 @@ class UnifiedDataManager {
     try {
       localStorage.removeItem(this.settingsKey);
       localStorage.removeItem(this.storageKey);
+      localStorage.removeItem(this.contentKey);
       this.initializeData();
       console.log('[UnifiedDataManager] Reset to defaults completed');
       this.emit('settings_updated', { settings: this.defaultSettings });
+      this.emit('content_updated', { content: defaultContent });
     } catch (error) {
       console.error('[UnifiedDataManager] Failed to reset:', error);
     }
