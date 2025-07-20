@@ -1,39 +1,68 @@
 
-# cPanel Deployment Guide for APEX Crypto Licensing Website
+# Namecheap cPanel Deployment Guide for APEX Crypto Licensing Website
 
-## Prerequisites
-- cPanel hosting account with Node.js support (or static file hosting)
-- Domain name configured in cPanel
-- FTP/File Manager access
+## Prerequisites for Namecheap Shared Hosting
+- Namecheap shared hosting account with cPanel access
+- Domain name purchased/transferred to Namecheap
+- FTP/File Manager access through cPanel
+- **Note**: This is a static React app deployment (no Node.js required on shared hosting)
 
-## Step 1: Build the Application
+## Step 1: Build the Application Locally
 
-1. **Install Dependencies** (if not already done):
-```bash
-npm install
-```
+**Important**: You need to build this project on your local computer first, then upload the built files.
 
-2. **Build for Production**:
-```bash
-npm run build
-```
+1. **Clone/Download the Project**:
+   - Download the project files to your computer
+   - Extract to a folder (e.g., `apex-crypto-licensing`)
 
-This creates a `dist` folder with all production files.
+2. **Install Node.js** (if not already installed):
+   - Download from [nodejs.org](https://nodejs.org)
+   - Install the LTS version
 
-## Step 2: Upload Files to cPanel
+3. **Install Dependencies**:
+   ```bash
+   cd apex-crypto-licensing
+   npm install
+   ```
 
-### Method A: Using File Manager
-1. Log into cPanel
-2. Open **File Manager**
-3. Navigate to `public_html` (or your domain's document root)
-4. Upload the entire contents of the `dist` folder to this directory
-5. Extract if uploaded as a zip file
+4. **Build for Production**:
+   ```bash
+   npm run build
+   ```
 
-### Method B: Using FTP
-1. Connect to your hosting via FTP client
-2. Navigate to `public_html` directory
-3. Upload all files from the `dist` folder
-4. Ensure file permissions are set correctly (644 for files, 755 for folders)
+This creates a `dist` folder with all the static files ready for upload.
+
+## Step 2: Upload Files to Namecheap cPanel
+
+### Method A: Using cPanel File Manager (Recommended)
+1. **Login to Namecheap cPanel**:
+   - Go to your Namecheap account dashboard
+   - Click on "Manage" next to your hosting account
+   - Click "cPanel Login"
+
+2. **Access File Manager**:
+   - In cPanel, click **File Manager**
+   - Navigate to `public_html` folder (this is your website's root directory)
+   - **Important**: Clear any existing files if this is a fresh installation
+
+3. **Upload Your Built Files**:
+   - Click "Upload" in File Manager
+   - Select all files from your local `dist` folder
+   - Upload them directly to `public_html`
+   - **OR** zip the `dist` folder contents, upload the zip, then extract it
+
+### Method B: Using FTP (Alternative)
+1. **Get FTP Details from cPanel**:
+   - In cPanel, go to **FTP Accounts**
+   - Use the main account or create a new FTP user
+   - Note: Server, Username, Password
+
+2. **Upload via FTP Client**:
+   - Use FileZilla or similar FTP client
+   - Connect to your server
+   - Navigate to `public_html` directory
+   - Upload all files from your `dist` folder
+   - Set file permissions: 644 for files, 755 for folders
 
 ## Step 3: Configure URL Rewriting (Important for React Router)
 

@@ -75,26 +75,26 @@ const LicenseCategories = () => {
                 "24/7 support response",
                 "Recognized on all exchanges",
                 "Trading strategy protection"
-              ]}
-              popular
-              onApplyClick={openApplicationDialog}
-            />
+               ]}
+               onApplyClick={openApplicationDialog}
+             />
 
-            <LicenseCategory 
-              category={4}
-              title="Professional Trader"
-              price="150,000 USDT"
-              minVolume="$500,000"
-              features={[
-                "1-year validity period",
-                "Fast-track verification",
-                "Professional compliance cert",
-                "Dedicated support line",
-                "Global regulatory recognition",
-                "Advanced trading protection",
-                "Multi-exchange access"
-              ]}
-              onApplyClick={openApplicationDialog}
+             <LicenseCategory 
+               category={4}
+               title="Professional Trader"
+               price="150,000 USDT"
+               minVolume="$500,000"
+               features={[
+                 "1-year validity period",
+                 "Fast-track verification",
+                 "Professional compliance cert",
+                 "Dedicated support line",
+                 "Global regulatory recognition",
+                 "Advanced trading protection",
+                 "Multi-exchange access"
+               ]}
+               popular
+               onApplyClick={openApplicationDialog}
             />
             
             <LicenseCategory 
