@@ -1,34 +1,65 @@
 
-import Header from "@/components/Header";
-import Hero from "@/components/Hero";
-import AboutSection from "@/components/AboutSection";
-import WhatIsLicense from "@/components/WhatIsLicense";
-import FeaturesSection from "@/components/FeaturesSection";
-import ProcessSteps from "@/components/ProcessSteps";
-import LicenseCategories from "@/components/LicenseCategories";
-import StatsSection from "@/components/StatsSection";
-import VerificationSection from "@/components/VerificationSection";
-import ApplicationForm from "@/components/ApplicationForm";
-import Footer from "@/components/Footer";
+import { useState, useEffect } from 'react';
+import Header from '@/components/Header';
+import Hero from '@/components/Hero';
+import AboutSection from '@/components/AboutSection';
+import WhatIsLicense from '@/components/WhatIsLicense';
+import LicenseCategories from '@/components/LicenseCategories';
+import ProcessSteps from '@/components/ProcessSteps';
+import FeaturesSection from '@/components/FeaturesSection';
+import StatsSection from '@/components/StatsSection';
+import VerificationSection from '@/components/VerificationSection';
+import Footer from '@/components/Footer';
+import ApplicationDialog from '@/components/ApplicationDialog';
+import SupportDialog from '@/components/SupportDialog';
+import UnifiedApplicationForm from '@/components/UnifiedApplicationForm';
 
 const Index = () => {
+  const [showApplicationDialog, setShowApplicationDialog] = useState(false);
+  const [showSupportDialog, setShowSupportDialog] = useState(false);
+
+  // Scroll to hash if present
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash) {
+      setTimeout(() => {
+        const element = document.getElementById(hash.substring(1));
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  }, []);
+
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
+    <div className="min-h-screen">
+      <Header 
+        onApplyClick={() => setShowApplicationDialog(true)}
+        onSupportClick={() => setShowSupportDialog(true)}
+      />
       <main>
-        <Hero />
+        <Hero onApplyClick={() => setShowApplicationDialog(true)} />
         <AboutSection />
         <WhatIsLicense />
-        <FeaturesSection />
+        <LicenseCategories onApplyClick={() => setShowApplicationDialog(true)} />
         <ProcessSteps />
-        <LicenseCategories />
+        <FeaturesSection />
         <StatsSection />
         <VerificationSection />
-        <div className="hidden">
-          <ApplicationForm />
-        </div>
       </main>
       <Footer />
+      
+      <ApplicationDialog 
+        isOpen={showApplicationDialog} 
+        onClose={() => setShowApplicationDialog(false)}
+      >
+        <UnifiedApplicationForm />
+      </ApplicationDialog>
+      
+      <SupportDialog 
+        isOpen={showSupportDialog}
+        onClose={() => setShowSupportDialog(false)}
+      />
     </div>
   );
 };
