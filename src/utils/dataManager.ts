@@ -143,10 +143,10 @@ class DataManager {
     return false;
   }
 
-  // Licenses Management
+  // Enhanced Licenses Management
   getLicenses(): License[] {
     const data = localStorage.getItem('apex_licenses');
-    return data ? JSON.parse(data) : [];
+    return data ? JSON.parse(data) : this.getDefaultLicenses();
   }
 
   saveLicenses(licenses: License[]): void {
@@ -170,6 +170,16 @@ class DataManager {
     if (index !== -1) {
       licenses[index] = { ...licenses[index], ...updates };
       this.saveLicenses(licenses);
+      return true;
+    }
+    return false;
+  }
+
+  deleteLicense(id: string): boolean {
+    const licenses = this.getLicenses();
+    const filtered = licenses.filter(license => license.id !== id);
+    if (filtered.length !== licenses.length) {
+      this.saveLicenses(filtered);
       return true;
     }
     return false;
@@ -273,6 +283,31 @@ class DataManager {
         date: '2024-01-14', 
         status: 'replied' 
       },
+    ];
+  }
+
+  private getDefaultLicenses(): License[] {
+    return [
+      {
+        id: 'CL-2024-0001-T3',
+        holder: 'Thomas Anderson',
+        type: 'Category 3 - Advanced Trading',
+        category: 3,
+        issueDate: '2024-01-15',
+        expiryDate: '2025-01-15',
+        status: 'active',
+        platforms: 'Binance, Kraken, Coinbase, KuCoin'
+      },
+      {
+        id: 'CL-2024-0002-T4',
+        holder: 'Sarah Connor',
+        type: 'Category 4 - Professional Trading',
+        category: 4,
+        issueDate: '2024-01-10',
+        expiryDate: '2025-01-10',
+        status: 'active',
+        platforms: 'Binance, Kraken, Coinbase, KuCoin, Bybit'
+      }
     ];
   }
 

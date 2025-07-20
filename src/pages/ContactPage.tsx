@@ -1,3 +1,5 @@
+
+import { useState } from "react";
 import { Helmet } from "react-helmet-async";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -6,8 +8,63 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "@/hooks/use-toast";
+import { dataManager } from "@/utils/dataManager";
 
 const ContactPage = () => {
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    licenseType: '',
+    message: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      // Create contact record in dataManager
+      dataManager.addContact({
+        name: `${formData.firstName} ${formData.lastName}`,
+        email: formData.email,
+        subject: formData.licenseType ? `License Inquiry - ${formData.licenseType}` : 'General Inquiry',
+        message: `Phone: ${formData.phone}\nLicense Type: ${formData.licenseType}\n\nMessage:\n${formData.message}`
+      });
+
+      toast({
+        title: "Message Sent Successfully!",
+        description: "We'll get back to you within 24 hours.",
+      });
+
+      // Reset form
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        phone: '',
+        licenseType: '',
+        message: ''
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send message. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
@@ -42,43 +99,80 @@ const ContactPage = () => {
                 <h2 className="text-3xl font-bold mb-6">Send us a message</h2>
                 <Card>
                   <CardContent className="p-6">
-                    <form className="space-y-6">
+                    <form onSubmit={handleSubmit} className="space-y-6">
                       <div className="grid md:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-sm font-medium mb-2">First Name</label>
-                          <Input placeholder="John" />
+                          <Input 
+                            name="firstName"
+                            value={formData.firstName}
+                            onChange={handleInputChange}
+                            placeholder="John" 
+                            required
+                          />
                         </div>
                         <div>
                           <label className="block text-sm font-medium mb-2">Last Name</label>
-                          <Input placeholder="Doe" />
+                          <Input 
+                            name="lastName"
+                            value={formData.lastName}
+                            onChange={handleInputChange}
+                            placeholder="Doe" 
+                            required
+                          />
                         </div>
                       </div>
                       <div>
                         <label className="block text-sm font-medium mb-2">Email</label>
-                        <Input type="email" placeholder="john@example.com" />
+                        <Input 
+                          type="email" 
+                          name="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          placeholder="john@example.com" 
+                          required
+                        />
                       </div>
                       <div>
                         <label className="block text-sm font-medium mb-2">Phone</label>
-                        <Input placeholder="+1 (555) 123-4567" />
+                        <Input 
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleInputChange}
+                          placeholder="+1 (555) 123-4567" 
+                        />
                       </div>
                       <div>
                         <label className="block text-sm font-medium mb-2">License Type</label>
-                        <select className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary">
-                          <option>Select license type</option>
-                          <option>Category 1 - Basic Trading</option>
-                          <option>Category 2 - Advanced Trading</option>
-                          <option>Category 3 - International Trading</option>
-                          <option>Category 4 - Premium Trading</option>
+                        <select 
+                          name="licenseType"
+                          value={formData.licenseType}
+                          onChange={handleInputChange}
+                          className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                        >
+                          <option value="">Select license type</option>
+                          <option value="Category 1 - Basic Trading">Category 1 - Basic Trading</option>
+                          <option value="Category 2 - Advanced Trading">Category 2 - Advanced Trading</option>
+                          <option value="Category 3 - International Trading">Category 3 - International Trading</option>
+                          <option value="Category 4 - Premium Trading">Category 4 - Premium Trading</option>
+                          <option value="Category 5 - Institutional Trading">Category 5 - Institutional Trading</option>
+                          <option value="Category 6 - Executive Trading">Category 6 - Executive Trading</option>
                         </select>
                       </div>
                       <div>
                         <label className="block text-sm font-medium mb-2">Message</label>
                         <Textarea 
+                          name="message"
+                          value={formData.message}
+                          onChange={handleInputChange}
                           placeholder="Tell us about your requirements..." 
                           rows={4}
+                          required
                         />
                       </div>
-                      <Button className="w-full">Send Message</Button>
+                      <Button type="submit" className="w-full" disabled={isSubmitting}>
+                        {isSubmitting ? 'Sending...' : 'Send Message'}
+                      </Button>
                     </form>
                   </CardContent>
                 </Card>

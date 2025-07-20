@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { validLicenses, generateLicenseId } from '@/utils/licenseData';
 import { Button } from '@/components/ui/button';
@@ -6,7 +7,7 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Shield, Copy, Search, Download, Filter, LogOut, BarChart3, FileText, Settings, Mail } from 'lucide-react';
+import { Shield, Copy, Search, Download, Filter, LogOut, BarChart3, FileText, Settings, Mail, Globe, Layers } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -14,11 +15,13 @@ import { dataManager } from '@/utils/dataManager';
 import { ApplicationsManager } from '@/components/admin/ApplicationsManager';
 import { ContactsManager } from '@/components/admin/ContactsManager';
 import { SettingsManager } from '@/components/admin/SettingsManager';
+import { LicenseManager } from '@/components/admin/LicenseManager';
+import { ContentManager } from '@/components/admin/ContentManager';
 
 const Admin = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTier, setFilterTier] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState('licenses');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [analytics, setAnalytics] = useState(dataManager.getAnalytics());
   const { logout } = useAuth();
   const navigate = useNavigate();
@@ -93,7 +96,7 @@ const Admin = () => {
             APEX Admin Dashboard
           </h1>
           <p className="text-muted-foreground mt-2">
-            Comprehensive license and application management system
+            Comprehensive business management system
           </p>
         </div>
         
@@ -110,7 +113,11 @@ const Admin = () => {
       </header>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-7">
+          <TabsTrigger value="dashboard" className="flex items-center gap-2">
+            <BarChart3 className="h-4 w-4" />
+            Dashboard
+          </TabsTrigger>
           <TabsTrigger value="licenses" className="flex items-center gap-2">
             <Shield className="h-4 w-4" />
             Licenses
@@ -123,17 +130,95 @@ const Admin = () => {
             <Mail className="h-4 w-4" />
             Contacts
           </TabsTrigger>
+          <TabsTrigger value="content" className="flex items-center gap-2">
+            <Globe className="h-4 w-4" />
+            Content
+          </TabsTrigger>
           <TabsTrigger value="settings" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
             Settings
           </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
-            Analytics
+          <TabsTrigger value="legacy" className="flex items-center gap-2">
+            <Layers className="h-4 w-4" />
+            Legacy
           </TabsTrigger>
         </TabsList>
 
+        <TabsContent value="dashboard" className="space-y-6">
+          <h2 className="text-2xl font-semibold">Analytics Dashboard</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
+                <FileText className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{analytics.totalApplications}</div>
+                <p className="text-xs text-muted-foreground">
+                  {analytics.pendingApplications} pending review
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Active Licenses</CardTitle>
+                <Shield className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{analytics.activeLicenses}</div>
+                <p className="text-xs text-muted-foreground">
+                  {analytics.approvedApplications} approved this month
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Revenue</CardTitle>
+                <BarChart3 className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">${analytics.totalRevenue.toLocaleString()}</div>
+                <p className="text-xs text-muted-foreground">From approved applications</p>
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">New Messages</CardTitle>
+                <Mail className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{analytics.newContacts}</div>
+                <p className="text-xs text-muted-foreground">Requiring attention</p>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
         <TabsContent value="licenses" className="space-y-6">
+          <LicenseManager />
+        </TabsContent>
+
+        <TabsContent value="applications" className="space-y-6">
+          <ApplicationsManager />
+        </TabsContent>
+
+        <TabsContent value="contacts" className="space-y-6">
+          <ContactsManager />
+        </TabsContent>
+
+        <TabsContent value="content" className="space-y-6">
+          <ContentManager />
+        </TabsContent>
+
+        <TabsContent value="settings" className="space-y-6">
+          <SettingsManager />
+        </TabsContent>
+
+        <TabsContent value="legacy" className="space-y-6">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-grow">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -203,72 +288,6 @@ const Admin = () => {
                 ))}
               </TableBody>
             </Table>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="applications" className="space-y-6">
-          <ApplicationsManager />
-        </TabsContent>
-
-        <TabsContent value="contacts" className="space-y-6">
-          <ContactsManager />
-        </TabsContent>
-
-        <TabsContent value="settings" className="space-y-6">
-          <SettingsManager />
-        </TabsContent>
-
-        <TabsContent value="analytics" className="space-y-6">
-          <h2 className="text-2xl font-semibold">Analytics Dashboard</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
-                <FileText className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{analytics.totalApplications}</div>
-                <p className="text-xs text-muted-foreground">
-                  {analytics.pendingApplications} pending review
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Licenses</CardTitle>
-                <Shield className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{analytics.activeLicenses}</div>
-                <p className="text-xs text-muted-foreground">
-                  {analytics.approvedApplications} approved this month
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Revenue</CardTitle>
-                <BarChart3 className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">${analytics.totalRevenue.toLocaleString()}</div>
-                <p className="text-xs text-muted-foreground">From approved applications</p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">New Messages</CardTitle>
-                <Mail className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{analytics.newContacts}</div>
-                <p className="text-xs text-muted-foreground">Requiring attention</p>
-              </CardContent>
-            </Card>
           </div>
         </TabsContent>
       </Tabs>
