@@ -71,12 +71,12 @@ const Footer = () => {
               </li>
               <li className="flex items-center gap-2">
                 <MessageSquare className="h-4 w-4 opacity-80" />
-                <span className="opacity-80">{settings.phoneNumber}</span>
+                <span className="opacity-80">{settings.contactPhone}</span>
               </li>
               <li className="flex items-start gap-2">
                 <Globe className="h-4 w-4 opacity-80 mt-0.5" />
                 <div className="opacity-80">
-                  <div>{settings.address}</div>
+                  <div>{settings.companyAddress}</div>
                   <div>{settings.city}</div>
                   <div>{settings.country}</div>
                 </div>
