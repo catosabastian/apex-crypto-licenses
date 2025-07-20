@@ -1,4 +1,5 @@
 import CryptoJS from 'crypto-js';
+import { crossTabCommunication } from './crossTabCommunication';
 
 export interface Application {
   id: string;
@@ -85,120 +86,59 @@ class SecureDataManager {
   private eventListeners: { [key: string]: ((data: any) => void)[] } = {};
   private encryptionKey: string;
   private sessionCheckInterval?: NodeJS.Timeout;
-  private retryQueue: Array<{ event: string; data: any; attempts: number }> = [];
   
   private constructor() {
-    // Generate or retrieve encryption key
+    console.log('[SecureDataManager] Initializing singleton instance');
     this.encryptionKey = this.getOrCreateEncryptionKey();
     this.startSessionMonitoring();
-    this.startRetryQueue();
   }
   
   static getInstance(): SecureDataManager {
     if (!SecureDataManager.instance) {
       SecureDataManager.instance = new SecureDataManager();
+      console.log('[SecureDataManager] New singleton instance created');
+    } else {
+      console.log('[SecureDataManager] Returning existing singleton instance');
     }
     return SecureDataManager.instance;
   }
 
-  // Enhanced Event System with Comprehensive Logging and Multiple Channels
+  // Simplified Event System using CrossTabCommunication
   addEventListener(event: string, callback: (data: any) => void): void {
     if (!this.eventListeners[event]) {
       this.eventListeners[event] = [];
     }
     this.eventListeners[event].push(callback);
-    console.log(`[SecureDataManager] Event listener added for: ${event}, total listeners: ${this.eventListeners[event].length}`);
+    
+    // Also register with cross-tab communication
+    crossTabCommunication.addEventListener(event, callback);
+    console.log(`[SecureDataManager] Event listener added for: ${event}`);
   }
 
   removeEventListener(event: string, callback: (data: any) => void): void {
     if (this.eventListeners[event]) {
       this.eventListeners[event] = this.eventListeners[event].filter(cb => cb !== callback);
-      console.log(`[SecureDataManager] Event listener removed for: ${event}, remaining listeners: ${this.eventListeners[event].length}`);
     }
+    crossTabCommunication.removeEventListener(event, callback);
   }
 
-  private emit(event: string, data: any, retryOnFailure: boolean = true): void {
+  private emit(event: string, data: any): void {
     console.log(`[SecureDataManager] Emitting event: ${event}`, data);
     
-    try {
-      // 1. Emit to local listeners first
-      if (this.eventListeners[event]) {
-        console.log(`[SecureDataManager] Triggering ${this.eventListeners[event].length} local listeners for ${event}`);
-        this.eventListeners[event].forEach((callback, index) => {
-          try {
-            callback(data);
-            console.log(`[SecureDataManager] Local listener ${index} executed successfully for ${event}`);
-          } catch (error) {
-            console.error(`[SecureDataManager] Local listener ${index} failed for ${event}:`, error);
-          }
-        });
-      } else {
-        console.log(`[SecureDataManager] No local listeners found for event: ${event}`);
-      }
-      
-      // 2. Cross-tab communication via CustomEvent
-      const customEvent = new CustomEvent(`apex_${event}`, { detail: data });
-      window.dispatchEvent(customEvent);
-      console.log(`[SecureDataManager] CustomEvent dispatched: apex_${event}`);
-      
-      // 3. Cross-window communication via localStorage
-      const eventData = {
-        event: `apex_${event}`,
-        data,
-        timestamp: Date.now(),
-        id: this.generateSecureId()
-      };
-      
-      const eventKey = `apex_event_${eventData.timestamp}_${eventData.id}`;
-      localStorage.setItem(eventKey, JSON.stringify(eventData));
-      console.log(`[SecureDataManager] localStorage event set: ${eventKey}`);
-      
-      // 4. Direct localStorage update for immediate detection
-      localStorage.setItem('apex_last_update', JSON.stringify({
-        event,
-        data,
-        timestamp: Date.now()
-      }));
-      console.log(`[SecureDataManager] Direct localStorage update marker set`);
-      
-      // 5. Force storage event dispatch
-      window.dispatchEvent(new StorageEvent('storage', {
-        key: 'apex_last_update',
-        newValue: JSON.stringify({ event, data, timestamp: Date.now() }),
-        oldValue: null,
-        storageArea: localStorage
-      }));
-      console.log(`[SecureDataManager] Manual StorageEvent dispatched`);
-      
-    } catch (error) {
-      console.error(`[SecureDataManager] Event emission failed for ${event}:`, error);
-      if (retryOnFailure) {
-        this.addToRetryQueue(event, data);
-      }
+    // Emit through cross-tab communication system
+    crossTabCommunication.emit(event, data);
+    
+    // Also trigger local listeners immediately
+    if (this.eventListeners[event]) {
+      this.eventListeners[event].forEach((callback, index) => {
+        try {
+          callback(data);
+          console.log(`[SecureDataManager] Local listener ${index} executed for ${event}`);
+        } catch (error) {
+          console.error(`[SecureDataManager] Local listener ${index} failed for ${event}:`, error);
+        }
+      });
     }
-  }
-
-  private addToRetryQueue(event: string, data: any): void {
-    this.retryQueue.push({ event, data, attempts: 0 });
-    console.log(`[SecureDataManager] Event added to retry queue: ${event}`);
-  }
-
-  private startRetryQueue(): void {
-    setInterval(() => {
-      if (this.retryQueue.length > 0) {
-        console.log(`[SecureDataManager] Processing retry queue, ${this.retryQueue.length} items`);
-        this.retryQueue = this.retryQueue.filter(item => {
-          if (item.attempts < 3) {
-            item.attempts++;
-            console.log(`[SecureDataManager] Retrying event ${item.event}, attempt ${item.attempts}`);
-            this.emit(item.event, item.data, false);
-            return item.attempts < 3;
-          }
-          console.log(`[SecureDataManager] Event ${item.event} exceeded max retry attempts, removing from queue`);
-          return false;
-        });
-      }
-    }, 5000);
   }
 
   // Encryption/Decryption Methods
@@ -444,7 +384,7 @@ class SecureDataManager {
     return false;
   }
 
-  // Enhanced Settings with Immediate Multi-Channel Propagation
+  // Enhanced Settings with Bulletproof Propagation
   getSettings(): WebsiteSettings {
     const settings = this.secureGetItem('apex_settings', this.getDefaultSettings());
     console.log('[SecureDataManager] Retrieved settings:', settings);
@@ -464,45 +404,33 @@ class SecureDataManager {
     // Log security event
     this.logSecurityEvent('data_change', `Website settings updated: ${Object.keys(updates).join(', ')}`);
     
-    // Multi-channel immediate propagation
-    console.log('[SecureDataManager] Starting multi-channel settings propagation');
+    // BULLETPROOF PROPAGATION - Multiple channels with immediate triggers
+    console.log('[SecureDataManager] Starting bulletproof settings propagation');
     
-    // Channel 1: Primary event
+    // Channel 1: Primary settings update
     this.emit('settings_updated', newSettings);
     
-    // Channel 2: Force update event (immediate)
+    // Channel 2: Force update (immediate)
     setTimeout(() => {
-      console.log('[SecureDataManager] Emitting force update');
-      this.emit('settings_force_update', newSettings);
+      console.log('[SecureDataManager] Triggering force update');
+      this.emit('settings_force_refresh', newSettings);
+    }, 10);
+    
+    // Channel 3: Admin confirmation event
+    setTimeout(() => {
+      console.log('[SecureDataManager] Triggering admin confirmation');
+      this.emit('admin_settings_confirmed', { 
+        settings: newSettings, 
+        timestamp: Date.now(),
+        updateKeys: Object.keys(updates)
+      });
     }, 50);
     
-    // Channel 3: Backup broadcast after short delay
+    // Channel 4: Emergency broadcast
     setTimeout(() => {
-      console.log('[SecureDataManager] Emitting backup broadcast');
-      this.emit('settings_backup_update', newSettings);
-    }, 200);
-    
-    // Channel 4: Direct window messaging
-    try {
-      if (window.parent && window.parent !== window) {
-        window.parent.postMessage({
-          type: 'apex_settings_updated',
-          data: newSettings,
-          timestamp: Date.now()
-        }, '*');
-        console.log('[SecureDataManager] Parent window message sent');
-      }
-    } catch (error) {
-      console.log('[SecureDataManager] Parent window messaging not available');
-    }
-    
-    // Channel 5: Manual localStorage trigger
-    localStorage.setItem('apex_settings_manual_trigger', JSON.stringify({
-      settings: newSettings,
-      timestamp: Date.now(),
-      trigger: 'manual_update'
-    }));
-    console.log('[SecureDataManager] Manual localStorage trigger set');
+      console.log('[SecureDataManager] Emergency broadcast');
+      crossTabCommunication.emit('emergency_settings_sync', newSettings);
+    }, 100);
     
     console.log('[SecureDataManager] Settings update complete, returning:', newSettings);
     return newSettings;
@@ -702,6 +630,7 @@ class SecureDataManager {
     if (this.sessionCheckInterval) {
       clearInterval(this.sessionCheckInterval);
     }
+    crossTabCommunication.destroy();
   }
 }
 

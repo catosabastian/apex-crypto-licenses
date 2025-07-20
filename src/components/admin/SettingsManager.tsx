@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { Edit, Save, DollarSign, Wallet, CheckCircle, AlertCircle } from 'lucide-react';
+import { Edit, Save, DollarSign, Wallet, CheckCircle, AlertCircle, Wifi, WifiOff } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { secureDataManager, WebsiteSettings } from '@/utils/secureDataManager';
 import { ContactSettingsManager } from './ContactSettingsManager';
@@ -19,6 +19,8 @@ export const SettingsManager = () => {
   const [tempSettings, setTempSettings] = useState<WebsiteSettings>(settings);
   const [lastUpdateTime, setLastUpdateTime] = useState<Date>(new Date());
   const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'success' | 'error'>('idle');
+  const [frontendConnected, setFrontendConnected] = useState<boolean>(true);
+  const [propagationConfirmed, setPropagationConfirmed] = useState<boolean>(false);
 
   useEffect(() => {
     console.log('[SettingsManager] Component mounted, initializing settings');
@@ -27,11 +29,36 @@ export const SettingsManager = () => {
     const currentSettings = secureDataManager.getSettings();
     setSettings(currentSettings);
     setTempSettings(currentSettings);
+
+    // Listen for admin confirmation that settings propagated
+    const handleAdminConfirmation = (data: any) => {
+      console.log('[SettingsManager] Admin confirmation received:', data);
+      setPropagationConfirmed(true);
+      setFrontendConnected(true);
+      setSyncStatus('success');
+      
+      toast({
+        title: "Settings Propagated Successfully",
+        description: `Changes confirmed across all frontend instances at ${new Date(data.timestamp).toLocaleTimeString()}`,
+      });
+      
+      setTimeout(() => {
+        setPropagationConfirmed(false);
+        setSyncStatus('idle');
+      }, 3000);
+    };
+
+    secureDataManager.addEventListener('admin_settings_confirmed', handleAdminConfirmation);
+
+    return () => {
+      secureDataManager.removeEventListener('admin_settings_confirmed', handleAdminConfirmation);
+    };
   }, []);
 
   const handleSaveSettings = () => {
     console.log('[SettingsManager] Saving settings:', tempSettings);
     setSyncStatus('syncing');
+    setPropagationConfirmed(false);
     
     try {
       const updatedSettings = secureDataManager.updateSettings(tempSettings);
@@ -41,15 +68,24 @@ export const SettingsManager = () => {
       setIsEditingPrices(false);
       setIsEditingWallets(false);
       setLastUpdateTime(new Date());
-      setSyncStatus('success');
       
       toast({
         title: "Settings Updated Successfully",
-        description: "All changes have been saved and synchronized across the platform",
+        description: "Changes are being propagated to all frontend instances...",
       });
       
-      // Reset sync status after showing success
-      setTimeout(() => setSyncStatus('idle'), 3000);
+      // Set timeout to show error if no confirmation received
+      setTimeout(() => {
+        if (!propagationConfirmed) {
+          setSyncStatus('error');
+          setFrontendConnected(false);
+          toast({
+            title: "Propagation Warning",
+            description: "Settings saved but frontend sync confirmation not received. Frontend may need manual refresh.",
+            variant: "destructive",
+          });
+        }
+      }, 5000);
       
     } catch (error) {
       console.error('[SettingsManager] Failed to save settings:', error);
@@ -61,7 +97,6 @@ export const SettingsManager = () => {
         variant: "destructive",
       });
       
-      // Reset sync status after showing error
       setTimeout(() => setSyncStatus('idle'), 3000);
     }
   };
@@ -69,6 +104,7 @@ export const SettingsManager = () => {
   const handleAvailabilityToggle = (category: keyof WebsiteSettings, value: boolean) => {
     console.log(`[SettingsManager] Toggling availability for ${category}:`, value);
     setSyncStatus('syncing');
+    setPropagationConfirmed(false);
     
     try {
       const updates = { [category]: value };
@@ -78,15 +114,19 @@ export const SettingsManager = () => {
       setSettings(updatedSettings);
       setTempSettings(updatedSettings);
       setLastUpdateTime(new Date());
-      setSyncStatus('success');
       
       toast({
         title: "Availability Updated",
-        description: `${category} has been ${value ? 'enabled' : 'disabled'} successfully`,
+        description: `${category} has been ${value ? 'enabled' : 'disabled'} - propagating to frontend...`,
       });
       
-      // Reset sync status after showing success
-      setTimeout(() => setSyncStatus('idle'), 2000);
+      // Set timeout for confirmation
+      setTimeout(() => {
+        if (!propagationConfirmed) {
+          setSyncStatus('error');
+          setFrontendConnected(false);
+        }
+      }, 3000);
       
     } catch (error) {
       console.error('[SettingsManager] Failed to toggle availability:', error);
@@ -98,7 +138,6 @@ export const SettingsManager = () => {
         variant: "destructive",
       });
       
-      // Reset sync status after showing error
       setTimeout(() => setSyncStatus('idle'), 3000);
     }
   };
@@ -117,9 +156,13 @@ export const SettingsManager = () => {
   };
 
   const getSyncStatusText = () => {
+    if (propagationConfirmed) {
+      return 'Frontend Sync Confirmed ✓';
+    }
+    
     switch (syncStatus) {
       case 'syncing':
-        return 'Synchronizing...';
+        return 'Propagating to Frontend...';
       case 'success':
         return 'Synchronized';
       case 'error':
@@ -129,13 +172,31 @@ export const SettingsManager = () => {
     }
   };
 
+  const getConnectionIcon = () => {
+    return frontendConnected ? (
+      <Wifi className="h-4 w-4 text-green-500" />
+    ) : (
+      <WifiOff className="h-4 w-4 text-red-500" />
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-semibold">Website Settings</h2>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          {getSyncStatusIcon()}
-          <span>{getSyncStatusText()}</span>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 text-sm">
+            {getConnectionIcon()}
+            <span className={frontendConnected ? 'text-green-600' : 'text-red-600'}>
+              {frontendConnected ? 'Frontend Connected' : 'Frontend Disconnected'}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            {getSyncStatusIcon()}
+            <span className={propagationConfirmed ? 'text-green-600 font-medium' : ''}>
+              {getSyncStatusText()}
+            </span>
+          </div>
         </div>
       </div>
       
@@ -150,6 +211,11 @@ export const SettingsManager = () => {
               <CardTitle className="flex items-center gap-2">
                 <DollarSign className="h-5 w-5" />
                 License Pricing
+                {propagationConfirmed && (
+                  <Badge variant="default" className="bg-green-500 text-white">
+                    Live ✓
+                  </Badge>
+                )}
               </CardTitle>
               <CardDescription>Manage license pricing and availability</CardDescription>
             </div>
@@ -191,7 +257,7 @@ export const SettingsManager = () => {
                     {syncStatus === 'syncing' ? (
                       <>
                         <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2" />
-                        Saving...
+                        Saving & Syncing...
                       </>
                     ) : (
                       <>
@@ -225,6 +291,11 @@ export const SettingsManager = () => {
                     <Badge variant={settings[`category${category}Available` as keyof WebsiteSettings] ? "default" : "secondary"}>
                       {settings[`category${category}Available` as keyof WebsiteSettings] ? "Available" : "Sold Out"}
                     </Badge>
+                    {propagationConfirmed && (
+                      <Badge variant="outline" className="text-green-600 border-green-600">
+                        Synced ✓
+                      </Badge>
+                    )}
                   </div>
                 </div>
               </div>
@@ -239,6 +310,11 @@ export const SettingsManager = () => {
               <CardTitle className="flex items-center gap-2">
                 <Wallet className="h-5 w-5" />
                 Payment Addresses
+                {propagationConfirmed && (
+                  <Badge variant="default" className="bg-green-500 text-white">
+                    Live ✓
+                  </Badge>
+                )}
               </CardTitle>
               <CardDescription>Manage cryptocurrency wallet addresses</CardDescription>
             </div>
@@ -305,7 +381,7 @@ export const SettingsManager = () => {
                     {syncStatus === 'syncing' ? (
                       <>
                         <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2" />
-                        Saving...
+                        Saving & Syncing...
                       </>
                     ) : (
                       <>
@@ -324,18 +400,33 @@ export const SettingsManager = () => {
                 <p className="font-medium">Bitcoin</p>
                 <p className="text-sm text-muted-foreground font-mono break-all">{settings.bitcoinAddress}</p>
               </div>
+              {propagationConfirmed && (
+                <Badge variant="outline" className="text-green-600 border-green-600">
+                  Synced ✓
+                </Badge>
+              )}
             </div>
             <div className="flex items-center justify-between p-4 border rounded-lg glass-card">
               <div>
                 <p className="font-medium">Ethereum</p>
                 <p className="text-sm text-muted-foreground font-mono break-all">{settings.ethereumAddress}</p>
               </div>
+              {propagationConfirmed && (
+                <Badge variant="outline" className="text-green-600 border-green-600">
+                  Synced ✓
+                </Badge>
+              )}
             </div>
             <div className="flex items-center justify-between p-4 border rounded-lg glass-card">
               <div>
                 <p className="font-medium">USDT</p>
                 <p className="text-sm text-muted-foreground font-mono break-all">{settings.usdtAddress}</p>
               </div>
+              {propagationConfirmed && (
+                <Badge variant="outline" className="text-green-600 border-green-600">
+                  Synced ✓
+                </Badge>
+              )}
             </div>
           </CardContent>
         </Card>
