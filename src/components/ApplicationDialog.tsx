@@ -2,6 +2,8 @@
 import { createContext, useContext, ReactNode, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import DynamicApplicationForm from '@/components/DynamicApplicationForm';
 import ErrorBoundary from '@/components/ErrorBoundary';
 
@@ -30,14 +32,27 @@ export const ApplicationDialogProvider = ({ children }: { children: ReactNode })
     <ApplicationDialogContext.Provider value={{ isOpen, openApplicationDialog, closeApplicationDialog }}>
       {children}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-6xl max-h-[95vh] p-0 overflow-hidden">
-          <DialogHeader className="px-6 pt-6 pb-4 border-b">
-            <DialogTitle className="text-2xl font-bold">Trading License Application</DialogTitle>
+        <DialogContent className="max-w-6xl max-h-[98vh] p-0 overflow-hidden glass-card border-0 shadow-2xl">
+          <DialogHeader className="px-8 pt-8 pb-6 border-b border-border/50 relative">
+            <DialogTitle className="text-3xl font-bold gradient-text">Trading License Application</DialogTitle>
+            <p className="text-lg text-muted-foreground mt-2">
+              Complete your application for cryptocurrency trading certification
+            </p>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-6 top-6 rounded-full hover:bg-destructive/10 hover:text-destructive"
+              onClick={closeApplicationDialog}
+            >
+              <X className="h-5 w-5" />
+            </Button>
           </DialogHeader>
-          <ScrollArea className="flex-1 max-h-[calc(95vh-120px)]">
-            <div className="px-6 pb-6">
+          <ScrollArea className="flex-1 max-h-[calc(98vh-140px)]">
+            <div className="px-8 pb-8">
               <ErrorBoundary>
-                <DynamicApplicationForm />
+                <div className="py-6">
+                  <DynamicApplicationForm />
+                </div>
               </ErrorBoundary>
             </div>
           </ScrollArea>

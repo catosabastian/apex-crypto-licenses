@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, Shield, Award, Users, Globe, CheckCircle, Star, Zap } from 'lucide-react';
+import { ChevronDown, Shield, Award, Users, Globe, CheckCircle, Star, Zap, Sparkles } from 'lucide-react';
 import { useApplicationDialog } from '@/components/ApplicationDialog';
 
 const Hero = () => {
@@ -19,17 +19,17 @@ const Hero = () => {
   }, []);
 
   const stats = [
-    { value: '45,000+', label: 'Licensed Traders', icon: Users },
-    { value: '180+', label: 'Countries Served', icon: Globe },
-    { value: '99.9%', label: 'Success Rate', icon: Award },
-    { value: '24/7', label: 'Support Available', icon: Shield }
+    { value: '45,000+', label: 'Licensed Traders', icon: Users, color: 'text-primary' },
+    { value: '180+', label: 'Countries Served', icon: Globe, color: 'text-accent' },
+    { value: '99.9%', label: 'Success Rate', icon: Award, color: 'text-accent-emerald' },
+    { value: '24/7', label: 'Support Available', icon: Shield, color: 'text-accent-amber' }
   ];
 
   const trustBadges = [
-    { name: 'SEC Approved', verified: true },
-    { name: 'CFTC Certified', verified: true },
-    { name: 'FCA Licensed', verified: true },
-    { name: 'MiCA Compliant', verified: true }
+    { name: 'SEC Approved', verified: true, color: 'bg-primary/10 text-primary' },
+    { name: 'CFTC Certified', verified: true, color: 'bg-accent/10 text-accent' },
+    { name: 'FCA Licensed', verified: true, color: 'bg-accent-emerald/10 text-accent-emerald' },
+    { name: 'MiCA Compliant', verified: true, color: 'bg-accent-amber/10 text-accent-amber' }
   ];
 
   useEffect(() => {
@@ -41,127 +41,127 @@ const Hero = () => {
 
   return (
     <section className="relative min-h-screen pt-16 flex flex-col overflow-hidden">
-      {/* Clean Professional Background */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: 'url(https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80)'
-        }}
-      />
+      {/* Modern Gradient Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-accent/5" />
       
-      {/* Improved gradient overlay with better contrast */}
-      <div className="absolute inset-0 bg-gradient-to-br from-background/60 via-background/70 to-background/60" />
+      {/* Glass Morphism Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-white/10 to-transparent backdrop-blur-3xl" />
       
-      {/* Subtle animated elements */}
+      {/* Floating Elements with Modern Animation */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute w-2 h-2 bg-primary/30 rounded-full animate-pulse" style={{top: '20%', left: '10%', animationDelay: '0s'}} />
-        <div className="absolute w-1 h-1 bg-accent/40 rounded-full animate-pulse" style={{top: '40%', left: '90%', animationDelay: '1s'}} />
-        <div className="absolute w-2 h-2 bg-primary/20 rounded-full animate-pulse" style={{top: '70%', left: '15%', animationDelay: '2s'}} />
-        <div className="absolute w-1 h-1 bg-accent/30 rounded-full animate-pulse" style={{top: '80%', left: '85%', animationDelay: '3s'}} />
+        <div className="absolute w-3 h-3 bg-primary/30 rounded-full animate-float" style={{top: '20%', left: '10%', animationDelay: '0s'}} />
+        <div className="absolute w-2 h-2 bg-accent/40 rounded-full animate-float" style={{top: '40%', left: '90%', animationDelay: '1s'}} />
+        <div className="absolute w-4 h-4 bg-primary/20 rounded-full animate-float" style={{top: '70%', left: '15%', animationDelay: '2s'}} />
+        <div className="absolute w-2 h-2 bg-accent-amber/30 rounded-full animate-float" style={{top: '80%', left: '85%', animationDelay: '3s'}} />
+        <div className="absolute w-3 h-3 bg-accent-emerald/25 rounded-full animate-float" style={{top: '30%', left: '80%', animationDelay: '4s'}} />
       </div>
       
-      <div className="container flex-1 flex flex-col justify-center py-16 relative z-10">
+      <div className="container flex-1 flex flex-col justify-center py-20 relative z-10">
         <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="grid lg:grid-cols-2 gap-20 items-center">
             {/* Left Content */}
-            <div className="text-center lg:text-left space-y-8">
-              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium border border-primary/20">
-                <Shield className="h-4 w-4" />
-                <span>Official Regulatory Authority</span>
-                <Star className="h-3 w-3 fill-current" />
+            <div className="text-center lg:text-left space-y-10 animate-fade-in-up">
+              <div className="inline-flex items-center gap-3 glass-card px-6 py-3 rounded-full text-sm font-medium">
+                <Shield className="h-5 w-5 text-primary" />
+                <span className="text-primary font-semibold">Official Regulatory Authority</span>
+                <Sparkles className="h-4 w-4 text-accent animate-pulse" />
               </div>
               
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
+              <h1 className="text-display leading-tight animate-slide-up">
                 <span className="block text-foreground">World's Leading</span>
-                <span className="block text-primary text-5xl md:text-6xl lg:text-7xl font-black">
+                <span className="block gradient-text font-black">
                   Crypto Trading
                 </span>
                 <span className="block text-foreground">License Provider</span>
               </h1>
               
-              <p className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl">
+              <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-2xl animate-fade-in" style={{animationDelay: '0.2s'}}>
                 Secure your regulatory compliance with our internationally recognized trading certificates. 
-                Join <span className="font-semibold text-primary">45,000+</span> successful traders worldwide.
+                Join <span className="font-bold text-primary">45,000+</span> successful traders worldwide.
               </p>
               
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+              <div className="flex flex-col sm:flex-row gap-6 justify-center lg:justify-start animate-fade-in" style={{animationDelay: '0.4s'}}>
                 <Button 
                   size="lg" 
-                  className="gap-2 px-8 py-6 text-lg font-semibold" 
+                  className="glass-button gap-3 px-10 py-8 text-lg font-bold rounded-2xl hover-lift hover-glow" 
                   onClick={openApplicationDialog}
                 >
-                  <Zap className="h-5 w-5" />
+                  <Zap className="h-6 w-6" />
                   Start Your Application
                 </Button>
                 <Button 
                   size="lg" 
                   variant="outline" 
-                  className="gap-2 px-8 py-6 text-lg font-semibold"
+                  className="gap-3 px-10 py-8 text-lg font-bold rounded-2xl glass-card hover-lift"
                   onClick={() => document.getElementById('verification')?.scrollIntoView({ behavior: 'smooth' })}
                 >
-                  <Award className="h-5 w-5" />
+                  <Award className="h-6 w-6" />
                   Verify License
                 </Button>
               </div>
               
               {/* Trust Indicators */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 pt-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-8 animate-fade-in" style={{animationDelay: '0.6s'}}>
                 {trustBadges.map((badge, index) => (
-                  <div key={index} className="flex items-center gap-2 justify-center lg:justify-start p-3 bg-card/50 rounded-lg border border-border/50">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    <span className="text-xs font-medium">{badge.name}</span>
+                  <div key={index} className={`flex items-center gap-3 justify-center lg:justify-start p-4 rounded-xl ${badge.color} glass-card hover-lift`}>
+                    <CheckCircle className="h-5 w-5 text-accent-emerald" />
+                    <span className="text-sm font-semibold">{badge.name}</span>
                   </div>
                 ))}
               </div>
             </div>
             
-            {/* Right Content - Statistics Dashboard */}
-            <div className="relative">
-              <div className="bg-card/80 backdrop-blur-sm p-8 rounded-2xl border border-border shadow-xl">
-                <div className="text-center mb-8">
-                  <h3 className="text-2xl font-bold text-foreground mb-2">Live Platform Metrics</h3>
-                  <p className="text-muted-foreground">Real-time global statistics</p>
+            {/* Right Content - Enhanced Statistics Dashboard */}
+            <div className="relative animate-fade-in" style={{animationDelay: '0.3s'}}>
+              <div className="modern-card hover-lift">
+                <div className="text-center mb-10">
+                  <h3 className="text-section gradient-text mb-4">Live Platform Metrics</h3>
+                  <p className="text-lg text-muted-foreground">Real-time global statistics</p>
                 </div>
                 
-                <div className="grid grid-cols-2 gap-6 mb-8">
+                <div className="grid grid-cols-2 gap-6 mb-10">
                   {stats.map((stat, index) => {
                     const IconComponent = stat.icon;
                     return (
                       <div 
                         key={index}
-                        className={`text-center p-4 rounded-xl transition-all duration-500 ${
+                        className={`text-center p-6 rounded-2xl transition-all duration-500 hover-lift ${
                           index === currentStat 
-                            ? 'bg-primary/10 border-2 border-primary shadow-md' 
-                            : 'bg-muted/30 border border-border'
+                            ? 'bg-primary/10 border-2 border-primary shadow-lg shadow-primary/20 animate-glow' 
+                            : 'bg-muted/30 border border-border/50 hover:border-primary/30'
                         }`}
                       >
-                        <div className="flex justify-center mb-2">
-                          <IconComponent className={`h-6 w-6 ${
-                            index === currentStat ? 'text-primary' : 'text-muted-foreground'
+                        <div className="flex justify-center mb-4">
+                          <IconComponent className={`h-8 w-8 ${
+                            index === currentStat ? 'text-primary' : stat.color
                           }`} />
                         </div>
-                        <div className="text-2xl font-bold text-primary mb-1">{stat.value}</div>
-                        <div className="text-xs text-muted-foreground font-medium">{stat.label}</div>
+                        <div className="text-3xl font-bold text-primary mb-2">{stat.value}</div>
+                        <div className="text-sm text-muted-foreground font-medium">{stat.label}</div>
                       </div>
                     );
                   })}
                 </div>
                 
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Processing Speed</span>
-                    <span className="text-sm font-semibold text-primary">18 hours avg</span>
-                  </div>
-                  <div className="w-full bg-muted/50 rounded-full h-2">
-                    <div className="bg-primary h-2 rounded-full w-[90%]"></div>
+                <div className="space-y-6">
+                  <div className="glass-card p-6 rounded-2xl">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-sm font-semibold text-muted-foreground">Processing Speed</span>
+                      <span className="text-sm font-bold text-primary">18 hours avg</span>
+                    </div>
+                    <div className="w-full bg-muted/50 rounded-full h-3">
+                      <div className="bg-gradient-to-r from-primary to-accent h-3 rounded-full w-[90%] animate-pulse-glow"></div>
+                    </div>
                   </div>
                   
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">Success Rate</span>
-                    <span className="text-sm font-semibold text-green-600">99.9%</span>
-                  </div>
-                  <div className="w-full bg-muted/50 rounded-full h-2">
-                    <div className="bg-green-500 h-2 rounded-full w-[99%]"></div>
+                  <div className="glass-card p-6 rounded-2xl">
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-sm font-semibold text-muted-foreground">Success Rate</span>
+                      <span className="text-sm font-bold text-accent-emerald">99.9%</span>
+                    </div>
+                    <div className="w-full bg-muted/50 rounded-full h-3">
+                      <div className="bg-gradient-to-r from-accent-emerald to-primary h-3 rounded-full w-[99%] animate-pulse-glow"></div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -171,7 +171,7 @@ const Hero = () => {
       </div>
       
       <div className="absolute bottom-8 left-0 right-0 flex justify-center animate-bounce z-10">
-        <a href="#about" className="text-muted-foreground hover:text-foreground transition-colors p-2 rounded-full bg-background/20 backdrop-blur-sm">
+        <a href="#about" className="glass-card p-3 rounded-full hover-lift text-muted-foreground hover:text-primary transition-colors">
           <ChevronDown className="h-6 w-6" />
         </a>
       </div>
