@@ -46,7 +46,7 @@ const Hero = () => {
             <Button 
               size="lg" 
               variant="outline" 
-              className="gap-2 border-white/20 text-white hover:bg-white/10 px-8 py-4 text-lg" 
+              className="gap-2 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10 px-8 py-4 text-lg"
               onClick={() => document.getElementById('verification')?.scrollIntoView({ behavior: 'smooth' })}
             >
               Verify License
