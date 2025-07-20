@@ -1,15 +1,37 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, ChevronRight, MessageSquareText, XCircle, Shield, Star, Crown, Building, Zap, Trophy } from 'lucide-react';
+import { CheckCircle, ChevronRight, MessageSquareText, XCircle, Shield, Star, Crown, Building, Zap, Trophy, Wifi } from 'lucide-react';
 import { useApplicationDialog } from '@/components/ApplicationDialog';
 import SupportDialog from '@/components/SupportDialog';
+import { unifiedDataManager, WebsiteSettings } from '@/utils/unifiedDataManager';
 
 const LicenseCategories = () => {
   const { openApplicationDialog } = useApplicationDialog();
   const [isSupportDialogOpen, setSupportDialogOpen] = useState(false);
+  const [settings, setSettings] = useState<WebsiteSettings>(unifiedDataManager.getSettings());
+  const [lastUpdateTime, setLastUpdateTime] = useState<Date>(new Date());
+  const [isConnected, setIsConnected] = useState(true);
+
+  useEffect(() => {
+    console.log('[LicenseCategories] Component mounted, listening for settings updates');
+    
+    const handleSettingsUpdate = (data: any) => {
+      console.log('[LicenseCategories] Settings update received:', data);
+      const newSettings = data.settings || data;
+      setSettings(newSettings);
+      setLastUpdateTime(new Date());
+      setIsConnected(true);
+    };
+
+    unifiedDataManager.addEventListener('settings_updated', handleSettingsUpdate);
+
+    return () => {
+      unifiedDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
+    };
+  }, []);
   
   return (
     <section id="licenses" className="py-24 bg-muted/20">
@@ -18,6 +40,15 @@ const LicenseCategories = () => {
           <div className="flex items-center gap-3 mb-6">
             <div className="h-1 w-16 bg-gradient-to-r from-primary to-accent rounded-full"></div>
             <span className="text-sm text-muted-foreground uppercase tracking-wider font-semibold">License Categories</span>
+            <div className="flex items-center gap-2 ml-auto">
+              <Wifi className={`h-4 w-4 ${isConnected ? 'text-green-500' : 'text-red-500'}`} />
+              <span className={`text-xs ${isConnected ? 'text-green-600' : 'text-red-600'}`}>
+                {isConnected ? 'Live Updates' : 'Disconnected'}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {lastUpdateTime.toLocaleTimeString()}
+              </span>
+            </div>
           </div>
           
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
@@ -37,7 +68,7 @@ const LicenseCategories = () => {
             <LicenseCategory 
               category={1}
               title="Basic Trader"
-              price="25,000 USDT"
+              price={settings.category1Price}
               minVolume="$50,000"
               icon={Shield}
               color="blue"
@@ -49,13 +80,13 @@ const LicenseCategories = () => {
                 "Recognized on major exchanges",
                 "Email support during business hours"
               ]}
-              soldOut={true}
+              soldOut={!settings.category1Available}
             />
             
             <LicenseCategory 
               category={2}
               title="Standard Trader"
-              price="50,000 USDT"
+              price={settings.category2Price}
               minVolume="$100,000"
               icon={CheckCircle}
               color="green"
@@ -68,13 +99,13 @@ const LicenseCategories = () => {
                 "Basic trading protection coverage",
                 "Phone support during business hours"
               ]}
-              soldOut={true}
+              soldOut={!settings.category2Available}
             />
             
             <LicenseCategory 
               category={3}
               title="Advanced Trader"
-              price="70,000 USDT"
+              price={settings.category3Price}
               minVolume="$250,000"
               icon={Star}
               color="purple"
@@ -88,13 +119,14 @@ const LicenseCategories = () => {
                 "Dedicated account manager",
                 "Advanced risk management tools"
               ]}
+              soldOut={!settings.category3Available}
               onApplyClick={openApplicationDialog}
             />
 
             <LicenseCategory 
               category={4}
               title="Professional Trader"
-              price="150,000 USDT"
+              price={settings.category4Price}
               minVolume="$500,000"
               icon={Crown}
               color="gold"
@@ -110,13 +142,14 @@ const LicenseCategories = () => {
                 "Premium trading tools access"
               ]}
               popular
+              soldOut={!settings.category4Available}
               onApplyClick={openApplicationDialog}
             />
             
             <LicenseCategory 
               category={5}
               title="Institutional Trader"
-              price="250,000 USDT"
+              price={settings.category5Price}
               minVolume="$1,000,000+"
               icon={Building}
               color="platinum"
@@ -132,13 +165,14 @@ const LicenseCategories = () => {
                 "White-label solutions available",
                 "API access for system integration"
               ]}
+              soldOut={!settings.category5Available}
               onApplyClick={openApplicationDialog}
             />
 
             <LicenseCategory 
               category={6}
               title="Executive Trader"
-              price="500,000 USDT"
+              price={settings.category6Price}
               minVolume="$2,500,000+"
               icon={Trophy}
               color="diamond"
@@ -156,6 +190,7 @@ const LicenseCategories = () => {
                 "Custom integration solutions"
               ]}
               exclusive
+              soldOut={!settings.category6Available}
               onApplyClick={openApplicationDialog}
             />
           </div>
