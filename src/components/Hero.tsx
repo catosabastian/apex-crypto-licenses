@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, Shield, TrendingUp, Award } from 'lucide-react';
@@ -17,27 +18,37 @@ const Hero = () => {
   }, []);
 
   return (
-    <section className="relative min-h-screen pt-16 flex flex-col government-gradient">
+    <section className="relative min-h-screen pt-16 flex flex-col">
+      {/* Background Image with Overlay */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: 'url(https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80)'
+        }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-900/95 via-slate-800/90 to-slate-900/95" />
+      <div className="absolute inset-0 bg-gradient-to-t from-background/20 to-transparent" />
+      
       <div className="container flex-1 flex flex-col justify-center py-12 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-2 rounded-full text-sm mb-8">
+          <div className="inline-flex items-center gap-2 bg-accent/20 text-accent px-4 py-2 rounded-full text-sm mb-8 backdrop-blur-sm border border-accent/20">
             <Shield className="h-4 w-4" />
             <span className="font-semibold">Official Regulatory Authority</span>
           </div>
           
-          <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight mb-6 text-white">
+          <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold tracking-tight mb-6 text-white drop-shadow-lg">
             Simplifying Your Trading
-            <span className="block gold-accent">Certificate Process</span>
+            <span className="block text-accent drop-shadow-lg">Certificate Process</span>
           </h1>
           
-          <p className="text-xl md:text-2xl text-white/90 mb-10 leading-relaxed">
+          <p className="text-xl md:text-2xl text-white/90 mb-10 leading-relaxed drop-shadow-md">
             Effortless trading certificate acquisition with speed and compliance.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
             <Button 
               size="lg" 
-              className="gap-2 bg-accent hover:bg-accent/90 text-accent-foreground font-semibold px-8 py-4 text-lg" 
+              className="gap-2 bg-accent hover:bg-accent/90 text-white font-semibold px-8 py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300 border-0" 
               onClick={openApplicationDialog}
             >
               Get Started
@@ -46,7 +57,7 @@ const Hero = () => {
             <Button 
               size="lg" 
               variant="outline" 
-              className="gap-2 border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10 px-8 py-4 text-lg"
+              className="gap-2 border-white/30 bg-white/10 text-white hover:bg-white/20 hover:border-white/50 px-8 py-4 text-lg shadow-lg backdrop-blur-sm transition-all duration-300"
               onClick={() => document.getElementById('verification')?.scrollIntoView({ behavior: 'smooth' })}
             >
               Verify License
@@ -55,23 +66,23 @@ const Hero = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto">
-            <div className="flex items-center gap-3 justify-center md:justify-start">
-              <div className="h-4 w-4 rounded-full bg-green-400"></div>
+            <div className="flex items-center gap-3 justify-center md:justify-start backdrop-blur-sm bg-white/5 rounded-lg p-3 border border-white/10">
+              <div className="h-4 w-4 rounded-full bg-green-400 shadow-lg"></div>
               <span className="text-white/90 font-medium">Regulatory Compliance</span>
             </div>
-            <div className="flex items-center gap-3 justify-center md:justify-start">
-              <div className="h-4 w-4 rounded-full bg-blue-400"></div>
+            <div className="flex items-center gap-3 justify-center md:justify-start backdrop-blur-sm bg-white/5 rounded-lg p-3 border border-white/10">
+              <div className="h-4 w-4 rounded-full bg-blue-400 shadow-lg"></div>
               <span className="text-white/90 font-medium">Identity Verification</span>
             </div>
-            <div className="flex items-center gap-3 justify-center md:justify-start">
-              <div className="h-4 w-4 rounded-full bg-purple-400"></div>
+            <div className="flex items-center gap-3 justify-center md:justify-start backdrop-blur-sm bg-white/5 rounded-lg p-3 border border-white/10">
+              <div className="h-4 w-4 rounded-full bg-purple-400 shadow-lg"></div>
               <span className="text-white/90 font-medium">Trade Protection</span>
             </div>
           </div>
         </div>
       </div>
       
-      <div className="absolute bottom-6 left-0 right-0 flex justify-center animate-bounce">
+      <div className="absolute bottom-6 left-0 right-0 flex justify-center animate-bounce z-10">
         <a href="#about" className="text-white/70 hover:text-white transition-colors">
           <ChevronDown className="h-6 w-6" />
         </a>
@@ -79,7 +90,7 @@ const Hero = () => {
       
       <RegulatoryBubbles />
       
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background to-transparent h-32"></div>
+      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background to-transparent h-32 z-5"></div>
     </section>
   );
 };

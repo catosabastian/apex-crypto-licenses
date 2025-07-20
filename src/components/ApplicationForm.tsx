@@ -37,7 +37,7 @@ interface ApplicationFormProps {
 const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [applicantType, setApplicantType] = useState<'individual' | 'corporate'>('individual');
-  const [selectedCategory, setSelectedCategory] = useState<'4' | '5'>('4');
+  const [selectedCategory, setSelectedCategory] = useState<'3' | '4' | '5'>('3');
   const [selectedCrypto, setSelectedCrypto] = useState<'BTC' | 'ETH' | 'USDT_TRON' | 'USDT_ETH' | 'XRP'>('BTC');
   const [copySuccess, setCopySuccess] = useState<string | null>(null);
   
@@ -349,17 +349,29 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
             </div>
           </div>
           
-          {/* License Selection - Only Categories 4 & 5 */}
+          {/* License Selection - Categories 3, 4 & 5 Available */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold">License Selection</h3>
             
             <RadioGroup 
               name="licenseCategory" 
-              defaultValue="4" 
-              className="grid grid-cols-1 md:grid-cols-2 gap-4"
+              defaultValue="3" 
+              className="grid grid-cols-1 md:grid-cols-3 gap-4"
               required
-              onValueChange={(value) => setSelectedCategory(value as '4' | '5')}
+              onValueChange={(value) => setSelectedCategory(value as '3' | '4' | '5')}
             >
+              <div className={`border rounded-lg p-4 ${selectedCategory === '3' ? 'border-primary bg-primary/5' : ''}`}>
+                <div className="flex items-start gap-2">
+                  <RadioGroupItem value="3" id="category3" className="mt-1" />
+                  <div>
+                    <Label htmlFor="category3" className="font-semibold">Category 3 - Advanced Trader</Label>
+                    <p className="text-sm text-muted-foreground">$70,000 USDT</p>
+                    <p className="text-xs text-muted-foreground mt-2">For trade volumes of $250,000+ minimum</p>
+                    <Badge variant="secondary" className="mt-2 bg-accent text-white">Popular</Badge>
+                  </div>
+                </div>
+              </div>
+              
               <div className={`border rounded-lg p-4 ${selectedCategory === '4' ? 'border-primary bg-primary/5' : ''}`}>
                 <div className="flex items-start gap-2">
                   <RadioGroupItem value="4" id="category4" className="mt-1" />
@@ -367,7 +379,7 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
                     <Label htmlFor="category4" className="font-semibold">Category 4 - Professional Trader</Label>
                     <p className="text-sm text-muted-foreground">$150,000 USDT</p>
                     <p className="text-xs text-muted-foreground mt-2">For trade volumes of $500,000+ minimum</p>
-                    <Badge variant="secondary" className="mt-2 bg-accent text-white">Recommended</Badge>
+                    <Badge variant="outline" className="mt-2">Premium</Badge>
                   </div>
                 </div>
               </div>
@@ -379,7 +391,7 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
                     <Label htmlFor="category5" className="font-semibold">Category 5 - Institutional Trader</Label>
                     <p className="text-sm text-muted-foreground">$250,000 USDT</p>
                     <p className="text-xs text-muted-foreground mt-2">For trade volumes of $1,000,000+ minimum</p>
-                    <Badge variant="outline" className="mt-2">Premium</Badge>
+                    <Badge variant="outline" className="mt-2">Enterprise</Badge>
                   </div>
                 </div>
               </div>

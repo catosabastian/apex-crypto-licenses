@@ -76,7 +76,8 @@ const LicenseCategories = () => {
                 "Recognized on all exchanges",
                 "Trading strategy protection"
               ]}
-              soldOut={true}
+              popular
+              onApplyClick={openApplicationDialog}
             />
 
             <LicenseCategory 
@@ -93,7 +94,6 @@ const LicenseCategories = () => {
                 "Advanced trading protection",
                 "Multi-exchange access"
               ]}
-              popular
               onApplyClick={openApplicationDialog}
             />
             
