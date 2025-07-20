@@ -51,10 +51,14 @@ export interface WebsiteSettings {
   bitcoinAddress: string;
   ethereumAddress: string;
   usdtAddress: string;
+  usdtTronAddress: string;
+  usdtEthereumAddress: string;
+  xrpAddress: string;
   // Contact Information
   companyName: string;
   supportEmail: string;
   salesEmail: string;
+  contactEmail: string;
   phoneNumber: string;
   address: string;
   city: string;
@@ -360,10 +364,14 @@ class DataManager {
       bitcoinAddress: "1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa",
       ethereumAddress: "0x742d35Cc6663C65C926d75d60e3B3d97c8a0e0e0",
       usdtAddress: "TG3XXyExBkPp9nzdajDGFahC9nyKERJpUN",
+      usdtTronAddress: "TG3XXyExBkPp9nzdajDGFahC9nyKERJpUN",
+      usdtEthereumAddress: "0x742d35Cc6663C65C926d75d60e3B3d97c8a0e0e0",
+      xrpAddress: "rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH",
       // Contact Information Defaults
       companyName: "APEX Crypto Licensing Regulatory",
       supportEmail: "support@apexcrypto.reg",
       salesEmail: "sales@apexcrypto.reg",
+      contactEmail: "contact@apexcrypto.reg",
       phoneNumber: "+1 (555) 123-4567",
       address: "123 Blockchain Avenue",
       city: "Digital City, DC 12345",
