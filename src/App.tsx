@@ -24,6 +24,7 @@ import VerifyPage from '@/pages/VerifyPage';
 import Login from '@/pages/Login';
 import Admin from '@/pages/Admin';
 import SecureAdmin from '@/pages/SecureAdmin';
+import Setup from '@/pages/Setup';
 import NotFound from '@/pages/NotFound';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
@@ -102,6 +103,7 @@ function App() {
                         <Route path="/testimonials" element={<TestimonialsPage />} />
                         <Route path="/verify" element={<VerifyPage />} />
                         <Route path="/login" element={<Login />} />
+                        <Route path="/setup" element={<Setup />} />
                         <Route 
                           path="/admin" 
                           element={

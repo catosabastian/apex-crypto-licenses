@@ -2,8 +2,23 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-const SUPABASE_URL = "https://ydfgxneyjdtbcwzfrgwh.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkZmd4bmV5amR0YmN3emZyZ3doIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwMzQ5MDcsImV4cCI6MjA2ODYxMDkwN30.EnG-FbV42TO9Y06oalRIOXmsLQZdtHHymgaoJrRIBbI";
+// Get Supabase credentials from localStorage or use defaults
+const getSupabaseUrl = () => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('supabase_url') || "https://ydfgxneyjdtbcwzfrgwh.supabase.co";
+  }
+  return "https://ydfgxneyjdtbcwzfrgwh.supabase.co";
+};
+
+const getSupabaseKey = () => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('supabase_key') || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkZmd4bmV5amR0YmN3emZyZ3doIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwMzQ5MDcsImV4cCI6MjA2ODYxMDkwN30.EnG-FbV42TO9Y06oalRIOXmsLQZdtHHymgaoJrRIBbI";
+  }
+  return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkZmd4bmV5amR0YmN3emZyZ3doIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTMwMzQ5MDcsImV4cCI6MjA2ODYxMDkwN30.EnG-FbV42TO9Y06oalRIOXmsLQZdtHHymgaoJrRIBbI";
+};
+
+const SUPABASE_URL = getSupabaseUrl();
+const SUPABASE_PUBLISHABLE_KEY = getSupabaseKey();
 
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
@@ -15,3 +30,24 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     autoRefreshToken: true,
   }
 });
+
+// Function to reinitialize client with new credentials
+export const reinitializeSupabase = () => {
+  const newUrl = getSupabaseUrl();
+  const newKey = getSupabaseKey();
+  
+  // Create new client instance
+  const newClient = createClient<Database>(newUrl, newKey, {
+    auth: {
+      storage: localStorage,
+      persistSession: true,
+      autoRefreshToken: true,
+    }
+  });
+  
+  // Replace the exported client (this is a bit hacky but works)
+  Object.setPrototypeOf(supabase, Object.getPrototypeOf(newClient));
+  Object.assign(supabase, newClient);
+  
+  return supabase;
+};
