@@ -622,6 +622,40 @@ class SupabaseDataManager {
     }
   }
 
+  // Admin role management
+  async checkUserRole(userId: string): Promise<string | null> {
+    try {
+      const { data, error } = await (supabase as any)
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .single();
+
+      if (error) return null;
+      return data?.role || null;
+    } catch (error) {
+      console.error('Error checking user role:', error);
+      return null;
+    }
+  }
+
+  async assignAdminRole(userId: string): Promise<boolean> {
+    try {
+      const { error } = await (supabase as any)
+        .from('user_roles')
+        .upsert({
+          user_id: userId,
+          role: 'admin'
+        });
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error assigning admin role:', error);
+      return false;
+    }
+  }
+
   // Enhanced analytics with better data handling
   async getAnalytics() {
     await this.ensureInitialized();

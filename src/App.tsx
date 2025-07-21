@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ApplicationDialogProvider } from '@/components/ApplicationDialog';
 import { AuthProvider } from '@/contexts/AuthContext';
-import { SecureAuthProvider } from '@/contexts/SecureAuthContext';
+import { AdminAuthProvider } from '@/contexts/AdminAuthContext';
 import { unifiedDataManager } from '@/utils/unifiedDataManager';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import Index from '@/pages/Index';
@@ -23,7 +23,7 @@ import TestimonialsPage from '@/pages/TestimonialsPage';
 import VerifyPage from '@/pages/VerifyPage';
 import Login from '@/pages/Login';
 import Admin from '@/pages/Admin';
-import SecureAdmin from '@/pages/SecureAdmin';
+import AdminLogin from '@/pages/AdminLogin';
 import Setup from '@/pages/Setup';
 import NotFound from '@/pages/NotFound';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -80,7 +80,7 @@ function App() {
         <TooltipProvider>
           <BrowserRouter>
             <AuthProvider>
-              <SecureAuthProvider>
+              <AdminAuthProvider>
                 <ApplicationDialogProvider>
                   <div className="min-h-screen bg-background font-sans antialiased">
                     <Suspense fallback={
@@ -103,20 +103,13 @@ function App() {
                         <Route path="/testimonials" element={<TestimonialsPage />} />
                         <Route path="/verify" element={<VerifyPage />} />
                         <Route path="/login" element={<Login />} />
+                        <Route path="/admin-login" element={<AdminLogin />} />
                         <Route path="/setup" element={<Setup />} />
                         <Route 
                           path="/admin" 
                           element={
-                            <ProtectedRoute>
+                            <ProtectedRoute requireAdmin={true}>
                               <Admin />
-                            </ProtectedRoute>
-                          } 
-                        />
-                        <Route 
-                          path="/secure-admin" 
-                          element={
-                            <ProtectedRoute>
-                              <SecureAdmin />
                             </ProtectedRoute>
                           } 
                         />
@@ -126,7 +119,7 @@ function App() {
                   </div>
                   <Toaster />
                 </ApplicationDialogProvider>
-              </SecureAuthProvider>
+              </AdminAuthProvider>
             </AuthProvider>
           </BrowserRouter>
         </TooltipProvider>

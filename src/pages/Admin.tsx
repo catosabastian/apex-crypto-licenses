@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Shield, Copy, Search, Download, Filter, LogOut, BarChart3, FileText, Settings, Mail, Globe, Layers, Wallet, RefreshCw } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAdminAuth } from '@/contexts/AdminAuthContext';
 import { useNavigate } from 'react-router-dom';
 import { supabaseDataManager } from '@/utils/supabaseDataManager';
 import { ApplicationsManager } from '@/components/admin/ApplicationsManager';
@@ -32,7 +32,7 @@ const Admin = () => {
     totalRevenue: 0
   });
   const [isLoading, setIsLoading] = useState(true);
-  const { logout } = useAuth();
+  const { signOut, user } = useAdminAuth();
   const navigate = useNavigate();
 
   // Update analytics when tab changes
@@ -141,9 +141,9 @@ const Admin = () => {
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/admin-login');
   };
 
   const refreshData = async () => {
