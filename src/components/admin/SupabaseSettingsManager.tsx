@@ -79,7 +79,7 @@ export const SupabaseSettingsManager = () => {
   const handleSaveAddresses = async () => {
     try {
       for (const address of tempAddresses) {
-        await supabaseDataManager.updatePaymentAddress(address.cryptocurrency, address.address);
+        await supabaseDataManager.updatePaymentAddress(address.cryptocurrency, { address: address.address });
       }
       
       toast({

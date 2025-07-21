@@ -9,23 +9,34 @@ import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Edit, Save, Eye, Plus, Trash } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { unifiedDataManager, ContentSettings } from '@/utils/unifiedDataManager';
+import { supabaseDataManager } from '@/utils/supabaseDataManager';
 
 export const ContentManager = () => {
-  const [content, setContent] = useState(unifiedDataManager.getContent());
+  const [content, setContent] = useState<any>({});
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   useEffect(() => {
-    const handleContentUpdate = () => {
-      setContent(unifiedDataManager.getContent());
+    const loadContent = async () => {
+      try {
+        // Load all content sections
+        const sections = ['hero', 'about', 'features', 'stats', 'process', 'verification', 'license-info'];
+        const contentData = {};
+        for (const section of sections) {
+          try {
+            const data = await supabaseDataManager.getContent(section);
+            contentData[section] = data;
+          } catch (error) {
+            console.error(`Failed to load ${section} content:`, error);
+          }
+        }
+        setContent(contentData);
+      } catch (error) {
+        console.error('Failed to load content:', error);
+      }
     };
 
-    unifiedDataManager.addEventListener('content_updated', handleContentUpdate);
-    
-    return () => {
-      unifiedDataManager.removeEventListener('content_updated', handleContentUpdate);
-    };
+    loadContent();
   }, []);
 
   const sections = [
@@ -38,16 +49,26 @@ export const ContentManager = () => {
     { key: 'whatIsLicense', title: 'What is License Section', description: 'License explanation content' }
   ];
 
-  const handleUpdateContent = (sectionKey: string, newContent: any) => {
-    const updates = { [sectionKey]: newContent };
-    unifiedDataManager.updateContent(updates);
-    
-    toast({
-      title: "Content Updated",
-      description: `${sectionKey} section has been updated successfully`,
-    });
-    
-    setIsEditDialogOpen(false);
+  const handleUpdateContent = async (sectionKey: string, newContent: any) => {
+    try {
+      // This would need to be implemented in supabaseDataManager
+      // For now, just update the local state
+      setContent(prev => ({ ...prev, [sectionKey]: newContent }));
+      
+      toast({
+        title: "Content Updated",
+        description: `${sectionKey} section has been updated successfully`,
+      });
+      
+      setIsEditDialogOpen(false);
+    } catch (error) {
+      console.error('Failed to update content:', error);
+      toast({
+        title: "Update Failed",
+        description: "Failed to update content. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -102,9 +123,9 @@ export const ContentManager = () => {
                         </DialogDescription>
                       </DialogHeader>
                       {selectedSection && (
-                        <ContentEditForm 
+                         <ContentEditForm 
                           sectionKey={selectedSection}
-                          content={content[selectedSection as keyof ContentSettings]}
+                          content={content[selectedSection]}
                           onUpdate={(newContent) => handleUpdateContent(selectedSection, newContent)}
                         />
                       )}

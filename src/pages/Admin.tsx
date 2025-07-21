@@ -13,10 +13,10 @@ import { useNavigate } from 'react-router-dom';
 import { supabaseDataManager } from '@/utils/supabaseDataManager';
 import { ApplicationsManager } from '@/components/admin/ApplicationsManager';
 import { ContactsManager } from '@/components/admin/ContactsManager';
-import { SettingsManager } from '@/components/admin/SettingsManager';
+import { SupabaseSettingsManager } from '@/components/admin/SupabaseSettingsManager';
 import { LicenseManager } from '@/components/admin/LicenseManager';
 import { ContentManager } from '@/components/admin/ContentManager';
-import { PaymentAddressManager } from '@/components/admin/PaymentAddressManager';
+
 
 const Admin = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -251,12 +251,8 @@ const Admin = () => {
           <ContentManager />
         </TabsContent>
 
-        <TabsContent value="payments" className="space-y-6">
-          <PaymentAddressManager />
-        </TabsContent>
-
         <TabsContent value="settings" className="space-y-6">
-          <SettingsManager />
+          <SupabaseSettingsManager />
         </TabsContent>
 
         <TabsContent value="legacy" className="space-y-6">

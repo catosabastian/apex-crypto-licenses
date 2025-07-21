@@ -1,14 +1,14 @@
-
-import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ChevronDown, Shield, Award, Users, Globe, CheckCircle, Star, Zap, Sparkles } from 'lucide-react';
-import { useApplicationDialog } from '@/components/ApplicationDialog';
-import { unifiedDataManager } from '@/utils/unifiedDataManager';
+import { Badge } from '@/components/ui/badge';
+import { Play, TrendingUp, Users, Shield, Zap } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useApplicationDialog } from './ApplicationDialog';
+import { supabaseDataManager } from '@/utils/supabaseDataManager';
 
 const Hero = () => {
   const [scrolled, setScrolled] = useState(false);
   const [currentStat, setCurrentStat] = useState(0);
-  const [content, setContent] = useState(unifiedDataManager.getContent().hero);
+  const [content, setContent] = useState<any>({});
   const { openApplicationDialog } = useApplicationDialog();
   
   useEffect(() => {
@@ -21,165 +21,164 @@ const Hero = () => {
   }, []);
 
   useEffect(() => {
-    const handleContentUpdate = () => {
-      setContent(unifiedDataManager.getContent().hero);
+    const loadContent = async () => {
+      try {
+        const data = await supabaseDataManager.getContent('hero');
+        setContent(data);
+      } catch (error) {
+        console.error('Failed to load hero content:', error);
+      }
     };
 
-    unifiedDataManager.addEventListener('content_updated', handleContentUpdate);
-    
-    return () => {
-      unifiedDataManager.removeEventListener('content_updated', handleContentUpdate);
-    };
+    loadContent();
   }, []);
 
   const iconMap: Record<string, any> = {
+    TrendingUp,
     Users,
-    Globe,
-    Award,
-    Shield
+    Shield,
+    Zap,
+    Play
   };
 
+  const statsData = content.stats || [];
+
   useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentStat((prev) => (prev + 1) % content.stats.length);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [content.stats.length]);
+    if (statsData.length > 0) {
+      const interval = setInterval(() => {
+        setCurrentStat((prev) => (prev + 1) % statsData.length);
+      }, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [statsData.length]);
 
   return (
-    <section className="relative min-h-screen pt-16 flex flex-col overflow-hidden">
-      {/* Modern Gradient Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background to-accent/5" />
+    <section className="relative min-h-screen overflow-hidden bg-gradient-to-br from-background via-primary/5 to-accent/10">
+      {/* Background Elements */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-white/10" />
+      <div className="absolute inset-0" style={{
+        backgroundImage: `radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                         radial-gradient(circle at 80% 20%, rgba(255, 183, 77, 0.3) 0%, transparent 50%),
+                         radial-gradient(circle at 40% 40%, rgba(139, 92, 246, 0.2) 0%, transparent 50%)`
+      }} />
       
-      {/* Glass Morphism Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-white/10 to-transparent backdrop-blur-3xl" />
-      
-      {/* Floating Elements with Modern Animation */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute w-3 h-3 bg-primary/30 rounded-full animate-float" style={{top: '20%', left: '10%', animationDelay: '0s'}} />
-        <div className="absolute w-2 h-2 bg-accent/40 rounded-full animate-float" style={{top: '40%', left: '90%', animationDelay: '1s'}} />
-        <div className="absolute w-4 h-4 bg-primary/20 rounded-full animate-float" style={{top: '70%', left: '15%', animationDelay: '2s'}} />
-        <div className="absolute w-2 h-2 bg-accent-amber/30 rounded-full animate-float" style={{top: '80%', left: '85%', animationDelay: '3s'}} />
-        <div className="absolute w-3 h-3 bg-accent-emerald/25 rounded-full animate-float" style={{top: '30%', left: '80%', animationDelay: '4s'}} />
-      </div>
-      
-      <div className="container flex-1 flex flex-col justify-center py-20 relative z-10">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-20 items-center">
-            {/* Left Content */}
-            <div className="text-center lg:text-left space-y-10 animate-fade-in-up">
-              <div className="inline-flex items-center gap-3 glass-card px-6 py-3 rounded-full text-sm font-medium">
-                <Shield className="h-5 w-5 text-primary" />
-                <span className="text-primary font-semibold">Official Regulatory Authority</span>
-                <Sparkles className="h-4 w-4 text-accent animate-pulse" />
+      {/* Grid Pattern */}
+      <div className="absolute inset-0 opacity-40" style={{
+        backgroundImage: `url("data:image/svg+xml,%3csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3e%3cg fill='none' fill-rule='evenodd'%3e%3cg fill='%239C92AC' fill-opacity='0.1'%3e%3ccircle cx='30' cy='30' r='1'/%3e%3c/g%3e%3c/g%3e%3c/svg%3e")`,
+      }} />
+
+      <div className="container relative z-10 flex flex-col justify-center min-h-screen py-16">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left Column - Main Content */}
+            <div className="space-y-8 animate-fade-in">
+              {/* Badge */}
+              <Badge 
+                variant="outline" 
+                className="glass-card text-primary border-primary/20 px-6 py-3 text-sm font-medium bg-primary/5 hover:bg-primary/10 transition-all duration-300"
+              >
+                {content.badge}
+              </Badge>
+
+              {/* Main Headline */}
+              <div className="space-y-6">
+                <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
+                  <span className="block text-foreground">{content.title?.line1}</span>
+                  <span className="block gradient-text animate-gradient">{content.title?.line2}</span>
+                  <span className="block text-foreground">{content.title?.line3}</span>
+                </h1>
+                
+                <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl leading-relaxed">
+                  {content.subtitle}
+                </p>
               </div>
-              
-              <h1 className="text-display leading-tight animate-slide-up">
-                <span className="block text-foreground">World's Leading</span>
-                <span className="block gradient-text font-black">
-                  Crypto Trading
-                </span>
-                <span className="block text-foreground">License Provider</span>
-              </h1>
-              
-              <p className="text-xl md:text-2xl text-muted-foreground leading-relaxed max-w-2xl animate-fade-in" style={{animationDelay: '0.2s'}}>
-                {content.subheadline}
-              </p>
-              
-              <div className="flex flex-col sm:flex-row gap-6 justify-center lg:justify-start animate-fade-in" style={{animationDelay: '0.4s'}}>
-                <Button 
-                  size="lg" 
-                  className="glass-button gap-3 px-10 py-8 text-lg font-bold rounded-2xl hover-lift hover-glow" 
+
+              {/* CTA Buttons */}
+              <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                <Button
+                  size="lg"
+                  className="btn-primary text-lg px-8 py-6 shadow-2xl hover:shadow-primary/50 transition-all duration-300"
                   onClick={openApplicationDialog}
                 >
-                  <Zap className="h-6 w-6" />
-                  {content.ctaText}
+                  {content.primaryCTA}
                 </Button>
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="gap-3 px-10 py-8 text-lg font-bold rounded-2xl glass-card hover-lift"
-                  onClick={() => document.getElementById('verification')?.scrollIntoView({ behavior: 'smooth' })}
+                
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="btn-outline text-lg px-8 py-6 group"
                 >
-                  <Award className="h-6 w-6" />
-                  {content.ctaSecondaryText}
+                  <Play className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
+                  {content.secondaryCTA}
                 </Button>
               </div>
-              
+
               {/* Trust Indicators */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-8 animate-fade-in" style={{animationDelay: '0.6s'}}>
-                {content.trustBadges.map((badge, index) => (
-                  <div key={index} className={`flex items-center gap-3 justify-center lg:justify-start p-4 rounded-xl ${badge.color} glass-card hover-lift`}>
-                    <CheckCircle className="h-5 w-5 text-accent-emerald" />
-                    <span className="text-sm font-semibold">{badge.name}</span>
+              <div className="flex flex-wrap items-center gap-6 pt-8">
+                {content.trustIndicators?.map((indicator, index) => (
+                  <div key={index} className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                    <span>{indicator}</span>
                   </div>
                 ))}
               </div>
             </div>
-            
-            {/* Right Content - Enhanced Statistics Dashboard */}
-            <div className="relative animate-fade-in" style={{animationDelay: '0.3s'}}>
-              <div className="modern-card hover-lift">
-                <div className="text-center mb-10">
-                  <h3 className="text-section gradient-text mb-4">Live Platform Metrics</h3>
-                  <p className="text-lg text-muted-foreground">Real-time global statistics</p>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-6 mb-10">
-                  {content.stats.map((stat, index) => {
-                    const IconComponent = iconMap[stat.icon];
-                    return (
-                      <div 
-                        key={index}
-                        className={`text-center p-6 rounded-2xl transition-all duration-500 hover-lift ${
-                          index === currentStat 
-                            ? 'bg-primary/10 border-2 border-primary shadow-lg shadow-primary/20 animate-glow' 
-                            : 'bg-muted/30 border border-border/50 hover:border-primary/30'
-                        }`}
-                      >
-                        <div className="flex justify-center mb-4">
-                          {IconComponent && <IconComponent className={`h-8 w-8 ${
-                            index === currentStat ? 'text-primary' : stat.color
-                          }`} />}
-                        </div>
-                        <div className="text-3xl font-bold text-primary mb-2">{stat.value}</div>
-                        <div className="text-sm text-muted-foreground font-medium">{stat.label}</div>
-                      </div>
-                    );
-                  })}
-                </div>
-                
+
+            {/* Right Column - Interactive Stats */}
+            <div className="relative animate-fade-in-delay">
+              <div className="glass-card p-8 rounded-3xl shadow-2xl bg-white/10 backdrop-blur-lg border border-white/20">
                 <div className="space-y-6">
-                  <div className="glass-card p-6 rounded-2xl">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm font-semibold text-muted-foreground">Processing Speed</span>
-                      <span className="text-sm font-bold text-primary">18 hours avg</span>
-                    </div>
-                    <div className="w-full bg-muted/50 rounded-full h-3">
-                      <div className="bg-gradient-to-r from-primary to-accent h-3 rounded-full w-[90%] animate-pulse-glow"></div>
-                    </div>
-                  </div>
+                  <h3 className="text-2xl font-bold text-center gradient-text">
+                    {content.statsTitle}
+                  </h3>
                   
-                  <div className="glass-card p-6 rounded-2xl">
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="text-sm font-semibold text-muted-foreground">Success Rate</span>
-                      <span className="text-sm font-bold text-accent-emerald">99.9%</span>
+                  {/* Animated Stat Display */}
+                  {statsData.length > 0 && (
+                    <div className="text-center space-y-4 min-h-[200px] flex flex-col justify-center">
+                      <div className="relative">
+                        <div className="text-6xl font-bold text-primary mb-2 animate-fade-in">
+                          {statsData[currentStat]?.number}
+                        </div>
+                        <div className="text-xl font-semibold text-foreground mb-2">
+                          {statsData[currentStat]?.label}
+                        </div>
+                        <div className="text-muted-foreground">
+                          {statsData[currentStat]?.description}
+                        </div>
+                      </div>
                     </div>
-                    <div className="w-full bg-muted/50 rounded-full h-3">
-                      <div className="bg-gradient-to-r from-accent-emerald to-primary h-3 rounded-full w-[99%] animate-pulse-glow"></div>
-                    </div>
+                  )}
+
+                  {/* Stat Indicators */}
+                  <div className="flex justify-center gap-2">
+                    {statsData.map((_, index) => (
+                      <button
+                        key={index}
+                        className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                          index === currentStat 
+                            ? 'bg-primary scale-125' 
+                            : 'bg-primary/30 hover:bg-primary/60'
+                        }`}
+                        onClick={() => setCurrentStat(index)}
+                      />
+                    ))}
                   </div>
                 </div>
               </div>
+
+              {/* Floating Elements */}
+              <div className="absolute -top-6 -right-6 w-24 h-24 bg-primary/20 rounded-full blur-xl animate-float" />
+              <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-accent/20 rounded-full blur-xl animate-float-delay" />
             </div>
           </div>
         </div>
       </div>
-      
-      <div className="absolute bottom-8 left-0 right-0 flex justify-center animate-bounce z-10">
-        <a href="#about" className="glass-card p-3 rounded-full hover-lift text-muted-foreground hover:text-primary transition-colors">
-          <ChevronDown className="h-6 w-6" />
-        </a>
+
+      {/* Scroll Indicator */}
+      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
+        <div className="w-6 h-10 border-2 border-primary/50 rounded-full p-1">
+          <div className="w-1 h-3 bg-primary rounded-full mx-auto animate-scroll" />
+        </div>
       </div>
     </section>
   );

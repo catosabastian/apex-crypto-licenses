@@ -9,21 +9,22 @@ import {
   HeadphonesIcon 
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { unifiedDataManager } from '@/utils/unifiedDataManager';
+import { supabaseDataManager } from '@/utils/supabaseDataManager';
 
 const FeaturesSection = () => {
-  const [content, setContent] = useState(unifiedDataManager.getContent().features);
+  const [content, setContent] = useState<any>({});
 
   useEffect(() => {
-    const handleContentUpdate = () => {
-      setContent(unifiedDataManager.getContent().features);
+    const loadContent = async () => {
+      try {
+        const data = await supabaseDataManager.getContent('features');
+        setContent(data);
+      } catch (error) {
+        console.error('Failed to load features content:', error);
+      }
     };
 
-    unifiedDataManager.addEventListener('content_updated', handleContentUpdate);
-    
-    return () => {
-      unifiedDataManager.removeEventListener('content_updated', handleContentUpdate);
-    };
+    loadContent();
   }, []);
 
   const iconMap: Record<string, any> = {

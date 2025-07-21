@@ -2,14 +2,14 @@
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Copy, Check, Wallet } from 'lucide-react';
-import { ContentSettings } from '@/utils/unifiedDataManager';
+
 
 interface PaymentInfoSectionProps {
   selectedCategory: {
     name: string;
     price: string;
   } | null;
-  settings: ContentSettings;
+  settings: any;
   copiedAddress: string | null;
   onCopyAddress: (address: string, type: string) => void;
 }

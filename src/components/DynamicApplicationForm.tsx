@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
-import { unifiedDataManager, ContentSettings } from '@/utils/unifiedDataManager';
+import { supabaseDataManager } from '@/utils/supabaseDataManager';
 import PersonalInfoSection from '@/components/form/PersonalInfoSection';
 import LicenseCategorySection from '@/components/form/LicenseCategorySection';
 import PaymentInfoSection from '@/components/form/PaymentInfoSection';
@@ -27,23 +27,22 @@ const DynamicApplicationForm = () => {
     notes: ''
   });
   
-  const [settings, setSettings] = useState<ContentSettings>(unifiedDataManager.getSettings());
+  const [settings, setSettings] = useState<any>({});
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    // Enhanced real-time settings update handler
-    const handleSettingsUpdate = (updatedData: { settings: ContentSettings }) => {
-      console.log('Settings updated in form:', updatedData.settings);
-      setSettings(updatedData.settings);
+    // Load settings on mount
+    const loadSettings = async () => {
+      try {
+        const data = await supabaseDataManager.getSettings();
+        setSettings(data);
+      } catch (error) {
+        console.error('Failed to load settings:', error);
+      }
     };
 
-    // Listen to unified data manager events
-    unifiedDataManager.addEventListener('settings_updated', handleSettingsUpdate);
-
-    return () => {
-      unifiedDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
-    };
+    loadSettings();
   }, []);
 
   const licenseCategories = [
@@ -150,13 +149,13 @@ const DynamicApplicationForm = () => {
         return;
       }
       
-      const newApplication = unifiedDataManager.addApplication({
+      const newApplication = await supabaseDataManager.createApplication({
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
         company: formData.company,
-        country: '',
-        licenseType: selectedCategory?.name || `Category ${formData.category}`,
+        
+        category: selectedCategory?.name || `Category ${formData.category}`,
         walletAddress: '',
         additionalInfo: formData.notes
       });

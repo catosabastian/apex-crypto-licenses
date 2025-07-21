@@ -2,21 +2,22 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { TrendingUp, Users, Globe, Award, Shield, Star } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { unifiedDataManager } from '@/utils/unifiedDataManager';
+import { supabaseDataManager } from '@/utils/supabaseDataManager';
 
 const StatsSection = () => {
-  const [content, setContent] = useState(unifiedDataManager.getContent().stats);
+  const [content, setContent] = useState<any>({});
 
   useEffect(() => {
-    const handleContentUpdate = () => {
-      setContent(unifiedDataManager.getContent().stats);
+    const loadContent = async () => {
+      try {
+        const data = await supabaseDataManager.getContent('stats');
+        setContent(data);
+      } catch (error) {
+        console.error('Failed to load stats content:', error);
+      }
     };
 
-    unifiedDataManager.addEventListener('content_updated', handleContentUpdate);
-    
-    return () => {
-      unifiedDataManager.removeEventListener('content_updated', handleContentUpdate);
-    };
+    loadContent();
   }, []);
 
   const iconMap: Record<string, any> = {
