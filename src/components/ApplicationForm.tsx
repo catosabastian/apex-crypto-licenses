@@ -1,4 +1,3 @@
-
 import { useState, useEffect, FormEvent } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,15 +29,23 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
 
   // Listen for settings updates
   useEffect(() => {
+    const loadSettings = async () => {
+      const currentSettings = await supabaseDataManager.getSettings();
+      setSettings(currentSettings);
+      console.log('[ApplicationForm] Settings loaded:', currentSettings);
+    };
+
+    loadSettings();
+
     const handleSettingsUpdate = (data: any) => {
       const newSettings = data.settings || data;
       setSettings(newSettings);
       console.log('[ApplicationForm] Settings updated:', newSettings);
     };
 
-    unifiedDataManager.addEventListener('settings_updated', handleSettingsUpdate);
+    supabaseDataManager.addEventListener('settings_updated', handleSettingsUpdate);
     return () => {
-      unifiedDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
+      supabaseDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
     };
   }, []);
 
@@ -53,9 +60,9 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
 
   const isCategoryAvailable = (category: string): boolean => {
     switch (category) {
-      case '3': return settings.category3Available ?? true;
-      case '4': return settings.category4Available ?? true;
-      case '5': return settings.category5Available ?? true;
+      case '3': return settings.category3_available ?? true;
+      case '4': return settings.category4_available ?? true;
+      case '5': return settings.category5_available ?? true;
       default: return false;
     }
   };
@@ -88,6 +95,26 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
         walletAddress: getSelectedWalletAddress()
       };
       
+      // Save application to Supabase
+      const applicationData = {
+        name: `${formDataObj.firstName || formDataObj.companyName} ${formDataObj.lastName || ''}`.trim(),
+        email: (formDataObj.email || formDataObj.businessEmail) as string,
+        phone: formDataObj.phone as string,
+        company: formDataObj.companyName as string,
+        category: selectedCategory,
+        notes: JSON.stringify(completeFormData),
+        status: 'pending' as const,
+        amount: getCategoryPrice(selectedCategory),
+        payment_method: selectedCrypto,
+        transaction_id: null
+      };
+
+      const savedApplication = await supabaseDataManager.createApplication(applicationData);
+      
+      if (!savedApplication) {
+        throw new Error('Failed to save application to database');
+      }
+
       const notificationSent = await sendAdminNotification(
         completeFormData,
         ADMIN_EMAIL
@@ -125,13 +152,20 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
     }
   };
 
-  const getSelectedWalletAddress = (): string => {
+  const getSelectedWalletAddress = async (): Promise<string> => {
+    const paymentAddresses = await supabaseDataManager.getPaymentAddresses();
+    const addressMap: Record<string, string> = {};
+    
+    paymentAddresses.forEach(addr => {
+      addressMap[addr.cryptocurrency] = addr.address;
+    });
+
     switch (selectedCrypto) {
-      case 'BTC': return settings.bitcoinAddress || '';
-      case 'ETH': return settings.ethereumAddress || '';
-      case 'USDT_TRON': return settings.usdtTronAddress || '';
-      case 'USDT_ETH': return settings.usdtEthereumAddress || '';
-      case 'XRP': return settings.xrpAddress || '';
+      case 'BTC': return addressMap['BTC'] || '';
+      case 'ETH': return addressMap['ETH'] || '';
+      case 'USDT_TRON': return addressMap['USDT_TRON'] || '';
+      case 'USDT_ETH': return addressMap['USDT_ETH'] || '';
+      case 'XRP': return addressMap['XRP'] || '';
       default: return '';
     }
   };
