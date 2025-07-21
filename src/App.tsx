@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ApplicationDialogProvider } from '@/components/ApplicationDialog';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { AdminAuthProvider } from '@/contexts/AdminAuthContext';
-import { unifiedDataManager } from '@/utils/unifiedDataManager';
+import { supabaseDataManager } from '@/utils/supabaseDataManager';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import Index from '@/pages/Index';
 import AboutPage from '@/pages/AboutPage';
@@ -41,26 +41,9 @@ function App() {
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    try {
-      // Initialize the unified data manager
-      console.log('[App] Initializing unified data manager...');
-      
-      // Verify settings are properly loaded
-      const settings = unifiedDataManager.getSettings();
-      console.log('[App] Settings loaded:', settings);
-      
-      setIsInitialized(true);
-    } catch (error) {
-      console.error('[App] Initialization failed:', error);
-      // Try to reset and reinitialize
-      try {
-        unifiedDataManager.resetToDefaults();
-        setIsInitialized(true);
-      } catch (resetError) {
-        console.error('[App] Reset failed:', resetError);
-        setIsInitialized(true); // Still allow app to load
-      }
-    }
+    // Simple initialization for the unified admin system
+    console.log('[App] Initializing application...');
+    setIsInitialized(true);
   }, []);
 
   if (!isInitialized) {

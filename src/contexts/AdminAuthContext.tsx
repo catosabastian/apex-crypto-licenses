@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
+import { adminUtils } from "@/utils/adminUtils";
 
 interface AdminAuthContextType {
   user: User | null;
@@ -26,31 +27,10 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     if (!user) return false;
     
     try {
-      // Use the secure function we created in the database
-      const { data, error } = await (supabase as any)
-        .rpc('is_admin');
-
-      if (error) {
-        console.log('Error checking admin role with RPC:', error);
-        // Fallback to direct query if RPC fails
-        const { data: roleData, error: roleError } = await (supabase as any)
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id)
-          .eq('role', 'admin')
-          .maybeSingle();
-
-        if (roleError) {
-          console.error('Fallback admin role check failed:', roleError);
-          return false;
-        }
-
-        return !!roleData;
-      }
-
-      return data === true;
+      // Use the adminUtils that has proper type handling
+      return await adminUtils.isUserAdmin(user.id);
     } catch (error) {
-      console.error('Error checking admin role:', error);
+      console.error('Admin role check error:', error);
       return false;
     }
   };

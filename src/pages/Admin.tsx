@@ -18,7 +18,7 @@ import { SettingsManager } from '@/components/admin/SettingsManager';
 import { LicenseManager } from '@/components/admin/LicenseManager';
 import { ContentManager } from '@/components/admin/ContentManager';
 import { PaymentAddressManager } from '@/components/admin/PaymentAddressManager';
-import AdminUserManager from '@/components/AdminUserManager';
+
 
 const Admin = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -304,7 +304,13 @@ const Admin = () => {
         </TabsContent>
 
         <TabsContent value="users" className="space-y-6">
-          <AdminUserManager />
+          <div className="text-center py-8">
+            <h3 className="text-lg font-semibold mb-2">Single Admin User</h3>
+            <p className="text-muted-foreground">This system uses a simplified single admin user model.</p>
+            <p className="text-sm text-muted-foreground mt-2">
+              Currently logged in as: {user?.email}
+            </p>
+          </div>
         </TabsContent>
 
         <TabsContent value="legacy" className="space-y-6">

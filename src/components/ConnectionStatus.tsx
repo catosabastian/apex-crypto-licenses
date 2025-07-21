@@ -1,11 +1,11 @@
-
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Wifi, WifiOff, RotateCcw } from 'lucide-react';
-import { useSecureAuth } from '@/contexts/SecureAuthContext';
+import { useAdminAuth } from '@/contexts/AdminAuthContext';
 
 export const ConnectionStatus: React.FC = () => {
-  const { connectionStatus } = useSecureAuth();
+  const { isLoading } = useAdminAuth();
+  const connectionStatus: 'connected' | 'disconnected' | 'reconnecting' = isLoading ? 'reconnecting' : 'connected';
 
   const getStatusConfig = () => {
     switch (connectionStatus) {
@@ -15,13 +15,6 @@ export const ConnectionStatus: React.FC = () => {
           text: 'Connected',
           variant: 'default' as const,
           className: 'bg-green-100 text-green-800 border-green-200'
-        };
-      case 'disconnected':
-        return {
-          icon: WifiOff,
-          text: 'Disconnected',
-          variant: 'destructive' as const,
-          className: 'bg-red-100 text-red-800 border-red-200'
         };
       case 'reconnecting':
         return {

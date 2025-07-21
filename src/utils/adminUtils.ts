@@ -37,7 +37,7 @@ class AdminUtils {
     this.requestCounter++;
   }
 
-  // Cached admin role check
+  // Cached admin role check with auto-promotion
   async isUserAdmin(userId: string): Promise<boolean> {
     if (!userId) return false;
 
@@ -50,7 +50,21 @@ class AdminUtils {
     await this.rateLimit();
 
     try {
-      // Use the secure RPC function directly without passing userId
+      // First try to promote to admin if no admin exists
+      try {
+        const { data: promoteResult } = await (supabase as any).rpc('promote_to_admin');
+        if (promoteResult) {
+          this.adminRoleCache.set(userId, {
+            isAdmin: true,
+            expires: Date.now() + this.CACHE_DURATION
+          });
+          return true;
+        }
+      } catch (promoteError) {
+        console.warn('Admin promotion check failed:', promoteError);
+      }
+
+      // Use the secure RPC function to check admin status
       const { data, error } = await (supabase as any).rpc('is_admin');
       
       if (error) {
