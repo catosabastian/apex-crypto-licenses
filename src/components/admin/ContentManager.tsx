@@ -7,24 +7,43 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Edit, Save, Eye, Plus, Trash } from 'lucide-react';
+import { Edit, Save, Eye, RefreshCw, Globe } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { unifiedDataManager, ContentSettings } from '@/utils/unifiedDataManager';
+import { supabaseDataManager } from '@/utils/supabaseDataManager';
 
 export const ContentManager = () => {
-  const [content, setContent] = useState(unifiedDataManager.getContent());
+  const [content, setContent] = useState<Record<string, any>>({});
   const [selectedSection, setSelectedSection] = useState<string | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const handleContentUpdate = () => {
-      setContent(unifiedDataManager.getContent());
+    const loadContent = async () => {
+      try {
+        setIsLoading(true);
+        const contentData = await supabaseDataManager.getContent();
+        setContent(contentData);
+      } catch (error) {
+        console.error('Error loading content:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load content",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
     };
 
-    unifiedDataManager.addEventListener('content_updated', handleContentUpdate);
+    const handleContentUpdate = () => {
+      loadContent();
+    };
+
+    supabaseDataManager.addEventListener('content_updated', handleContentUpdate);
+    loadContent();
     
     return () => {
-      unifiedDataManager.removeEventListener('content_updated', handleContentUpdate);
+      supabaseDataManager.removeEventListener('content_updated', handleContentUpdate);
     };
   }, []);
 
@@ -38,17 +57,50 @@ export const ContentManager = () => {
     { key: 'whatIsLicense', title: 'What is License Section', description: 'License explanation content' }
   ];
 
-  const handleUpdateContent = (sectionKey: string, newContent: any) => {
-    const updates = { [sectionKey]: newContent };
-    unifiedDataManager.updateContent(updates);
-    
-    toast({
-      title: "Content Updated",
-      description: `${sectionKey} section has been updated successfully`,
-    });
-    
-    setIsEditDialogOpen(false);
+  const handleUpdateContent = async (sectionKey: string, key: string, newContent: any) => {
+    try {
+      await supabaseDataManager.updateContent(sectionKey, key, newContent);
+      
+      toast({
+        title: "Content Updated",
+        description: `${sectionKey} section has been updated successfully`,
+      });
+      
+      setIsEditDialogOpen(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update content",
+        variant: "destructive",
+      });
+    }
   };
+
+  const refreshContent = async () => {
+    try {
+      const contentData = await supabaseDataManager.getContent();
+      setContent(contentData);
+      toast({
+        title: "Content Refreshed",
+        description: "Content data has been reloaded",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to refresh content",
+        variant: "destructive",
+      });
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <h2 className="text-2xl font-semibold">Content Management</h2>
+        <div className="text-center py-8">Loading content...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -57,18 +109,23 @@ export const ContentManager = () => {
           <h2 className="text-2xl font-semibold">Content Management</h2>
           <p className="text-muted-foreground">Manage website content with real-time updates</p>
         </div>
-        <Button variant="outline">
-          <Eye className="h-4 w-4 mr-2" />
-          Preview Changes
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={refreshContent} variant="outline">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
+          <Button variant="outline">
+            <Eye className="h-4 w-4 mr-2" />
+            Preview Changes
+          </Button>
+        </div>
       </div>
 
       <Tabs defaultValue="sections" className="space-y-6">
         <TabsList>
           <TabsTrigger value="sections">Content Sections</TabsTrigger>
           <TabsTrigger value="hero">Hero Content</TabsTrigger>
-          <TabsTrigger value="features">Features</TabsTrigger>
-          <TabsTrigger value="stats">Statistics</TabsTrigger>
+          <TabsTrigger value="quick-edit">Quick Edit</TabsTrigger>
         </TabsList>
 
         <TabsContent value="sections" className="space-y-4">
@@ -104,8 +161,8 @@ export const ContentManager = () => {
                       {selectedSection && (
                         <ContentEditForm 
                           sectionKey={selectedSection}
-                          content={content[selectedSection as keyof ContentSettings]}
-                          onUpdate={(newContent) => handleUpdateContent(selectedSection, newContent)}
+                          content={content[selectedSection]}
+                          onUpdate={(key, newContent) => handleUpdateContent(selectedSection, key, newContent)}
                         />
                       )}
                     </DialogContent>
@@ -113,28 +170,16 @@ export const ContentManager = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="text-sm text-muted-foreground">
-                    {section.key === 'hero' && (
+                    {section.key === 'hero' && content.hero && (
                       <div>
-                        <p><strong>Headline:</strong> {content.hero.headline}</p>
-                        <p><strong>Subheadline:</strong> {content.hero.subheadline.substring(0, 100)}...</p>
+                        <p><strong>Current content:</strong> Hero section configured</p>
+                        <p className="text-xs mt-1">Click Edit to modify hero content</p>
                       </div>
                     )}
-                    {section.key === 'about' && (
+                    {section.key !== 'hero' && (
                       <div>
-                        <p><strong>Title:</strong> {content.about.title}</p>
-                        <p><strong>Description:</strong> {content.about.description[0]?.substring(0, 100)}...</p>
-                      </div>
-                    )}
-                    {section.key === 'features' && (
-                      <div>
-                        <p><strong>Title:</strong> {content.features.title}</p>
-                        <p><strong>Features:</strong> {content.features.items.length} items</p>
-                      </div>
-                    )}
-                    {section.key === 'stats' && (
-                      <div>
-                        <p><strong>Title:</strong> {content.stats.title}</p>
-                        <p><strong>Statistics:</strong> {content.stats.items.length} items</p>
+                        <p><strong>Section:</strong> {section.title}</p>
+                        <p className="text-xs mt-1">Click Edit to modify this section</p>
                       </div>
                     )}
                   </div>
@@ -145,15 +190,28 @@ export const ContentManager = () => {
         </TabsContent>
 
         <TabsContent value="hero" className="space-y-4">
-          <HeroContentManager content={content.hero} onUpdate={(newContent) => handleUpdateContent('hero', newContent)} />
+          <HeroContentManager 
+            content={content.hero || {}} 
+            onUpdate={(key, newContent) => handleUpdateContent('hero', key, newContent)} 
+          />
         </TabsContent>
 
-        <TabsContent value="features" className="space-y-4">
-          <FeaturesContentManager content={content.features} onUpdate={(newContent) => handleUpdateContent('features', newContent)} />
-        </TabsContent>
-
-        <TabsContent value="stats" className="space-y-4">
-          <StatsContentManager content={content.stats} onUpdate={(newContent) => handleUpdateContent('stats', newContent)} />
+        <TabsContent value="quick-edit" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Globe className="h-5 w-5" />
+                Quick Content Updates
+              </CardTitle>
+              <CardDescription>Make quick updates to common content elements</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-muted-foreground">
+                Quick edit functionality will be available in a future update.
+                Use the section editors above for detailed content management.
+              </p>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
@@ -167,98 +225,55 @@ const ContentEditForm = ({
 }: { 
   sectionKey: string; 
   content: any;
-  onUpdate: (content: any) => void;
+  onUpdate: (key: string, content: any) => void;
 }) => {
-  const [formData, setFormData] = useState(content);
+  const [formData, setFormData] = useState(content || {});
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onUpdate(formData);
+    // Update each field individually
+    Object.keys(formData).forEach(key => {
+      onUpdate(key, formData[key]);
+    });
   };
 
   const updateField = (field: string, value: any) => {
     setFormData((prev: any) => ({ ...prev, [field]: value }));
   };
 
-  const updateArrayItem = (arrayName: string, index: number, field: string, value: any) => {
-    setFormData((prev: any) => ({
-      ...prev,
-      [arrayName]: prev[arrayName].map((item: any, i: number) => 
-        i === index ? { ...item, [field]: value } : item
-      )
-    }));
-  };
-
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {sectionKey === 'hero' && (
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="headline">Main Headline</Label>
-            <Input
-              id="headline"
-              value={formData.headline}
-              onChange={(e) => updateField('headline', e.target.value)}
-            />
-          </div>
-          <div>
-            <Label htmlFor="subheadline">Subheadline</Label>
-            <Textarea
-              id="subheadline"
-              value={formData.subheadline}
-              onChange={(e) => updateField('subheadline', e.target.value)}
-              rows={3}
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="ctaText">Primary CTA Text</Label>
-              <Input
-                id="ctaText"
-                value={formData.ctaText}
-                onChange={(e) => updateField('ctaText', e.target.value)}
-              />
-            </div>
-            <div>
-              <Label htmlFor="ctaSecondaryText">Secondary CTA Text</Label>
-              <Input
-                id="ctaSecondaryText"
-                value={formData.ctaSecondaryText}
-                onChange={(e) => updateField('ctaSecondaryText', e.target.value)}
-              />
-            </div>
-          </div>
+      <div className="space-y-4">
+        <div>
+          <Label htmlFor="title">Section Title</Label>
+          <Input
+            id="title"
+            value={formData.title || ''}
+            onChange={(e) => updateField('title', e.target.value)}
+            placeholder="Enter section title"
+          />
         </div>
-      )}
-
-      {sectionKey === 'about' && (
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="title">Section Title</Label>
-            <Input
-              id="title"
-              value={formData.title}
-              onChange={(e) => updateField('title', e.target.value)}
-            />
-          </div>
-          <div>
-            <Label>Description Paragraphs</Label>
-            {formData.description.map((desc: string, index: number) => (
-              <Textarea
-                key={index}
-                value={desc}
-                onChange={(e) => {
-                  const newDesc = [...formData.description];
-                  newDesc[index] = e.target.value;
-                  updateField('description', newDesc);
-                }}
-                rows={3}
-                className="mb-2"
-              />
-            ))}
-          </div>
+        <div>
+          <Label htmlFor="description">Description</Label>
+          <Textarea
+            id="description"
+            value={formData.description || ''}
+            onChange={(e) => updateField('description', e.target.value)}
+            placeholder="Enter section description"
+            rows={3}
+          />
         </div>
-      )}
+        <div>
+          <Label htmlFor="content">Content</Label>
+          <Textarea
+            id="content"
+            value={formData.content || ''}
+            onChange={(e) => updateField('content', e.target.value)}
+            placeholder="Enter section content"
+            rows={5}
+          />
+        </div>
+      </div>
 
       <DialogFooter>
         <Button type="submit">
@@ -270,11 +285,13 @@ const ContentEditForm = ({
   );
 };
 
-const HeroContentManager = ({ content, onUpdate }: { content: any; onUpdate: (content: any) => void }) => {
-  const [formData, setFormData] = useState(content);
+const HeroContentManager = ({ content, onUpdate }: { content: any; onUpdate: (key: string, content: any) => void }) => {
+  const [formData, setFormData] = useState(content || {});
 
   const handleSave = () => {
-    onUpdate(formData);
+    Object.keys(formData).forEach(key => {
+      onUpdate(key, formData[key]);
+    });
     toast({
       title: "Hero Content Updated",
       description: "Hero section content has been updated successfully",
@@ -292,93 +309,37 @@ const HeroContentManager = ({ content, onUpdate }: { content: any; onUpdate: (co
           <div>
             <Label>Main Headline</Label>
             <Input
-              value={formData.headline}
+              value={formData.headline || ''}
               onChange={(e) => setFormData(prev => ({ ...prev, headline: e.target.value }))}
+              placeholder="Enter main headline"
             />
           </div>
           <div>
             <Label>Subheadline</Label>
             <Textarea
-              value={formData.subheadline}
+              value={formData.subheadline || ''}
               onChange={(e) => setFormData(prev => ({ ...prev, subheadline: e.target.value }))}
+              placeholder="Enter subheadline"
               rows={3}
             />
           </div>
-          <div className="flex justify-end">
-            <Button onClick={handleSave}>
-              <Save className="h-4 w-4 mr-2" />
-              Save Changes
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
-
-const FeaturesContentManager = ({ content, onUpdate }: { content: any; onUpdate: (content: any) => void }) => {
-  const [formData, setFormData] = useState(content);
-
-  const handleSave = () => {
-    onUpdate(formData);
-    toast({
-      title: "Features Updated",
-      description: "Features section has been updated successfully",
-    });
-  };
-
-  return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Features Section</CardTitle>
-          <CardDescription>Manage service features and benefits</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label>Section Title</Label>
-            <Input
-              value={formData.title}
-              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-            />
-          </div>
-          <div className="flex justify-end">
-            <Button onClick={handleSave}>
-              <Save className="h-4 w-4 mr-2" />
-              Save Changes
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
-
-const StatsContentManager = ({ content, onUpdate }: { content: any; onUpdate: (content: any) => void }) => {
-  const [formData, setFormData] = useState(content);
-
-  const handleSave = () => {
-    onUpdate(formData);
-    toast({
-      title: "Statistics Updated",
-      description: "Statistics section has been updated successfully",
-    });
-  };
-
-  return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Statistics Section</CardTitle>
-          <CardDescription>Manage company statistics and metrics</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label>Section Title</Label>
-            <Input
-              value={formData.title}
-              onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label>Primary CTA Text</Label>
+              <Input
+                value={formData.ctaText || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, ctaText: e.target.value }))}
+                placeholder="Primary button text"
+              />
+            </div>
+            <div>
+              <Label>Secondary CTA Text</Label>
+              <Input
+                value={formData.ctaSecondaryText || ''}
+                onChange={(e) => setFormData(prev => ({ ...prev, ctaSecondaryText: e.target.value }))}
+                placeholder="Secondary button text"
+              />
+            </div>
           </div>
           <div className="flex justify-end">
             <Button onClick={handleSave}>

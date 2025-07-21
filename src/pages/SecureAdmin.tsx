@@ -3,11 +3,11 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Shield, LogOut, BarChart3, FileText, Settings, Mail, Globe, Layers, Download } from 'lucide-react';
+import { Shield, LogOut, BarChart3, FileText, Settings, Mail, Globe, Download, RefreshCw } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { useSecureAuth } from '@/contexts/SecureAuthContext';
 import { useNavigate } from 'react-router-dom';
-import { unifiedDataManager } from '@/utils/unifiedDataManager';
+import { supabaseDataManager } from '@/utils/supabaseDataManager';
 import { ApplicationsManager } from '@/components/admin/ApplicationsManager';
 import { ContactsManager } from '@/components/admin/ContactsManager';
 import { UnifiedSettingsManager } from '@/components/admin/UnifiedSettingsManager';
@@ -16,13 +16,38 @@ import { ContentManager } from '@/components/admin/ContentManager';
 
 const SecureAdmin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [analytics, setAnalytics] = useState(unifiedDataManager.getAnalytics());
+  const [analytics, setAnalytics] = useState({
+    totalApplications: 0,
+    pendingApplications: 0,
+    approvedApplications: 0,
+    activeLicenses: 0,
+    newContacts: 0,
+    totalRevenue: 0
+  });
+  const [isLoading, setIsLoading] = useState(true);
   const { logout } = useSecureAuth();
   const navigate = useNavigate();
 
   // Update analytics when tab changes
   useEffect(() => {
-    setAnalytics(unifiedDataManager.getAnalytics());
+    const loadAnalytics = async () => {
+      try {
+        setIsLoading(true);
+        const analyticsData = await supabaseDataManager.getAnalytics();
+        setAnalytics(analyticsData);
+      } catch (error) {
+        console.error('Error loading analytics:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load analytics data",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadAnalytics();
   }, [activeTab]);
 
   const handleLogout = () => {
@@ -30,28 +55,44 @@ const SecureAdmin = () => {
     navigate('/login');
   };
 
-  const exportData = () => {
-    const applications = unifiedDataManager.getApplications();
-    const contacts = unifiedDataManager.getContacts();
-    const licenses = unifiedDataManager.getLicenses();
-    
-    const csvContent = "data:text/csv;charset=utf-8," 
-      + "Type,ID,Name,Email,Status,Date\n" 
-      + applications.map(app => `Application,${app.id},${app.name},${app.email},${app.status},${app.date}`).join("\n")
-      + "\n"
-      + contacts.map(contact => `Contact,${contact.id},${contact.name},${contact.email},${contact.status},${contact.date}`).join("\n");
-    
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "apex_admin_data.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
+  const exportData = async () => {
+    try {
+      const allData = await supabaseDataManager.exportAllData();
+      const csvContent = "data:text/csv;charset=utf-8," 
+        + "Type,ID,Name,Email,Status,Date,Additional_Info\n" 
+        + allData.applications.map(app => `Application,${app.id},${app.name},${app.email},${app.status},${app.created_at},Category: ${app.category}`).join("\n")
+        + "\n"
+        + allData.contacts.map(contact => `Contact,${contact.id},${contact.name},${contact.email},${contact.status},${contact.created_at},Subject: ${contact.subject || 'None'}`).join("\n")
+        + "\n"
+        + allData.licenses.map(license => `License,${license.id},${license.holder_name},,${license.status},${license.created_at},License ID: ${license.license_id}`).join("\n");
+      
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `apex_secure_admin_data_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast({
+        title: "Data Exported!",
+        description: "All data exported as CSV",
+      });
+    } catch (error) {
+      toast({
+        title: "Export Failed",
+        description: "Failed to export data",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const refreshData = async () => {
+    const analyticsData = await supabaseDataManager.getAnalytics();
+    setAnalytics(analyticsData);
     toast({
-      title: "Data Exported!",
-      description: "All data exported as CSV",
+      title: "Data Refreshed",
+      description: "Dashboard data has been updated",
     });
   };
 
@@ -61,14 +102,18 @@ const SecureAdmin = () => {
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Shield className="text-primary" />
-            APEX Admin Dashboard
+            APEX Secure Admin Dashboard
           </h1>
           <p className="text-muted-foreground mt-2">
-            Unified business management system with real-time sync
+            Secure business management system with real-time sync
           </p>
         </div>
         
         <div className="flex gap-3">
+          <Button onClick={refreshData} variant="outline" className="flex items-center gap-2">
+            <RefreshCw className="h-4 w-4" />
+            Refresh
+          </Button>
           <Button onClick={exportData} className="flex items-center gap-2">
             <Download className="h-4 w-4" />
             Export Data
@@ -111,55 +156,59 @@ const SecureAdmin = () => {
         <TabsContent value="dashboard" className="space-y-6">
           <h2 className="text-2xl font-semibold">Analytics Dashboard</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
-                <FileText className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{analytics.totalApplications}</div>
-                <p className="text-xs text-muted-foreground">
-                  {analytics.pendingApplications} pending review
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Licenses</CardTitle>
-                <Shield className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{analytics.activeLicenses}</div>
-                <p className="text-xs text-muted-foreground">
-                  {analytics.approvedApplications} approved this month
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Revenue</CardTitle>
-                <BarChart3 className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">${analytics.totalRevenue.toLocaleString()}</div>
-                <p className="text-xs text-muted-foreground">From approved applications</p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">New Messages</CardTitle>
-                <Mail className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{analytics.newContacts}</div>
-                <p className="text-xs text-muted-foreground">Requiring attention</p>
-              </CardContent>
-            </Card>
-          </div>
+          {isLoading ? (
+            <div className="text-center py-8">Loading analytics...</div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Total Applications</CardTitle>
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{analytics.totalApplications}</div>
+                  <p className="text-xs text-muted-foreground">
+                    {analytics.pendingApplications} pending review
+                  </p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Active Licenses</CardTitle>
+                  <Shield className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{analytics.activeLicenses}</div>
+                  <p className="text-xs text-muted-foreground">
+                    {analytics.approvedApplications} approved this month
+                  </p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">Revenue</CardTitle>
+                  <BarChart3 className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">${analytics.totalRevenue.toLocaleString()}</div>
+                  <p className="text-xs text-muted-foreground">From approved applications</p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">New Messages</CardTitle>
+                  <Mail className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{analytics.newContacts}</div>
+                  <p className="text-xs text-muted-foreground">Requiring attention</p>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value="applications" className="space-y-6">

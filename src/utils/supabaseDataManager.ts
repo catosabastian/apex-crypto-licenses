@@ -183,6 +183,7 @@ class SupabaseDataManager {
   }
 
   async getApplications(): Promise<Application[]> {
+    await this.ensureInitialized();
     return this.dataSubjects.applications.value;
   }
 
@@ -190,7 +191,7 @@ class SupabaseDataManager {
     try {
       const { data, error } = await (supabase as any)
         .from('applications')
-        .update(updates)
+        .update({ ...updates, updated_at: new Date().toISOString() })
         .eq('id', id)
         .select()
         .single();
@@ -200,6 +201,21 @@ class SupabaseDataManager {
     } catch (error) {
       console.error('Error updating application:', error);
       return null;
+    }
+  }
+
+  async deleteApplication(id: string): Promise<boolean> {
+    try {
+      const { error } = await (supabase as any)
+        .from('applications')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error deleting application:', error);
+      return false;
     }
   }
 
@@ -221,7 +237,40 @@ class SupabaseDataManager {
   }
 
   async getLicenses(): Promise<License[]> {
+    await this.ensureInitialized();
     return this.dataSubjects.licenses.value;
+  }
+
+  async updateLicense(id: string, updates: Partial<License>): Promise<License | null> {
+    try {
+      const { data, error } = await (supabase as any)
+        .from('licenses')
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error updating license:', error);
+      return null;
+    }
+  }
+
+  async deleteLicense(id: string): Promise<boolean> {
+    try {
+      const { error } = await (supabase as any)
+        .from('licenses')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error deleting license:', error);
+      return false;
+    }
   }
 
   async verifyLicense(licenseId: string): Promise<License | null> {
@@ -244,7 +293,7 @@ class SupabaseDataManager {
   // Payment Addresses
   async getPaymentAddresses(): Promise<PaymentAddress[]> {
     await this.ensureInitialized();
-    return this.dataSubjects.paymentAddresses.value.filter(addr => addr.is_active);
+    return this.dataSubjects.paymentAddresses.value;
   }
 
   async updatePaymentAddress(cryptocurrency: string, updates: Partial<PaymentAddress>): Promise<PaymentAddress | null> {
@@ -261,13 +310,28 @@ class SupabaseDataManager {
 
       if (error) throw error;
       
-      // Update local data and emit event
       await this.loadTableData('payment_addresses');
       this.notifyListeners('payment_addresses_updated', data);
       
       return data;
     } catch (error) {
       console.error('Error updating payment address:', error);
+      return null;
+    }
+  }
+
+  async createPaymentAddress(address: Omit<PaymentAddress, 'id' | 'created_at' | 'updated_at'>): Promise<PaymentAddress | null> {
+    try {
+      const { data, error } = await (supabase as any)
+        .from('payment_addresses')
+        .insert([address])
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error creating payment address:', error);
       return null;
     }
   }
@@ -295,7 +359,6 @@ class SupabaseDataManager {
 
       if (error) throw error;
       
-      // Update local data and emit event
       await this.loadTableData('settings');
       this.notifyListeners('settings_updated', data);
       
@@ -319,6 +382,7 @@ class SupabaseDataManager {
 
   // Content
   async getContent(section?: string): Promise<Record<string, any>> {
+    await this.ensureInitialized();
     const content = this.dataSubjects.content.value;
     const filtered = section ? content.filter(c => c.section === section) : content;
     
@@ -345,11 +409,12 @@ class SupabaseDataManager {
     try {
       const { data, error } = await (supabase as any)
         .from('content')
-        .upsert({ section, key, value })
+        .upsert({ section, key, value, updated_at: new Date().toISOString() })
         .select()
         .single();
 
       if (error) throw error;
+      await this.loadTableData('content');
       return data;
     } catch (error) {
       console.error('Error updating content:', error);
@@ -375,6 +440,7 @@ class SupabaseDataManager {
   }
 
   async getContacts(): Promise<Contact[]> {
+    await this.ensureInitialized();
     return this.dataSubjects.contacts.value;
   }
 
@@ -382,7 +448,7 @@ class SupabaseDataManager {
     try {
       const { data, error } = await (supabase as any)
         .from('contacts')
-        .update(updates)
+        .update({ ...updates, updated_at: new Date().toISOString() })
         .eq('id', id)
         .select()
         .single();
@@ -392,6 +458,52 @@ class SupabaseDataManager {
     } catch (error) {
       console.error('Error updating contact:', error);
       return null;
+    }
+  }
+
+  async deleteContact(id: string): Promise<boolean> {
+    try {
+      const { error } = await (supabase as any)
+        .from('contacts')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error deleting contact:', error);
+      return false;
+    }
+  }
+
+  // Bulk operations
+  async bulkUpdateApplications(ids: string[], updates: Partial<Application>): Promise<boolean> {
+    try {
+      const { error } = await (supabase as any)
+        .from('applications')
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .in('id', ids);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error bulk updating applications:', error);
+      return false;
+    }
+  }
+
+  async bulkDeleteApplications(ids: string[]): Promise<boolean> {
+    try {
+      const { error } = await (supabase as any)
+        .from('applications')
+        .delete()
+        .in('id', ids);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error bulk deleting applications:', error);
+      return false;
     }
   }
 
@@ -417,6 +529,7 @@ class SupabaseDataManager {
 
   // Analytics
   async getAnalytics() {
+    await this.ensureInitialized();
     const applications = this.dataSubjects.applications.value;
     const licenses = this.dataSubjects.licenses.value;
     const contacts = this.dataSubjects.contacts.value;
@@ -427,7 +540,23 @@ class SupabaseDataManager {
       approvedApplications: applications.filter(a => a.status === 'approved').length,
       activeLicenses: licenses.filter(l => l.status === 'active').length,
       newContacts: contacts.filter(c => c.status === 'unread').length,
-      totalRevenue: 0 // Could be calculated from approved applications
+      totalRevenue: applications
+        .filter(a => a.status === 'approved' && a.amount)
+        .reduce((sum, a) => sum + (parseFloat(a.amount?.replace(/[^0-9.]/g, '') || '0')), 0)
+    };
+  }
+
+  // Export data
+  async exportAllData() {
+    await this.ensureInitialized();
+    return {
+      applications: this.dataSubjects.applications.value,
+      licenses: this.dataSubjects.licenses.value,
+      contacts: this.dataSubjects.contacts.value,
+      paymentAddresses: this.dataSubjects.paymentAddresses.value,
+      settings: this.dataSubjects.settings.value,
+      content: this.dataSubjects.content.value,
+      exportedAt: new Date().toISOString()
     };
   }
 }
