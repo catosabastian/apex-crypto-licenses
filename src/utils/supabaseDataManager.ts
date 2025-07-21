@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 export interface PaymentAddress {
@@ -23,7 +22,7 @@ export interface Application {
   amount?: string;
   payment_method?: string;
   transaction_id?: string;
-  documents: any[];
+  documents: any;
   created_at: string;
   updated_at: string;
 }
@@ -63,6 +62,15 @@ export interface Setting {
   updated_at: string;
 }
 
+export interface ContentData {
+  id: string;
+  key: string;
+  section: string;
+  value: any;
+  created_at: string;
+  updated_at: string;
+}
+
 class SupabaseDataManager {
   private listeners: Map<string, Set<Function>> = new Map();
   private cache: Map<string, any> = new Map();
@@ -93,12 +101,28 @@ class SupabaseDataManager {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'applications' }, 
         (payload) => this.handleRealtimeUpdate('applications', payload))
       .subscribe();
+
+    // Subscribe to content changes
+    supabase
+      .channel('content-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'content' }, 
+        (payload) => this.handleRealtimeUpdate('content', payload))
+      .subscribe();
+
+    // Subscribe to license changes
+    supabase
+      .channel('license-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'licenses' }, 
+        (payload) => this.handleRealtimeUpdate('licenses', payload))
+      .subscribe();
   }
 
   private handleRealtimeUpdate(table: string, payload: any) {
     console.log(`[SupabaseDataManager] Realtime update for ${table}:`, payload);
     this.cache.delete(table);
+    this.cache.delete(`${table}_${payload.new?.section || payload.old?.section}`);
     this.notifyListeners(`${table}_updated`, payload);
+    this.notifyListeners('content_updated', payload);
   }
 
   addEventListener(event: string, callback: Function) {
@@ -123,6 +147,69 @@ class SupabaseDataManager {
           console.error(`[SupabaseDataManager] Error in event listener for ${event}:`, error);
         }
       });
+    }
+  }
+
+  async getContent(section: string): Promise<any> {
+    try {
+      const cacheKey = `content_${section}`;
+      const now = Date.now();
+      
+      if (this.cache.has(cacheKey) && (now - (this.lastUpdate.get(cacheKey) || 0)) < 5000) {
+        return this.cache.get(cacheKey);
+      }
+
+      const { data, error } = await supabase
+        .from('content')
+        .select('*')
+        .eq('section', section);
+
+      if (error) {
+        console.error(`[SupabaseDataManager] Error loading content for ${section}:`, error);
+        return {};
+      }
+
+      if (!data || data.length === 0) {
+        console.log(`[SupabaseDataManager] No content found for section: ${section}`);
+        return {};
+      }
+
+      // Convert array of content records to a single object
+      const contentObject: any = {};
+      data.forEach((item: ContentData) => {
+        contentObject[item.key] = item.value;
+      });
+
+      this.cache.set(cacheKey, contentObject);
+      this.lastUpdate.set(cacheKey, now);
+      
+      console.log(`[SupabaseDataManager] Loaded content for ${section}:`, contentObject);
+      return contentObject;
+    } catch (error) {
+      console.error(`[SupabaseDataManager] Error loading content for ${section}:`, error);
+      return {};
+    }
+  }
+
+  async verifyLicense(licenseId: string): Promise<License | null> {
+    try {
+      const { data, error } = await supabase
+        .from('licenses')
+        .select('*')
+        .eq('license_id', licenseId)
+        .eq('status', 'active')
+        .single();
+
+      if (error) {
+        console.error(`[SupabaseDataManager] Error verifying license ${licenseId}:`, error);
+        return null;
+      }
+
+      console.log(`[SupabaseDataManager] License verification result for ${licenseId}:`, data);
+      return data;
+    } catch (error) {
+      console.error(`[SupabaseDataManager] Error verifying license ${licenseId}:`, error);
+      return null;
     }
   }
 
@@ -245,7 +332,16 @@ class SupabaseDataManager {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data || [];
+      
+      // Convert the data to match our Application interface
+      const applications: Application[] = (data || []).map(item => ({
+        ...item,
+        documents: Array.isArray(item.documents) ? item.documents : 
+                   typeof item.documents === 'string' ? JSON.parse(item.documents) : 
+                   item.documents || []
+      }));
+
+      return applications;
     } catch (error) {
       console.error('[SupabaseDataManager] Error loading applications:', error);
       return [];
@@ -254,16 +350,43 @@ class SupabaseDataManager {
 
   async createApplication(application: Partial<Application>): Promise<Application | null> {
     try {
+      // Ensure required fields are present
+      if (!application.name || !application.email || !application.category) {
+        throw new Error('Missing required fields: name, email, and category are required');
+      }
+
+      const applicationData = {
+        name: application.name,
+        email: application.email,
+        category: application.category,
+        phone: application.phone || null,
+        company: application.company || null,
+        notes: application.notes || null,
+        status: application.status || 'pending',
+        amount: application.amount || null,
+        payment_method: application.payment_method || null,
+        transaction_id: application.transaction_id || null,
+        documents: application.documents || []
+      };
+
       const { data, error } = await supabase
         .from('applications')
-        .insert(application)
+        .insert(applicationData)
         .select()
         .single();
 
       if (error) throw error;
       
-      this.notifyListeners('applications_updated', data);
-      return data;
+      // Convert the data to match our Application interface
+      const result: Application = {
+        ...data,
+        documents: Array.isArray(data.documents) ? data.documents : 
+                   typeof data.documents === 'string' ? JSON.parse(data.documents) : 
+                   data.documents || []
+      };
+      
+      this.notifyListeners('applications_updated', result);
+      return result;
     } catch (error) {
       console.error('[SupabaseDataManager] Error creating application:', error);
       throw error;
@@ -284,8 +407,16 @@ class SupabaseDataManager {
 
       if (error) throw error;
       
-      this.notifyListeners('applications_updated', data);
-      return data;
+      // Convert the data to match our Application interface
+      const result: Application = {
+        ...data,
+        documents: Array.isArray(data.documents) ? data.documents : 
+                   typeof data.documents === 'string' ? JSON.parse(data.documents) : 
+                   data.documents || []
+      };
+      
+      this.notifyListeners('applications_updated', result);
+      return result;
     } catch (error) {
       console.error('[SupabaseDataManager] Error updating application:', error);
       throw error;
@@ -324,9 +455,22 @@ class SupabaseDataManager {
 
   async createContact(contact: Partial<Contact>): Promise<Contact | null> {
     try {
+      // Ensure required fields are present
+      if (!contact.name || !contact.email || !contact.message) {
+        throw new Error('Missing required fields: name, email, and message are required');
+      }
+
+      const contactData = {
+        name: contact.name,
+        email: contact.email,
+        message: contact.message,
+        subject: contact.subject || null,
+        status: contact.status || 'unread'
+      };
+
       const { data, error } = await supabase
         .from('contacts')
-        .insert(contact)
+        .insert(contactData)
         .select()
         .single();
 
