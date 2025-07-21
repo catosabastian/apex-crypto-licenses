@@ -1,6 +1,7 @@
+
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Play, TrendingUp, Users, Shield, Zap } from 'lucide-react';
+import { Play, TrendingUp, Users, Shield, Zap, ArrowRight, CheckCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useApplicationDialog } from './ApplicationDialog';
 import { supabaseDataManager } from '@/utils/supabaseDataManager';
@@ -9,6 +10,7 @@ const Hero = () => {
   const [scrolled, setScrolled] = useState(false);
   const [currentStat, setCurrentStat] = useState(0);
   const [content, setContent] = useState<any>({});
+  const [isVisible, setIsVisible] = useState(false);
   const { openApplicationDialog } = useApplicationDialog();
   
   useEffect(() => {
@@ -21,6 +23,7 @@ const Hero = () => {
   }, []);
 
   useEffect(() => {
+    setIsVisible(true);
     const loadContent = async () => {
       try {
         const data = await supabaseDataManager.getContent('hero');
@@ -38,148 +41,218 @@ const Hero = () => {
     Users,
     Shield,
     Zap,
-    Play
+    Play,
+    CheckCircle
   };
 
-  const statsData = content.stats || [];
+  const statsData = content.stats || [
+    { number: "10K+", label: "Licensed Professionals", description: "Trusted by industry leaders" },
+    { number: "98%", label: "Success Rate", description: "Application approval rate" },
+    { number: "24/7", label: "Expert Support", description: "Professional assistance" }
+  ];
 
   useEffect(() => {
     if (statsData.length > 0) {
       const interval = setInterval(() => {
         setCurrentStat((prev) => (prev + 1) % statsData.length);
-      }, 3000);
+      }, 4000);
       return () => clearInterval(interval);
     }
   }, [statsData.length]);
 
+  const defaultContent = {
+    badge: "Industry Leading Solutions",
+    title: {
+      line1: "Professional",
+      line2: "Cryptocurrency",
+      line3: "Licensing"
+    },
+    subtitle: "Secure your future in digital finance with our comprehensive licensing solutions. Join thousands of professionals who trust our platform.",
+    primaryCTA: "Get Licensed Now",
+    secondaryCTA: "Watch Demo",
+    trustIndicators: [
+      "Regulatory Compliant",
+      "Industry Certified",
+      "Globally Recognized"
+    ],
+    statsTitle: "Trusted Worldwide"
+  };
+
+  const displayContent = { ...defaultContent, ...content };
+
   return (
-    <section className="relative min-h-screen overflow-hidden bg-gradient-to-br from-background via-primary/5 to-accent/10">
-      {/* Background Elements */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-white/10" />
+    <section className="relative min-h-screen overflow-hidden bg-gradient-to-br from-background via-primary/3 to-accent/8">
+      {/* Enhanced Background Elements */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-white/5" />
       <div className="absolute inset-0" style={{
-        backgroundImage: `radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-                         radial-gradient(circle at 80% 20%, rgba(255, 183, 77, 0.3) 0%, transparent 50%),
-                         radial-gradient(circle at 40% 40%, rgba(139, 92, 246, 0.2) 0%, transparent 50%)`
+        backgroundImage: `radial-gradient(circle at 25% 75%, rgba(120, 119, 198, 0.15) 0%, transparent 60%),
+                         radial-gradient(circle at 75% 25%, rgba(255, 183, 77, 0.12) 0%, transparent 60%),
+                         radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 70%)`
       }} />
       
-      {/* Grid Pattern */}
-      <div className="absolute inset-0 opacity-40" style={{
-        backgroundImage: `url("data:image/svg+xml,%3csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3e%3cg fill='none' fill-rule='evenodd'%3e%3cg fill='%239C92AC' fill-opacity='0.1'%3e%3ccircle cx='30' cy='30' r='1'/%3e%3c/g%3e%3c/g%3e%3c/svg%3e")`,
+      {/* Advanced Grid Pattern */}
+      <div className="absolute inset-0 opacity-30" style={{
+        backgroundImage: `url("data:image/svg+xml,%3csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3e%3cg fill='none' fill-rule='evenodd'%3e%3cg fill='%23183B4A' fill-opacity='0.08'%3e%3cpath d='M40 40c0-11.046-8.954-20-20-20s-20 8.954-20 20 8.954 20 20 20 20-8.954 20-20zm20-20c0-11.046-8.954-20-20-20s-20 8.954-20 20 8.954 20 20 20 20-8.954 20-20z'/%3e%3c/g%3e%3c/g%3e%3c/svg%3e")`,
       }} />
 
-      <div className="container relative z-10 flex flex-col justify-center min-h-screen py-16">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left Column - Main Content */}
-            <div className="space-y-8 animate-fade-in">
-              {/* Badge */}
-              <Badge 
-                variant="outline" 
-                className="glass-card text-primary border-primary/20 px-6 py-3 text-sm font-medium bg-primary/5 hover:bg-primary/10 transition-all duration-300"
-              >
-                {content.badge}
-              </Badge>
+      {/* Floating Orbs */}
+      <div className="absolute top-20 left-10 w-32 h-32 bg-primary/10 rounded-full blur-2xl animate-float" />
+      <div className="absolute bottom-20 right-10 w-40 h-40 bg-accent/10 rounded-full blur-2xl animate-float-delay" />
+      <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-accent-amber/10 rounded-full blur-xl animate-pulse" />
 
-              {/* Main Headline */}
-              <div className="space-y-6">
-                <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
-                  <span className="block text-foreground">{content.title?.line1}</span>
-                  <span className="block gradient-text animate-gradient">{content.title?.line2}</span>
-                  <span className="block text-foreground">{content.title?.line3}</span>
+      <div className="container relative z-10 flex flex-col justify-center min-h-screen py-20">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Enhanced Left Column - Main Content */}
+            <div className={`space-y-10 transition-all duration-1000 ${isVisible ? 'animate-fade-in' : 'opacity-0 translate-y-8'}`}>
+              {/* Premium Badge */}
+              <div className="inline-flex">
+                <Badge 
+                  variant="outline" 
+                  className="glass-card text-primary border-primary/30 px-8 py-4 text-base font-semibold bg-primary/8 hover:bg-primary/12 transition-all duration-500 hover:scale-105 shadow-lg"
+                >
+                  <Shield className="w-4 h-4 mr-2" />
+                  {displayContent.badge}
+                </Badge>
+              </div>
+
+              {/* Enhanced Main Headline */}
+              <div className="space-y-8">
+                <h1 className="text-6xl md:text-7xl lg:text-8xl font-bold leading-[0.9] tracking-tight">
+                  <span className="block text-foreground drop-shadow-sm">{displayContent.title?.line1}</span>
+                  <span className="block gradient-text animate-gradient bg-gradient-to-r from-primary via-accent to-accent-amber bg-300% drop-shadow-lg">{displayContent.title?.line2}</span>
+                  <span className="block text-foreground drop-shadow-sm">{displayContent.title?.line3}</span>
                 </h1>
                 
-                <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl leading-relaxed">
-                  {content.subtitle}
+                <p className="text-2xl md:text-3xl text-muted-foreground max-w-2xl leading-relaxed font-light">
+                  {displayContent.subtitle}
                 </p>
               </div>
 
-              {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
+              {/* Enhanced CTA Section */}
+              <div className="flex flex-col sm:flex-row gap-6 pt-8">
                 <Button
                   size="lg"
-                  className="btn-primary text-lg px-8 py-6 shadow-2xl hover:shadow-primary/50 transition-all duration-300"
+                  className="btn-primary text-xl px-12 py-8 shadow-2xl hover:shadow-primary/40 transition-all duration-500 transform hover:scale-105 hover:-translate-y-1 relative overflow-hidden group"
                   onClick={openApplicationDialog}
                 >
-                  {content.primaryCTA}
+                  <span className="relative z-10 flex items-center">
+                    {displayContent.primaryCTA}
+                    <ArrowRight className="w-6 h-6 ml-3 group-hover:translate-x-1 transition-transform" />
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
                 </Button>
                 
                 <Button
                   variant="outline"
                   size="lg"
-                  className="btn-outline text-lg px-8 py-6 group"
+                  className="btn-outline text-xl px-12 py-8 group border-2 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:scale-105"
                 >
-                  <Play className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
-                  {content.secondaryCTA}
+                  <Play className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform" />
+                  {displayContent.secondaryCTA}
                 </Button>
               </div>
 
-              {/* Trust Indicators */}
-              <div className="flex flex-wrap items-center gap-6 pt-8">
-                {content.trustIndicators?.map((indicator, index) => (
-                  <div key={index} className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                    <span>{indicator}</span>
+              {/* Enhanced Trust Indicators */}
+              <div className="flex flex-wrap items-center gap-8 pt-12">
+                {displayContent.trustIndicators?.map((indicator, index) => (
+                  <div key={index} className="flex items-center gap-3 text-base text-muted-foreground group hover:text-foreground transition-colors">
+                    <div className="w-3 h-3 bg-primary rounded-full animate-pulse group-hover:scale-125 transition-transform" />
+                    <span className="font-medium">{indicator}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Right Column - Interactive Stats */}
-            <div className="relative animate-fade-in-delay">
-              <div className="glass-card p-8 rounded-3xl shadow-2xl bg-white/10 backdrop-blur-lg border border-white/20">
-                <div className="space-y-6">
-                  <h3 className="text-2xl font-bold text-center gradient-text">
-                    {content.statsTitle}
-                  </h3>
+            {/* Enhanced Right Column - Interactive Stats Dashboard */}
+            <div className={`relative transition-all duration-1000 delay-300 ${isVisible ? 'animate-fade-in-delay' : 'opacity-0 translate-y-8'}`}>
+              <div className="glass-card p-10 rounded-3xl shadow-2xl bg-white/12 backdrop-blur-xl border border-white/20 hover:bg-white/15 transition-all duration-500 hover:scale-105">
+                <div className="space-y-8">
+                  <div className="text-center">
+                    <h3 className="text-3xl font-bold gradient-text mb-2">
+                      {displayContent.statsTitle}
+                    </h3>
+                    <div className="w-24 h-1 bg-gradient-to-r from-primary to-accent mx-auto rounded-full" />
+                  </div>
                   
-                  {/* Animated Stat Display */}
+                  {/* Enhanced Animated Stat Display */}
                   {statsData.length > 0 && (
-                    <div className="text-center space-y-4 min-h-[200px] flex flex-col justify-center">
-                      <div className="relative">
-                        <div className="text-6xl font-bold text-primary mb-2 animate-fade-in">
+                    <div className="text-center space-y-6 min-h-[240px] flex flex-col justify-center relative">
+                      <div className="relative overflow-hidden rounded-2xl p-8 bg-primary/5 border border-primary/20">
+                        <div className="text-7xl font-bold text-primary mb-4 animate-fade-in leading-none">
                           {statsData[currentStat]?.number}
                         </div>
-                        <div className="text-xl font-semibold text-foreground mb-2">
+                        <div className="text-2xl font-semibold text-foreground mb-3">
                           {statsData[currentStat]?.label}
                         </div>
-                        <div className="text-muted-foreground">
+                        <div className="text-lg text-muted-foreground leading-relaxed">
                           {statsData[currentStat]?.description}
                         </div>
+                        
+                        {/* Progress indicator */}
+                        <div className="absolute bottom-0 left-0 h-1 bg-primary rounded-full animate-gradient" 
+                             style={{ width: '100%', animation: 'progress 4s linear infinite' }} />
                       </div>
                     </div>
                   )}
 
-                  {/* Stat Indicators */}
-                  <div className="flex justify-center gap-2">
+                  {/* Enhanced Stat Navigation */}
+                  <div className="flex justify-center gap-3">
                     {statsData.map((_, index) => (
                       <button
                         key={index}
-                        className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                        className={`w-4 h-4 rounded-full transition-all duration-500 hover:scale-125 ${
                           index === currentStat 
-                            ? 'bg-primary scale-125' 
-                            : 'bg-primary/30 hover:bg-primary/60'
+                            ? 'bg-primary scale-125 shadow-lg shadow-primary/50' 
+                            : 'bg-primary/40 hover:bg-primary/70'
                         }`}
                         onClick={() => setCurrentStat(index)}
                       />
                     ))}
                   </div>
+
+                  {/* Additional Visual Elements */}
+                  <div className="grid grid-cols-3 gap-4 pt-6">
+                    {[CheckCircle, Shield, TrendingUp].map((Icon, index) => (
+                      <div key={index} className="flex flex-col items-center p-4 rounded-xl bg-primary/5 hover:bg-primary/10 transition-colors group">
+                        <Icon className="w-6 h-6 text-primary group-hover:scale-110 transition-transform" />
+                        <div className="w-8 h-0.5 bg-primary/30 mt-2 rounded-full" />
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 
-              {/* Floating Elements */}
-              <div className="absolute -top-6 -right-6 w-24 h-24 bg-primary/20 rounded-full blur-xl animate-float" />
-              <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-accent/20 rounded-full blur-xl animate-float-delay" />
+              {/* Enhanced Floating Elements */}
+              <div className="absolute -top-8 -right-8 w-32 h-32 bg-primary/15 rounded-full blur-2xl animate-float" />
+              <div className="absolute -bottom-8 -left-8 w-40 h-40 bg-accent/15 rounded-full blur-2xl animate-float-delay" />
+              <div className="absolute top-1/2 -right-4 w-6 h-6 bg-accent-amber rounded-full animate-ping" />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Scroll Indicator */}
-      <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-        <div className="w-6 h-10 border-2 border-primary/50 rounded-full p-1">
-          <div className="w-1 h-3 bg-primary rounded-full mx-auto animate-scroll" />
+      {/* Enhanced Scroll Indicator */}
+      <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 animate-bounce">
+        <div className="flex flex-col items-center space-y-2">
+          <div className="w-8 h-12 border-2 border-primary/60 rounded-full p-1 bg-white/10 backdrop-blur-sm">
+            <div className="w-2 h-4 bg-primary rounded-full mx-auto animate-scroll" />
+          </div>
+          <span className="text-sm text-muted-foreground font-medium">Scroll to explore</span>
         </div>
       </div>
+
+      {/* Additional CSS for custom animations */}
+      <style jsx>{`
+        @keyframes progress {
+          0% { transform: scaleX(0); transform-origin: left; }
+          100% { transform: scaleX(1); transform-origin: left; }
+        }
+        
+        .bg-300% {
+          background-size: 300% 300%;
+        }
+      `}</style>
     </section>
   );
 };
