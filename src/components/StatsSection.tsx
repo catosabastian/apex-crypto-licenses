@@ -5,13 +5,57 @@ import { useEffect, useState } from 'react';
 import { supabaseDataManager } from '@/utils/supabaseDataManager';
 
 const StatsSection = () => {
-  const [content, setContent] = useState<any>({});
+  const [content, setContent] = useState<any>({
+    title: "Trusted by Thousands Worldwide",
+    subtitle: "Our Track Record",
+    description: "Join thousands of satisfied clients who have obtained their cryptocurrency trading licenses through our platform.",
+    items: [
+      {
+        icon: "TrendingUp",
+        number: "10,000+",
+        label: "Licenses Issued",
+        description: "Professional licenses delivered",
+        color: "text-primary",
+        bgColor: "bg-primary/10"
+      },
+      {
+        icon: "Users", 
+        number: "5,000+",
+        label: "Happy Clients",
+        description: "Satisfied customers worldwide",
+        color: "text-accent",
+        bgColor: "bg-accent/10"
+      },
+      {
+        icon: "Globe",
+        number: "50+",
+        label: "Countries Served",
+        description: "Global licensing coverage",
+        color: "text-accent-emerald",
+        bgColor: "bg-emerald-500/10"
+      },
+      {
+        icon: "Award",
+        number: "99.9%",
+        label: "Success Rate",
+        description: "Application approval rate",
+        color: "text-accent-amber",
+        bgColor: "bg-amber-500/10"
+      }
+    ],
+    trustIndicator: {
+      title: "Trusted & Verified Platform",
+      description: "Our licensing platform is verified and trusted by regulatory bodies worldwide, ensuring complete legitimacy and compliance."
+    }
+  });
 
   useEffect(() => {
     const loadContent = async () => {
       try {
         const data = await supabaseDataManager.getContent('stats');
-        setContent(data);
+        if (data && Object.keys(data).length > 0) {
+          setContent(data);
+        }
       } catch (error) {
         console.error('Failed to load stats content:', error);
       }
@@ -50,27 +94,46 @@ const StatsSection = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {content.items.map((stat, index) => {
-              const IconComponent = iconMap[stat.icon];
-              return (
-                <Card key={index} className="modern-card hover-lift group border-0 shadow-lg">
+            {content.items && Array.isArray(content.items) ? 
+              content.items.map((stat: any, index: number) => {
+                const IconComponent = iconMap[stat.icon];
+                return (
+                  <Card key={index} className="modern-card hover-lift group border-0 shadow-lg">
+                    <CardContent className="p-8 text-center">
+                      <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl ${stat.bgColor || 'bg-primary/10'} mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                        {IconComponent && <IconComponent className={`h-8 w-8 ${stat.color || 'text-primary'}`} />}
+                      </div>
+                      <div className="text-4xl md:text-5xl font-bold text-primary mb-3 group-hover:scale-105 transition-transform duration-300">
+                        {stat.number}
+                      </div>
+                      <div className="text-lg font-semibold text-foreground mb-2">
+                        {stat.label}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {stat.description}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              }) : (
+                <Card className="modern-card hover-lift group border-0 shadow-lg">
                   <CardContent className="p-8 text-center">
-                    <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl ${stat.bgColor} mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                      {IconComponent && <IconComponent className={`h-8 w-8 ${stat.color}`} />}
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-6 group-hover:scale-110 transition-transform duration-300">
+                      <TrendingUp className="h-8 w-8 text-primary" />
                     </div>
                     <div className="text-4xl md:text-5xl font-bold text-primary mb-3 group-hover:scale-105 transition-transform duration-300">
-                      {stat.number}
+                      1000+
                     </div>
                     <div className="text-lg font-semibold text-foreground mb-2">
-                      {stat.label}
+                      Happy Clients
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      {stat.description}
+                      Satisfied customers worldwide
                     </div>
                   </CardContent>
                 </Card>
-              );
-            })}
+              )
+            }
           </div>
 
           {/* Additional Trust Indicators */}
@@ -78,10 +141,10 @@ const StatsSection = () => {
             <div className="glass-card p-8 rounded-3xl max-w-4xl mx-auto">
               <div className="flex items-center justify-center gap-3 mb-4">
                 <Shield className="h-6 w-6 text-primary" />
-                <h3 className="text-xl font-bold text-primary">{content.trustIndicator.title}</h3>
+                <h3 className="text-xl font-bold text-primary">{content.trustIndicator?.title || "Trusted Platform"}</h3>
               </div>
               <p className="text-muted-foreground">
-                {content.trustIndicator.description}
+                {content.trustIndicator?.description || "Our platform is trusted by clients worldwide for professional licensing services."}
               </p>
             </div>
           </div>

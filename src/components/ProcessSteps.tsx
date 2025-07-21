@@ -11,21 +11,46 @@ const ProcessSteps = () => {
     title: 'How to Get Your License',
     subtitle: 'Simple Process',
     description: 'Follow our streamlined 3-step process to obtain your cryptocurrency trading license quickly and efficiently.',
-    steps: [],
+    steps: [
+      {
+        number: "01",
+        icon: "CreditCard",
+        title: "Submit Application",
+        description: "Complete our secure online application form with your personal and business details."
+      },
+      {
+        number: "02", 
+        icon: "Upload",
+        title: "Document Verification",
+        description: "Upload required documents for identity and compliance verification."
+      },
+      {
+        number: "03",
+        icon: "Award",
+        title: "Receive License", 
+        description: "Get your official cryptocurrency trading license delivered digitally."
+      }
+    ],
     ctaText: 'Start Your Application'
   });
   const { openApplicationDialog } = useApplicationDialog();
 
   useEffect(() => {
     const loadContent = async () => {
-      const processContent = await supabaseDataManager.getContent('process');
-      setContent({
-        title: processContent.title || 'How to Get Your License',
-        subtitle: processContent.subtitle || 'Simple Process',
-        description: processContent.description || 'Follow our streamlined 3-step process to obtain your cryptocurrency trading license quickly and efficiently.',
-        steps: processContent.steps || [],
-        ctaText: processContent.ctaText || 'Start Your Application'
-      });
+      try {
+        const processContent = await supabaseDataManager.getContent('process');
+        if (processContent && Object.keys(processContent).length > 0) {
+          setContent({
+            title: processContent.title || 'How to Get Your License',
+            subtitle: processContent.subtitle || 'Simple Process',
+            description: processContent.description || 'Follow our streamlined 3-step process to obtain your cryptocurrency trading license quickly and efficiently.',
+            steps: processContent.steps || content.steps,
+            ctaText: processContent.ctaText || 'Start Your Application'
+          });
+        }
+      } catch (error) {
+        console.error('Failed to load process content:', error);
+      }
     };
 
     const handleContentUpdate = () => {
@@ -67,35 +92,52 @@ const ProcessSteps = () => {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 mb-12">
-            {content.steps.map((step, index) => {
-              const IconComponent = iconMap[step.icon];
-              return (
-                <div key={index} className="relative">
-                  <Card className="process-step">
-                    <div className="step-number">
-                      {step.number}
-                    </div>
+            {content.steps && Array.isArray(content.steps) ? 
+              content.steps.map((step: any, index: number) => {
+                const IconComponent = iconMap[step.icon];
+                return (
+                  <div key={index} className="relative">
+                    <Card className="process-step">
+                      <div className="step-number">
+                        {step.number}
+                      </div>
+                      
+                      <CardHeader className="pt-8">
+                        <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                          {IconComponent && <IconComponent className="h-8 w-8 text-primary" />}
+                        </div>
+                        <CardTitle className="text-xl text-center">{step.title}</CardTitle>
+                      </CardHeader>
+                      
+                      <CardContent>
+                        <p className="text-muted-foreground text-center">{step.description}</p>
+                      </CardContent>
+                    </Card>
                     
+                    {index < content.steps.length - 1 && (
+                      <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-10">
+                        <ArrowRight className="h-6 w-6 text-primary" />
+                      </div>
+                    )}
+                  </div>
+                );
+              }) : (
+                <div className="relative">
+                  <Card className="process-step">
+                    <div className="step-number">01</div>
                     <CardHeader className="pt-8">
                       <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                        {IconComponent && <IconComponent className="h-8 w-8 text-primary" />}
+                        <CreditCard className="h-8 w-8 text-primary" />
                       </div>
-                      <CardTitle className="text-xl text-center">{step.title}</CardTitle>
+                      <CardTitle className="text-xl text-center">Get Started</CardTitle>
                     </CardHeader>
-                    
                     <CardContent>
-                      <p className="text-muted-foreground text-center">{step.description}</p>
+                      <p className="text-muted-foreground text-center">Begin your licensing journey with our simple application process.</p>
                     </CardContent>
                   </Card>
-                  
-                  {index < content.steps.length - 1 && (
-                    <div className="hidden md:block absolute top-1/2 -right-4 transform -translate-y-1/2 z-10">
-                      <ArrowRight className="h-6 w-6 text-primary" />
-                    </div>
-                  )}
                 </div>
-              );
-            })}
+              )
+            }
           </div>
 
           <div className="text-center">
