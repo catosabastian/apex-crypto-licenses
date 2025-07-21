@@ -9,60 +9,21 @@ import {
   HeadphonesIcon 
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { supabaseDataManager } from '@/utils/supabaseDataManager';
+import { unifiedDataManager } from '@/utils/unifiedDataManager';
 
 const FeaturesSection = () => {
-  const [content, setContent] = useState<any>({
-    title: "Why Choose Our Licensing Service",
-    subtitle: "Key Features",
-    description: "Experience comprehensive licensing solutions designed for modern cryptocurrency trading requirements.",
-    items: [
-      {
-        icon: "Zap",
-        title: "Fast Processing",
-        description: "Quick license approval and issuance process"
-      },
-      {
-        icon: "Shield",
-        title: "Secure & Compliant",
-        description: "Full regulatory compliance and security measures"
-      },
-      {
-        icon: "Users",
-        title: "Expert Support",
-        description: "Dedicated support throughout the licensing process"
-      },
-      {
-        icon: "Lock",
-        title: "Data Protection",
-        description: "Your information is protected with enterprise-grade security"
-      },
-      {
-        icon: "Building",
-        title: "Business Solutions",
-        description: "Tailored licensing for businesses of all sizes"
-      },
-      {
-        icon: "HeadphonesIcon",
-        title: "24/7 Support",
-        description: "Round-the-clock customer support and assistance"
-      }
-    ]
-  });
+  const [content, setContent] = useState(unifiedDataManager.getContent().features);
 
   useEffect(() => {
-    const loadContent = async () => {
-      try {
-        const data = await supabaseDataManager.getContent('features');
-        if (data && Object.keys(data).length > 0) {
-          setContent(data);
-        }
-      } catch (error) {
-        console.error('Failed to load features content:', error);
-      }
+    const handleContentUpdate = () => {
+      setContent(unifiedDataManager.getContent().features);
     };
 
-    loadContent();
+    unifiedDataManager.addEventListener('content_updated', handleContentUpdate);
+    
+    return () => {
+      unifiedDataManager.removeEventListener('content_updated', handleContentUpdate);
+    };
   }, []);
 
   const iconMap: Record<string, any> = {
@@ -95,36 +56,22 @@ const FeaturesSection = () => {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {content.items && Array.isArray(content.items) ? 
-              content.items.map((feature: any, index: number) => {
-                const IconComponent = iconMap[feature.icon];
-                return (
-                  <Card key={index} className="feature-card group">
-                    <CardHeader>
-                      <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                        {IconComponent && <IconComponent className="h-6 w-6 text-primary" />}
-                      </div>
-                      <CardTitle className="text-xl">{feature.title}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-muted-foreground">{feature.description}</p>
-                    </CardContent>
-                  </Card>
-                );
-              }) : (
-                <Card className="feature-card group">
+            {content.items.map((feature, index) => {
+              const IconComponent = iconMap[feature.icon];
+              return (
+                <Card key={index} className="feature-card group">
                   <CardHeader>
                     <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
-                      <Shield className="h-6 w-6 text-primary" />
+                      {IconComponent && <IconComponent className="h-6 w-6 text-primary" />}
                     </div>
-                    <CardTitle className="text-xl">Professional Service</CardTitle>
+                    <CardTitle className="text-xl">{feature.title}</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-muted-foreground">Complete cryptocurrency trading license solutions</p>
+                    <p className="text-muted-foreground">{feature.description}</p>
                   </CardContent>
                 </Card>
-              )
-            }
+              );
+            })}
           </div>
         </div>
       </div>

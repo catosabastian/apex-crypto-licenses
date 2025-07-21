@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
-import { supabaseDataManager } from '@/utils/supabaseDataManager';
+import { unifiedDataManager, ContentSettings } from '@/utils/unifiedDataManager';
 import PersonalInfoSection from '@/components/form/PersonalInfoSection';
 import LicenseCategorySection from '@/components/form/LicenseCategorySection';
 import PaymentInfoSection from '@/components/form/PaymentInfoSection';
@@ -27,78 +27,79 @@ const DynamicApplicationForm = () => {
     notes: ''
   });
   
-  const [settings, setSettings] = useState<any>({});
+  const [settings, setSettings] = useState<ContentSettings>(unifiedDataManager.getSettings());
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    // Load settings on mount
-    const loadSettings = async () => {
-      try {
-        const data = await supabaseDataManager.getSettings();
-        setSettings(data);
-      } catch (error) {
-        console.error('Failed to load settings:', error);
-      }
+    // Enhanced real-time settings update handler
+    const handleSettingsUpdate = (updatedData: { settings: ContentSettings }) => {
+      console.log('Settings updated in form:', updatedData.settings);
+      setSettings(updatedData.settings);
     };
 
-    loadSettings();
+    // Listen to unified data manager events
+    unifiedDataManager.addEventListener('settings_updated', handleSettingsUpdate);
+
+    return () => {
+      unifiedDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
+    };
   }, []);
 
   const licenseCategories = [
     { 
       id: '1', 
-      name: settings.category1Details?.name, 
+      name: settings.category1Details.name, 
       price: settings.category1Price, 
       available: settings.category1Available, 
-      minVolume: settings.category1Details?.minVolume,
-      features: settings.category1Details?.features,
-      processingTime: settings.category1Details?.processingTime
+      minVolume: settings.category1Details.minVolume,
+      features: settings.category1Details.features,
+      processingTime: settings.category1Details.processingTime
     },
     { 
       id: '2', 
-      name: settings.category2Details?.name, 
+      name: settings.category2Details.name, 
       price: settings.category2Price, 
       available: settings.category2Available, 
-      minVolume: settings.category2Details?.minVolume,
-      features: settings.category2Details?.features,
-      processingTime: settings.category2Details?.processingTime
+      minVolume: settings.category2Details.minVolume,
+      features: settings.category2Details.features,
+      processingTime: settings.category2Details.processingTime
     },
     { 
       id: '3', 
-      name: settings.category3Details?.name, 
+      name: settings.category3Details.name, 
       price: settings.category3Price, 
       available: settings.category3Available, 
-      minVolume: settings.category3Details?.minVolume,
-      features: settings.category3Details?.features,
-      processingTime: settings.category3Details?.processingTime
+      minVolume: settings.category3Details.minVolume,
+      features: settings.category3Details.features,
+      processingTime: settings.category3Details.processingTime
     },
     { 
       id: '4', 
-      name: settings.category4Details?.name, 
+      name: settings.category4Details.name, 
       price: settings.category4Price, 
       available: settings.category4Available, 
-      minVolume: settings.category4Details?.minVolume,
-      features: settings.category4Details?.features,
-      processingTime: settings.category4Details?.processingTime
+      minVolume: settings.category4Details.minVolume,
+      features: settings.category4Details.features,
+      processingTime: settings.category4Details.processingTime
     },
     { 
       id: '5', 
-      name: settings.category5Details?.name, 
+      name: settings.category5Details.name, 
       price: settings.category5Price, 
       available: settings.category5Available, 
-      minVolume: settings.category5Details?.minVolume,
-      features: settings.category5Details?.features,
-      processingTime: settings.category5Details?.processingTime
+      minVolume: settings.category5Details.minVolume,
+      features: settings.category5Details.features,
+      processingTime: settings.category5Details.processingTime
     },
     { 
       id: '6', 
-      name: settings.category6Details?.name, 
+      name: settings.category6Details.name, 
       price: settings.category6Price, 
       available: settings.category6Available, 
-      minVolume: settings.category6Details?.minVolume,
-      features: settings.category6Details?.features,
-      processingTime: settings.category6Details?.processingTime
+      minVolume: settings.category6Details.minVolume,
+      features: settings.category6Details.features,
+      processingTime: settings.category6Details.processingTime
     }
   ];
 
@@ -149,13 +150,15 @@ const DynamicApplicationForm = () => {
         return;
       }
       
-      const newApplication = await supabaseDataManager.createApplication({
+      const newApplication = unifiedDataManager.addApplication({
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
         company: formData.company,
-        category: selectedCategory?.name || `Category ${formData.category}`,
-        notes: formData.notes
+        country: '',
+        licenseType: selectedCategory?.name || `Category ${formData.category}`,
+        walletAddress: '',
+        additionalInfo: formData.notes
       });
 
       console.log('Application added successfully:', newApplication);

@@ -1,49 +1,21 @@
 
 import { Shield, CheckCircle, FileCheck, AlertTriangle } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { supabaseDataManager } from '@/utils/supabaseDataManager';
+import { unifiedDataManager } from '@/utils/unifiedDataManager';
 
 const AboutSection = () => {
-  const [content, setContent] = useState<any>({
-    title: "Professional Cryptocurrency Trading Licenses",
-    subtitle: "Authority & Compliance",
-    description: [
-      "We are a globally recognized authority in cryptocurrency trading license issuance, providing comprehensive licensing solutions for individuals and businesses entering the digital asset trading space.",
-      "Our licenses ensure full regulatory compliance and provide the legal framework necessary for legitimate cryptocurrency trading operations."
-    ],
-    features: [
-      {
-        icon: "Shield",
-        title: "Regulatory Compliance",
-        description: "Full compliance with international cryptocurrency trading regulations"
-      },
-      {
-        icon: "CheckCircle", 
-        title: "Global Recognition",
-        description: "Licenses recognized by major cryptocurrency exchanges worldwide"
-      },
-      {
-        icon: "FileCheck",
-        title: "Legal Framework",
-        description: "Complete legal protection for your trading activities"
-      }
-    ],
-    legalNotice: "This service provides legitimate cryptocurrency trading licenses issued by authorized regulatory bodies. All licenses are subject to verification and compliance requirements."
-  });
+  const [content, setContent] = useState(unifiedDataManager.getContent().about);
 
   useEffect(() => {
-    const loadContent = async () => {
-      try {
-        const data = await supabaseDataManager.getContent('about');
-        if (data && Object.keys(data).length > 0) {
-          setContent(data);
-        }
-      } catch (error) {
-        console.error('Failed to load about content:', error);
-      }
+    const handleContentUpdate = () => {
+      setContent(unifiedDataManager.getContent().about);
     };
 
-    loadContent();
+    unifiedDataManager.addEventListener('content_updated', handleContentUpdate);
+    
+    return () => {
+      unifiedDataManager.removeEventListener('content_updated', handleContentUpdate);
+    };
   }, []);
 
   const iconMap: Record<string, any> = {
@@ -67,17 +39,11 @@ const AboutSection = () => {
           
           <div className="grid md:grid-cols-2 gap-12 mb-10">
             <div>
-              {content.description && Array.isArray(content.description) ? 
-                content.description.map((paragraph: string, index: number) => (
-                  <p key={index} className="text-lg text-muted-foreground mb-6">
-                    {paragraph}
-                  </p>
-                )) : (
-                  <p className="text-lg text-muted-foreground mb-6">
-                    {content.description || "We provide professional cryptocurrency trading licenses for individuals and businesses."}
-                  </p>
-                )
-              }
+              {content.description.map((paragraph, index) => (
+                <p key={index} className="text-lg text-muted-foreground mb-6">
+                  {paragraph}
+                </p>
+              ))}
               
               <div className="flex gap-2 items-center p-4 border border-muted bg-muted/30 rounded-lg">
                 <AlertTriangle className="h-8 w-8 text-amber-600" />
@@ -86,32 +52,20 @@ const AboutSection = () => {
             </div>
             
             <div className="space-y-4">
-              {content.features && Array.isArray(content.features) ? 
-                content.features.map((feature: any, index: number) => {
-                  const IconComponent = iconMap[feature.icon];
-                  return (
-                    <div key={index} className="flex gap-4">
-                      <div className="shrink-0 h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center">
-                        {IconComponent && <IconComponent className="h-6 w-6 text-primary" />}
-                      </div>
-                      <div>
-                        <h3 className="font-semibold mb-1">{feature.title}</h3>
-                        <p className="text-muted-foreground">{feature.description}</p>
-                      </div>
-                    </div>
-                  );
-                }) : (
-                  <div className="flex gap-4">
+              {content.features.map((feature, index) => {
+                const IconComponent = iconMap[feature.icon];
+                return (
+                  <div key={index} className="flex gap-4">
                     <div className="shrink-0 h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center">
-                      <Shield className="h-6 w-6 text-primary" />
+                      {IconComponent && <IconComponent className="h-6 w-6 text-primary" />}
                     </div>
                     <div>
-                      <h3 className="font-semibold mb-1">Professional Licensing</h3>
-                      <p className="text-muted-foreground">Complete cryptocurrency trading license solutions</p>
+                      <h3 className="font-semibold mb-1">{feature.title}</h3>
+                      <p className="text-muted-foreground">{feature.description}</p>
                     </div>
                   </div>
-                )
-              }
+                );
+              })}
             </div>
           </div>
           

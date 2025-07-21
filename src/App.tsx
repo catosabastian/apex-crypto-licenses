@@ -5,8 +5,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ApplicationDialogProvider } from '@/components/ApplicationDialog';
 import { AuthProvider } from '@/contexts/AuthContext';
-
-import { supabaseDataManager } from '@/utils/supabaseDataManager';
+import { SecureAuthProvider } from '@/contexts/SecureAuthContext';
+import { unifiedDataManager } from '@/utils/unifiedDataManager';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import Index from '@/pages/Index';
 import AboutPage from '@/pages/AboutPage';
@@ -21,12 +21,12 @@ import ResourcesPage from '@/pages/ResourcesPage';
 import NewsPage from '@/pages/NewsPage';
 import TestimonialsPage from '@/pages/TestimonialsPage';
 import VerifyPage from '@/pages/VerifyPage';
-
+import Login from '@/pages/Login';
 import Admin from '@/pages/Admin';
-
+import SecureAdmin from '@/pages/SecureAdmin';
 import Setup from '@/pages/Setup';
 import NotFound from '@/pages/NotFound';
-
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -41,30 +41,26 @@ function App() {
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    const initialize = async () => {
+    try {
+      // Initialize the unified data manager
+      console.log('[App] Initializing unified data manager...');
+      
+      // Verify settings are properly loaded
+      const settings = unifiedDataManager.getSettings();
+      console.log('[App] Settings loaded:', settings);
+      
+      setIsInitialized(true);
+    } catch (error) {
+      console.error('[App] Initialization failed:', error);
+      // Try to reset and reinitialize
       try {
-        // Initialize the supabase data manager
-        console.log('[App] Initializing supabase data manager...');
-        
-        // Verify settings are properly loaded
-        const settings = await supabaseDataManager.getSettings();
-        console.log('[App] Settings loaded:', settings);
-        
+        unifiedDataManager.resetToDefaults();
         setIsInitialized(true);
-      } catch (error) {
-        console.error('[App] Initialization failed:', error);
-        // Try to reset and reinitialize
-        try {
-          supabaseDataManager.clearCache();
-          setIsInitialized(true);
-        } catch (resetError) {
-          console.error('[App] Reset failed:', resetError);
-          setIsInitialized(true); // Still allow app to load
-        }
+      } catch (resetError) {
+        console.error('[App] Reset failed:', resetError);
+        setIsInitialized(true); // Still allow app to load
       }
-    };
-    
-    initialize();
+    }
   }, []);
 
   if (!isInitialized) {
@@ -84,7 +80,7 @@ function App() {
         <TooltipProvider>
           <BrowserRouter>
             <AuthProvider>
-              
+              <SecureAuthProvider>
                 <ApplicationDialogProvider>
                   <div className="min-h-screen bg-background font-sans antialiased">
                     <Suspense fallback={
@@ -106,16 +102,31 @@ function App() {
                         <Route path="/news" element={<NewsPage />} />
                         <Route path="/testimonials" element={<TestimonialsPage />} />
                         <Route path="/verify" element={<VerifyPage />} />
-                        
+                        <Route path="/login" element={<Login />} />
                         <Route path="/setup" element={<Setup />} />
-                        <Route path="/admin" element={<Admin />} />
+                        <Route 
+                          path="/admin" 
+                          element={
+                            <ProtectedRoute>
+                              <Admin />
+                            </ProtectedRoute>
+                          } 
+                        />
+                        <Route 
+                          path="/secure-admin" 
+                          element={
+                            <ProtectedRoute>
+                              <SecureAdmin />
+                            </ProtectedRoute>
+                          } 
+                        />
                         <Route path="*" element={<NotFound />} />
                       </Routes>
                     </Suspense>
                   </div>
                   <Toaster />
                 </ApplicationDialogProvider>
-              
+              </SecureAuthProvider>
             </AuthProvider>
           </BrowserRouter>
         </TooltipProvider>

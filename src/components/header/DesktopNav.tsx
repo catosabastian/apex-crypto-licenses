@@ -12,7 +12,9 @@ const DesktopNav = () => {
       <a href="#about" className="text-sm font-medium hover:text-accent transition-colors">About</a>
       <a href="#licenses" className="text-sm font-medium hover:text-accent transition-colors">Licenses</a>
       <a href="#verification" className="text-sm font-medium hover:text-accent transition-colors">Verification</a>
-      {/* Setup link removed from public navigation */}
+      <Button variant="outline" size="sm" asChild>
+        <Link to="/setup">Setup</Link>
+      </Button>
       <Button variant="default" size="sm" onClick={openApplicationDialog}>Apply Now</Button>
     </nav>
   );

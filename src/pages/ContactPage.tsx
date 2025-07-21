@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
-import { supabaseDataManager } from "@/utils/supabaseDataManager";
+import { dataManager } from "@/utils/dataManager";
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -32,8 +32,8 @@ const ContactPage = () => {
     setIsSubmitting(true);
 
     try {
-      // Create contact record in supabaseDataManager
-      await supabaseDataManager.createContact({
+      // Create contact record in dataManager
+      dataManager.addContact({
         name: `${formData.firstName} ${formData.lastName}`,
         email: formData.email,
         subject: formData.licenseType ? `License Inquiry - ${formData.licenseType}` : 'General Inquiry',

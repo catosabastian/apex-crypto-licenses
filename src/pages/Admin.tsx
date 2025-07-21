@@ -1,5 +1,5 @@
-
 import { useState, useEffect } from 'react';
+import { validLicenses, generateLicenseId } from '@/utils/licenseData';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -10,58 +10,25 @@ import { Shield, Copy, Search, Download, Filter, LogOut, BarChart3, FileText, Se
 import { toast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { supabaseDataManager } from '@/utils/supabaseDataManager';
+import { dataManager } from '@/utils/dataManager';
 import { ApplicationsManager } from '@/components/admin/ApplicationsManager';
 import { ContactsManager } from '@/components/admin/ContactsManager';
-import { SupabaseSettingsManager } from '@/components/admin/SupabaseSettingsManager';
+import { SettingsManager } from '@/components/admin/SettingsManager';
 import { LicenseManager } from '@/components/admin/LicenseManager';
 import { ContentManager } from '@/components/admin/ContentManager';
-
+import { PaymentAddressManager } from '@/components/admin/PaymentAddressManager';
 
 const Admin = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTier, setFilterTier] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [analytics, setAnalytics] = useState({ totalApplications: 0, pendingApplications: 0, activeLicenses: 0, approvedApplications: 0, totalRevenue: 0, newContacts: 0 });
-  const [legacyLicenses, setLegacyLicenses] = useState<any[]>([]);
+  const [analytics, setAnalytics] = useState(dataManager.getAnalytics());
   const { logout } = useAuth();
   const navigate = useNavigate();
 
-  // Load analytics and legacy licenses
+  // Update analytics when tab changes
   useEffect(() => {
-    const loadData = async () => {
-      try {
-        const applications = await supabaseDataManager.getApplications();
-        const licenses = await supabaseDataManager.getLicenses();
-        const contacts = await supabaseDataManager.getContacts();
-        
-        // Calculate analytics from database
-        const totalApplications = applications.length;
-        const pendingApplications = applications.filter(app => app.status === 'pending').length;
-        const activeLicenses = licenses.filter(license => license.status === 'active').length;
-        const approvedApplications = applications.filter(app => app.status === 'approved').length;
-        const totalRevenue = applications
-          .filter(app => app.status === 'approved' && app.amount)
-          .reduce((sum, app) => sum + parseFloat(app.amount || '0'), 0);
-        const newContacts = contacts.filter(contact => contact.status === 'unread').length;
-        
-        setAnalytics({
-          totalApplications,
-          pendingApplications,
-          activeLicenses,
-          approvedApplications,
-          totalRevenue,
-          newContacts
-        });
-        
-        // Set legacy licenses for the legacy tab
-        setLegacyLicenses(licenses);
-      } catch (error) {
-        console.error('Error loading admin data:', error);
-      }
-    };
-
-    loadData();
+    setAnalytics(dataManager.getAnalytics());
   }, [activeTab]);
 
   // Copy license ID to clipboard
@@ -89,17 +56,17 @@ const Admin = () => {
   };
   
   // Filter licenses based on search term and tier filter
-  const filteredLicenses = legacyLicenses.filter(license => {
-    const matchesSearch = searchTerm === '' || license.license_id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTier = filterTier === null || getLicenseTier(license.license_id) === filterTier;
+  const filteredLicenses = validLicenses.filter(license => {
+    const matchesSearch = searchTerm === '' || license.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesTier = filterTier === null || getLicenseTier(license) === filterTier;
     return matchesSearch && matchesTier;
   });
   
   // Generate CSV of licenses
   const exportCsv = () => {
     const csvContent = "data:text/csv;charset=utf-8," 
-      + "License ID,Tier,Holder,Type,Status\n" 
-      + legacyLicenses.map(license => `${license.license_id},${getLicenseTier(license.license_id)},${license.holder_name},${license.license_type},${license.status}`).join("\n");
+      + "License ID,Tier\n" 
+      + validLicenses.map(license => `${license},${getLicenseTier(license)}`).join("\n");
     
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
@@ -251,8 +218,12 @@ const Admin = () => {
           <ContentManager />
         </TabsContent>
 
+        <TabsContent value="payments" className="space-y-6">
+          <PaymentAddressManager />
+        </TabsContent>
+
         <TabsContent value="settings" className="space-y-6">
-          <SupabaseSettingsManager />
+          <SettingsManager />
         </TabsContent>
 
         <TabsContent value="legacy" className="space-y-6">
@@ -270,7 +241,7 @@ const Admin = () => {
             <div className="flex items-center gap-2">
               <Filter className="h-4 w-4 text-muted-foreground" />
               <span className="text-sm whitespace-nowrap">Filter by tier:</span>
-              {[1, 2, 3, 4, 5, 6].map((tier) => (
+              {[1, 2, 3].map((tier) => (
                 <Button
                   key={tier}
                   variant={filterTier === tier ? "default" : "outline"}
@@ -287,46 +258,35 @@ const Admin = () => {
           <div className="border rounded-lg overflow-hidden">
             <Table>
               <TableCaption>
-                Showing {filteredLicenses.length} of {legacyLicenses.length} total licenses
+                Showing {filteredLicenses.length} of {validLicenses.length} total licenses
               </TableCaption>
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-[50px]">#</TableHead>
                   <TableHead>License ID</TableHead>
-                  <TableHead>Holder</TableHead>
                   <TableHead className="w-[100px]">Tier</TableHead>
-                  <TableHead>Status</TableHead>
                   <TableHead className="text-right w-[100px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredLicenses.map((license, index) => (
-                  <TableRow key={license.license_id}>
+                  <TableRow key={license}>
                     <TableCell className="font-medium">{index + 1}</TableCell>
-                    <TableCell className="font-mono">{license.license_id}</TableCell>
-                    <TableCell>{license.holder_name}</TableCell>
+                    <TableCell>{license}</TableCell>
                     <TableCell>
                       <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        getLicenseTier(license.license_id) === 1 ? 'bg-blue-100 text-blue-800' : 
-                        getLicenseTier(license.license_id) === 2 ? 'bg-purple-100 text-purple-800' : 
-                        getLicenseTier(license.license_id) === 3 ? 'bg-amber-100 text-amber-800' :
-                        getLicenseTier(license.license_id) === 4 ? 'bg-green-100 text-green-800' :
-                        getLicenseTier(license.license_id) === 5 ? 'bg-red-100 text-red-800' :
-                        'bg-gray-100 text-gray-800'
+                        getLicenseTier(license) === 1 ? 'bg-blue-100 text-blue-800' : 
+                        getLicenseTier(license) === 2 ? 'bg-purple-100 text-purple-800' : 
+                        'bg-amber-100 text-amber-800'
                       }`}>
-                        Tier {getLicenseTier(license.license_id)}
+                        Tier {getLicenseTier(license)}
                       </span>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={license.status === 'active' ? 'default' : 'secondary'}>
-                        {license.status}
-                      </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <Button 
                         variant="ghost" 
                         size="icon"
-                        onClick={() => handleCopy(license.license_id)}
+                        onClick={() => handleCopy(license)}
                         title="Copy license ID"
                       >
                         <Copy className="h-4 w-4" />

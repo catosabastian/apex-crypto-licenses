@@ -4,23 +4,24 @@ import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
 import { useApplicationDialog } from "./ApplicationDialog";
 import { useState, useEffect } from "react";
-import { supabaseDataManager } from "@/utils/supabaseDataManager";
+import { unifiedDataManager, ContentSettings } from "@/utils/unifiedDataManager";
 
 const Footer = () => {
   const { openApplicationDialog } = useApplicationDialog();
-  const [settings, setSettings] = useState<any>({});
+  const [settings, setSettings] = useState<ContentSettings>(unifiedDataManager.getSettings());
   
   useEffect(() => {
-    const loadSettings = async () => {
-      try {
-        const data = await supabaseDataManager.getSettings();
-        setSettings(data);
-      } catch (error) {
-        console.error('Failed to load settings:', error);
-      }
+    // Real-time settings update handler
+    const handleSettingsUpdate = (data: { settings: ContentSettings }) => {
+      setSettings(data.settings);
     };
 
-    loadSettings();
+    // Listen to unified data manager events
+    unifiedDataManager.addEventListener('settings_updated', handleSettingsUpdate);
+
+    return () => {
+      unifiedDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
+    };
   }, []);
   
   return (

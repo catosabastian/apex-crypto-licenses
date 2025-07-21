@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Loader2, ShieldCheck } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { sendAdminNotification } from "@/utils/emailService";
-import { supabaseDataManager } from "@/utils/supabaseDataManager";
+import { unifiedDataManager, ContentSettings } from "@/utils/unifiedDataManager";
 import PaymentSection from "@/components/form/PaymentSection";
 
 const ADMIN_EMAIL = "catosabastian@gmail.com";
@@ -26,7 +26,7 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
   const [applicantType, setApplicantType] = useState<'individual' | 'corporate'>('individual');
   const [selectedCategory, setSelectedCategory] = useState<'3' | '4' | '5'>('3');
   const [selectedCrypto, setSelectedCrypto] = useState<'BTC' | 'ETH' | 'USDT_TRON' | 'USDT_ETH' | 'XRP'>('BTC');
-  const [settings, setSettings] = useState<any>({});
+  const [settings, setSettings] = useState<ContentSettings>(unifiedDataManager.getSettings());
 
   // Listen for settings updates
   useEffect(() => {
@@ -36,7 +36,10 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
       console.log('[ApplicationForm] Settings updated:', newSettings);
     };
 
-    // Settings update listener can be added here if needed in future
+    unifiedDataManager.addEventListener('settings_updated', handleSettingsUpdate);
+    return () => {
+      unifiedDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
+    };
   }, []);
 
   const getCategoryPrice = (category: string): string => {

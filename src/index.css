@@ -90,15 +90,15 @@
   }
 }
 
-/* Simplified Glass Morphism Components */
+/* Enhanced Glass Morphism Components */
 @layer components {
   .glass-card {
-    @apply backdrop-blur-sm border shadow-lg bg-card/95;
+    @apply backdrop-blur-lg border shadow-2xl bg-card/95;
     border-color: hsl(var(--border));
   }
   
   .glass-button {
-    @apply backdrop-blur-sm border shadow-lg transition-all duration-300;
+    @apply backdrop-blur-md border shadow-xl transition-all duration-300 hover:scale-105;
     background-color: hsl(var(--primary));
     border-color: hsl(var(--primary) / 0.25);
     color: hsl(var(--primary-foreground));
@@ -109,7 +109,7 @@
   }
   
   .modern-card {
-    @apply backdrop-blur-sm border rounded-2xl p-6 shadow-lg bg-card;
+    @apply backdrop-blur-md border rounded-2xl p-6 shadow-2xl bg-card;
     border-color: hsl(var(--border));
   }
   
@@ -120,31 +120,66 @@
   .enhanced-shadow {
     box-shadow: 
       0 2px 4px 0 hsl(var(--foreground) / 0.1),
-      0 8px 12px -2px hsl(var(--foreground) / 0.1);
+      0 8px 12px -2px hsl(var(--foreground) / 0.1),
+      0 20px 25px -5px hsl(var(--foreground) / 0.1);
+  }
+
+  .vibrant-glow {
+    box-shadow: 
+      0 0 30px hsl(var(--primary) / 0.4),
+      0 0 60px hsl(var(--primary) / 0.2);
   }
 }
 
-/* Simplified Animation System */
+/* Enhanced Animation System */
 @layer utilities {
   .animate-float {
     animation: float 6s ease-in-out infinite;
   }
   
-  .animate-fade-in {
-    animation: fadeIn 0.6s ease-out forwards;
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite alternate;
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.8s ease-out forwards;
+  }
+  
+  .animate-fade-in-up {
+    animation: fadeInUp 0.6s ease-out forwards;
   }
   
   .hover-lift {
-    @apply transition-all duration-300 hover:transform hover:-translate-y-1;
+    @apply transition-all duration-300 hover:transform hover:-translate-y-1 hover:shadow-2xl;
+  }
+  
+  .hover-glow {
+    @apply transition-all duration-300 hover:shadow-lg hover:shadow-primary/20;
   }
 }
 
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+  50% { transform: translateY(-20px); }
 }
 
-@keyframes fadeIn {
+@keyframes glow {
+  0% { box-shadow: 0 0 20px hsl(var(--primary) / 0.3); }
+  100% { box-shadow: 0 0 30px hsl(var(--primary) / 0.6); }
+}
+
+@keyframes slideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
   0% {
     opacity: 0;
     transform: translateY(20px);
@@ -157,7 +192,7 @@
 
 /* Enhanced Form Components */
 .form-section {
-  @apply space-y-6 p-8 modern-card;
+  @apply space-y-6 p-8 modern-card hover-lift;
 }
 
 .section-heading {
@@ -165,7 +200,7 @@
 }
 
 .section-icon {
-  @apply p-3 bg-primary/10 rounded-xl;
+  @apply p-3 bg-primary/10 rounded-xl hover-glow;
 }
 
 .form-field-group {
@@ -174,11 +209,11 @@
 
 /* Enhanced Category Cards */
 .category-card {
-  @apply p-6 border border-border/50 rounded-2xl cursor-pointer transition-all duration-300 hover:shadow-lg hover:border-primary/50 hover:-translate-y-1 modern-card;
+  @apply p-6 border border-border/50 rounded-2xl cursor-pointer transition-all duration-300 hover:shadow-xl hover:border-primary/50 hover:-translate-y-1 modern-card;
 }
 
 .category-card.selected {
-  @apply border-primary bg-primary/5 ring-2 ring-primary/50 shadow-lg enhanced-shadow;
+  @apply border-primary bg-primary/5 ring-2 ring-primary/50 shadow-xl enhanced-shadow;
 }
 
 .category-card.disabled {
@@ -200,7 +235,7 @@
 }
 
 .wallet-address {
-  @apply p-4 bg-muted/40 rounded-xl font-mono text-sm break-all border border-border/50;
+  @apply p-4 bg-muted/40 rounded-xl font-mono text-sm break-all border border-border/50 hover-glow;
 }
 
 .copy-button-success {
@@ -218,12 +253,12 @@
 
 /* Enhanced Button Styling */
 .btn-primary {
-  @apply bg-primary text-primary-foreground hover:bg-primary/95 transition-all duration-300 rounded-xl px-8 py-4 font-semibold shadow-lg shadow-primary/25;
+  @apply bg-primary text-primary-foreground hover:bg-primary/95 transition-all duration-300 rounded-xl px-10 py-5 font-semibold shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/35 hover:-translate-y-1 vibrant-glow;
 }
 
 /* Professional License Card Styling */
 .license-card {
-  @apply relative overflow-hidden border-2 border-primary/30 shadow-xl bg-card;
+  @apply relative overflow-hidden border-2 border-primary/30 shadow-2xl bg-card;
 }
 
 .license-card::before {
@@ -306,12 +341,15 @@
 @media (prefers-reduced-motion: reduce) {
   .loading-spinner,
   .animate-float,
-  .animate-fade-in {
+  .animate-glow,
+  .animate-slide-up,
+  .animate-fade-in-up {
     @apply animate-none;
   }
   
   .category-card,
-  .hover-lift {
+  .hover-lift,
+  .hover-glow {
     @apply transition-none;
   }
 }

@@ -9,22 +9,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/use-toast';
-import { supabaseDataManager } from '@/utils/supabaseDataManager';
+import { isValidLicense, sampleLicense } from '@/utils/licenseData';
 
 const VerifyPage = () => {
   const [licenseId, setLicenseId] = useState('');
   const [isVerifying, setIsVerifying] = useState(false);
   const [verificationResult, setVerificationResult] = useState<any>(null);
-  
-  // Use a real license ID from the database
-  const sampleLicense = {
-    id: 'CL-2024-8294-T2',
-    holder: 'APEX Trading Solutions Ltd.',
-    type: 'Professional Trader',
-    issueDate: '2024-01-15',
-    expiryDate: '2025-01-15',
-    platforms: 'Binance, Coinbase Pro, Kraken, Bybit'
-  };
   
   const handleVerify = async () => {
     if (!licenseId.trim()) {
@@ -38,20 +28,21 @@ const VerifyPage = () => {
     
     setIsVerifying(true);
     
-    try {
-      const license = await supabaseDataManager.verifyLicense(licenseId.trim());
+    // Simulate verification process
+    setTimeout(() => {
+      const isValid = isValidLicense(licenseId);
       
-      if (license) {
+      if (isValid) {
         setVerificationResult({
           valid: true,
           license: {
-            id: license.license_id,
-            holder: license.holder_name,
-            type: license.license_type,
-            issueDate: license.issue_date,
-            expiryDate: license.expiry_date,
-            status: license.status === 'active' ? 'Active' : license.status,
-            platforms: license.platforms || 'All major exchanges'
+            id: licenseId,
+            holder: sampleLicense.holder,
+            type: sampleLicense.type,
+            issueDate: sampleLicense.issueDate,
+            expiryDate: sampleLicense.expiryDate,
+            status: "Active",
+            platforms: sampleLicense.platforms
           }
         });
       } else {
@@ -60,15 +51,9 @@ const VerifyPage = () => {
           message: "License ID not found or invalid"
         });
       }
-    } catch (error) {
-      console.error('Verification error:', error);
-      setVerificationResult({
-        valid: false,
-        message: "An error occurred during verification"
-      });
-    } finally {
+      
       setIsVerifying(false);
-    }
+    }, 2000);
   };
   
   const handleCopy = (text: string) => {
@@ -128,7 +113,7 @@ const VerifyPage = () => {
                     <div className="flex gap-2">
                       <Input
                         id="license-id"
-                        placeholder="Enter license ID (e.g., CL-2024-8294-T2)"
+                        placeholder="Enter license ID (e.g., CL-2024-0001-T3)"
                         value={licenseId}
                         onChange={(e) => setLicenseId(e.target.value)}
                         className="flex-1"
