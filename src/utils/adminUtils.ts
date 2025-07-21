@@ -50,8 +50,8 @@ class AdminUtils {
     await this.rateLimit();
 
     try {
-      // Use the secure RPC function
-      const { data, error } = await supabase.rpc('is_admin');
+      // Use the secure RPC function directly without passing userId
+      const { data, error } = await (supabase as any).rpc('is_admin');
       
       if (error) {
         console.error('Admin check failed:', error);
@@ -78,17 +78,14 @@ class AdminUtils {
     await this.rateLimit();
 
     try {
-      const { data, error } = await supabase.rpc('create_admin_user', { _email: email });
+      const { data, error } = await (supabase as any).rpc('create_admin_user', { _email: email });
       
       if (error) {
         return { success: false, message: error.message };
       }
 
-      // Clear cache for this user
-      const { data: userData } = await supabase.auth.admin.getUserByEmail(email);
-      if (userData.user) {
-        this.adminRoleCache.delete(userData.user.id);
-      }
+      // Clear cache for all users since we don't have direct access to user ID
+      this.adminRoleCache.clear();
 
       return { success: true, message: data };
     } catch (error) {
@@ -103,7 +100,7 @@ class AdminUtils {
 
     try {
       // Use RPC to get admin users safely
-      const { data, error } = await supabase.rpc('get_admin_users');
+      const { data, error } = await (supabase as any).rpc('get_admin_users');
 
       if (error) {
         console.error('Error fetching admin users:', error);
@@ -130,7 +127,7 @@ class AdminUtils {
       if (!user) return;
 
       // Use RPC for audit logging to avoid type issues
-      await supabase.rpc('log_admin_action', {
+      await (supabase as any).rpc('log_admin_action', {
         action_type: action,
         table_name: tableName,
         record_id: recordId,
@@ -148,7 +145,7 @@ class AdminUtils {
 
     try {
       // Use RPC to get audit logs to avoid type issues
-      const { data, error } = await supabase.rpc('get_audit_logs', { log_limit: limit });
+      const { data, error } = await (supabase as any).rpc('get_audit_logs', { log_limit: limit });
 
       if (error) {
         console.error('Error fetching audit logs:', error);

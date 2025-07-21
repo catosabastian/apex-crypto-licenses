@@ -104,7 +104,7 @@ class SupabaseDataManager {
 
       // Check if user has admin role before loading sensitive data
       try {
-        const { data: isAdmin, error } = await supabase.rpc('is_admin');
+        const { data: isAdmin, error } = await (supabase as any).rpc('is_admin');
         if (error || !isAdmin) {
           console.log('[SupabaseDataManager] User is not admin, loading public data only');
           await this.loadPublicData();
