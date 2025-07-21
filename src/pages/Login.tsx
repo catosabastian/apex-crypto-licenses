@@ -6,16 +6,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ShieldCheck, AlertCircle, User, Key, Activity, Loader2 } from "lucide-react";
+import { ShieldCheck, AlertCircle, User, Key, Activity } from "lucide-react";
 import { useSecureAuth } from "@/contexts/SecureAuthContext";
 import { ConnectionStatus } from "@/components/ConnectionStatus";
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loginAttempts, setLoginAttempts] = useState(0);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const { isAuthenticated, login, connectionStatus, loading, error: authError } = useSecureAuth();
+  const { isAuthenticated, login, connectionStatus } = useSecureAuth();
   const location = useLocation();
   
   // Redirect if already authenticated
@@ -23,38 +23,32 @@ const Login = () => {
     return <Navigate to="/admin" replace />;
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
     
     if (!username || !password) {
+      setError("Please enter both username and password");
       return;
     }
 
     // Rate limiting for security
     if (loginAttempts >= 3) {
+      setError("Too many login attempts. Please wait before trying again.");
       return;
     }
     
-    try {
-      setIsSubmitting(true);
-      const success = await login(username, password);
+    const success = login(username, password);
+    if (!success) {
+      setLoginAttempts(prev => prev + 1);
+      setError("Invalid username or password");
       
-      if (!success) {
-        setLoginAttempts(prev => prev + 1);
-        
-        // Reset attempts after 5 minutes
-        setTimeout(() => {
-          setLoginAttempts(0);
-        }, 300000);
-      }
-    } catch (err) {
-      console.error('Login submission error:', err);
-    } finally {
-      setIsSubmitting(false);
+      // Reset attempts after 5 minutes
+      setTimeout(() => {
+        setLoginAttempts(0);
+      }, 300000);
     }
   };
-
-  const isDisabled = loginAttempts >= 3 || connectionStatus === 'disconnected' || loading || isSubmitting;
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
@@ -79,10 +73,10 @@ const Login = () => {
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
-            {authError && (
+            {error && (
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{authError}</AlertDescription>
+                <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
             {loginAttempts > 0 && (
@@ -103,8 +97,7 @@ const Login = () => {
                   className="pl-9" 
                   value={username} 
                   onChange={(e) => setUsername(e.target.value)} 
-                  disabled={isDisabled}
-                  required
+                  disabled={loginAttempts >= 3}
                 />
               </div>
             </div>
@@ -119,8 +112,7 @@ const Login = () => {
                   className="pl-9" 
                   value={password} 
                   onChange={(e) => setPassword(e.target.value)} 
-                  disabled={isDisabled}
-                  required
+                  disabled={loginAttempts >= 3}
                 />
               </div>
             </div>
@@ -129,18 +121,9 @@ const Login = () => {
             <Button 
               type="submit" 
               className="w-full" 
-              disabled={isDisabled}
+              disabled={loginAttempts >= 3 || connectionStatus === 'disconnected'}
             >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Signing in...
-                </>
-              ) : connectionStatus === 'disconnected' ? (
-                'Connection Required'
-              ) : (
-                'Login'
-              )}
+              {connectionStatus === 'disconnected' ? 'Connection Required' : 'Login'}
             </Button>
           </CardFooter>
         </form>

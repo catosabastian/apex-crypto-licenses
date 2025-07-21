@@ -1,4 +1,4 @@
-import { Globe, MessageSquare, ShieldCheck, Mail, MapPin } from "lucide-react";
+import { Globe, MessageSquare, ShieldCheck } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
 import { useApplicationDialog } from "./ApplicationDialog";
@@ -7,7 +7,15 @@ import { supabaseDataManager } from "@/utils/supabaseDataManager";
 
 const Footer = () => {
   const { openApplicationDialog } = useApplicationDialog();
-  const [settings, setSettings] = useState<Record<string, any>>({});
+  const [settings, setSettings] = useState<Record<string, any>>({
+    companyName: "CryptoLicense Pro",
+    supportEmail: "support@cryptolicensepro.com", 
+    contactPhone: "+1 (555) 123-4567",
+    companyAddress: "123 Business Ave",
+    city: "New York, NY 10001",
+    country: "United States",
+    website: ""
+  });
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
@@ -74,12 +82,12 @@ const Footer = () => {
               <ShieldCheck className="h-6 w-6" />
               <div>
                 <h2 className="text-xl font-bold">{settings.companyName || "CryptoLicense Pro"}</h2>
-                <p className="text-xs opacity-80">{settings.companyTagline || "Crypto Licensing Regulatory"}</p>
+                <p className="text-xs opacity-80">Crypto Licensing Regulatory</p>
               </div>
             </div>
             
             <p className="mt-4 text-sm opacity-80 max-w-md">
-              {settings.companyDescription || `${settings.companyName || "CryptoLicense Pro"} provides official regulatory licensing for cryptocurrency traders and institutions. Our mission is to ensure compliance and security in digital asset trading.`}
+              {settings.companyName || "CryptoLicense Pro"} provides official regulatory licensing for cryptocurrency traders and institutions. Our mission is to ensure compliance and security in digital asset trading.
             </p>
           </div>
           
@@ -96,29 +104,23 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold mb-4">Contact</h3>
             <ul className="space-y-2 text-sm">
-              {(settings.showSupportEmail === true || settings.showSupportEmail === 'true') && settings.supportEmail && (
-                <li className="flex items-center gap-2">
-                  <Mail className="h-4 w-4 opacity-80" />
-                  <span className="opacity-80">{settings.supportEmail}</span>
-                </li>
-              )}
-              {(settings.showPhoneNumber === true || settings.showPhoneNumber === 'true') && settings.phoneNumber && (
-                <li className="flex items-center gap-2">
-                  <MessageSquare className="h-4 w-4 opacity-80" />
-                  <span className="opacity-80">{settings.phoneNumber}</span>
-                </li>
-              )}
-              {(settings.showAddress === true || settings.showAddress === 'true') && (settings.address || settings.city || settings.country) && (
-                <li className="flex items-start gap-2">
-                  <MapPin className="h-4 w-4 opacity-80 mt-0.5" />
-                  <div className="opacity-80">
-                    {settings.address && <div>{settings.address}</div>}
-                    {settings.city && <div>{settings.city}</div>}
-                    {settings.country && <div>{settings.country}</div>}
-                  </div>
-                </li>
-              )}
-              {(settings.showWebsite === true || settings.showWebsite === 'true') && settings.website && (
+              <li className="flex items-center gap-2">
+                <Globe className="h-4 w-4 opacity-80" />
+                <span className="opacity-80">{settings.supportEmail || "support@cryptolicensepro.com"}</span>
+              </li>
+              <li className="flex items-center gap-2">
+                <MessageSquare className="h-4 w-4 opacity-80" />
+                <span className="opacity-80">{settings.contactPhone || "+1 (555) 123-4567"}</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <Globe className="h-4 w-4 opacity-80 mt-0.5" />
+                <div className="opacity-80">
+                  <div>{settings.companyAddress || "123 Business Ave"}</div>
+                  <div>{settings.city || "New York, NY 10001"}</div>
+                  <div>{settings.country || "United States"}</div>
+                </div>
+              </li>
+              {settings.website && (
                 <li className="flex items-center gap-2">
                   <Globe className="h-4 w-4 opacity-80" />
                   <a href={settings.website} target="_blank" rel="noopener noreferrer" className="opacity-80 hover:opacity-100 transition-opacity">
@@ -134,22 +136,14 @@ const Footer = () => {
         
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-xs opacity-70">
-            {settings.copyrightText || `© ${new Date().getFullYear()} ${settings.companyName || "CryptoLicense Pro"}. All rights reserved.`}
+            © {new Date().getFullYear()} {settings.companyName || "CryptoLicense Pro"}. All rights reserved.
           </div>
           
-          {(settings.showFooterLinks === true || settings.showFooterLinks === 'true') && (
-            <div className="flex gap-6 text-xs opacity-70">
-              {settings.privacyPolicyUrl && (
-                <a href={settings.privacyPolicyUrl} className="hover:opacity-100 transition-opacity">Privacy Policy</a>
-              )}
-              {settings.termsOfServiceUrl && (
-                <a href={settings.termsOfServiceUrl} className="hover:opacity-100 transition-opacity">Terms of Service</a>
-              )}
-              {settings.legalNoticeUrl && (
-                <a href={settings.legalNoticeUrl} className="hover:opacity-100 transition-opacity">Legal Notice</a>
-              )}
-            </div>
-          )}
+          <div className="flex gap-6 text-xs opacity-70">
+            <a href="#" className="hover:opacity-100 transition-opacity">Privacy Policy</a>
+            <a href="#" className="hover:opacity-100 transition-opacity">Terms of Service</a>
+            <a href="#" className="hover:opacity-100 transition-opacity">Legal Notice</a>
+          </div>
         </div>
       </div>
     </footer>

@@ -4,12 +4,10 @@ import { secureDataManager } from "@/utils/secureDataManager";
 
 interface AuthContextType {
   isAuthenticated: boolean;
-  login: (username: string, password: string) => Promise<boolean>;
+  login: (username: string, password: string) => boolean;
   logout: () => void;
   sessionInfo: any;
   connectionStatus: 'connected' | 'disconnected' | 'reconnecting';
-  loading: boolean;
-  error: string | null;
 }
 
 const SecureAuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -18,36 +16,19 @@ export const SecureAuthProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [sessionInfo, setSessionInfo] = useState<any>(null);
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'reconnecting'>('connected');
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const initializeAuth = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        // Check existing session
-        const session = secureDataManager.getCurrentSession();
-        if (session && session.isActive) {
-          setIsAuthenticated(true);
-          setSessionInfo(session);
-        }
-      } catch (err) {
-        console.error('Auth initialization error:', err);
-        setError('Failed to initialize authentication');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    initializeAuth();
+    // Check existing session
+    const session = secureDataManager.getCurrentSession();
+    if (session && session.isActive) {
+      setIsAuthenticated(true);
+      setSessionInfo(session);
+    }
 
     // Listen for session events
     const handleSessionExpired = () => {
       setIsAuthenticated(false);
       setSessionInfo(null);
-      setError('Session expired');
     };
 
     const handleSessionEnded = () => {
@@ -78,39 +59,20 @@ export const SecureAuthProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     };
   }, []);
 
-  const login = async (username: string, password: string): Promise<boolean> => {
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const success = secureDataManager.createSession({ username, password });
-      if (success) {
-        const session = secureDataManager.getCurrentSession();
-        setIsAuthenticated(true);
-        setSessionInfo(session);
-        return true;
-      }
-      
-      setError('Invalid credentials');
-      return false;
-    } catch (err) {
-      console.error('Login error:', err);
-      setError('Login failed. Please try again.');
-      return false;
-    } finally {
-      setLoading(false);
+  const login = (username: string, password: string): boolean => {
+    const success = secureDataManager.createSession({ username, password });
+    if (success) {
+      const session = secureDataManager.getCurrentSession();
+      setIsAuthenticated(true);
+      setSessionInfo(session);
     }
+    return success;
   };
 
   const logout = () => {
-    try {
-      secureDataManager.endSession();
-      setIsAuthenticated(false);
-      setSessionInfo(null);
-      setError(null);
-    } catch (err) {
-      console.error('Logout error:', err);
-    }
+    secureDataManager.endSession();
+    setIsAuthenticated(false);
+    setSessionInfo(null);
   };
 
   return (
@@ -119,9 +81,7 @@ export const SecureAuthProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       login, 
       logout, 
       sessionInfo,
-      connectionStatus,
-      loading,
-      error
+      connectionStatus 
     }}>
       {children}
     </SecureAuthContext.Provider>
