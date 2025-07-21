@@ -2,8 +2,8 @@
 import { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import Hero from '@/components/Hero';
-import AboutSection from '@/components/AboutSection';
-import WhatIsLicense from '@/components/WhatIsLicense';
+import EnhancedAboutSection from '@/components/EnhancedAboutSection';
+import EnhancedWhatIsLicense from '@/components/EnhancedWhatIsLicense';
 import LicenseCategories from '@/components/LicenseCategories';
 import ProcessSteps from '@/components/ProcessSteps';
 import FeaturesSection from '@/components/FeaturesSection';
@@ -34,11 +34,11 @@ const Index = () => {
       <Header />
       <main>
         <Hero />
-        <AboutSection />
-        <WhatIsLicense />
-        <LicenseCategories />
-        <ProcessSteps />
         <FeaturesSection />
+        <EnhancedAboutSection />
+        <LicenseCategories />
+        <EnhancedWhatIsLicense />
+        <ProcessSteps />
         <StatsSection />
         <VerificationSection />
       </main>

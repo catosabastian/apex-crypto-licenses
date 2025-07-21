@@ -53,56 +53,16 @@ const LicenseCategorySection = ({ selectedCategory, onCategorySelect }: LicenseC
   }, []);
 
   const generateCategories = (): LicenseCategory[] => {
-    return [
-      {
-        id: "1", 
-        name: "Basic Trader",
-        price: settings.category1_price || "Loading...",
-        available: settings.category1_available !== false,
-        minVolume: "Up to $100K",
-        status: settings.category1_status || "AVAILABLE"
-      },
-      {
-        id: "2", 
-        name: "Standard Trader", 
-        price: settings.category2_price || "Loading...",
-        available: settings.category2_available !== false,
-        minVolume: "Up to $500K",
-        status: settings.category2_status || "AVAILABLE"
-      },
-      {
-        id: "3", 
-        name: "Advanced Trader",
-        price: settings.category3_price || "Loading...",
-        available: settings.category3_available !== false,
-        minVolume: "Up to $1M",
-        status: settings.category3_status || "AVAILABLE"
-      },
-      {
-        id: "4", 
-        name: "Professional Trader",
-        price: settings.category4_price || "Loading...",
-        available: settings.category4_available !== false,
-        minVolume: "Up to $5M",
-        status: settings.category4_status || "AVAILABLE"
-      },
-      {
-        id: "5", 
-        name: "Institutional Trader",
-        price: settings.category5_price || "Loading...",
-        available: settings.category5_available !== false,
-        minVolume: "Up to $10M",
-        status: settings.category5_status || "AVAILABLE"
-      },
-      {
-        id: "6", 
-        name: "Executive Trader",
-        price: settings.category6_price || "Loading...",
-        available: settings.category6_available !== false,
-        minVolume: "Unlimited",
-        status: settings.category6_status || "AVAILABLE"
-      }
-    ];
+    const licenseCategories = settings.license_categories || {};
+    
+    return Object.entries(licenseCategories).map(([key, category]: [string, any]) => ({
+      id: key,
+      name: category.name,
+      price: category.price,
+      minVolume: category.minVolume,
+      available: category.available,
+      status: category.available ? 'AVAILABLE' : 'SOLD OUT'
+    }));
   };
 
   const categories = generateCategories();
