@@ -240,28 +240,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_admin_users: {
-        Args: Record<PropertyKey, never>
-        Returns: {
-          id: string
-          email: string
-          role: string
-          created_at: string
-        }[]
-      }
-      get_audit_logs: {
-        Args: { log_limit?: number }
-        Returns: {
-          id: string
-          user_id: string
-          action: string
-          table_name: string
-          record_id: string
-          old_data: Json
-          new_data: Json
-          created_at: string
-        }[]
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never

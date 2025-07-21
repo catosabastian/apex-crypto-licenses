@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ShieldCheck, AlertCircle, User, Key, Activity, Loader2 } from "lucide-react";
-import { useAdminAuth } from "@/contexts/AdminAuthContext";
+import { useSecureAuth } from "@/contexts/SecureAuthContext";
 import { ConnectionStatus } from "@/components/ConnectionStatus";
 
 const Login = () => {
@@ -15,9 +15,7 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { isAuthenticated, signIn, isLoading } = useAdminAuth();
-  const [authError, setAuthError] = useState<string | null>(null);
-  const connectionStatus: 'connected' | 'disconnected' | 'reconnecting' = 'connected';
+  const { isAuthenticated, login, connectionStatus, loading, error: authError } = useSecureAuth();
   const location = useLocation();
   
   // Redirect if already authenticated
@@ -39,11 +37,9 @@ const Login = () => {
     
     try {
       setIsSubmitting(true);
-      setAuthError(null);
-      const result = await signIn(username, password);
+      const success = await login(username, password);
       
-      if (result.error) {
-        setAuthError(result.error);
+      if (!success) {
         setLoginAttempts(prev => prev + 1);
         
         // Reset attempts after 5 minutes
@@ -53,13 +49,12 @@ const Login = () => {
       }
     } catch (err) {
       console.error('Login submission error:', err);
-      setAuthError('An unexpected error occurred');
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const isDisabled = loginAttempts >= 3 || isLoading || isSubmitting;
+  const isDisabled = loginAttempts >= 3 || connectionStatus === 'disconnected' || loading || isSubmitting;
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50">
@@ -141,6 +136,8 @@ const Login = () => {
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Signing in...
                 </>
+              ) : connectionStatus === 'disconnected' ? (
+                'Connection Required'
               ) : (
                 'Login'
               )}

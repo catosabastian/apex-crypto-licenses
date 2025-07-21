@@ -5,8 +5,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ApplicationDialogProvider } from '@/components/ApplicationDialog';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { SecureAuthProvider } from '@/contexts/SecureAuthContext';
 import { AdminAuthProvider } from '@/contexts/AdminAuthContext';
-import { supabaseDataManager } from '@/utils/supabaseDataManager';
+import { unifiedDataManager } from '@/utils/unifiedDataManager';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import Index from '@/pages/Index';
 import AboutPage from '@/pages/AboutPage';
@@ -23,7 +24,7 @@ import TestimonialsPage from '@/pages/TestimonialsPage';
 import VerifyPage from '@/pages/VerifyPage';
 import Login from '@/pages/Login';
 import Admin from '@/pages/Admin';
-import AdminLogin from '@/pages/AdminLogin';
+import SecureAdmin from '@/pages/SecureAdmin';
 import Setup from '@/pages/Setup';
 import NotFound from '@/pages/NotFound';
 import ProtectedRoute from '@/components/ProtectedRoute';
@@ -41,9 +42,26 @@ function App() {
   const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
-    // Simple initialization for the unified admin system
-    console.log('[App] Initializing application...');
-    setIsInitialized(true);
+    try {
+      // Initialize the unified data manager
+      console.log('[App] Initializing unified data manager...');
+      
+      // Verify settings are properly loaded
+      const settings = unifiedDataManager.getSettings();
+      console.log('[App] Settings loaded:', settings);
+      
+      setIsInitialized(true);
+    } catch (error) {
+      console.error('[App] Initialization failed:', error);
+      // Try to reset and reinitialize
+      try {
+        unifiedDataManager.resetToDefaults();
+        setIsInitialized(true);
+      } catch (resetError) {
+        console.error('[App] Reset failed:', resetError);
+        setIsInitialized(true); // Still allow app to load
+      }
+    }
   }, []);
 
   if (!isInitialized) {
@@ -63,8 +81,9 @@ function App() {
         <TooltipProvider>
           <BrowserRouter>
             <AuthProvider>
-              <AdminAuthProvider>
-                <ApplicationDialogProvider>
+              <SecureAuthProvider>
+                <AdminAuthProvider>
+                  <ApplicationDialogProvider>
                   <div className="min-h-screen bg-background font-sans antialiased">
                     <Suspense fallback={
                       <div className="min-h-screen flex items-center justify-center">
@@ -86,13 +105,20 @@ function App() {
                         <Route path="/testimonials" element={<TestimonialsPage />} />
                         <Route path="/verify" element={<VerifyPage />} />
                         <Route path="/login" element={<Login />} />
-                        <Route path="/admin-login" element={<AdminLogin />} />
                         <Route path="/setup" element={<Setup />} />
                         <Route 
                           path="/admin" 
                           element={
-                            <ProtectedRoute requireAdmin={true}>
+                            <ProtectedRoute>
                               <Admin />
+                            </ProtectedRoute>
+                          } 
+                        />
+                        <Route 
+                          path="/secure-admin" 
+                          element={
+                            <ProtectedRoute>
+                              <SecureAdmin />
                             </ProtectedRoute>
                           } 
                         />
@@ -101,8 +127,9 @@ function App() {
                     </Suspense>
                   </div>
                   <Toaster />
-                </ApplicationDialogProvider>
-              </AdminAuthProvider>
+                  </ApplicationDialogProvider>
+                </AdminAuthProvider>
+              </SecureAuthProvider>
             </AuthProvider>
           </BrowserRouter>
         </TooltipProvider>

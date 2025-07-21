@@ -73,6 +73,27 @@ export interface ContentItem {
   updated_at: string;
 }
 
+export interface UserRole {
+  id: string;
+  user_id: string;
+  role: 'admin' | 'user' | 'moderator';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AuditLog {
+  id: string;
+  user_id?: string;
+  action: string;
+  table_name: string;
+  record_id?: string;
+  old_data?: any;
+  new_data?: any;
+  ip_address?: string;
+  user_agent?: string;
+  created_at: string;
+}
+
 class SupabaseDataManager {
   private eventListeners: { [key: string]: Function[] } = {};
   private dataSubjects = {
@@ -93,37 +114,13 @@ class SupabaseDataManager {
   private async initialize() {
     try {
       console.log('[SupabaseDataManager] Starting initialization...');
-      
-      // Check if user is authenticated before initializing
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        console.log('[SupabaseDataManager] No session found, skipping admin data initialization');
-        this.isInitialized = true;
-        return;
-      }
-
-      // Check if user has admin role before loading sensitive data
-      try {
-        const { data: isAdmin, error } = await (supabase as any).rpc('is_admin');
-        if (error || !isAdmin) {
-          console.log('[SupabaseDataManager] User is not admin, loading public data only');
-          await this.loadPublicData();
-        } else {
-          console.log('[SupabaseDataManager] Admin user detected, loading all data');
-          this.initializeRealtimeSubscriptions();
-          await this.loadInitialData();
-        }
-      } catch (rpcError) {
-        console.log('[SupabaseDataManager] RPC call failed, loading public data only');
-        await this.loadPublicData();
-      }
-      
+      this.initializeRealtimeSubscriptions();
+      await this.loadInitialData();
       this.isInitialized = true;
       console.log('[SupabaseDataManager] Initialization complete');
     } catch (error) {
       console.error('[SupabaseDataManager] Initialization failed:', error);
-      // Continue with limited functionality
-      this.isInitialized = true;
+      throw error;
     }
   }
 
@@ -162,23 +159,7 @@ class SupabaseDataManager {
       console.log('[SupabaseDataManager] Initial data loaded successfully');
     } catch (error) {
       console.error('[SupabaseDataManager] Error loading initial data:', error);
-      // Continue with limited functionality instead of throwing
-      console.log('[SupabaseDataManager] Continuing with limited functionality');
-    }
-  }
-
-  private async loadPublicData() {
-    try {
-      console.log('[SupabaseDataManager] Loading public data only...');
-      await Promise.all([
-        this.loadTableData('payment_addresses'),
-        this.loadTableData('settings'),
-        this.loadTableData('content')
-      ]);
-      console.log('[SupabaseDataManager] Public data loaded successfully');
-    } catch (error) {
-      console.error('[SupabaseDataManager] Error loading public data:', error);
-      console.log('[SupabaseDataManager] Continuing with empty data');
+      throw error;
     }
   }
 
@@ -662,40 +643,6 @@ class SupabaseDataManager {
     }
   }
 
-  // Admin role management
-  async checkUserRole(userId: string): Promise<string | null> {
-    try {
-      const { data, error } = await (supabase as any)
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .single();
-
-      if (error) return null;
-      return data?.role || null;
-    } catch (error) {
-      console.error('Error checking user role:', error);
-      return null;
-    }
-  }
-
-  async assignAdminRole(userId: string): Promise<boolean> {
-    try {
-      const { error } = await (supabase as any)
-        .from('user_roles')
-        .upsert({
-          user_id: userId,
-          role: 'admin'
-        });
-
-      if (error) throw error;
-      return true;
-    } catch (error) {
-      console.error('Error assigning admin role:', error);
-      return false;
-    }
-  }
-
   // Enhanced analytics with better data handling
   async getAnalytics() {
     await this.ensureInitialized();
@@ -732,6 +679,88 @@ class SupabaseDataManager {
       content: this.dataSubjects.content.value,
       exportedAt: new Date().toISOString()
     };
+  }
+
+  // Admin role checking
+  async checkAdminRole(): Promise<boolean> {
+    try {
+      const { data, error } = await (supabase as any)
+        .from('user_roles')
+        .select('role')
+        .eq('role', 'admin')
+        .single();
+
+      return !error && data !== null;
+    } catch (error) {
+      console.error('Error checking admin role:', error);
+      return false;
+    }
+  }
+
+  async getUserRoles(): Promise<UserRole[]> {
+    try {
+      const { data, error } = await (supabase as any)
+        .from('user_roles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error getting user roles:', error);
+      return [];
+    }
+  }
+
+  async assignUserRole(userId: string, role: 'admin' | 'user' | 'moderator'): Promise<boolean> {
+    try {
+      const { error } = await (supabase as any)
+        .from('user_roles')
+        .upsert({ 
+          user_id: userId, 
+          role,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id,role'
+        });
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error assigning user role:', error);
+      return false;
+    }
+  }
+
+  // Audit logging
+  async logAdminAction(action: string, tableName: string, recordId?: string, oldData?: any, newData?: any): Promise<void> {
+    try {
+      await (supabase as any).rpc('log_admin_action', {
+        action_type: action,
+        table_name: tableName,
+        record_id: recordId,
+        old_data: oldData,
+        new_data: newData
+      });
+    } catch (error) {
+      console.error('Error logging admin action:', error);
+    }
+  }
+
+  async getAuditLogs(limit: number = 100): Promise<AuditLog[]> {
+    try {
+      const { data, error } = await (supabase as any)
+        .from('admin_audit_log')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error getting audit logs:', error);
+      return [];
+    }
   }
 
   // Add system health check

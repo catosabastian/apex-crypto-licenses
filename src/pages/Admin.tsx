@@ -7,9 +7,9 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Shield, Copy, Search, Download, Filter, LogOut, BarChart3, FileText, Settings, Mail, Globe, Layers, Wallet, RefreshCw, Users } from 'lucide-react';
+import { Shield, Copy, Search, Download, Filter, LogOut, BarChart3, FileText, Settings, Mail, Globe, Layers, Wallet, RefreshCw } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { useAdminAuth } from '@/contexts/AdminAuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { supabaseDataManager } from '@/utils/supabaseDataManager';
 import { ApplicationsManager } from '@/components/admin/ApplicationsManager';
@@ -18,7 +18,6 @@ import { SettingsManager } from '@/components/admin/SettingsManager';
 import { LicenseManager } from '@/components/admin/LicenseManager';
 import { ContentManager } from '@/components/admin/ContentManager';
 import { PaymentAddressManager } from '@/components/admin/PaymentAddressManager';
-
 
 const Admin = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -33,7 +32,7 @@ const Admin = () => {
     totalRevenue: 0
   });
   const [isLoading, setIsLoading] = useState(true);
-  const { signOut, user } = useAdminAuth();
+  const { logout } = useAuth();
   const navigate = useNavigate();
 
   // Update analytics when tab changes
@@ -142,9 +141,9 @@ const Admin = () => {
     }
   };
 
-  const handleLogout = async () => {
-    await signOut();
-    navigate('/admin-login');
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
   const refreshData = async () => {
@@ -215,9 +214,9 @@ const Admin = () => {
             <Settings className="h-4 w-4" />
             Settings
           </TabsTrigger>
-          <TabsTrigger value="users" className="flex items-center gap-2">
-            <Users className="h-4 w-4" />
-            Users
+          <TabsTrigger value="legacy" className="flex items-center gap-2">
+            <Layers className="h-4 w-4" />
+            Legacy
           </TabsTrigger>
         </TabsList>
 
@@ -301,16 +300,6 @@ const Admin = () => {
 
         <TabsContent value="settings" className="space-y-6">
           <SettingsManager />
-        </TabsContent>
-
-        <TabsContent value="users" className="space-y-6">
-          <div className="text-center py-8">
-            <h3 className="text-lg font-semibold mb-2">Single Admin User</h3>
-            <p className="text-muted-foreground">This system uses a simplified single admin user model.</p>
-            <p className="text-sm text-muted-foreground mt-2">
-              Currently logged in as: {user?.email}
-            </p>
-          </div>
         </TabsContent>
 
         <TabsContent value="legacy" className="space-y-6">
