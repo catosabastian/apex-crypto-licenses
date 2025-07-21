@@ -6,30 +6,60 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { CheckCircle, ChevronRight, MessageSquareText, XCircle, Shield, Star, Crown, Building, Zap, Trophy, Wifi } from 'lucide-react';
 import { useApplicationDialog } from '@/components/ApplicationDialog';
 import SupportDialog from '@/components/SupportDialog';
-import { unifiedDataManager, ContentSettings } from '@/utils/unifiedDataManager';
+import { supabaseDataManager } from '@/utils/supabaseDataManager';
 
 const LicenseCategories = () => {
   const { openApplicationDialog } = useApplicationDialog();
   const [isSupportDialogOpen, setSupportDialogOpen] = useState(false);
-  const [settings, setSettings] = useState(unifiedDataManager.getSettings());
+  const [settings, setSettings] = useState({
+    category1Price: '$25,000',
+    category1Available: false,
+    category2Price: '$50,000', 
+    category2Available: false,
+    category3Price: '$70,000',
+    category3Available: true,
+    category4Price: '$150,000',
+    category4Available: true,
+    category5Price: '$250,000',
+    category5Available: true,
+    category6Price: '$500,000',
+    category6Available: true
+  });
   const [lastUpdateTime, setLastUpdateTime] = useState<Date>(new Date());
   const [isConnected, setIsConnected] = useState(true);
 
   useEffect(() => {
-    console.log('[LicenseCategories] Component mounted, listening for settings updates');
-    
-    const handleSettingsUpdate = (data: any) => {
-      console.log('[LicenseCategories] Settings update received:', data);
-      const newSettings = data.settings || data;
-      setSettings(newSettings);
-      setLastUpdateTime(new Date());
-      setIsConnected(true);
+    const loadSettings = async () => {
+      try {
+        const supabaseSettings = await supabaseDataManager.getSettings();
+        const newSettings = {
+          category1Price: supabaseSettings.category1_price || '$25,000',
+          category1Available: supabaseSettings.category1_available !== false,
+          category2Price: supabaseSettings.category2_price || '$50,000',
+          category2Available: supabaseSettings.category2_available !== false,
+          category3Price: supabaseSettings.category3_price || '$70,000',
+          category3Available: supabaseSettings.category3_available !== false,
+          category4Price: supabaseSettings.category4_price || '$150,000',
+          category4Available: supabaseSettings.category4_available !== false,
+          category5Price: supabaseSettings.category5_price || '$250,000',
+          category5Available: supabaseSettings.category5_available !== false,
+          category6Price: supabaseSettings.category6_price || '$500,000',
+          category6Available: supabaseSettings.category6_available !== false
+        };
+        setSettings(newSettings);
+        setLastUpdateTime(new Date());
+        setIsConnected(true);
+      } catch (error) {
+        console.error('Error loading settings:', error);
+        setIsConnected(false);
+      }
     };
 
-    unifiedDataManager.addEventListener('settings_updated', handleSettingsUpdate);
+    loadSettings();
+    supabaseDataManager.addEventListener('settings_updated', loadSettings);
 
     return () => {
-      unifiedDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
+      supabaseDataManager.removeEventListener('settings_updated', loadSettings);
     };
   }, []);
   

@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Loader2, ShieldCheck } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { sendAdminNotification } from "@/utils/emailService";
-import { unifiedDataManager, ContentSettings } from "@/utils/unifiedDataManager";
+import { supabaseDataManager } from "@/utils/supabaseDataManager";
 import PaymentSection from "@/components/form/PaymentSection";
 
 const ADMIN_EMAIL = "catosabastian@gmail.com";
@@ -26,7 +26,7 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
   const [applicantType, setApplicantType] = useState<'individual' | 'corporate'>('individual');
   const [selectedCategory, setSelectedCategory] = useState<'3' | '4' | '5'>('3');
   const [selectedCrypto, setSelectedCrypto] = useState<'BTC' | 'ETH' | 'USDT_TRON' | 'USDT_ETH' | 'XRP'>('BTC');
-  const [settings, setSettings] = useState<ContentSettings>(unifiedDataManager.getSettings());
+  const [settings, setSettings] = useState<any>({});
 
   // Listen for settings updates
   useEffect(() => {
@@ -445,7 +445,6 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
             selectedCrypto={selectedCrypto}
             onCryptoChange={(crypto) => setSelectedCrypto(crypto as 'BTC' | 'ETH' | 'USDT_TRON' | 'USDT_ETH' | 'XRP')}
             selectedCategory={selectedCategory}
-            settings={settings}
           />
           
           {/* Additional Information */}
