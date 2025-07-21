@@ -1,14 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Shield, LogOut, BarChart3, FileText, Settings, Mail, Globe, Download, RefreshCw, AlertTriangle, Activity, Users } from 'lucide-react';
+import { Shield, LogOut, BarChart3, FileText, Settings, Mail, Globe, Download, RefreshCw, AlertTriangle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { toast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
-import { useAdminAuth } from '@/contexts/AdminAuthContext';
-import { supabaseDataManager, AuditLog } from '@/utils/supabaseDataManager';
+import { useSecureAuth } from '@/contexts/SecureAuthContext';
+import { useNavigate } from 'react-router-dom';
+import { supabaseDataManager } from '@/utils/supabaseDataManager';
 import { ApplicationsManager } from '@/components/admin/ApplicationsManager';
 import { ContactsManager } from '@/components/admin/ContactsManager';
 import { UnifiedSettingsManager } from '@/components/admin/UnifiedSettingsManager';
@@ -29,29 +28,8 @@ const SecureAdmin = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [systemHealth, setSystemHealth] = useState<{ status: string; issues: string[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
-  
-  const { isAuthenticated, logout } = useAuth();
-  const { isAdminAuthenticated, isCheckingAdminRole, adminError } = useAdminAuth();
+  const { logout, connectionStatus, loading: authLoading } = useSecureAuth();
   const navigate = useNavigate();
-
-  // Redirect if not authenticated or not admin
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (!isCheckingAdminRole && !isAdminAuthenticated) {
-    return (
-      <div className="container mx-auto py-10 px-4">
-        <Alert variant="destructive">
-          <AlertTriangle className="h-4 w-4" />
-          <AlertDescription>
-            {adminError || 'Access denied. Admin privileges required.'}
-          </AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
 
   // Update analytics when tab changes
   useEffect(() => {
@@ -80,10 +58,10 @@ const SecureAdmin = () => {
       }
     };
 
-    if (!isCheckingAdminRole && isAdminAuthenticated) {
+    if (!authLoading) {
       loadAnalytics();
     }
-  }, [activeTab, isCheckingAdminRole, isAdminAuthenticated]);
+  }, [activeTab, authLoading]);
 
   const handleLogout = () => {
     try {
@@ -158,13 +136,13 @@ const SecureAdmin = () => {
     }
   };
 
-  if (isCheckingAdminRole) {
+  if (authLoading) {
     return (
       <div className="container mx-auto py-10 px-4">
         <div className="flex items-center justify-center min-h-[400px]">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-            <p className="mt-2 text-muted-foreground">Verifying admin privileges...</p>
+            <p className="mt-2 text-muted-foreground">Loading admin dashboard...</p>
           </div>
         </div>
       </div>

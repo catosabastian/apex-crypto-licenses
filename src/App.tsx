@@ -6,7 +6,6 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ApplicationDialogProvider } from '@/components/ApplicationDialog';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { SecureAuthProvider } from '@/contexts/SecureAuthContext';
-import { AdminAuthProvider } from '@/contexts/AdminAuthContext';
 import { unifiedDataManager } from '@/utils/unifiedDataManager';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import Index from '@/pages/Index';
@@ -82,8 +81,7 @@ function App() {
           <BrowserRouter>
             <AuthProvider>
               <SecureAuthProvider>
-                <AdminAuthProvider>
-                  <ApplicationDialogProvider>
+                <ApplicationDialogProvider>
                   <div className="min-h-screen bg-background font-sans antialiased">
                     <Suspense fallback={
                       <div className="min-h-screen flex items-center justify-center">
@@ -127,8 +125,7 @@ function App() {
                     </Suspense>
                   </div>
                   <Toaster />
-                  </ApplicationDialogProvider>
-                </AdminAuthProvider>
+                </ApplicationDialogProvider>
               </SecureAuthProvider>
             </AuthProvider>
           </BrowserRouter>
