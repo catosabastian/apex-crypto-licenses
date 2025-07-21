@@ -85,6 +85,9 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
         return;
       }
 
+      // Get wallet address first (await the async function)
+      const walletAddress = await getSelectedWalletAddress();
+
       const completeFormData = {
         ...formDataObj,
         submissionTime: new Date().toISOString(),
@@ -92,7 +95,7 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
         selectedCategory,
         selectedCrypto,
         categoryPrice: getCategoryPrice(selectedCategory),
-        walletAddress: getSelectedWalletAddress()
+        walletAddress
       };
       
       // Save application to Supabase
@@ -153,20 +156,25 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
   };
 
   const getSelectedWalletAddress = async (): Promise<string> => {
-    const paymentAddresses = await supabaseDataManager.getPaymentAddresses();
-    const addressMap: Record<string, string> = {};
-    
-    paymentAddresses.forEach(addr => {
-      addressMap[addr.cryptocurrency] = addr.address;
-    });
+    try {
+      const paymentAddresses = await supabaseDataManager.getPaymentAddresses();
+      const addressMap: Record<string, string> = {};
+      
+      paymentAddresses.forEach(addr => {
+        addressMap[addr.cryptocurrency] = addr.address;
+      });
 
-    switch (selectedCrypto) {
-      case 'BTC': return addressMap['BTC'] || '';
-      case 'ETH': return addressMap['ETH'] || '';
-      case 'USDT_TRON': return addressMap['USDT_TRON'] || '';
-      case 'USDT_ETH': return addressMap['USDT_ETH'] || '';
-      case 'XRP': return addressMap['XRP'] || '';
-      default: return '';
+      switch (selectedCrypto) {
+        case 'BTC': return addressMap['BTC'] || '';
+        case 'ETH': return addressMap['ETH'] || '';
+        case 'USDT_TRON': return addressMap['USDT_TRON'] || '';
+        case 'USDT_ETH': return addressMap['USDT_ETH'] || '';
+        case 'XRP': return addressMap['XRP'] || '';
+        default: return '';
+      }
+    } catch (error) {
+      console.error('Error getting wallet address:', error);
+      return '';
     }
   };
 
