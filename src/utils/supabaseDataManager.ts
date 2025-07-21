@@ -116,7 +116,8 @@ class SupabaseDataManager {
     tables.forEach(table => {
       supabase
         .channel(`${table}-changes`)
-        .on('postgres_changes', { event: '*', schema: 'public', table }, () => {
+        .on('postgres_changes', { event: '*', schema: 'public', table }, (payload) => {
+          console.log(`[SupabaseDataManager] Real-time update for ${table}:`, payload);
           this.loadTableData(table);
         })
         .subscribe();
@@ -218,16 +219,23 @@ class SupabaseDataManager {
     }
   }
 
-  // Licenses
+  // Enhanced Licenses methods with proper error handling
   async createLicense(license: Omit<License, 'id' | 'created_at' | 'updated_at'>): Promise<License | null> {
     try {
+      console.log('[SupabaseDataManager] Creating license:', license);
       const { data, error } = await (supabase as any)
         .from('licenses')
         .insert([license])
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('[SupabaseDataManager] Error creating license:', error);
+        throw error;
+      }
+      
+      console.log('[SupabaseDataManager] License created successfully:', data);
+      await this.loadTableData('licenses');
       return data;
     } catch (error) {
       console.error('Error creating license:', error);
@@ -242,6 +250,7 @@ class SupabaseDataManager {
 
   async updateLicense(id: string, updates: Partial<License>): Promise<License | null> {
     try {
+      console.log('[SupabaseDataManager] Updating license:', id, updates);
       const { data, error } = await (supabase as any)
         .from('licenses')
         .update({ ...updates, updated_at: new Date().toISOString() })
@@ -249,7 +258,14 @@ class SupabaseDataManager {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('[SupabaseDataManager] Error updating license:', error);
+        throw error;
+      }
+      
+      console.log('[SupabaseDataManager] License updated successfully:', data);
+      await this.loadTableData('licenses');
+      this.notifyListeners('licenses_updated', data);
       return data;
     } catch (error) {
       console.error('Error updating license:', error);
@@ -259,12 +275,20 @@ class SupabaseDataManager {
 
   async deleteLicense(id: string): Promise<boolean> {
     try {
+      console.log('[SupabaseDataManager] Deleting license:', id);
       const { error } = await (supabase as any)
         .from('licenses')
         .delete()
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('[SupabaseDataManager] Error deleting license:', error);
+        throw error;
+      }
+      
+      console.log('[SupabaseDataManager] License deleted successfully');
+      await this.loadTableData('licenses');
+      this.notifyListeners('licenses_updated', null);
       return true;
     } catch (error) {
       console.error('Error deleting license:', error);
@@ -274,6 +298,7 @@ class SupabaseDataManager {
 
   async verifyLicense(licenseId: string): Promise<License | null> {
     try {
+      console.log('[SupabaseDataManager] Verifying license:', licenseId);
       const { data, error } = await (supabase as any)
         .from('licenses')
         .select('*')
@@ -281,7 +306,12 @@ class SupabaseDataManager {
         .eq('status', 'active')
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('[SupabaseDataManager] Error verifying license:', error);
+        return null;
+      }
+      
+      console.log('[SupabaseDataManager] License verified:', data);
       return data;
     } catch (error) {
       console.error('Error verifying license:', error);
@@ -516,23 +546,79 @@ class SupabaseDataManager {
     }
   }
 
+  // Enhanced bulk operations with better error handling
+  async bulkUpdateLicenses(ids: string[], updates: Partial<License>): Promise<boolean> {
+    try {
+      console.log('[SupabaseDataManager] Bulk updating licenses:', ids, updates);
+      const { error } = await (supabase as any)
+        .from('licenses')
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .in('id', ids);
+
+      if (error) {
+        console.error('[SupabaseDataManager] Error bulk updating licenses:', error);
+        throw error;
+      }
+      
+      console.log('[SupabaseDataManager] Licenses bulk updated successfully');
+      await this.loadTableData('licenses');
+      this.notifyListeners('licenses_updated', null);
+      return true;
+    } catch (error) {
+      console.error('Error bulk updating licenses:', error);
+      return false;
+    }
+  }
+
+  async bulkDeleteLicenses(ids: string[]): Promise<boolean> {
+    try {
+      console.log('[SupabaseDataManager] Bulk deleting licenses:', ids);
+      const { error } = await (supabase as any)
+        .from('licenses')
+        .delete()
+        .in('id', ids);
+
+      if (error) {
+        console.error('[SupabaseDataManager] Error bulk deleting licenses:', error);
+        throw error;
+      }
+      
+      console.log('[SupabaseDataManager] Licenses bulk deleted successfully');
+      await this.loadTableData('licenses');
+      this.notifyListeners('licenses_updated', null);
+      return true;
+    } catch (error) {
+      console.error('Error bulk deleting licenses:', error);
+      return false;
+    }
+  }
+
   // Event system for component updates
   addEventListener(event: string, listener: Function) {
     if (!this.eventListeners[event]) {
       this.eventListeners[event] = [];
     }
     this.eventListeners[event].push(listener);
+    console.log(`[SupabaseDataManager] Event listener added for: ${event}`);
   }
 
   removeEventListener(event: string, listener: Function) {
     if (this.eventListeners[event]) {
       this.eventListeners[event] = this.eventListeners[event].filter(l => l !== listener);
+      console.log(`[SupabaseDataManager] Event listener removed for: ${event}`);
     }
   }
 
   private notifyListeners(event: string, data: any) {
     if (this.eventListeners[event]) {
-      this.eventListeners[event].forEach(listener => listener(data));
+      console.log(`[SupabaseDataManager] Notifying ${this.eventListeners[event].length} listeners for: ${event}`);
+      this.eventListeners[event].forEach(listener => {
+        try {
+          listener(data);
+        } catch (error) {
+          console.error(`[SupabaseDataManager] Error in event listener for ${event}:`, error);
+        }
+      });
     }
   }
 
@@ -572,6 +658,37 @@ class SupabaseDataManager {
       content: this.dataSubjects.content.value,
       exportedAt: new Date().toISOString()
     };
+  }
+
+  // Add system health check
+  async checkSystemHealth(): Promise<{ status: 'healthy' | 'degraded' | 'unhealthy', issues: string[] }> {
+    const issues: string[] = [];
+    
+    try {
+      // Test database connection
+      const { error: dbError } = await supabase.from('settings').select('count').limit(1);
+      if (dbError) {
+        issues.push('Database connection issue');
+      }
+      
+      // Test real-time subscriptions
+      if (!this.isInitialized) {
+        issues.push('Real-time subscriptions not initialized');
+      }
+      
+      // Check data freshness
+      const settings = this.dataSubjects.settings.value;
+      if (settings.length === 0) {
+        issues.push('No settings data loaded');
+      }
+      
+      const status = issues.length === 0 ? 'healthy' : issues.length < 3 ? 'degraded' : 'unhealthy';
+      
+      return { status, issues };
+    } catch (error) {
+      console.error('[SupabaseDataManager] Health check failed:', error);
+      return { status: 'unhealthy', issues: ['System health check failed'] };
+    }
   }
 }
 
