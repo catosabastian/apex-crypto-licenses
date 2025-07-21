@@ -40,7 +40,7 @@ export const ContactsManager = () => {
     }
   };
 
-  const handleReply = () => {
+  const handleReply = async () => {
     if (!selectedContact || !replyMessage.trim()) return;
 
     try {

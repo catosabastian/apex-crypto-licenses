@@ -48,57 +48,57 @@ const DynamicApplicationForm = () => {
   const licenseCategories = [
     { 
       id: '1', 
-      name: settings.category1Details.name, 
+      name: settings.category1Details?.name, 
       price: settings.category1Price, 
       available: settings.category1Available, 
-      minVolume: settings.category1Details.minVolume,
-      features: settings.category1Details.features,
-      processingTime: settings.category1Details.processingTime
+      minVolume: settings.category1Details?.minVolume,
+      features: settings.category1Details?.features,
+      processingTime: settings.category1Details?.processingTime
     },
     { 
       id: '2', 
-      name: settings.category2Details.name, 
+      name: settings.category2Details?.name, 
       price: settings.category2Price, 
       available: settings.category2Available, 
-      minVolume: settings.category2Details.minVolume,
-      features: settings.category2Details.features,
-      processingTime: settings.category2Details.processingTime
+      minVolume: settings.category2Details?.minVolume,
+      features: settings.category2Details?.features,
+      processingTime: settings.category2Details?.processingTime
     },
     { 
       id: '3', 
-      name: settings.category3Details.name, 
+      name: settings.category3Details?.name, 
       price: settings.category3Price, 
       available: settings.category3Available, 
-      minVolume: settings.category3Details.minVolume,
-      features: settings.category3Details.features,
-      processingTime: settings.category3Details.processingTime
+      minVolume: settings.category3Details?.minVolume,
+      features: settings.category3Details?.features,
+      processingTime: settings.category3Details?.processingTime
     },
     { 
       id: '4', 
-      name: settings.category4Details.name, 
+      name: settings.category4Details?.name, 
       price: settings.category4Price, 
       available: settings.category4Available, 
-      minVolume: settings.category4Details.minVolume,
-      features: settings.category4Details.features,
-      processingTime: settings.category4Details.processingTime
+      minVolume: settings.category4Details?.minVolume,
+      features: settings.category4Details?.features,
+      processingTime: settings.category4Details?.processingTime
     },
     { 
       id: '5', 
-      name: settings.category5Details.name, 
+      name: settings.category5Details?.name, 
       price: settings.category5Price, 
       available: settings.category5Available, 
-      minVolume: settings.category5Details.minVolume,
-      features: settings.category5Details.features,
-      processingTime: settings.category5Details.processingTime
+      minVolume: settings.category5Details?.minVolume,
+      features: settings.category5Details?.features,
+      processingTime: settings.category5Details?.processingTime
     },
     { 
       id: '6', 
-      name: settings.category6Details.name, 
+      name: settings.category6Details?.name, 
       price: settings.category6Price, 
       available: settings.category6Available, 
-      minVolume: settings.category6Details.minVolume,
-      features: settings.category6Details.features,
-      processingTime: settings.category6Details.processingTime
+      minVolume: settings.category6Details?.minVolume,
+      features: settings.category6Details?.features,
+      processingTime: settings.category6Details?.processingTime
     }
   ];
 
@@ -154,10 +154,8 @@ const DynamicApplicationForm = () => {
         email: formData.email,
         phone: formData.phone,
         company: formData.company,
-        
         category: selectedCategory?.name || `Category ${formData.category}`,
-        walletAddress: '',
-        additionalInfo: formData.notes
+        notes: formData.notes
       });
 
       console.log('Application added successfully:', newApplication);
