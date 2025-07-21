@@ -9,6 +9,7 @@ const Hero = () => {
   const [scrolled, setScrolled] = useState(false);
   const [currentStat, setCurrentStat] = useState(0);
   const [content, setContent] = useState<any>({});
+  const [loading, setLoading] = useState(true);
   const { openApplicationDialog } = useApplicationDialog();
   
   useEffect(() => {
@@ -23,10 +24,29 @@ const Hero = () => {
   useEffect(() => {
     const loadContent = async () => {
       try {
+        setLoading(true);
         const data = await supabaseDataManager.getContent('hero');
         setContent(data);
       } catch (error) {
         console.error('Failed to load hero content:', error);
+        // Set fallback content
+        setContent({
+          badge: "🚀 New License Platform Available",
+          title: { line1: "Get Your", line2: "Digital License", line3: "Today" },
+          subtitle: "Streamlined licensing process with blockchain verification and instant approval for modern businesses.",
+          primaryCTA: "Apply Now",
+          secondaryCTA: "Watch Demo",
+          trustIndicators: ["Blockchain Verified", "Instant Approval", "Global Recognition", "24/7 Support"],
+          statsTitle: "Platform Statistics",
+          stats: [
+            { number: "10,000+", label: "Active Licenses", description: "Issued worldwide" },
+            { number: "99.9%", label: "Uptime", description: "Platform reliability" },
+            { number: "150+", label: "Countries", description: "Global coverage" },
+            { number: "24/7", label: "Support", description: "Always available" }
+          ]
+        });
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -72,97 +92,134 @@ const Hero = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left Column - Main Content */}
             <div className="space-y-8 animate-fade-in">
-              {/* Badge */}
-              <Badge 
-                variant="outline" 
-                className="glass-card text-primary border-primary/20 px-6 py-3 text-sm font-medium bg-primary/5 hover:bg-primary/10 transition-all duration-300"
-              >
-                {content.badge}
-              </Badge>
+              {loading ? (
+                <div className="space-y-6 animate-pulse">
+                  <div className="h-8 bg-muted rounded-lg w-48" />
+                  <div className="space-y-4">
+                    <div className="h-16 bg-muted rounded-lg w-full" />
+                    <div className="h-16 bg-muted rounded-lg w-4/5" />
+                    <div className="h-6 bg-muted rounded-lg w-3/4" />
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="h-12 bg-muted rounded-lg w-32" />
+                    <div className="h-12 bg-muted rounded-lg w-32" />
+                  </div>
+                </div>
+              ) : (
+                <>
+                  {/* Badge */}
+                  <Badge 
+                    variant="outline" 
+                    className="glass-card text-primary border-primary/20 px-6 py-3 text-sm font-medium bg-primary/5 hover:bg-primary/10 transition-all duration-300"
+                  >
+                    {content.badge || "🚀 New License Platform Available"}
+                  </Badge>
 
-              {/* Main Headline */}
-              <div className="space-y-6">
-                <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
-                  <span className="block text-foreground">{content.title?.line1}</span>
-                  <span className="block gradient-text animate-gradient">{content.title?.line2}</span>
-                  <span className="block text-foreground">{content.title?.line3}</span>
-                </h1>
-                
-                <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl leading-relaxed">
-                  {content.subtitle}
-                </p>
-              </div>
+                  {/* Main Headline */}
+                  <div className="space-y-6">
+                    <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight">
+                      <span className="block text-foreground">{content.title?.line1 || "Get Your"}</span>
+                      <span className="block bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent bg-[length:200%_100%] animate-gradient">{content.title?.line2 || "Digital License"}</span>
+                      <span className="block text-foreground">{content.title?.line3 || "Today"}</span>
+                    </h1>
+                    
+                    <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl leading-relaxed">
+                      {content.subtitle || "Streamlined licensing process with blockchain verification and instant approval for modern businesses."}
+                    </p>
+                  </div>
 
-              {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Button
-                  size="lg"
-                  className="btn-primary text-lg px-8 py-6 shadow-2xl hover:shadow-primary/50 transition-all duration-300"
-                  onClick={openApplicationDialog}
-                >
-                  {content.primaryCTA}
-                </Button>
-                
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="btn-outline text-lg px-8 py-6 group"
-                >
-                  <Play className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
-                  {content.secondaryCTA}
-                </Button>
-              </div>
+                  {/* CTA Buttons */}
+                  <div className="flex flex-col sm:flex-row gap-4 pt-4">
+                    <Button
+                      size="lg"
+                      className="text-lg px-8 py-6 shadow-2xl hover:shadow-primary/50 transition-all duration-300 bg-primary hover:bg-primary/90"
+                      onClick={openApplicationDialog}
+                    >
+                      {content.primaryCTA || "Apply Now"}
+                    </Button>
+                    
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="text-lg px-8 py-6 group border-primary/20 hover:bg-primary/10"
+                    >
+                      <Play className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
+                      {content.secondaryCTA || "Watch Demo"}
+                    </Button>
+                  </div>
+                </>
+              )}
 
               {/* Trust Indicators */}
-              <div className="flex flex-wrap items-center gap-6 pt-8">
-                {content.trustIndicators?.map((indicator, index) => (
-                  <div key={index} className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
-                    <span>{indicator}</span>
-                  </div>
-                ))}
-              </div>
+              {!loading && (
+                <div className="flex flex-wrap items-center gap-6 pt-8">
+                  {(content.trustIndicators || ["Blockchain Verified", "Instant Approval", "Global Recognition", "24/7 Support"]).map((indicator, index) => (
+                    <div key={index} className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                      <span>{indicator}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Right Column - Interactive Stats */}
             <div className="relative animate-fade-in-delay">
-              <div className="glass-card p-8 rounded-3xl shadow-2xl bg-white/10 backdrop-blur-lg border border-white/20">
+              <div className="p-8 rounded-3xl shadow-2xl bg-white/10 backdrop-blur-lg border border-white/20 backdrop-saturate-150">
                 <div className="space-y-6">
-                  <h3 className="text-2xl font-bold text-center gradient-text">
-                    {content.statsTitle}
-                  </h3>
-                  
-                  {/* Animated Stat Display */}
-                  {statsData.length > 0 && (
-                    <div className="text-center space-y-4 min-h-[200px] flex flex-col justify-center">
-                      <div className="relative">
-                        <div className="text-6xl font-bold text-primary mb-2 animate-fade-in">
-                          {statsData[currentStat]?.number}
-                        </div>
-                        <div className="text-xl font-semibold text-foreground mb-2">
-                          {statsData[currentStat]?.label}
-                        </div>
-                        <div className="text-muted-foreground">
-                          {statsData[currentStat]?.description}
-                        </div>
+                  {loading ? (
+                    <div className="space-y-4 animate-pulse">
+                      <div className="h-8 bg-muted/50 rounded-lg w-48 mx-auto" />
+                      <div className="min-h-[200px] flex flex-col justify-center space-y-4">
+                        <div className="h-16 bg-muted/50 rounded-lg w-32 mx-auto" />
+                        <div className="h-6 bg-muted/50 rounded-lg w-24 mx-auto" />
+                        <div className="h-4 bg-muted/50 rounded-lg w-20 mx-auto" />
+                      </div>
+                      <div className="flex justify-center gap-2">
+                        {[...Array(4)].map((_, i) => (
+                          <div key={i} className="w-3 h-3 bg-muted/50 rounded-full" />
+                        ))}
                       </div>
                     </div>
-                  )}
+                  ) : (
+                    <>
+                      <h3 className="text-2xl font-bold text-center bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                        {content.statsTitle || "Platform Statistics"}
+                      </h3>
+                      
+                      {/* Animated Stat Display */}
+                      {statsData.length > 0 && (
+                        <div className="text-center space-y-4 min-h-[200px] flex flex-col justify-center">
+                          <div className="relative">
+                            <div className="text-6xl font-bold text-primary mb-2 transition-all duration-500">
+                              {statsData[currentStat]?.number}
+                            </div>
+                            <div className="text-xl font-semibold text-foreground mb-2">
+                              {statsData[currentStat]?.label}
+                            </div>
+                            <div className="text-muted-foreground">
+                              {statsData[currentStat]?.description}
+                            </div>
+                          </div>
+                        </div>
+                      )}
 
-                  {/* Stat Indicators */}
-                  <div className="flex justify-center gap-2">
-                    {statsData.map((_, index) => (
-                      <button
-                        key={index}
-                        className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                          index === currentStat 
-                            ? 'bg-primary scale-125' 
-                            : 'bg-primary/30 hover:bg-primary/60'
-                        }`}
-                        onClick={() => setCurrentStat(index)}
-                      />
-                    ))}
-                  </div>
+                      {/* Stat Indicators */}
+                      <div className="flex justify-center gap-2">
+                        {statsData.map((_, index) => (
+                          <button
+                            key={index}
+                            className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                              index === currentStat 
+                                ? 'bg-primary scale-125' 
+                                : 'bg-primary/30 hover:bg-primary/60'
+                            }`}
+                            onClick={() => setCurrentStat(index)}
+                          />
+                        ))}
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 

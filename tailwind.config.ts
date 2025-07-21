@@ -142,6 +142,16 @@ export default {
 				'pulse-glow': {
 					'0%, 100%': { boxShadow: '0 0 20px hsl(var(--primary) / 0.2)' },
 					'50%': { boxShadow: '0 0 40px hsl(var(--primary) / 0.4)' }
+				},
+				'gradient': {
+					'0%': { backgroundPosition: '0% 50%' },
+					'50%': { backgroundPosition: '100% 50%' },
+					'100%': { backgroundPosition: '0% 50%' }
+				},
+				'scroll': {
+					'0%': { transform: 'translateY(0px)', opacity: '0' },
+					'50%': { transform: 'translateY(6px)', opacity: '1' },
+					'100%': { transform: 'translateY(12px)', opacity: '0' }
 				}
 			},
 			animation: {
@@ -149,12 +159,16 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in': 'fade-in 0.6s ease-out forwards',
 				'fade-in-up': 'fade-in-up 0.8s ease-out forwards',
+				'fade-in-delay': 'fade-in 0.8s ease-out 0.3s forwards',
 				'slide-up': 'slide-up 0.8s ease-out forwards',
 				'scale-in': 'scale-in 0.4s ease-out forwards',
 				'float': 'float 6s ease-in-out infinite',
+				'float-delay': 'float 6s ease-in-out infinite 3s',
 				'glow': 'glow 2s ease-in-out infinite alternate',
 				'spin-slow': 'spin-slow 8s linear infinite',
-				'pulse-glow': 'pulse-glow 2s ease-in-out infinite'
+				'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
+				'gradient': 'gradient 3s ease infinite',
+				'scroll': 'scroll 2s ease-in-out infinite'
 			},
 			backgroundImage: {
 				'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
