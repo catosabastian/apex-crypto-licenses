@@ -73,6 +73,27 @@ export interface ContentItem {
   updated_at: string;
 }
 
+export interface UserRole {
+  id: string;
+  user_id: string;
+  role: 'admin' | 'user' | 'moderator';
+  created_at: string;
+  updated_at: string;
+}
+
+export interface AuditLog {
+  id: string;
+  user_id?: string;
+  action: string;
+  table_name: string;
+  record_id?: string;
+  old_data?: any;
+  new_data?: any;
+  ip_address?: string;
+  user_agent?: string;
+  created_at: string;
+}
+
 class SupabaseDataManager {
   private eventListeners: { [key: string]: Function[] } = {};
   private dataSubjects = {
@@ -658,6 +679,88 @@ class SupabaseDataManager {
       content: this.dataSubjects.content.value,
       exportedAt: new Date().toISOString()
     };
+  }
+
+  // Admin role checking
+  async checkAdminRole(): Promise<boolean> {
+    try {
+      const { data, error } = await (supabase as any)
+        .from('user_roles')
+        .select('role')
+        .eq('role', 'admin')
+        .single();
+
+      return !error && data !== null;
+    } catch (error) {
+      console.error('Error checking admin role:', error);
+      return false;
+    }
+  }
+
+  async getUserRoles(): Promise<UserRole[]> {
+    try {
+      const { data, error } = await (supabase as any)
+        .from('user_roles')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error getting user roles:', error);
+      return [];
+    }
+  }
+
+  async assignUserRole(userId: string, role: 'admin' | 'user' | 'moderator'): Promise<boolean> {
+    try {
+      const { error } = await (supabase as any)
+        .from('user_roles')
+        .upsert({ 
+          user_id: userId, 
+          role,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id,role'
+        });
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error assigning user role:', error);
+      return false;
+    }
+  }
+
+  // Audit logging
+  async logAdminAction(action: string, tableName: string, recordId?: string, oldData?: any, newData?: any): Promise<void> {
+    try {
+      await (supabase as any).rpc('log_admin_action', {
+        action_type: action,
+        table_name: tableName,
+        record_id: recordId,
+        old_data: oldData,
+        new_data: newData
+      });
+    } catch (error) {
+      console.error('Error logging admin action:', error);
+    }
+  }
+
+  async getAuditLogs(limit: number = 100): Promise<AuditLog[]> {
+    try {
+      const { data, error } = await (supabase as any)
+        .from('admin_audit_log')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('Error getting audit logs:', error);
+      return [];
+    }
   }
 
   // Add system health check
