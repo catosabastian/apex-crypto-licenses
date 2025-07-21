@@ -1,25 +1,26 @@
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Shield, Clock, Globe, CheckCircle, Users, Zap, Award, TrendingUp } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { 
+  Zap, 
+  Shield, 
+  Users, 
+  Lock, 
+  Building, 
+  HeadphonesIcon 
+} from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { supabaseDataManager } from '@/utils/supabaseDataManager';
 
 const FeaturesSection = () => {
   const [content, setContent] = useState<any>({});
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadContent = async () => {
       try {
         const data = await supabaseDataManager.getContent('features');
-        console.log('Features content loaded:', data);
-        setContent(data || {});
+        setContent(data);
       } catch (error) {
         console.error('Failed to load features content:', error);
-        setContent({});
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -27,117 +28,53 @@ const FeaturesSection = () => {
   }, []);
 
   const iconMap: Record<string, any> = {
-    Shield,
-    Clock,
-    Globe,
-    CheckCircle,
-    Users,
     Zap,
-    Award,
-    TrendingUp
+    Shield,
+    Users,
+    Lock,
+    Building,
+    HeadphonesIcon
   };
 
-  if (loading) {
-    return (
-      <div className="py-24 bg-muted/20">
-        <div className="container text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-        </div>
-      </div>
-    );
-  }
-
-  const features = content.features || [];
-
   return (
-    <section className="py-24 bg-muted/20">
+    <section className="py-20 bg-background">
       <div className="container">
-        <div className="max-w-3xl mx-auto text-center mb-16">
-          <Badge variant="outline" className="mb-6">
-            {content.badge || 'Key Features'}
-          </Badge>
-          
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            {content.title || 'Why Choose Our Licensing Platform'}
-          </h2>
-          
-          <p className="text-xl text-muted-foreground">
-            {content.subtitle || 'Comprehensive licensing solutions designed for the modern crypto ecosystem'}
-          </p>
-        </div>
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <div className="h-1 w-12 bg-primary"></div>
+              <span className="text-sm text-muted-foreground uppercase tracking-wider">{content.subtitle}</span>
+              <div className="h-1 w-12 bg-primary"></div>
+            </div>
+            
+            <h2 className="text-3xl md:text-4xl font-bold mb-6">
+              {content.title}
+            </h2>
+            
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              {content.description}
+            </p>
+          </div>
 
-        {features.length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => {
-              const IconComponent = iconMap[feature.icon] || Shield;
-              
+            {content.items.map((feature, index) => {
+              const IconComponent = iconMap[feature.icon];
               return (
-                <Card key={index} className="glass-card hover:shadow-lg transition-all duration-300 group">
-                  <CardContent className="p-8">
-                    <div className="text-center">
-                      <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-primary/20 transition-colors">
-                        <IconComponent className="w-8 h-8 text-primary" />
-                      </div>
-                      
-                      <h3 className="text-xl font-semibold mb-4">{feature.title}</h3>
-                      <p className="text-muted-foreground leading-relaxed">
-                        {feature.description}
-                      </p>
+                <Card key={index} className="feature-card group">
+                  <CardHeader>
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                      {IconComponent && <IconComponent className="h-6 w-6 text-primary" />}
                     </div>
+                    <CardTitle className="text-xl">{feature.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-muted-foreground">{feature.description}</p>
                   </CardContent>
                 </Card>
               );
             })}
           </div>
-        ) : (
-          // Default features when no content is loaded
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card className="glass-card hover:shadow-lg transition-all duration-300 group">
-              <CardContent className="p-8">
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-primary/20 transition-colors">
-                    <Shield className="w-8 h-8 text-primary" />
-                  </div>
-                  
-                  <h3 className="text-xl font-semibold mb-4">Regulatory Compliance</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Full compliance with international cryptocurrency regulations and standards.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="glass-card hover:shadow-lg transition-all duration-300 group">
-              <CardContent className="p-8">
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-primary/20 transition-colors">
-                    <Clock className="w-8 h-8 text-primary" />
-                  </div>
-                  
-                  <h3 className="text-xl font-semibold mb-4">Fast Processing</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Quick application processing with transparent timeline and status updates.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="glass-card hover:shadow-lg transition-all duration-300 group">
-              <CardContent className="p-8">
-                <div className="text-center">
-                  <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 group-hover:bg-primary/20 transition-colors">
-                    <Globe className="w-8 h-8 text-primary" />
-                  </div>
-                  
-                  <h3 className="text-xl font-semibold mb-4">Global Recognition</h3>
-                  <p className="text-muted-foreground leading-relaxed">
-                    Internationally recognized licenses accepted by major trading platforms.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+        </div>
       </div>
     </section>
   );

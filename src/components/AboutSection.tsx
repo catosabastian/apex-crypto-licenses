@@ -1,25 +1,18 @@
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { CheckCircle, Users, Globe, Shield, Zap, TrendingUp, Award, Clock } from 'lucide-react';
+import { Shield, CheckCircle, FileCheck, AlertTriangle } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { supabaseDataManager } from '@/utils/supabaseDataManager';
 
 const AboutSection = () => {
   const [content, setContent] = useState<any>({});
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadContent = async () => {
       try {
         const data = await supabaseDataManager.getContent('about');
-        console.log('About content loaded:', data);
-        setContent(data || {});
+        setContent(data);
       } catch (error) {
         console.error('Failed to load about content:', error);
-        setContent({});
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -27,113 +20,68 @@ const AboutSection = () => {
   }, []);
 
   const iconMap: Record<string, any> = {
-    CheckCircle,
-    Users,
-    Globe,
     Shield,
-    Zap,
-    TrendingUp,
-    Award,
-    Clock
+    CheckCircle,
+    FileCheck
   };
 
-  if (loading) {
-    return (
-      <div className="py-24 bg-background">
-        <div className="container text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-        </div>
-      </div>
-    );
-  }
-
-  const features = content.features || [];
-  const stats = content.stats || [];
-
   return (
-    <section id="about" className="py-24 bg-background">
+    <section id="about" className="py-20 bg-white">
       <div className="container">
-        <div className="max-w-4xl mx-auto text-center mb-16">
-          <Badge variant="outline" className="mb-6">
-            {content.badge || 'About APEX'}
-          </Badge>
+        <div className="max-w-4xl mx-auto">
+          <div className="flex items-center gap-2 mb-4">
+            <div className="h-1 w-12 bg-primary"></div>
+            <span className="text-sm text-muted-foreground uppercase tracking-wider">{content.subtitle}</span>
+          </div>
           
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
-            {content.title || 'Leading Crypto Licensing Authority'}
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">
+            {content.title}
           </h2>
           
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            {content.subtitle || 'We provide comprehensive regulatory licensing solutions for cryptocurrency traders and institutions worldwide.'}
-          </p>
-        </div>
-
-        {/* Stats Grid */}
-        {stats.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-16">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center">
-                <div className="text-3xl md:text-4xl font-bold text-primary mb-2">
-                  {stat.number}
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {stat.label}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Features Grid */}
-        {features.length > 0 && (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {features.map((feature, index) => {
-              const IconComponent = iconMap[feature.icon] || Shield;
+          <div className="grid md:grid-cols-2 gap-12 mb-10">
+            <div>
+              {content.description.map((paragraph, index) => (
+                <p key={index} className="text-lg text-muted-foreground mb-6">
+                  {paragraph}
+                </p>
+              ))}
               
-              return (
-                <Card key={index} className="glass-card hover:shadow-lg transition-all duration-300">
-                  <CardContent className="p-6">
-                    <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0">
-                        <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                          <IconComponent className="w-6 h-6 text-primary" />
-                        </div>
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-semibold mb-2">{feature.title}</h3>
-                        <p className="text-muted-foreground text-sm leading-relaxed">
-                          {feature.description}
-                        </p>
-                      </div>
+              <div className="flex gap-2 items-center p-4 border border-muted bg-muted/30 rounded-lg">
+                <AlertTriangle className="h-8 w-8 text-amber-600" />
+                <p className="text-sm">Trading digital assets without proper licensing may lead to regulatory penalties in many jurisdictions.</p>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              {content.features.map((feature, index) => {
+                const IconComponent = iconMap[feature.icon];
+                return (
+                  <div key={index} className="flex gap-4">
+                    <div className="shrink-0 h-12 w-12 bg-primary/10 rounded-full flex items-center justify-center">
+                      {IconComponent && <IconComponent className="h-6 w-6 text-primary" />}
                     </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        )}
-
-        {/* Default content when no features are available */}
-        {features.length === 0 && (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card className="glass-card hover:shadow-lg transition-all duration-300">
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0">
-                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                      <Shield className="w-6 h-6 text-primary" />
+                    <div>
+                      <h3 className="font-semibold mb-1">{feature.title}</h3>
+                      <p className="text-muted-foreground">{feature.description}</p>
                     </div>
                   </div>
-                  <div>
-                    <h3 className="text-lg font-semibold mb-2">Regulatory Compliance</h3>
-                    <p className="text-muted-foreground text-sm leading-relaxed">
-                      Full compliance with international cryptocurrency regulations and standards.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                );
+              })}
+            </div>
           </div>
-        )}
+          
+          <div className="flex flex-col md:flex-row gap-4 p-6 bg-muted/30 border border-muted rounded-lg">
+            <div className="shrink-0 h-16 w-16 bg-accent/20 rounded-lg flex items-center justify-center text-accent">
+              <AlertTriangle className="h-8 w-8" />
+            </div>
+            <div>
+              <h4 className="font-semibold mb-1">Legal Notice</h4>
+              <p className="text-sm text-muted-foreground">
+                {content.legalNotice}
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
