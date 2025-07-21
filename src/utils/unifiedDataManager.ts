@@ -357,12 +357,12 @@ class UnifiedDataManager {
   // Updated comprehensive default settings
   private defaultSettings: ContentSettings = {
     // License pricing
-    category1Price: '10,000 USDT',
-    category2Price: '25,000 USDT',
-    category3Price: '50,000 USDT',
-    category4Price: '100,000 USDT',
-    category5Price: '250,000 USDT',
-    category6Price: '500,000 USDT',
+    category1Price: '$25,000',
+    category2Price: '$50,000', 
+    category3Price: '$70,000',
+    category4Price: '$150,000',
+    category5Price: '$250,000',
+    category6Price: '$500,000',
     
     // Availability
     category1Available: true,

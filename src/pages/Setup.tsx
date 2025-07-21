@@ -12,8 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { Shield, Database, Key, CheckCircle, AlertTriangle, Lock } from 'lucide-react';
 
 const Setup = () => {
-  const [adminPassword, setAdminPassword] = useState('');
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated] = useState(true); // Remove password requirement
   const [supabaseUrl, setSupabaseUrl] = useState('');
   const [supabaseKey, setSupabaseKey] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -22,23 +21,7 @@ const Setup = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const ADMIN_PASSWORD = 'apex2024admin'; // In production, this should be more secure
-
-  const handleAdminAuth = () => {
-    if (adminPassword === ADMIN_PASSWORD) {
-      setIsAuthenticated(true);
-      toast({
-        title: "Admin Access Granted",
-        description: "You can now set up the Supabase connection",
-      });
-    } else {
-      toast({
-        title: "Access Denied",
-        description: "Invalid admin password",
-        variant: "destructive",
-      });
-    }
-  };
+  // Admin password requirement removed for direct access
 
   const databaseSchema = `
 -- Create applications table
@@ -340,48 +323,7 @@ CREATE POLICY "Allow full access to content" ON public.content FOR ALL USING (tr
     }
   };
 
-  // Admin authentication screen
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-muted/50 p-4">
-        <div className="max-w-md mx-auto pt-20">
-          <Card className="border-2 border-destructive/20">
-            <CardHeader className="text-center">
-              <div className="mx-auto mb-4 p-3 bg-destructive/10 rounded-full w-fit">
-                <Lock className="h-8 w-8 text-destructive" />
-              </div>
-              <CardTitle className="text-2xl">Admin Access Required</CardTitle>
-              <CardDescription>
-                This setup page is restricted to administrators only
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="adminPassword">Admin Password</Label>
-                <Input
-                  id="adminPassword"
-                  type="password"
-                  placeholder="Enter admin password"
-                  value={adminPassword}
-                  onChange={(e) => setAdminPassword(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleAdminAuth()}
-                />
-              </div>
-              <Button onClick={handleAdminAuth} className="w-full">
-                <Shield className="h-4 w-4 mr-2" />
-                Authenticate
-              </Button>
-              <div className="text-center">
-                <Button variant="link" onClick={() => navigate('/')}>
-                  ← Back to Home
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
+  // Direct access to setup - no authentication required
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/50 p-4">
