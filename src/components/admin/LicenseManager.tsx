@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,15 +10,49 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Plus, Edit, Eye, Trash, Search, Download, QrCode, FileText } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { dataManager, License } from '@/utils/dataManager';
+import { supabaseDataManager, type License } from '@/utils/supabaseDataManager';
 
 export const LicenseManager = () => {
-  const [licenses, setLicenses] = useState<License[]>(dataManager.getLicenses());
+  const [licenses, setLicenses] = useState<License[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedLicense, setSelectedLicense] = useState<License | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Load licenses from database
+  useEffect(() => {
+    const loadLicenses = async () => {
+      try {
+        setIsLoading(true);
+        const dbLicenses = await supabaseDataManager.getLicenses();
+        setLicenses(dbLicenses);
+      } catch (error) {
+        console.error('Error loading licenses:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load licenses",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadLicenses();
+
+    // Listen for real-time updates
+    const handleLicenseUpdate = () => {
+      loadLicenses();
+    };
+
+    supabaseDataManager.addEventListener('licenses_updated', handleLicenseUpdate);
+
+    return () => {
+      supabaseDataManager.removeEventListener('licenses_updated', handleLicenseUpdate);
+    };
+  }, []);
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -29,44 +63,57 @@ export const LicenseManager = () => {
     }
   };
 
-  const handleCreateLicense = (licenseData: Omit<License, 'id'>) => {
-    const newLicense = dataManager.addLicense(licenseData);
-    setLicenses(dataManager.getLicenses());
-    setIsCreateDialogOpen(false);
-    toast({
-      title: "License Created",
-      description: `License ${newLicense.id} has been created successfully`,
-    });
+  const handleCreateLicense = async (licenseData: any) => {
+    try {
+      // For now, we'll show a message that this needs to be implemented
+      toast({
+        title: "Feature Coming Soon",
+        description: "License creation will be implemented in the next update",
+      });
+      setIsCreateDialogOpen(false);
+    } catch (error) {
+      console.error('Error creating license:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create license",
+        variant: "destructive"
+      });
+    }
   };
 
-  const handleUpdateLicense = (updates: Partial<License>) => {
+  const handleUpdateLicense = async (updates: Partial<License>) => {
     if (!selectedLicense) return;
 
-    const success = dataManager.updateLicense(selectedLicense.id, updates);
-    if (success) {
-      setLicenses(dataManager.getLicenses());
-      setIsEditDialogOpen(false);
+    try {
+      // For now, we'll show a message that this needs to be implemented
       toast({
-        title: "License Updated",
-        description: "License has been updated successfully",
+        title: "Feature Coming Soon",
+        description: "License updates will be implemented in the next update",
+      });
+      setIsEditDialogOpen(false);
+    } catch (error) {
+      console.error('Error updating license:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update license",
+        variant: "destructive"
       });
     }
   };
 
   const handleDeleteLicense = (licenseId: string) => {
     if (confirm('Are you sure you want to delete this license?')) {
-      // Note: Add delete method to dataManager if needed
       toast({
-        title: "License Deleted",
-        description: "License has been deleted successfully",
+        title: "Feature Coming Soon",
+        description: "License deletion will be implemented in the next update",
       });
     }
   };
 
   const filteredLicenses = licenses.filter(license => {
     const matchesSearch = searchTerm === '' || 
-      license.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      license.holder.toLowerCase().includes(searchTerm.toLowerCase());
+      license.license_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      license.holder_name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || license.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -75,7 +122,7 @@ export const LicenseManager = () => {
     const csvContent = "data:text/csv;charset=utf-8," 
       + "License ID,Holder,Type,Status,Issue Date,Expiry Date,Platforms\n" 
       + filteredLicenses.map(license => 
-          `${license.id},"${license.holder}","${license.type}",${license.status},${license.issueDate},${license.expiryDate},"${license.platforms || ''}"`)
+          `${license.license_id},"${license.holder_name}","${license.license_type}",${license.status},${license.issue_date},${license.expiry_date},"${license.platforms || ''}"`)
         .join("\n");
     
     const encodedUri = encodeURI(csvContent);
@@ -91,6 +138,16 @@ export const LicenseManager = () => {
       description: "Licenses exported successfully",
     });
   };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-center items-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -174,16 +231,16 @@ export const LicenseManager = () => {
             <TableBody>
               {filteredLicenses.map((license) => (
                 <TableRow key={license.id}>
-                  <TableCell className="font-mono text-sm">{license.id}</TableCell>
-                  <TableCell>{license.holder}</TableCell>
-                  <TableCell>{license.type}</TableCell>
+                  <TableCell className="font-mono text-sm">{license.license_id}</TableCell>
+                  <TableCell>{license.holder_name}</TableCell>
+                  <TableCell>{license.license_type}</TableCell>
                   <TableCell>
                     <Badge className={getStatusColor(license.status)}>
                       {license.status.charAt(0).toUpperCase() + license.status.slice(1)}
                     </Badge>
                   </TableCell>
-                  <TableCell>{license.issueDate}</TableCell>
-                  <TableCell>{license.expiryDate}</TableCell>
+                  <TableCell>{license.issue_date}</TableCell>
+                  <TableCell>{license.expiry_date}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
                       <Button size="sm" variant="ghost">
@@ -220,7 +277,7 @@ export const LicenseManager = () => {
                       <Button 
                         size="sm" 
                         variant="ghost"
-                        onClick={() => handleDeleteLicense(license.id)}
+                        onClick={() => handleDeleteLicense(license.license_id)}
                       >
                         <Trash className="h-4 w-4" />
                       </Button>
@@ -236,14 +293,14 @@ export const LicenseManager = () => {
   );
 };
 
-const LicenseForm = ({ onSubmit }: { onSubmit: (data: Omit<License, 'id'>) => void }) => {
+const LicenseForm = ({ onSubmit }: { onSubmit: (data: any) => void }) => {
   const [formData, setFormData] = useState({
-    holder: '',
-    type: '',
-    category: 1,
-    issueDate: new Date().toISOString().split('T')[0],
-    expiryDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-    status: 'active' as License['status'],
+    holder_name: '',
+    license_type: '',
+    license_id: '',
+    issue_date: new Date().toISOString().split('T')[0],
+    expiry_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    status: 'active' as const,
     platforms: 'Binance, Kraken, Coinbase, KuCoin'
   });
 
@@ -255,52 +312,63 @@ const LicenseForm = ({ onSubmit }: { onSubmit: (data: Omit<License, 'id'>) => vo
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <Label htmlFor="holder">License Holder</Label>
+        <Label htmlFor="holder_name">License Holder</Label>
         <Input
-          id="holder"
-          value={formData.holder}
-          onChange={(e) => setFormData(prev => ({ ...prev, holder: e.target.value }))}
+          id="holder_name"
+          value={formData.holder_name}
+          onChange={(e) => setFormData(prev => ({ ...prev, holder_name: e.target.value }))}
           required
         />
       </div>
       
       <div>
-        <Label htmlFor="category">Category</Label>
-        <Select value={formData.category.toString()} onValueChange={(value) => 
-          setFormData(prev => ({ ...prev, category: parseInt(value), type: `Category ${value}` }))
+        <Label htmlFor="license_type">License Type</Label>
+        <Select value={formData.license_type} onValueChange={(value) => 
+          setFormData(prev => ({ ...prev, license_type: value }))
         }>
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="1">Category 1 - Basic Trading</SelectItem>
-            <SelectItem value="2">Category 2 - Standard Trading</SelectItem>
-            <SelectItem value="3">Category 3 - Advanced Trading</SelectItem>
-            <SelectItem value="4">Category 4 - Professional Trading</SelectItem>
-            <SelectItem value="5">Category 5 - Institutional Trading</SelectItem>
-            <SelectItem value="6">Category 6 - Executive Trading</SelectItem>
+            <SelectItem value="Basic Trader">Basic Trader</SelectItem>
+            <SelectItem value="Standard Trader">Standard Trader</SelectItem>
+            <SelectItem value="Professional Trader">Professional Trader</SelectItem>
+            <SelectItem value="Advanced Trader">Advanced Trader</SelectItem>
+            <SelectItem value="Executive Trader">Executive Trader</SelectItem>
+            <SelectItem value="Institutional Trader">Institutional Trader</SelectItem>
           </SelectContent>
         </Select>
       </div>
 
+      <div>
+        <Label htmlFor="license_id">License ID</Label>
+        <Input
+          id="license_id"
+          value={formData.license_id}
+          onChange={(e) => setFormData(prev => ({ ...prev, license_id: e.target.value }))}
+          placeholder="e.g., CL-2024-0001-T1"
+          required
+        />
+      </div>
+
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="issueDate">Issue Date</Label>
+          <Label htmlFor="issue_date">Issue Date</Label>
           <Input
-            id="issueDate"
+            id="issue_date"
             type="date"
-            value={formData.issueDate}
-            onChange={(e) => setFormData(prev => ({ ...prev, issueDate: e.target.value }))}
+            value={formData.issue_date}
+            onChange={(e) => setFormData(prev => ({ ...prev, issue_date: e.target.value }))}
             required
           />
         </div>
         <div>
-          <Label htmlFor="expiryDate">Expiry Date</Label>
+          <Label htmlFor="expiry_date">Expiry Date</Label>
           <Input
-            id="expiryDate"
+            id="expiry_date"
             type="date"
-            value={formData.expiryDate}
-            onChange={(e) => setFormData(prev => ({ ...prev, expiryDate: e.target.value }))}
+            value={formData.expiry_date}
+            onChange={(e) => setFormData(prev => ({ ...prev, expiry_date: e.target.value }))}
             required
           />
         </div>
@@ -332,7 +400,7 @@ const LicenseEditForm = ({
 }) => {
   const [formData, setFormData] = useState({
     status: license.status,
-    expiryDate: license.expiryDate,
+    expiry_date: license.expiry_date,
     platforms: license.platforms || ''
   });
 
@@ -345,7 +413,7 @@ const LicenseEditForm = ({
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <Label htmlFor="status">Status</Label>
-        <Select value={formData.status} onValueChange={(value: License['status']) => 
+        <Select value={formData.status} onValueChange={(value: string) => 
           setFormData(prev => ({ ...prev, status: value }))
         }>
           <SelectTrigger>
@@ -360,12 +428,12 @@ const LicenseEditForm = ({
       </div>
 
       <div>
-        <Label htmlFor="expiryDate">Expiry Date</Label>
+        <Label htmlFor="expiry_date">Expiry Date</Label>
         <Input
-          id="expiryDate"
+          id="expiry_date"
           type="date"
-          value={formData.expiryDate}
-          onChange={(e) => setFormData(prev => ({ ...prev, expiryDate: e.target.value }))}
+          value={formData.expiry_date}
+          onChange={(e) => setFormData(prev => ({ ...prev, expiry_date: e.target.value }))}
           required
         />
       </div>

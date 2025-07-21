@@ -35,12 +35,12 @@ const VerificationSection = () => {
   const [verifiedLicense, setVerifiedLicense] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [sampleLicense] = useState({
-    id: 'CL-2023-8294-T2',
+    id: 'CL-2024-8294-T2',
     holder: 'APEX Trading Solutions Ltd.',
     type: 'Professional Trader',
-    issueDate: '2023-11-15',
-    expiryDate: '2024-11-15',
-    platforms: 'Binance, Coinbase Pro, Kraken, FTX'
+    issueDate: '2024-01-15',
+    expiryDate: '2025-01-15',
+    platforms: 'Binance, Coinbase Pro, Kraken, Bybit'
   });
 
   useEffect(() => {
@@ -170,7 +170,7 @@ const VerificationSection = () => {
                 <DialogHeader>
                   <DialogTitle>License Verification</DialogTitle>
                   <DialogDescription>
-                    Enter the license ID to verify its authenticity.
+                    Enter the license ID to verify its authenticity. Try using: {sampleLicense.id}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
@@ -182,7 +182,7 @@ const VerificationSection = () => {
                       id="licenseId" 
                       value={licenseId} 
                       onChange={(e) => setLicenseId(e.target.value)} 
-                      placeholder="e.g. CL-2023-8294-T2"
+                      placeholder="e.g. CL-2024-8294-T2"
                       className="col-span-3"
                     />
                   </div>
