@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { BehaviorSubject } from 'rxjs';
 
@@ -83,10 +84,30 @@ class SupabaseDataManager {
     contacts: new BehaviorSubject<Contact[]>([]),
     content: new BehaviorSubject<ContentItem[]>([])
   };
+  private isInitialized = false;
+  private initializationPromise: Promise<void> | null = null;
 
   constructor() {
-    this.initializeRealtimeSubscriptions();
-    this.loadInitialData();
+    this.initializationPromise = this.initialize();
+  }
+
+  private async initialize() {
+    try {
+      console.log('[SupabaseDataManager] Starting initialization...');
+      this.initializeRealtimeSubscriptions();
+      await this.loadInitialData();
+      this.isInitialized = true;
+      console.log('[SupabaseDataManager] Initialization complete');
+    } catch (error) {
+      console.error('[SupabaseDataManager] Initialization failed:', error);
+      throw error;
+    }
+  }
+
+  private async ensureInitialized() {
+    if (!this.isInitialized && this.initializationPromise) {
+      await this.initializationPromise;
+    }
   }
 
   private initializeRealtimeSubscriptions() {
@@ -104,30 +125,43 @@ class SupabaseDataManager {
   }
 
   private async loadInitialData() {
-    await Promise.all([
-      this.loadTableData('applications'),
-      this.loadTableData('licenses'),
-      this.loadTableData('payment_addresses'),
-      this.loadTableData('settings'),
-      this.loadTableData('contacts'),
-      this.loadTableData('content')
-    ]);
+    try {
+      console.log('[SupabaseDataManager] Loading initial data...');
+      await Promise.all([
+        this.loadTableData('applications'),
+        this.loadTableData('licenses'),
+        this.loadTableData('payment_addresses'),
+        this.loadTableData('settings'),
+        this.loadTableData('contacts'),
+        this.loadTableData('content')
+      ]);
+      console.log('[SupabaseDataManager] Initial data loaded successfully');
+    } catch (error) {
+      console.error('[SupabaseDataManager] Error loading initial data:', error);
+      throw error;
+    }
   }
 
   private async loadTableData(table: string) {
     try {
+      console.log(`[SupabaseDataManager] Loading ${table} data...`);
       const { data, error } = await (supabase as any)
         .from(table)
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error(`[SupabaseDataManager] Error loading ${table}:`, error);
+        throw error;
+      }
 
       const subjectKey = table === 'payment_addresses' ? 'paymentAddresses' : table as keyof typeof this.dataSubjects;
       this.dataSubjects[subjectKey].next(data || []);
       this.notifyListeners(`${table}_updated`, data);
+      console.log(`[SupabaseDataManager] ${table} data loaded:`, data?.length || 0, 'records');
     } catch (error) {
       console.error(`Error loading ${table}:`, error);
+      throw error;
     }
   }
 
@@ -209,6 +243,7 @@ class SupabaseDataManager {
 
   // Payment Addresses
   async getPaymentAddresses(): Promise<PaymentAddress[]> {
+    await this.ensureInitialized();
     return this.dataSubjects.paymentAddresses.value.filter(addr => addr.is_active);
   }
 
@@ -239,6 +274,7 @@ class SupabaseDataManager {
 
   // Settings
   async getSetting(key: string): Promise<any> {
+    await this.ensureInitialized();
     const settings = this.dataSubjects.settings.value;
     const setting = settings.find(s => s.key === key);
     return setting?.value;
@@ -271,11 +307,14 @@ class SupabaseDataManager {
   }
 
   async getSettings(): Promise<Record<string, any>> {
+    await this.ensureInitialized();
     const settings = this.dataSubjects.settings.value;
-    return settings.reduce((acc, setting) => {
+    const result = settings.reduce((acc, setting) => {
       acc[setting.key] = setting.value;
       return acc;
     }, {} as Record<string, any>);
+    console.log('[SupabaseDataManager] getSettings result:', result);
+    return result;
   }
 
   // Content
