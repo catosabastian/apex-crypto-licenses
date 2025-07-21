@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,10 +8,13 @@ import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { supabaseDataManager } from '@/utils/supabaseDataManager';
+import { Loader2 } from 'lucide-react';
 
 export function SettingsManager() {
   const [settings, setSettings] = useState<Record<string, any>>({});
   const [isDirty, setIsDirty] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -26,6 +30,24 @@ export function SettingsManager() {
       supabaseDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
     };
   }, []);
+
+  const loadSettings = async () => {
+    try {
+      setIsLoading(true);
+      const currentSettings = await supabaseDataManager.getSettings();
+      console.log('Loaded settings in SettingsManager:', currentSettings);
+      setSettings(currentSettings);
+    } catch (error) {
+      console.error('Error loading settings:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load settings",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handlePriceChange = (category: string, value: string) => {
     setSettings(prev => ({ ...prev, [`category${category}_price`]: value }));
@@ -43,13 +65,27 @@ export function SettingsManager() {
   };
 
   const handleSaveSettings = async () => {
+    if (!isDirty) return;
+    
     try {
-      // Update each setting individually
-      for (const [key, value] of Object.entries(settings)) {
+      setIsSaving(true);
+      console.log('Saving settings:', settings);
+      
+      // Update each setting individually with proper error handling
+      const settingsToUpdate = Object.entries(settings).filter(([key]) => 
+        key.startsWith('category') && (
+          key.includes('_price') || 
+          key.includes('_available') || 
+          key.includes('_status')
+        )
+      );
+      
+      for (const [key, value] of settingsToUpdate) {
+        console.log(`Updating setting ${key} with value:`, value);
         await supabaseDataManager.updateSetting(key, value);
       }
       
-      // Force reload data to confirm updates
+      // Force reload to confirm updates
       await loadSettings();
       
       setIsDirty(false);
@@ -61,19 +97,11 @@ export function SettingsManager() {
       console.error('Error saving settings:', error);
       toast({
         title: "Error", 
-        description: "Failed to update settings",
+        description: `Failed to update settings: ${error instanceof Error ? error.message : 'Unknown error'}`,
         variant: "destructive",
       });
-    }
-  };
-
-  const loadSettings = async () => {
-    try {
-      const currentSettings = await supabaseDataManager.getSettings();
-      console.log('Loaded settings from database:', currentSettings);
-      setSettings(currentSettings);
-    } catch (error) {
-      console.error('Error loading settings:', error);
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -87,6 +115,23 @@ export function SettingsManager() {
   ];
 
   const statusOptions = ['AVAILABLE', 'RECOMMENDED', 'SELLING FAST', 'SOLD OUT'];
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>License Categories & Pricing</CardTitle>
+          <CardDescription>Loading settings...</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center py-8">
+            <Loader2 className="h-6 w-6 animate-spin mr-2" />
+            <span>Loading categories...</span>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -153,10 +198,17 @@ export function SettingsManager() {
         <div className="flex justify-end pt-6">
           <Button 
             onClick={handleSaveSettings}
-            disabled={!isDirty}
+            disabled={!isDirty || isSaving}
             className="min-w-[120px]"
           >
-            Save Changes
+            {isSaving ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                Saving...
+              </>
+            ) : (
+              'Save Changes'
+            )}
           </Button>
         </div>
       </CardContent>

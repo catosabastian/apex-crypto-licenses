@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { BehaviorSubject } from 'rxjs';
 
@@ -346,26 +345,36 @@ class SupabaseDataManager {
 
   async updateSetting(key: string, value: any): Promise<Setting | null> {
     try {
+      // Ensure value is properly formatted for JSON storage
+      const settingValue = typeof value === 'string' ? value : value;
+      
       const { data, error } = await (supabase as any)
         .from('settings')
         .upsert({ 
           key, 
-          value, 
+          value: settingValue, 
           category: key.startsWith('category') ? 'pricing' : 'general',
           updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'key'
         })
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating setting:', error);
+        throw error;
+      }
       
+      // Force reload settings data to ensure consistency
       await this.loadTableData('settings');
       this.notifyListeners('settings_updated', data);
       
+      console.log('Setting updated successfully:', { key, value: settingValue, data });
       return data;
     } catch (error) {
       console.error('Error updating setting:', error);
-      return null;
+      throw error;
     }
   }
 
@@ -527,12 +536,19 @@ class SupabaseDataManager {
     }
   }
 
-  // Analytics
+  // Enhanced analytics with better data handling
   async getAnalytics() {
     await this.ensureInitialized();
     const applications = this.dataSubjects.applications.value;
     const licenses = this.dataSubjects.licenses.value;
     const contacts = this.dataSubjects.contacts.value;
+
+    const totalRevenue = applications
+      .filter(a => a.status === 'approved' && a.amount)
+      .reduce((sum, a) => {
+        const amount = parseFloat(a.amount?.replace(/[^0-9.]/g, '') || '0');
+        return sum + amount;
+      }, 0);
 
     return {
       totalApplications: applications.length,
@@ -540,9 +556,7 @@ class SupabaseDataManager {
       approvedApplications: applications.filter(a => a.status === 'approved').length,
       activeLicenses: licenses.filter(l => l.status === 'active').length,
       newContacts: contacts.filter(c => c.status === 'unread').length,
-      totalRevenue: applications
-        .filter(a => a.status === 'approved' && a.amount)
-        .reduce((sum, a) => sum + (parseFloat(a.amount?.replace(/[^0-9.]/g, '') || '0')), 0)
+      totalRevenue
     };
   }
 
