@@ -26,19 +26,29 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     if (!user) return false;
     
     try {
+      // Use the secure function we created in the database
       const { data, error } = await (supabase as any)
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user.id)
-        .eq('role', 'admin')
-        .single();
+        .rpc('is_admin');
 
       if (error) {
-        console.log('User is not an admin:', error);
-        return false;
+        console.log('Error checking admin role with RPC:', error);
+        // Fallback to direct query if RPC fails
+        const { data: roleData, error: roleError } = await (supabase as any)
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id)
+          .eq('role', 'admin')
+          .maybeSingle();
+
+        if (roleError) {
+          console.error('Fallback admin role check failed:', roleError);
+          return false;
+        }
+
+        return !!roleData;
       }
 
-      return !!data;
+      return data === true;
     } catch (error) {
       console.error('Error checking admin role:', error);
       return false;
@@ -46,20 +56,35 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   };
 
   useEffect(() => {
+    let isUnmounted = false;
+    
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => {
+        if (isUnmounted) return;
+        
         console.log('Auth state changed:', event, session?.user?.email);
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Check admin role when user signs in
+          // Defer admin role check to prevent auth loops
           setTimeout(async () => {
-            const adminStatus = await checkAdminRole();
-            setIsAdmin(adminStatus);
-            setIsLoading(false);
-          }, 0);
+            if (isUnmounted) return;
+            try {
+              const adminStatus = await checkAdminRole();
+              if (!isUnmounted) {
+                setIsAdmin(adminStatus);
+                setIsLoading(false);
+              }
+            } catch (error) {
+              console.error('Admin role check error:', error);
+              if (!isUnmounted) {
+                setIsAdmin(false);
+                setIsLoading(false);
+              }
+            }
+          }, 100);
         } else {
           setIsAdmin(false);
           setIsLoading(false);
@@ -69,29 +94,55 @@ export const AdminAuthProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (isUnmounted) return;
+      
       setSession(session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
         setTimeout(async () => {
-          const adminStatus = await checkAdminRole();
-          setIsAdmin(adminStatus);
-          setIsLoading(false);
-        }, 0);
+          if (isUnmounted) return;
+          try {
+            const adminStatus = await checkAdminRole();
+            if (!isUnmounted) {
+              setIsAdmin(adminStatus);
+              setIsLoading(false);
+            }
+          } catch (error) {
+            console.error('Initial admin role check error:', error);
+            if (!isUnmounted) {
+              setIsAdmin(false);
+              setIsLoading(false);
+            }
+          }
+        }, 100);
       } else {
         setIsLoading(false);
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      isUnmounted = true;
+      subscription.unsubscribe();
+    };
   }, []);
 
-  // Update admin status when user changes
-  useEffect(() => {
-    if (user) {
-      checkAdminRole().then(setIsAdmin);
+  // Cache admin role to prevent repeated checks
+  const [adminRoleCache, setAdminRoleCache] = useState<{ [userId: string]: boolean }>({});
+  
+  // Update checkAdminRole to use cache
+  const checkAdminRoleWithCache = async (): Promise<boolean> => {
+    if (!user) return false;
+    
+    // Check cache first
+    if (adminRoleCache[user.id] !== undefined) {
+      return adminRoleCache[user.id];
     }
-  }, [user]);
+    
+    const isAdminUser = await checkAdminRole();
+    setAdminRoleCache(prev => ({ ...prev, [user.id]: isAdminUser }));
+    return isAdminUser;
+  };
 
   const signIn = async (email: string, password: string) => {
     try {

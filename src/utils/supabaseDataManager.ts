@@ -93,13 +93,37 @@ class SupabaseDataManager {
   private async initialize() {
     try {
       console.log('[SupabaseDataManager] Starting initialization...');
-      this.initializeRealtimeSubscriptions();
-      await this.loadInitialData();
+      
+      // Check if user is authenticated before initializing
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        console.log('[SupabaseDataManager] No session found, skipping admin data initialization');
+        this.isInitialized = true;
+        return;
+      }
+
+      // Check if user has admin role before loading sensitive data
+      try {
+        const { data: isAdmin, error } = await supabase.rpc('is_admin');
+        if (error || !isAdmin) {
+          console.log('[SupabaseDataManager] User is not admin, loading public data only');
+          await this.loadPublicData();
+        } else {
+          console.log('[SupabaseDataManager] Admin user detected, loading all data');
+          this.initializeRealtimeSubscriptions();
+          await this.loadInitialData();
+        }
+      } catch (rpcError) {
+        console.log('[SupabaseDataManager] RPC call failed, loading public data only');
+        await this.loadPublicData();
+      }
+      
       this.isInitialized = true;
       console.log('[SupabaseDataManager] Initialization complete');
     } catch (error) {
       console.error('[SupabaseDataManager] Initialization failed:', error);
-      throw error;
+      // Continue with limited functionality
+      this.isInitialized = true;
     }
   }
 
@@ -138,7 +162,23 @@ class SupabaseDataManager {
       console.log('[SupabaseDataManager] Initial data loaded successfully');
     } catch (error) {
       console.error('[SupabaseDataManager] Error loading initial data:', error);
-      throw error;
+      // Continue with limited functionality instead of throwing
+      console.log('[SupabaseDataManager] Continuing with limited functionality');
+    }
+  }
+
+  private async loadPublicData() {
+    try {
+      console.log('[SupabaseDataManager] Loading public data only...');
+      await Promise.all([
+        this.loadTableData('payment_addresses'),
+        this.loadTableData('settings'),
+        this.loadTableData('content')
+      ]);
+      console.log('[SupabaseDataManager] Public data loaded successfully');
+    } catch (error) {
+      console.error('[SupabaseDataManager] Error loading public data:', error);
+      console.log('[SupabaseDataManager] Continuing with empty data');
     }
   }
 
