@@ -9,20 +9,38 @@ import {
   HeadphonesIcon 
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { unifiedDataManager } from '@/utils/unifiedDataManager';
+import { supabaseDataManager } from '@/utils/supabaseDataManager';
 
 const FeaturesSection = () => {
-  const [content, setContent] = useState(unifiedDataManager.getContent().features);
+  const [content, setContent] = useState({
+    title: 'Comprehensive Licensing Solutions',
+    subtitle: 'Our Services',
+    description: 'We provide end-to-end cryptocurrency licensing solutions designed to meet the evolving needs of digital asset businesses worldwide.',
+    items: []
+  });
 
   useEffect(() => {
-    const handleContentUpdate = () => {
-      setContent(unifiedDataManager.getContent().features);
+    const loadContent = async () => {
+      const featuresContent = await supabaseDataManager.getContent('features');
+      if (featuresContent && Object.keys(featuresContent).length > 0) {
+        setContent({
+          title: featuresContent.title || 'Comprehensive Licensing Solutions',
+          subtitle: featuresContent.subtitle || 'Our Services',
+          description: featuresContent.description || 'We provide end-to-end cryptocurrency licensing solutions designed to meet the evolving needs of digital asset businesses worldwide.',
+          items: featuresContent.items || []
+        });
+      }
     };
 
-    unifiedDataManager.addEventListener('content_updated', handleContentUpdate);
+    const handleContentUpdate = () => {
+      loadContent();
+    };
+
+    loadContent();
+    supabaseDataManager.addEventListener('content_updated', handleContentUpdate);
     
     return () => {
-      unifiedDataManager.removeEventListener('content_updated', handleContentUpdate);
+      supabaseDataManager.removeEventListener('content_updated', handleContentUpdate);
     };
   }, []);
 

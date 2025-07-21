@@ -3,12 +3,29 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, Shield, Award, Users, Globe, CheckCircle, Star, Zap, Sparkles } from 'lucide-react';
 import { useApplicationDialog } from '@/components/ApplicationDialog';
-import { unifiedDataManager } from '@/utils/unifiedDataManager';
+import { supabaseDataManager } from '@/utils/supabaseDataManager';
 
 const Hero = () => {
   const [scrolled, setScrolled] = useState(false);
   const [currentStat, setCurrentStat] = useState(0);
-  const [content, setContent] = useState(unifiedDataManager.getContent().hero);
+  const [content, setContent] = useState({
+    headline: 'Get Your Cryptocurrency License Fast & Secure',
+    subheadline: 'Join thousands of successful businesses who have obtained their cryptocurrency licenses through our expert-guided process. Fast, secure, and fully compliant with international regulations.',
+    ctaText: 'Start Your Application',
+    ctaSecondaryText: 'Learn More',
+    trustBadges: [
+      { name: 'ISO Certified', color: 'text-primary' },
+      { name: 'Bank Grade', color: 'text-accent' },
+      { name: 'Regulated', color: 'text-primary' },
+      { name: 'Secure', color: 'text-accent' }
+    ],
+    stats: [
+      { value: '500+', label: 'Licenses Issued', icon: 'Users', color: 'text-primary' },
+      { value: '50+', label: 'Countries', icon: 'Globe', color: 'text-accent' },
+      { value: '99.9%', label: 'Success Rate', icon: 'Award', color: 'text-primary' },
+      { value: '24/7', label: 'Support', icon: 'Shield', color: 'text-accent' }
+    ]
+  });
   const { openApplicationDialog } = useApplicationDialog();
   
   useEffect(() => {
@@ -21,14 +38,28 @@ const Hero = () => {
   }, []);
 
   useEffect(() => {
-    const handleContentUpdate = () => {
-      setContent(unifiedDataManager.getContent().hero);
+    const loadContent = async () => {
+      const heroContent = await supabaseDataManager.getContent('hero');
+      if (heroContent && Object.keys(heroContent).length > 0) {
+        setContent(prev => ({
+          ...prev,
+          headline: heroContent.headline || prev.headline,
+          subheadline: heroContent.subheadline || prev.subheadline,
+          ctaText: heroContent.ctaText || prev.ctaText,
+          ctaSecondaryText: heroContent.ctaSecondaryText || prev.ctaSecondaryText
+        }));
+      }
     };
 
-    unifiedDataManager.addEventListener('content_updated', handleContentUpdate);
+    const handleContentUpdate = () => {
+      loadContent();
+    };
+
+    loadContent();
+    supabaseDataManager.addEventListener('content_updated', handleContentUpdate);
     
     return () => {
-      unifiedDataManager.removeEventListener('content_updated', handleContentUpdate);
+      supabaseDataManager.removeEventListener('content_updated', handleContentUpdate);
     };
   }, []);
 

@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Edit, Save, Eye, RefreshCw, Globe } from 'lucide-react';
+import { Edit, Save, Eye, RefreshCw, Globe, Plus, Trash2 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabaseDataManager } from '@/utils/supabaseDataManager';
 
@@ -197,21 +197,33 @@ export const ContentManager = () => {
         </TabsContent>
 
         <TabsContent value="quick-edit" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Globe className="h-5 w-5" />
-                Quick Content Updates
-              </CardTitle>
-              <CardDescription>Make quick updates to common content elements</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-muted-foreground">
-                Quick edit functionality will be available in a future update.
-                Use the section editors above for detailed content management.
-              </p>
-            </CardContent>
-          </Card>
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Features Section</CardTitle>
+                <CardDescription>Manage the comprehensive licensing solutions features</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <FeaturesContentManager 
+                  content={content.features || {}} 
+                  onUpdate={(key, newContent) => handleUpdateContent('features', key, newContent)} 
+                />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Statistics Section</CardTitle>
+                <CardDescription>Manage platform metrics and achievements</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <StatsContentManager 
+                  content={content.stats || {}} 
+                  onUpdate={(key, newContent) => handleUpdateContent('stats', key, newContent)} 
+                />
+              </CardContent>
+            </Card>
+          </div>
         </TabsContent>
       </Tabs>
     </div>
@@ -349,6 +361,322 @@ const HeroContentManager = ({ content, onUpdate }: { content: any; onUpdate: (ke
           </div>
         </CardContent>
       </Card>
+    </div>
+  );
+};
+
+const FeaturesContentManager = ({ content, onUpdate }: { content: any; onUpdate: (key: string, content: any) => void }) => {
+  const [formData, setFormData] = useState({
+    title: content.title || '',
+    subtitle: content.subtitle || '',
+    description: content.description || '',
+    items: content.items || []
+  });
+
+  useEffect(() => {
+    setFormData({
+      title: content.title || '',
+      subtitle: content.subtitle || '',
+      description: content.description || '',
+      items: content.items || []
+    });
+  }, [content]);
+
+  const handleSave = () => {
+    Object.keys(formData).forEach(key => {
+      onUpdate(key, formData[key]);
+    });
+    toast({
+      title: "Features Content Updated",
+      description: "Features section has been updated successfully",
+    });
+  };
+
+  const addFeature = () => {
+    const newFeature = {
+      title: 'New Feature',
+      description: 'Feature description',
+      icon: 'Zap'
+    };
+    setFormData(prev => ({
+      ...prev,
+      items: [...prev.items, newFeature]
+    }));
+  };
+
+  const updateFeature = (index: number, feature: any) => {
+    const updatedItems = [...formData.items];
+    updatedItems[index] = feature;
+    setFormData(prev => ({
+      ...prev,
+      items: updatedItems
+    }));
+  };
+
+  const removeFeature = (index: number) => {
+    const updatedItems = formData.items.filter((_, i) => i !== index);
+    setFormData(prev => ({
+      ...prev,
+      items: updatedItems
+    }));
+  };
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <Label>Title</Label>
+        <Input
+          value={formData.title}
+          onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+          placeholder="Features section title"
+        />
+      </div>
+
+      <div>
+        <Label>Subtitle</Label>
+        <Input
+          value={formData.subtitle}
+          onChange={(e) => setFormData(prev => ({ ...prev, subtitle: e.target.value }))}
+          placeholder="Features section subtitle"
+        />
+      </div>
+
+      <div>
+        <Label>Description</Label>
+        <Textarea
+          value={formData.description}
+          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+          placeholder="Features section description"
+          rows={3}
+        />
+      </div>
+
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <Label>Feature Items</Label>
+          <Button onClick={addFeature} size="sm" variant="outline">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Feature
+          </Button>
+        </div>
+        
+        <div className="space-y-4">
+          {formData.items.map((item: any, index: number) => (
+            <Card key={index} className="p-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label>Feature {index + 1}</Label>
+                  <Button 
+                    variant="destructive" 
+                    size="sm" 
+                    onClick={() => removeFeature(index)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+                
+                <div className="grid grid-cols-1 gap-3">
+                  <div>
+                    <Label>Title</Label>
+                    <Input
+                      value={item.title}
+                      onChange={(e) => updateFeature(index, { ...item, title: e.target.value })}
+                      placeholder="Feature title"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label>Icon</Label>
+                    <select
+                      value={item.icon}
+                      onChange={(e) => updateFeature(index, { ...item, icon: e.target.value })}
+                      className="w-full p-2 border rounded-md"
+                    >
+                      <option value="Zap">Zap</option>
+                      <option value="Shield">Shield</option>
+                      <option value="Users">Users</option>
+                      <option value="Lock">Lock</option>
+                      <option value="Building">Building</option>
+                      <option value="HeadphonesIcon">Headphones</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <Label>Description</Label>
+                    <Textarea
+                      value={item.description}
+                      onChange={(e) => updateFeature(index, { ...item, description: e.target.value })}
+                      placeholder="Feature description"
+                      rows={2}
+                    />
+                  </div>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+      
+      <div className="flex justify-end">
+        <Button onClick={handleSave}>
+          <Save className="h-4 w-4 mr-2" />
+          Save All Changes
+        </Button>
+      </div>
+    </div>
+  );
+};
+
+const StatsContentManager = ({ content, onUpdate }: { content: any; onUpdate: (key: string, content: any) => void }) => {
+  const [formData, setFormData] = useState({
+    title: content.title || '',
+    subtitle: content.subtitle || '',
+    description: content.description || '',
+    items: content.items || []
+  });
+
+  useEffect(() => {
+    setFormData({
+      title: content.title || '',
+      subtitle: content.subtitle || '',
+      description: content.description || '',
+      items: content.items || []
+    });
+  }, [content]);
+
+  const handleSave = () => {
+    Object.keys(formData).forEach(key => {
+      onUpdate(key, formData[key]);
+    });
+    toast({
+      title: "Stats Content Updated",
+      description: "Statistics section has been updated successfully",
+    });
+  };
+
+  const addStat = () => {
+    const newStat = {
+      number: '100+',
+      label: 'New Metric',
+      description: 'Metric description'
+    };
+    setFormData(prev => ({
+      ...prev,
+      items: [...prev.items, newStat]
+    }));
+  };
+
+  const updateStat = (index: number, stat: any) => {
+    const updatedItems = [...formData.items];
+    updatedItems[index] = stat;
+    setFormData(prev => ({
+      ...prev,
+      items: updatedItems
+    }));
+  };
+
+  const removeStat = (index: number) => {
+    const updatedItems = formData.items.filter((_, i) => i !== index);
+    setFormData(prev => ({
+      ...prev,
+      items: updatedItems
+    }));
+  };
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <Label>Title</Label>
+        <Input
+          value={formData.title}
+          onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+          placeholder="Statistics section title"
+        />
+      </div>
+
+      <div>
+        <Label>Subtitle</Label>
+        <Input
+          value={formData.subtitle}
+          onChange={(e) => setFormData(prev => ({ ...prev, subtitle: e.target.value }))}
+          placeholder="Statistics section subtitle"
+        />
+      </div>
+
+      <div>
+        <Label>Description</Label>
+        <Textarea
+          value={formData.description}
+          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+          placeholder="Statistics section description"
+          rows={3}
+        />
+      </div>
+
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <Label>Statistics Items</Label>
+          <Button onClick={addStat} size="sm" variant="outline">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Statistic
+          </Button>
+        </div>
+        
+        <div className="space-y-4">
+          {formData.items.map((item: any, index: number) => (
+            <Card key={index} className="p-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label>Statistic {index + 1}</Label>
+                  <Button 
+                    variant="destructive" 
+                    size="sm" 
+                    onClick={() => removeStat(index)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+                
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <Label>Number</Label>
+                    <Input
+                      value={item.number}
+                      onChange={(e) => updateStat(index, { ...item, number: e.target.value })}
+                      placeholder="500+"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label>Label</Label>
+                    <Input
+                      value={item.label}
+                      onChange={(e) => updateStat(index, { ...item, label: e.target.value })}
+                      placeholder="Licenses Issued"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label>Description</Label>
+                    <Input
+                      value={item.description}
+                      onChange={(e) => updateStat(index, { ...item, description: e.target.value })}
+                      placeholder="Successfully processed"
+                    />
+                  </div>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+      
+      <div className="flex justify-end">
+        <Button onClick={handleSave}>
+          <Save className="h-4 w-4 mr-2" />
+          Save All Changes
+        </Button>
+      </div>
     </div>
   );
 };

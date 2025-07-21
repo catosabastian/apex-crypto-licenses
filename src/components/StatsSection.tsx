@@ -2,20 +2,46 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { TrendingUp, Users, Globe, Award, Shield, Star } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { unifiedDataManager } from '@/utils/unifiedDataManager';
+import { supabaseDataManager } from '@/utils/supabaseDataManager';
 
 const StatsSection = () => {
-  const [content, setContent] = useState(unifiedDataManager.getContent().stats);
+  const [content, setContent] = useState({
+    title: 'Trusted by Industry Leaders',
+    subtitle: 'Our Impact',
+    description: 'Join thousands of satisfied clients who have successfully obtained their cryptocurrency licenses through our platform.',
+    items: [],
+    trustIndicator: {
+      title: 'Regulated & Secure',
+      description: 'Our platform is fully regulated and follows the highest security standards in the industry.'
+    }
+  });
 
   useEffect(() => {
-    const handleContentUpdate = () => {
-      setContent(unifiedDataManager.getContent().stats);
+    const loadContent = async () => {
+      const statsContent = await supabaseDataManager.getContent('stats');
+      if (statsContent && Object.keys(statsContent).length > 0) {
+        setContent({
+          title: statsContent.title || 'Trusted by Industry Leaders',
+          subtitle: statsContent.subtitle || 'Our Impact',
+          description: statsContent.description || 'Join thousands of satisfied clients who have successfully obtained their cryptocurrency licenses through our platform.',
+          items: statsContent.items || [],
+          trustIndicator: {
+            title: 'Regulated & Secure',
+            description: 'Our platform is fully regulated and follows the highest security standards in the industry.'
+          }
+        });
+      }
     };
 
-    unifiedDataManager.addEventListener('content_updated', handleContentUpdate);
+    const handleContentUpdate = () => {
+      loadContent();
+    };
+
+    loadContent();
+    supabaseDataManager.addEventListener('content_updated', handleContentUpdate);
     
     return () => {
-      unifiedDataManager.removeEventListener('content_updated', handleContentUpdate);
+      supabaseDataManager.removeEventListener('content_updated', handleContentUpdate);
     };
   }, []);
 
@@ -50,12 +76,12 @@ const StatsSection = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {content.items.map((stat, index) => {
-              const IconComponent = iconMap[stat.icon];
+              const IconComponent = iconMap[stat.icon || 'Star'];
               return (
                 <Card key={index} className="modern-card hover-lift group border-0 shadow-lg">
                   <CardContent className="p-8 text-center">
-                    <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl ${stat.bgColor} mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                      {IconComponent && <IconComponent className={`h-8 w-8 ${stat.color}`} />}
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-6 group-hover:scale-110 transition-transform duration-300">
+                      {IconComponent && <IconComponent className="h-8 w-8 text-primary" />}
                     </div>
                     <div className="text-4xl md:text-5xl font-bold text-primary mb-3 group-hover:scale-105 transition-transform duration-300">
                       {stat.number}

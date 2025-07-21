@@ -1,20 +1,40 @@
 
 import { Shield, CheckCircle, FileCheck, AlertTriangle } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { unifiedDataManager } from '@/utils/unifiedDataManager';
+import { supabaseDataManager } from '@/utils/supabaseDataManager';
 
 const AboutSection = () => {
-  const [content, setContent] = useState(unifiedDataManager.getContent().about);
+  const [content, setContent] = useState({
+    title: 'Your Trusted Partner in Cryptocurrency Licensing',
+    subtitle: 'About APEX',
+    description: ['APEX is a leading provider of cryptocurrency licensing solutions, helping businesses navigate the complex regulatory landscape of digital assets.'],
+    features: [],
+    legalNotice: 'This service is provided for informational purposes. Please consult with legal professionals for specific regulatory advice in your jurisdiction.'
+  });
 
   useEffect(() => {
-    const handleContentUpdate = () => {
-      setContent(unifiedDataManager.getContent().about);
+    const loadContent = async () => {
+      const aboutContent = await supabaseDataManager.getContent('about');
+      if (aboutContent && Object.keys(aboutContent).length > 0) {
+        setContent({
+          title: aboutContent.title || 'Your Trusted Partner in Cryptocurrency Licensing',
+          subtitle: aboutContent.subtitle || 'About APEX',
+          description: aboutContent.description || ['APEX is a leading provider of cryptocurrency licensing solutions, helping businesses navigate the complex regulatory landscape of digital assets.'],
+          features: aboutContent.features || [],
+          legalNotice: aboutContent.legalNotice || 'This service is provided for informational purposes. Please consult with legal professionals for specific regulatory advice in your jurisdiction.'
+        });
+      }
     };
 
-    unifiedDataManager.addEventListener('content_updated', handleContentUpdate);
+    const handleContentUpdate = () => {
+      loadContent();
+    };
+
+    loadContent();
+    supabaseDataManager.addEventListener('content_updated', handleContentUpdate);
     
     return () => {
-      unifiedDataManager.removeEventListener('content_updated', handleContentUpdate);
+      supabaseDataManager.removeEventListener('content_updated', handleContentUpdate);
     };
   }, []);
 
