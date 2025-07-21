@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { validLicenses, generateLicenseId } from '@/utils/licenseData';
 import { Button } from '@/components/ui/button';
@@ -18,6 +17,7 @@ import { SettingsManager } from '@/components/admin/SettingsManager';
 import { LicenseManager } from '@/components/admin/LicenseManager';
 import { ContentManager } from '@/components/admin/ContentManager';
 import { PaymentAddressManager } from '@/components/admin/PaymentAddressManager';
+import { ContactSettingsManager } from '@/components/admin/ContactSettingsManager';
 
 const Admin = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -185,7 +185,7 @@ const Admin = () => {
       </header>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-8">
+        <TabsList className="grid w-full grid-cols-9">
           <TabsTrigger value="dashboard" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             Dashboard
@@ -201,6 +201,10 @@ const Admin = () => {
           <TabsTrigger value="contacts" className="flex items-center gap-2">
             <Mail className="h-4 w-4" />
             Contacts
+          </TabsTrigger>
+          <TabsTrigger value="contact-info" className="flex items-center gap-2">
+            <Globe className="h-4 w-4" />
+            Contact Info
           </TabsTrigger>
           <TabsTrigger value="content" className="flex items-center gap-2">
             <Globe className="h-4 w-4" />
@@ -288,6 +292,10 @@ const Admin = () => {
 
         <TabsContent value="contacts" className="space-y-6">
           <ContactsManager />
+        </TabsContent>
+
+        <TabsContent value="contact-info" className="space-y-6">
+          <ContactSettingsManager />
         </TabsContent>
 
         <TabsContent value="content" className="space-y-6">

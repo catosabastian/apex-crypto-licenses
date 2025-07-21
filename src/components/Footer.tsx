@@ -1,3 +1,4 @@
+
 import { Globe, MessageSquare, ShieldCheck } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
@@ -7,33 +8,36 @@ import { supabaseDataManager } from "@/utils/supabaseDataManager";
 
 const Footer = () => {
   const { openApplicationDialog } = useApplicationDialog();
-  const [settings, setSettings] = useState<Record<string, any>>({
+  const [settings, setSettings] = useState<Record<string, any>>({});
+  const [isLoading, setIsLoading] = useState(true);
+  
+  // Default values for fallback
+  const defaults = {
     companyName: "CryptoLicense Pro",
-    supportEmail: "support@cryptolicensepro.com", 
+    supportEmail: "support@cryptolicensepro.com",
     contactPhone: "+1 (555) 123-4567",
     companyAddress: "123 Business Ave",
     city: "New York, NY 10001",
     country: "United States",
     website: ""
-  });
-  const [isLoading, setIsLoading] = useState(true);
+  };
   
   useEffect(() => {
     const loadSettings = async () => {
       try {
-        console.log('[Footer] Loading settings...');
+        console.log('[Footer] Loading contact settings...');
         const loadedSettings = await supabaseDataManager.getSettings();
-        console.log('[Footer] Settings loaded:', loadedSettings);
+        console.log('[Footer] Contact settings loaded:', loadedSettings);
         
-        if (loadedSettings && Object.keys(loadedSettings).length > 0) {
-          setSettings(prev => ({
-            ...prev,
-            ...loadedSettings
-          }));
-        }
+        // Merge with defaults, preferring loaded settings
+        setSettings(prev => ({
+          ...defaults,
+          ...loadedSettings
+        }));
       } catch (error) {
-        console.error('[Footer] Error loading settings:', error);
-        // Keep default settings if loading fails
+        console.error('[Footer] Error loading contact settings:', error);
+        // Use defaults if loading fails
+        setSettings(defaults);
       } finally {
         setIsLoading(false);
       }
@@ -43,22 +47,27 @@ const Footer = () => {
 
     // Listen for settings updates
     const handleSettingsUpdate = (data: any) => {
-      console.log('[Footer] Settings updated:', data);
+      console.log('[Footer] Contact settings updated:', data);
       if (data && typeof data === 'object') {
         setSettings(prev => ({
+          ...defaults,
           ...prev,
           ...data
         }));
       }
     };
 
-    // Listen to supabase data manager events
     supabaseDataManager.addEventListener('settings_updated', handleSettingsUpdate);
 
     return () => {
       supabaseDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
     };
   }, []);
+
+  // Helper function to get setting value with fallback
+  const getSetting = (key: string) => {
+    return settings[key] || defaults[key as keyof typeof defaults] || '';
+  };
 
   if (isLoading) {
     return (
@@ -81,13 +90,13 @@ const Footer = () => {
             <div className="flex items-center gap-2">
               <ShieldCheck className="h-6 w-6" />
               <div>
-                <h2 className="text-xl font-bold">{settings.companyName || "CryptoLicense Pro"}</h2>
+                <h2 className="text-xl font-bold">{getSetting('companyName')}</h2>
                 <p className="text-xs opacity-80">Crypto Licensing Regulatory</p>
               </div>
             </div>
             
             <p className="mt-4 text-sm opacity-80 max-w-md">
-              {settings.companyName || "CryptoLicense Pro"} provides official regulatory licensing for cryptocurrency traders and institutions. Our mission is to ensure compliance and security in digital asset trading.
+              {getSetting('companyName')} provides official regulatory licensing for cryptocurrency traders and institutions. Our mission is to ensure compliance and security in digital asset trading.
             </p>
           </div>
           
@@ -104,26 +113,37 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold mb-4">Contact</h3>
             <ul className="space-y-2 text-sm">
-              <li className="flex items-center gap-2">
-                <Globe className="h-4 w-4 opacity-80" />
-                <span className="opacity-80">{settings.supportEmail || "support@cryptolicensepro.com"}</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <MessageSquare className="h-4 w-4 opacity-80" />
-                <span className="opacity-80">{settings.contactPhone || "+1 (555) 123-4567"}</span>
-              </li>
-              <li className="flex items-start gap-2">
-                <Globe className="h-4 w-4 opacity-80 mt-0.5" />
-                <div className="opacity-80">
-                  <div>{settings.companyAddress || "123 Business Ave"}</div>
-                  <div>{settings.city || "New York, NY 10001"}</div>
-                  <div>{settings.country || "United States"}</div>
-                </div>
-              </li>
-              {settings.website && (
+              {getSetting('supportEmail') && (
                 <li className="flex items-center gap-2">
                   <Globe className="h-4 w-4 opacity-80" />
-                  <a href={settings.website} target="_blank" rel="noopener noreferrer" className="opacity-80 hover:opacity-100 transition-opacity">
+                  <span className="opacity-80">{getSetting('supportEmail')}</span>
+                </li>
+              )}
+              {getSetting('contactPhone') && (
+                <li className="flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4 opacity-80" />
+                  <span className="opacity-80">{getSetting('contactPhone')}</span>
+                </li>
+              )}
+              {(getSetting('companyAddress') || getSetting('city') || getSetting('country')) && (
+                <li className="flex items-start gap-2">
+                  <Globe className="h-4 w-4 opacity-80 mt-0.5" />
+                  <div className="opacity-80">
+                    {getSetting('companyAddress') && <div>{getSetting('companyAddress')}</div>}
+                    {getSetting('city') && <div>{getSetting('city')}</div>}
+                    {getSetting('country') && <div>{getSetting('country')}</div>}
+                  </div>
+                </li>
+              )}
+              {getSetting('website') && (
+                <li className="flex items-center gap-2">
+                  <Globe className="h-4 w-4 opacity-80" />
+                  <a 
+                    href={getSetting('website')} 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="opacity-80 hover:opacity-100 transition-opacity"
+                  >
                     Visit Website
                   </a>
                 </li>
@@ -136,7 +156,7 @@ const Footer = () => {
         
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-xs opacity-70">
-            © {new Date().getFullYear()} {settings.companyName || "CryptoLicense Pro"}. All rights reserved.
+            © {new Date().getFullYear()} {getSetting('companyName')}. All rights reserved.
           </div>
           
           <div className="flex gap-6 text-xs opacity-70">
