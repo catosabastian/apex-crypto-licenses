@@ -9,35 +9,62 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Copy, Check, QrCode, Wallet, AlertCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { ContentSettings } from '@/utils/unifiedDataManager';
+import { supabaseDataManager } from '@/utils/supabaseDataManager';
 import QRCode from 'react-qr-code';
 
 interface PaymentSectionProps {
   selectedCrypto: string;
   onCryptoChange: (crypto: string) => void;
   selectedCategory: string;
-  settings: ContentSettings;
+  settings: any;
 }
 
 const PaymentSection = ({ selectedCrypto, onCryptoChange, selectedCategory, settings }: PaymentSectionProps) => {
   const [copySuccess, setCopySuccess] = useState<string | null>(null);
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
+  const [paymentAddresses, setPaymentAddresses] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadPaymentAddresses = async () => {
+      try {
+        setIsLoading(true);
+        const addresses = await supabaseDataManager.getPaymentAddresses();
+        console.log('[PaymentSection] Loaded payment addresses:', addresses);
+        setPaymentAddresses(addresses);
+      } catch (error) {
+        console.error('[PaymentSection] Error loading payment addresses:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    const handleAddressUpdate = (data: any) => {
+      console.log('[PaymentSection] Payment addresses updated:', data);
+      loadPaymentAddresses();
+    };
+
+    supabaseDataManager.addEventListener('payment_addresses_updated', handleAddressUpdate);
+    loadPaymentAddresses();
+
+    return () => {
+      supabaseDataManager.removeEventListener('payment_addresses_updated', handleAddressUpdate);
+    };
+  }, []);
 
   const getWalletAddress = (crypto: string): string => {
-    switch (crypto) {
-      case 'BTC':
-        return settings.bitcoinAddress || 'Address not configured';
-      case 'ETH':
-        return settings.ethereumAddress || 'Address not configured';
-      case 'USDT_TRON':
-        return settings.usdtTronAddress || 'Address not configured';
-      case 'USDT_ETH':
-        return settings.usdtEthereumAddress || 'Address not configured';
-      case 'XRP':
-        return settings.xrpAddress || 'Address not configured';
-      default:
-        return 'Address not available';
-    }
+    const cryptoMapping = {
+      'BTC': 'bitcoin',
+      'ETH': 'ethereum',
+      'USDT_TRON': 'usdt_tron',
+      'USDT_ETH': 'usdt_ethereum',
+      'XRP': 'xrp'
+    };
+
+    const mappedCrypto = cryptoMapping[crypto as keyof typeof cryptoMapping];
+    const address = paymentAddresses.find(addr => addr.cryptocurrency === mappedCrypto);
+    
+    return address?.address || 'Address not configured';
   };
 
   const getCryptoLabel = (crypto: string): string => {
@@ -53,9 +80,12 @@ const PaymentSection = ({ selectedCrypto, onCryptoChange, selectedCategory, sett
 
   const getCategoryPrice = (category: string): string => {
     switch (category) {
-      case '3': return settings.category3Price || '70,000 USDT';
-      case '4': return settings.category4Price || '150,000 USDT';
-      case '5': return settings.category5Price || '250,000 USDT';
+      case '1': return settings.category1_price || '25,000 USDT';
+      case '2': return settings.category2_price || '50,000 USDT';
+      case '3': return settings.category3_price || '70,000 USDT';
+      case '4': return settings.category4_price || '150,000 USDT';
+      case '5': return settings.category5_price || '250,000 USDT';
+      case '6': return settings.category6_price || '500,000 USDT';
       default: return 'Price not available';
     }
   };
@@ -89,6 +119,26 @@ const PaymentSection = ({ selectedCrypto, onCryptoChange, selectedCategory, sett
 
   const selectedAddress = getWalletAddress(selectedCrypto);
   const isAddressValid = selectedAddress && selectedAddress !== 'Address not configured';
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold">Payment Information</h3>
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label>Select Payment Cryptocurrency</Label>
+            <div className="h-10 bg-muted rounded-md animate-pulse" />
+          </div>
+          <Card className="p-6 border bg-muted/30 rounded-lg">
+            <div className="space-y-4">
+              <div className="h-4 bg-muted rounded animate-pulse" />
+              <div className="h-20 bg-muted rounded animate-pulse" />
+            </div>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">

@@ -1,7 +1,16 @@
-import { supabase } from '@/integrations/supabase/client';
-import { BehaviorSubject } from 'rxjs';
 
-// Types for database operations
+import { supabase } from '@/integrations/supabase/client';
+
+export interface PaymentAddress {
+  id: string;
+  cryptocurrency: string;
+  address: string;
+  is_active: boolean;
+  qr_code_data?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Application {
   id: string;
   name: string;
@@ -10,11 +19,11 @@ export interface Application {
   company?: string;
   category: string;
   notes?: string;
-  status: 'pending' | 'approved' | 'rejected' | 'processing';
+  status: string;
   amount?: string;
   payment_method?: string;
   transaction_id?: string;
-  documents?: any[];
+  documents: any[];
   created_at: string;
   updated_at: string;
 }
@@ -26,19 +35,20 @@ export interface License {
   license_type: string;
   issue_date: string;
   expiry_date: string;
-  status: 'active' | 'expired' | 'suspended' | 'revoked';
+  status: string;
   platforms?: string;
   application_id?: string;
   created_at: string;
   updated_at: string;
 }
 
-export interface PaymentAddress {
+export interface Contact {
   id: string;
-  cryptocurrency: string;
-  address: string;
-  is_active: boolean;
-  qr_code_data?: string;
+  name: string;
+  email: string;
+  subject?: string;
+  message: string;
+  status: string;
   created_at: string;
   updated_at: string;
 }
@@ -53,200 +63,104 @@ export interface Setting {
   updated_at: string;
 }
 
-export interface Contact {
-  id: string;
-  name: string;
-  email: string;
-  subject?: string;
-  message: string;
-  status: 'unread' | 'read' | 'responded' | 'archived';
-  created_at: string;
-  updated_at: string;
-}
-
-export interface ContentItem {
-  id: string;
-  section: string;
-  key: string;
-  value: any;
-  created_at: string;
-  updated_at: string;
-}
-
 class SupabaseDataManager {
-  private eventListeners: { [key: string]: Function[] } = {};
-  private dataSubjects = {
-    applications: new BehaviorSubject<Application[]>([]),
-    licenses: new BehaviorSubject<License[]>([]),
-    paymentAddresses: new BehaviorSubject<PaymentAddress[]>([]),
-    settings: new BehaviorSubject<Setting[]>([]),
-    contacts: new BehaviorSubject<Contact[]>([]),
-    content: new BehaviorSubject<ContentItem[]>([])
-  };
+  private listeners: Map<string, Set<Function>> = new Map();
+  private cache: Map<string, any> = new Map();
+  private lastUpdate: Map<string, number> = new Map();
 
   constructor() {
-    this.initializeRealtimeSubscriptions();
-    this.loadInitialData();
+    this.initializeRealTimeSubscriptions();
   }
 
-  private initializeRealtimeSubscriptions() {
-    // Subscribe to real-time changes for all tables
-    const tables = ['applications', 'licenses', 'payment_addresses', 'settings', 'contacts', 'content'];
-    
-    tables.forEach(table => {
-      supabase
-        .channel(`${table}-changes`)
-        .on('postgres_changes', { event: '*', schema: 'public', table }, () => {
-          this.loadTableData(table);
-        })
-        .subscribe();
-    });
+  private initializeRealTimeSubscriptions() {
+    // Subscribe to settings changes
+    supabase
+      .channel('settings-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'settings' }, 
+        (payload) => this.handleRealtimeUpdate('settings', payload))
+      .subscribe();
+
+    // Subscribe to payment addresses changes
+    supabase
+      .channel('payment-addresses-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'payment_addresses' }, 
+        (payload) => this.handleRealtimeUpdate('payment_addresses', payload))
+      .subscribe();
+
+    // Subscribe to applications changes
+    supabase
+      .channel('applications-changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'applications' }, 
+        (payload) => this.handleRealtimeUpdate('applications', payload))
+      .subscribe();
   }
 
-  private async loadInitialData() {
-    await Promise.all([
-      this.loadTableData('applications'),
-      this.loadTableData('licenses'),
-      this.loadTableData('payment_addresses'),
-      this.loadTableData('settings'),
-      this.loadTableData('contacts'),
-      this.loadTableData('content')
-    ]);
+  private handleRealtimeUpdate(table: string, payload: any) {
+    console.log(`[SupabaseDataManager] Realtime update for ${table}:`, payload);
+    this.cache.delete(table);
+    this.notifyListeners(`${table}_updated`, payload);
   }
 
-  private async loadTableData(table: string) {
-    try {
-      const { data, error } = await (supabase as any)
-        .from(table)
-        .select('*')
-        .order('created_at', { ascending: false });
+  addEventListener(event: string, callback: Function) {
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, new Set());
+    }
+    this.listeners.get(event)!.add(callback);
+  }
 
-      if (error) throw error;
-
-      const subjectKey = table === 'payment_addresses' ? 'paymentAddresses' : table as keyof typeof this.dataSubjects;
-      this.dataSubjects[subjectKey].next(data || []);
-      this.notifyListeners(`${table}_updated`, data);
-    } catch (error) {
-      console.error(`Error loading ${table}:`, error);
+  removeEventListener(event: string, callback: Function) {
+    if (this.listeners.has(event)) {
+      this.listeners.get(event)!.delete(callback);
     }
   }
 
-  // Applications
-  async createApplication(application: Omit<Application, 'id' | 'created_at' | 'updated_at'>): Promise<Application | null> {
-    try {
-      const { data, error } = await (supabase as any)
-        .from('applications')
-        .insert([application])
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('Error creating application:', error);
-      return null;
+  private notifyListeners(event: string, data: any) {
+    if (this.listeners.has(event)) {
+      this.listeners.get(event)!.forEach(callback => {
+        try {
+          callback(data);
+        } catch (error) {
+          console.error(`[SupabaseDataManager] Error in event listener for ${event}:`, error);
+        }
+      });
     }
   }
 
-  async getApplications(): Promise<Application[]> {
-    return this.dataSubjects.applications.value;
-  }
-
-  async updateApplication(id: string, updates: Partial<Application>): Promise<Application | null> {
+  async getSettings(): Promise<Record<string, any>> {
     try {
-      const { data, error } = await (supabase as any)
-        .from('applications')
-        .update(updates)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('Error updating application:', error);
-      return null;
-    }
-  }
-
-  // Licenses
-  async createLicense(license: Omit<License, 'id' | 'created_at' | 'updated_at'>): Promise<License | null> {
-    try {
-      const { data, error } = await (supabase as any)
-        .from('licenses')
-        .insert([license])
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('Error creating license:', error);
-      return null;
-    }
-  }
-
-  async getLicenses(): Promise<License[]> {
-    return this.dataSubjects.licenses.value;
-  }
-
-  async verifyLicense(licenseId: string): Promise<License | null> {
-    try {
-      const { data, error } = await (supabase as any)
-        .from('licenses')
-        .select('*')
-        .eq('license_id', licenseId)
-        .eq('status', 'active')
-        .single();
-
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('Error verifying license:', error);
-      return null;
-    }
-  }
-
-  // Payment Addresses
-  async getPaymentAddresses(): Promise<PaymentAddress[]> {
-    return this.dataSubjects.paymentAddresses.value.filter(addr => addr.is_active);
-  }
-
-  async updatePaymentAddress(cryptocurrency: string, updates: Partial<PaymentAddress>): Promise<PaymentAddress | null> {
-    try {
-      const { data, error } = await (supabase as any)
-        .from('payment_addresses')
-        .update({
-          ...updates,
-          updated_at: new Date().toISOString()
-        })
-        .eq('cryptocurrency', cryptocurrency)
-        .select()
-        .single();
-
-      if (error) throw error;
+      const cacheKey = 'settings';
+      const now = Date.now();
       
-      // Update local data and emit event
-      await this.loadTableData('payment_addresses');
-      this.notifyListeners('payment_addresses_updated', data);
-      
-      return data;
-    } catch (error) {
-      console.error('Error updating payment address:', error);
-      return null;
-    }
-  }
+      if (this.cache.has(cacheKey) && (now - (this.lastUpdate.get(cacheKey) || 0)) < 5000) {
+        return this.cache.get(cacheKey);
+      }
 
-  // Settings
-  async getSetting(key: string): Promise<any> {
-    const settings = this.dataSubjects.settings.value;
-    const setting = settings.find(s => s.key === key);
-    return setting?.value;
+      const { data, error } = await supabase
+        .from('settings')
+        .select('*')
+        .order('key');
+
+      if (error) throw error;
+
+      const settings: Record<string, any> = {};
+      data?.forEach((setting: Setting) => {
+        settings[setting.key] = setting.value;
+      });
+
+      this.cache.set(cacheKey, settings);
+      this.lastUpdate.set(cacheKey, now);
+      
+      console.log('[SupabaseDataManager] Loaded settings:', settings);
+      return settings;
+    } catch (error) {
+      console.error('[SupabaseDataManager] Error loading settings:', error);
+      return {};
+    }
   }
 
   async updateSetting(key: string, value: any): Promise<Setting | null> {
     try {
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('settings')
         .upsert({ 
           key, 
@@ -259,137 +173,177 @@ class SupabaseDataManager {
 
       if (error) throw error;
       
-      // Update local data and emit event
-      await this.loadTableData('settings');
+      // Clear cache and notify listeners
+      this.cache.delete('settings');
       this.notifyListeners('settings_updated', data);
       
       return data;
     } catch (error) {
-      console.error('Error updating setting:', error);
-      return null;
+      console.error('[SupabaseDataManager] Error updating setting:', error);
+      throw error;
     }
   }
 
-  async getSettings(): Promise<Record<string, any>> {
-    const settings = this.dataSubjects.settings.value;
-    return settings.reduce((acc, setting) => {
-      acc[setting.key] = setting.value;
-      return acc;
-    }, {} as Record<string, any>);
-  }
-
-  // Content
-  async getContent(section?: string): Promise<Record<string, any>> {
-    const content = this.dataSubjects.content.value;
-    const filtered = section ? content.filter(c => c.section === section) : content;
-    
-    if (section === 'process') {
-      const processContent = filtered.find(c => c.key === 'steps');
-      if (processContent) {
-        const steps = Array.isArray(processContent.value) ? processContent.value : [];
-        const title = filtered.find(c => c.key === 'title')?.value || 'How to Get Your License';
-        const subtitle = filtered.find(c => c.key === 'subtitle')?.value || 'Simple Process';
-        const description = filtered.find(c => c.key === 'description')?.value || 'Follow our streamlined process';
-        const ctaText = filtered.find(c => c.key === 'cta_text')?.value || 'Start Your Application';
-        
-        return { title, subtitle, description, steps, ctaText };
+  async getPaymentAddresses(): Promise<PaymentAddress[]> {
+    try {
+      const cacheKey = 'payment_addresses';
+      const now = Date.now();
+      
+      if (this.cache.has(cacheKey) && (now - (this.lastUpdate.get(cacheKey) || 0)) < 5000) {
+        return this.cache.get(cacheKey);
       }
+
+      const { data, error } = await supabase
+        .from('payment_addresses')
+        .select('*')
+        .eq('is_active', true)
+        .order('cryptocurrency');
+
+      if (error) throw error;
+
+      this.cache.set(cacheKey, data || []);
+      this.lastUpdate.set(cacheKey, now);
+      
+      console.log('[SupabaseDataManager] Loaded payment addresses:', data);
+      return data || [];
+    } catch (error) {
+      console.error('[SupabaseDataManager] Error loading payment addresses:', error);
+      return [];
     }
-    
-    return filtered.reduce((acc, item) => {
-      acc[item.key] = item.value;
-      return acc;
-    }, {} as Record<string, any>);
   }
 
-  async updateContent(section: string, key: string, value: any): Promise<ContentItem | null> {
+  async updatePaymentAddress(cryptocurrency: string, updates: Partial<PaymentAddress>): Promise<PaymentAddress | null> {
     try {
-      const { data, error } = await (supabase as any)
-        .from('content')
-        .upsert({ section, key, value })
+      const { data, error } = await supabase
+        .from('payment_addresses')
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString()
+        })
+        .eq('cryptocurrency', cryptocurrency)
         .select()
         .single();
 
       if (error) throw error;
+      
+      // Clear cache and notify listeners
+      this.cache.delete('payment_addresses');
+      this.notifyListeners('payment_addresses_updated', data);
+      
       return data;
     } catch (error) {
-      console.error('Error updating content:', error);
-      return null;
+      console.error('[SupabaseDataManager] Error updating payment address:', error);
+      throw error;
     }
   }
 
-  // Contacts
-  async createContact(contact: Omit<Contact, 'id' | 'created_at' | 'updated_at'>): Promise<Contact | null> {
+  async getApplications(): Promise<Application[]> {
     try {
-      const { data, error } = await (supabase as any)
-        .from('contacts')
-        .insert([contact])
+      const { data, error } = await supabase
+        .from('applications')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('[SupabaseDataManager] Error loading applications:', error);
+      return [];
+    }
+  }
+
+  async createApplication(application: Partial<Application>): Promise<Application | null> {
+    try {
+      const { data, error } = await supabase
+        .from('applications')
+        .insert(application)
         .select()
         .single();
 
       if (error) throw error;
+      
+      this.notifyListeners('applications_updated', data);
       return data;
     } catch (error) {
-      console.error('Error creating contact:', error);
-      return null;
+      console.error('[SupabaseDataManager] Error creating application:', error);
+      throw error;
     }
   }
 
-  async getContacts(): Promise<Contact[]> {
-    return this.dataSubjects.contacts.value;
-  }
-
-  async updateContact(id: string, updates: Partial<Contact>): Promise<Contact | null> {
+  async updateApplication(id: string, updates: Partial<Application>): Promise<Application | null> {
     try {
-      const { data, error } = await (supabase as any)
-        .from('contacts')
-        .update(updates)
+      const { data, error } = await supabase
+        .from('applications')
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString()
+        })
         .eq('id', id)
         .select()
         .single();
 
       if (error) throw error;
+      
+      this.notifyListeners('applications_updated', data);
       return data;
     } catch (error) {
-      console.error('Error updating contact:', error);
-      return null;
+      console.error('[SupabaseDataManager] Error updating application:', error);
+      throw error;
     }
   }
 
-  // Event system for component updates
-  addEventListener(event: string, listener: Function) {
-    if (!this.eventListeners[event]) {
-      this.eventListeners[event] = [];
-    }
-    this.eventListeners[event].push(listener);
-  }
+  async getLicenses(): Promise<License[]> {
+    try {
+      const { data, error } = await supabase
+        .from('licenses')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-  removeEventListener(event: string, listener: Function) {
-    if (this.eventListeners[event]) {
-      this.eventListeners[event] = this.eventListeners[event].filter(l => l !== listener);
-    }
-  }
-
-  private notifyListeners(event: string, data: any) {
-    if (this.eventListeners[event]) {
-      this.eventListeners[event].forEach(listener => listener(data));
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('[SupabaseDataManager] Error loading licenses:', error);
+      return [];
     }
   }
 
-  // Analytics
-  async getAnalytics() {
-    const applications = this.dataSubjects.applications.value;
-    const licenses = this.dataSubjects.licenses.value;
-    const contacts = this.dataSubjects.contacts.value;
+  async getContacts(): Promise<Contact[]> {
+    try {
+      const { data, error } = await supabase
+        .from('contacts')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    return {
-      totalApplications: applications.length,
-      pendingApplications: applications.filter(a => a.status === 'pending').length,
-      approvedApplications: applications.filter(a => a.status === 'approved').length,
-      activeLicenses: licenses.filter(l => l.status === 'active').length,
-      newContacts: contacts.filter(c => c.status === 'unread').length,
-      totalRevenue: 0 // Could be calculated from approved applications
-    };
+      if (error) throw error;
+      return data || [];
+    } catch (error) {
+      console.error('[SupabaseDataManager] Error loading contacts:', error);
+      return [];
+    }
+  }
+
+  async createContact(contact: Partial<Contact>): Promise<Contact | null> {
+    try {
+      const { data, error } = await supabase
+        .from('contacts')
+        .insert(contact)
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      this.notifyListeners('contacts_updated', data);
+      return data;
+    } catch (error) {
+      console.error('[SupabaseDataManager] Error creating contact:', error);
+      throw error;
+    }
+  }
+
+  // Clear all caches
+  clearCache() {
+    this.cache.clear();
+    this.lastUpdate.clear();
   }
 }
 

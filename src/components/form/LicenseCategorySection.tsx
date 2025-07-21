@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Shield, AlertCircle, Wifi } from 'lucide-react';
@@ -21,15 +22,25 @@ interface LicenseCategorySectionProps {
 const LicenseCategorySection = ({ selectedCategory, onCategorySelect }: LicenseCategorySectionProps) => {
   const [settings, setSettings] = useState<Record<string, any>>({});
   const [lastUpdateTime, setLastUpdateTime] = useState<Date>(new Date());
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadSettings = async () => {
-      const currentSettings = await supabaseDataManager.getSettings();
-      setSettings(currentSettings);
-      setLastUpdateTime(new Date());
+      try {
+        setIsLoading(true);
+        const currentSettings = await supabaseDataManager.getSettings();
+        console.log('[LicenseCategorySection] Loaded settings:', currentSettings);
+        setSettings(currentSettings);
+        setLastUpdateTime(new Date());
+      } catch (error) {
+        console.error('[LicenseCategorySection] Error loading settings:', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     const handleSettingsUpdate = (data: any) => {
+      console.log('[LicenseCategorySection] Settings update received:', data);
       loadSettings();
     };
 
@@ -47,7 +58,7 @@ const LicenseCategorySection = ({ selectedCategory, onCategorySelect }: LicenseC
         id: "1", 
         name: "Basic Trader",
         price: settings.category1_price || "$25,000",
-        available: settings.category1_available !== false,
+        available: settings.category1_available === true,
         minVolume: "Up to $100K",
         status: settings.category1_status || "SOLD OUT"
       },
@@ -55,7 +66,7 @@ const LicenseCategorySection = ({ selectedCategory, onCategorySelect }: LicenseC
         id: "2", 
         name: "Standard Trader", 
         price: settings.category2_price || "$50,000",
-        available: settings.category2_available !== false,
+        available: settings.category2_available === true,
         minVolume: "Up to $500K",
         status: settings.category2_status || "SOLD OUT"
       },
@@ -63,7 +74,7 @@ const LicenseCategorySection = ({ selectedCategory, onCategorySelect }: LicenseC
         id: "3", 
         name: "Advanced Trader",
         price: settings.category3_price || "$70,000",
-        available: settings.category3_available !== false,
+        available: settings.category3_available === true,
         minVolume: "Up to $1M",
         status: settings.category3_status || "RECOMMENDED"
       },
@@ -71,7 +82,7 @@ const LicenseCategorySection = ({ selectedCategory, onCategorySelect }: LicenseC
         id: "4", 
         name: "Professional Trader",
         price: settings.category4_price || "$150,000",
-        available: settings.category4_available !== false,
+        available: settings.category4_available === true,
         minVolume: "Up to $5M",
         status: settings.category4_status || "SELLING FAST"
       },
@@ -79,7 +90,7 @@ const LicenseCategorySection = ({ selectedCategory, onCategorySelect }: LicenseC
         id: "5", 
         name: "Institutional Trader",
         price: settings.category5_price || "$250,000",
-        available: settings.category5_available !== false,
+        available: settings.category5_available === true,
         minVolume: "Up to $10M",
         status: settings.category5_status || "SELLING FAST"
       },
@@ -87,7 +98,7 @@ const LicenseCategorySection = ({ selectedCategory, onCategorySelect }: LicenseC
         id: "6", 
         name: "Executive Trader",
         price: settings.category6_price || "$500,000",
-        available: settings.category6_available !== false,
+        available: settings.category6_available === true,
         minVolume: "Unlimited",
         status: settings.category6_status || "SELLING FAST"
       }
@@ -95,6 +106,30 @@ const LicenseCategorySection = ({ selectedCategory, onCategorySelect }: LicenseC
   };
 
   const categories = generateCategories();
+
+  if (isLoading) {
+    return (
+      <div className="form-section">
+        <div className="section-heading">
+          <div className="section-icon">
+            <Shield className="h-5 w-5" />
+          </div>
+          <h3 className="text-xl font-semibold">License Category *</h3>
+          <div className="flex items-center gap-2 ml-auto">
+            <div className="h-4 w-4 rounded-full bg-muted animate-pulse" />
+            <span className="text-xs text-muted-foreground">Loading...</span>
+          </div>
+        </div>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[...Array(6)].map((_, index) => (
+            <div key={index} className="category-card bg-muted/50 animate-pulse">
+              <div className="h-32 rounded-lg"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="form-section">
@@ -133,7 +168,7 @@ const LicenseCategorySection = ({ selectedCategory, onCategorySelect }: LicenseC
                       {category.status && (
                         <Badge 
                           variant={
-                            category.status === "SOLD OUT" ? "secondary" :
+                            category.status === "SOLD OUT" ? "destructive" :
                             category.status === "RECOMMENDED" ? "default" : "outline"
                           } 
                           className="text-xs"

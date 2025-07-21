@@ -6,32 +6,83 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { CheckCircle, ChevronRight, MessageSquareText, XCircle, Shield, Star, Crown, Building, Zap, Trophy, Wifi } from 'lucide-react';
 import { useApplicationDialog } from '@/components/ApplicationDialog';
 import SupportDialog from '@/components/SupportDialog';
-import { unifiedDataManager, ContentSettings } from '@/utils/unifiedDataManager';
+import { supabaseDataManager } from '@/utils/supabaseDataManager';
 
 const LicenseCategories = () => {
   const { openApplicationDialog } = useApplicationDialog();
   const [isSupportDialogOpen, setSupportDialogOpen] = useState(false);
-  const [settings, setSettings] = useState(unifiedDataManager.getSettings());
+  const [settings, setSettings] = useState<Record<string, any>>({});
   const [lastUpdateTime, setLastUpdateTime] = useState<Date>(new Date());
   const [isConnected, setIsConnected] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     console.log('[LicenseCategories] Component mounted, listening for settings updates');
     
+    const loadSettings = async () => {
+      try {
+        setIsLoading(true);
+        const currentSettings = await supabaseDataManager.getSettings();
+        console.log('[LicenseCategories] Loaded settings:', currentSettings);
+        setSettings(currentSettings);
+        setLastUpdateTime(new Date());
+        setIsConnected(true);
+      } catch (error) {
+        console.error('[LicenseCategories] Error loading settings:', error);
+        setIsConnected(false);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
     const handleSettingsUpdate = (data: any) => {
       console.log('[LicenseCategories] Settings update received:', data);
-      const newSettings = data.settings || data;
-      setSettings(newSettings);
-      setLastUpdateTime(new Date());
-      setIsConnected(true);
+      loadSettings();
     };
 
-    unifiedDataManager.addEventListener('settings_updated', handleSettingsUpdate);
+    supabaseDataManager.addEventListener('settings_updated', handleSettingsUpdate);
+    loadSettings();
 
     return () => {
-      unifiedDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
+      supabaseDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
     };
   }, []);
+
+  if (isLoading) {
+    return (
+      <section id="licenses" className="py-24 bg-muted/20">
+        <div className="container">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="h-1 w-16 bg-gradient-to-r from-primary to-accent rounded-full"></div>
+              <span className="text-sm text-muted-foreground uppercase tracking-wider font-semibold">License Categories</span>
+              <div className="flex items-center gap-2 ml-auto">
+                <div className="h-4 w-4 rounded-full bg-muted animate-pulse" />
+                <span className="text-xs text-muted-foreground">Loading...</span>
+              </div>
+            </div>
+            
+            <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-8 mb-12">
+              {[...Array(6)].map((_, index) => (
+                <Card key={index} className="h-96 bg-muted/50 animate-pulse">
+                  <div className="p-6 space-y-4">
+                    <div className="h-4 bg-muted rounded" />
+                    <div className="h-8 bg-muted rounded" />
+                    <div className="h-4 bg-muted rounded w-2/3" />
+                    <div className="space-y-2">
+                      {[...Array(4)].map((_, i) => (
+                        <div key={i} className="h-3 bg-muted rounded" />
+                      ))}
+                    </div>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
   
   return (
     <section id="licenses" className="py-24 bg-muted/20">
@@ -68,7 +119,7 @@ const LicenseCategories = () => {
             <LicenseCategory 
               category={1}
               title="Basic Trader"
-              price={settings.category1Price}
+              price={settings.category1_price || "$25,000"}
               minVolume="$50,000"
               icon={Shield}
               color="blue"
@@ -80,13 +131,13 @@ const LicenseCategories = () => {
                 "Recognized on major exchanges",
                 "Email support during business hours"
               ]}
-              soldOut={!settings.category1Available}
+              soldOut={settings.category1_available !== true}
             />
             
             <LicenseCategory 
               category={2}
               title="Standard Trader"
-              price={settings.category2Price}
+              price={settings.category2_price || "$50,000"}
               minVolume="$100,000"
               icon={CheckCircle}
               color="green"
@@ -99,13 +150,13 @@ const LicenseCategories = () => {
                 "Basic trading protection coverage",
                 "Phone support during business hours"
               ]}
-              soldOut={!settings.category2Available}
+              soldOut={settings.category2_available !== true}
             />
             
             <LicenseCategory 
               category={3}
               title="Advanced Trader"
-              price={settings.category3Price}
+              price={settings.category3_price || "$70,000"}
               minVolume="$250,000"
               icon={Star}
               color="purple"
@@ -119,14 +170,14 @@ const LicenseCategories = () => {
                 "Dedicated account manager",
                 "Advanced risk management tools"
               ]}
-              soldOut={!settings.category3Available}
+              soldOut={settings.category3_available !== true}
               onApplyClick={openApplicationDialog}
             />
 
             <LicenseCategory 
               category={4}
               title="Professional Trader"
-              price={settings.category4Price}
+              price={settings.category4_price || "$150,000"}
               minVolume="$500,000"
               icon={Crown}
               color="gold"
@@ -142,14 +193,14 @@ const LicenseCategories = () => {
                 "Premium trading tools access"
               ]}
               popular
-              soldOut={!settings.category4Available}
+              soldOut={settings.category4_available !== true}
               onApplyClick={openApplicationDialog}
             />
             
             <LicenseCategory 
               category={5}
               title="Institutional Trader"
-              price={settings.category5Price}
+              price={settings.category5_price || "$250,000"}
               minVolume="$1,000,000+"
               icon={Building}
               color="platinum"
@@ -165,14 +216,14 @@ const LicenseCategories = () => {
                 "White-label solutions available",
                 "API access for system integration"
               ]}
-              soldOut={!settings.category5Available}
+              soldOut={settings.category5_available !== true}
               onApplyClick={openApplicationDialog}
             />
 
             <LicenseCategory 
               category={6}
               title="Executive Trader"
-              price={settings.category6Price}
+              price={settings.category6_price || "$500,000"}
               minVolume="$2,500,000+"
               icon={Trophy}
               color="diamond"
@@ -190,7 +241,7 @@ const LicenseCategories = () => {
                 "Custom integration solutions"
               ]}
               exclusive
-              soldOut={!settings.category6Available}
+              soldOut={settings.category6_available !== true}
               onApplyClick={openApplicationDialog}
             />
           </div>

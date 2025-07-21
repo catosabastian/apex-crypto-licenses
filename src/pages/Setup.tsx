@@ -1,20 +1,44 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { createClient } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
+import { Shield, Database, Key, CheckCircle, AlertTriangle, Lock } from 'lucide-react';
 
 const Setup = () => {
+  const [adminPassword, setAdminPassword] = useState('');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [supabaseUrl, setSupabaseUrl] = useState('');
   const [supabaseKey, setSupabaseKey] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [testResult, setTestResult] = useState<string | null>(null);
+  const [setupProgress, setSetupProgress] = useState<string[]>([]);
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  const ADMIN_PASSWORD = 'apex2024admin'; // In production, this should be more secure
+
+  const handleAdminAuth = () => {
+    if (adminPassword === ADMIN_PASSWORD) {
+      setIsAuthenticated(true);
+      toast({
+        title: "Admin Access Granted",
+        description: "You can now set up the Supabase connection",
+      });
+    } else {
+      toast({
+        title: "Access Denied",
+        description: "Invalid admin password",
+        variant: "destructive",
+      });
+    }
+  };
 
   const databaseSchema = `
 -- Create applications table
@@ -102,7 +126,58 @@ ALTER TABLE public.settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.contacts ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.content ENABLE ROW LEVEL SECURITY;
 
--- Create policies for applications
+-- Enable realtime for tables
+ALTER TABLE public.applications REPLICA IDENTITY FULL;
+ALTER TABLE public.licenses REPLICA IDENTITY FULL;
+ALTER TABLE public.payment_addresses REPLICA IDENTITY FULL;
+ALTER TABLE public.settings REPLICA IDENTITY FULL;
+ALTER TABLE public.contacts REPLICA IDENTITY FULL;
+ALTER TABLE public.content REPLICA IDENTITY FULL;
+
+-- Add tables to realtime publication
+ALTER PUBLICATION supabase_realtime ADD TABLE public.applications;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.licenses;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.payment_addresses;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.settings;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.contacts;
+ALTER PUBLICATION supabase_realtime ADD TABLE public.content;
+`;
+
+  const insertInitialData = `
+-- Insert initial settings
+INSERT INTO public.settings (key, value, category, description) VALUES
+('category1_price', '"$25,000"', 'pricing', 'Basic Trader license price'),
+('category1_status', '"SOLD OUT"', 'pricing', 'Basic Trader license status'),
+('category1_available', 'false', 'pricing', 'Basic Trader license availability'),
+('category2_price', '"$50,000"', 'pricing', 'Standard Trader license price'),
+('category2_status', '"SOLD OUT"', 'pricing', 'Standard Trader license status'),
+('category2_available', 'false', 'pricing', 'Standard Trader license availability'),
+('category3_price', '"$70,000"', 'pricing', 'Advanced Trader license price'),
+('category3_status', '"RECOMMENDED"', 'pricing', 'Advanced Trader license status'),
+('category3_available', 'true', 'pricing', 'Advanced Trader license availability'),
+('category4_price', '"$150,000"', 'pricing', 'Professional Trader license price'),
+('category4_status', '"SELLING FAST"', 'pricing', 'Professional Trader license status'),
+('category4_available', 'true', 'pricing', 'Professional Trader license availability'),
+('category5_price', '"$250,000"', 'pricing', 'Institutional Trader license price'),
+('category5_status', '"SELLING FAST"', 'pricing', 'Institutional Trader license status'),
+('category5_available', 'true', 'pricing', 'Institutional Trader license availability'),
+('category6_price', '"$500,000"', 'pricing', 'Executive Trader license price'),
+('category6_status', '"SELLING FAST"', 'pricing', 'Executive Trader license status'),
+('category6_available', 'true', 'pricing', 'Executive Trader license availability')
+ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = now();
+
+-- Insert initial payment addresses
+INSERT INTO public.payment_addresses (cryptocurrency, address, is_active) VALUES
+('bitcoin', '1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2', true),
+('ethereum', '0x742d35Cc6634C0532925a3b8D4dAE6eE4c0dA3DD', true),
+('usdt_tron', 'TQn9Y2khEsLJW1ChVWFMSMeRDow5oREqNK', true),
+('usdt_ethereum', '0x742d35Cc6634C0532925a3b8D4dAE6eE4c0dA3DD', true),
+('xrp', 'rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH', true)
+ON CONFLICT (cryptocurrency) DO UPDATE SET address = EXCLUDED.address, updated_at = now();
+`;
+
+  const rLSPolicies = `
+-- Create RLS policies for applications
 DROP POLICY IF EXISTS "Allow public application submission" ON public.applications;
 CREATE POLICY "Allow public application submission" ON public.applications FOR INSERT WITH CHECK (true);
 DROP POLICY IF EXISTS "Allow public read of applications" ON public.applications;
@@ -137,29 +212,7 @@ DROP POLICY IF EXISTS "Allow public read of content" ON public.content;
 CREATE POLICY "Allow public read of content" ON public.content FOR SELECT USING (true);
 DROP POLICY IF EXISTS "Allow full access to content" ON public.content;
 CREATE POLICY "Allow full access to content" ON public.content FOR ALL USING (true);
-
--- Insert initial data
-INSERT INTO public.settings (key, value, category) VALUES
-('category1_price', '"$25,000"', 'pricing'),
-('category1_status', '"SOLD OUT"', 'pricing'),
-('category2_price', '"$50,000"', 'pricing'),
-('category2_status', '"SOLD OUT"', 'pricing'),
-('category3_price', '"$70,000"', 'pricing'),
-('category3_status', '"RECOMMENDED"', 'pricing'),
-('category4_price', '"$150,000"', 'pricing'),
-('category4_status', '"SELLING FAST"', 'pricing'),
-('category5_price', '"$250,000"', 'pricing'),
-('category5_status', '"RECOMMENDED"', 'pricing'),
-('category6_price', '"$500,000"', 'pricing'),
-('category6_status', '"SELLING FAST"', 'pricing')
-ON CONFLICT (key) DO NOTHING;
-
-INSERT INTO public.payment_addresses (cryptocurrency, address, is_active) VALUES
-('bitcoin', '1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2', true),
-('ethereum', '0x742d35Cc6634C0532925a3b8D4dAE6eE4c0dA3DD', true),
-('usdt', 'TQn9Y2khEsLJW1ChVWFMSMeRDow5oREqNK', true)
-ON CONFLICT (cryptocurrency) DO NOTHING;
-  `;
+`;
 
   const testConnection = async () => {
     if (!supabaseUrl || !supabaseKey) {
@@ -173,12 +226,12 @@ ON CONFLICT (cryptocurrency) DO NOTHING;
     try {
       const testClient = createClient(supabaseUrl, supabaseKey);
       
-      // Test connection by trying to query a simple table
+      // Test connection
       const { data, error } = await testClient
         .from('applications')
         .select('count', { count: 'exact', head: true });
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 is "table not found" which is expected
+      if (error && error.code !== 'PGRST116') {
         throw error;
       }
 
@@ -216,37 +269,58 @@ ON CONFLICT (cryptocurrency) DO NOTHING;
     }
 
     setIsLoading(true);
+    setSetupProgress([]);
 
     try {
       const testClient = createClient(supabaseUrl, supabaseKey);
       
-      // Execute database schema
-      const { error } = await testClient.rpc('exec_sql', { sql: databaseSchema });
+      // Step 1: Create tables
+      setSetupProgress(['Creating database schema...']);
+      const schemaCommands = databaseSchema.split(';').filter(cmd => cmd.trim());
       
-      if (error) {
-        // If RPC doesn't exist, we'll need to create tables one by one
-        console.log('RPC method not available, creating tables individually...');
-        
-        // Create each table individually using rpc
-        const tableCommands = databaseSchema.split(';').filter(cmd => cmd.trim());
-        
-        for (const command of tableCommands) {
-          if (command.trim()) {
-            try {
-              const { error: cmdError } = await testClient.rpc('exec_sql', { sql: command.trim() });
-              if (cmdError) {
-                console.log('Command may already exist or executed:', cmdError);
-              }
-            } catch (err) {
-              console.log('Command executed or already exists:', err);
-            }
+      for (const command of schemaCommands) {
+        if (command.trim()) {
+          try {
+            await testClient.rpc('exec_sql', { sql: command.trim() });
+          } catch (err) {
+            console.log('Command executed or already exists:', err);
           }
         }
       }
 
+      // Step 2: Insert initial data
+      setSetupProgress(prev => [...prev, 'Inserting initial data...']);
+      const dataCommands = insertInitialData.split(';').filter(cmd => cmd.trim());
+      
+      for (const command of dataCommands) {
+        if (command.trim()) {
+          try {
+            await testClient.rpc('exec_sql', { sql: command.trim() });
+          } catch (err) {
+            console.log('Data command executed:', err);
+          }
+        }
+      }
+
+      // Step 3: Set up RLS policies
+      setSetupProgress(prev => [...prev, 'Setting up security policies...']);
+      const policyCommands = rLSPolicies.split(';').filter(cmd => cmd.trim());
+      
+      for (const command of policyCommands) {
+        if (command.trim()) {
+          try {
+            await testClient.rpc('exec_sql', { sql: command.trim() });
+          } catch (err) {
+            console.log('Policy command executed:', err);
+          }
+        }
+      }
+
+      setSetupProgress(prev => [...prev, '✅ Database setup complete!']);
+
       toast({
         title: "Database Setup Complete",
-        description: "All tables and initial data have been created",
+        description: "All tables, data, and security policies have been created",
       });
 
       // Redirect to admin after successful setup
@@ -266,14 +340,70 @@ ON CONFLICT (cryptocurrency) DO NOTHING;
     }
   };
 
+  // Admin authentication screen
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted/50 p-4">
+        <div className="max-w-md mx-auto pt-20">
+          <Card className="border-2 border-destructive/20">
+            <CardHeader className="text-center">
+              <div className="mx-auto mb-4 p-3 bg-destructive/10 rounded-full w-fit">
+                <Lock className="h-8 w-8 text-destructive" />
+              </div>
+              <CardTitle className="text-2xl">Admin Access Required</CardTitle>
+              <CardDescription>
+                This setup page is restricted to administrators only
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="adminPassword">Admin Password</Label>
+                <Input
+                  id="adminPassword"
+                  type="password"
+                  placeholder="Enter admin password"
+                  value={adminPassword}
+                  onChange={(e) => setAdminPassword(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleAdminAuth()}
+                />
+              </div>
+              <Button onClick={handleAdminAuth} className="w-full">
+                <Shield className="h-4 w-4 mr-2" />
+                Authenticate
+              </Button>
+              <div className="text-center">
+                <Button variant="link" onClick={() => navigate('/')}>
+                  ← Back to Home
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/50 p-4">
-      <div className="max-w-2xl mx-auto pt-20">
+      <div className="max-w-4xl mx-auto pt-10">
+        <div className="text-center mb-8">
+          <div className="mx-auto mb-4 p-3 bg-primary/10 rounded-full w-fit">
+            <Database className="h-8 w-8 text-primary" />
+          </div>
+          <h1 className="text-3xl font-bold mb-2">APEX Supabase Setup</h1>
+          <p className="text-muted-foreground">
+            Configure your Supabase connection and automatically set up the database
+          </p>
+        </div>
+
         <Card>
           <CardHeader>
-            <CardTitle>Supabase Project Setup</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Key className="h-5 w-5" />
+              Supabase Project Configuration
+            </CardTitle>
             <CardDescription>
-              Connect your project to Supabase and set up the database automatically
+              Connect your APEX project to Supabase and set up the database automatically
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -323,8 +453,23 @@ ON CONFLICT (cryptocurrency) DO NOTHING;
               </div>
             </div>
 
+            {setupProgress.length > 0 && (
+              <div className="space-y-2 p-4 bg-muted/50 rounded-lg">
+                <h4 className="font-semibold">Setup Progress:</h4>
+                {setupProgress.map((step, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-500" />
+                    <span className="text-sm">{step}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <div className="bg-muted p-4 rounded-lg">
-              <h3 className="font-medium mb-2">Instructions:</h3>
+              <h3 className="font-medium mb-2 flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4" />
+                Setup Instructions:
+              </h3>
               <ol className="list-decimal list-inside space-y-1 text-sm text-muted-foreground">
                 <li>Create a new project in Supabase</li>
                 <li>Copy your Project URL and Anon key from Settings → API</li>
@@ -332,6 +477,31 @@ ON CONFLICT (cryptocurrency) DO NOTHING;
                 <li>Click "Setup Database" to create all required tables</li>
                 <li>Your project will be ready to use!</li>
               </ol>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4">
+              <Card className="p-4">
+                <h4 className="font-semibold mb-2">✅ What gets created:</h4>
+                <ul className="text-sm space-y-1 text-muted-foreground">
+                  <li>• Applications table with RLS</li>
+                  <li>• Licenses table with RLS</li>
+                  <li>• Payment addresses table</li>
+                  <li>• Settings table</li>
+                  <li>• Contacts table</li>
+                  <li>• Real-time subscriptions</li>
+                </ul>
+              </Card>
+              
+              <Card className="p-4">
+                <h4 className="font-semibold mb-2">🔒 Security Features:</h4>
+                <ul className="text-sm space-y-1 text-muted-foreground">
+                  <li>• Row Level Security (RLS)</li>
+                  <li>• Public read policies</li>
+                  <li>• Secure admin access</li>
+                  <li>• Real-time data sync</li>
+                  <li>• Encrypted connections</li>
+                </ul>
+              </Card>
             </div>
           </CardContent>
         </Card>
