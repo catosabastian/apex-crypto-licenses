@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { toast } from '@/hooks/use-toast';
-import { CheckCircle, Clock, Shield, TrendingUp, Users, Globe, Wallet, Copy, Check, QrCode, AlertCircle, Info, Building2, Gamepad2, CreditCard, Coins, Landmark, Briefcase } from 'lucide-react';
+import { CheckCircle, Clock, Shield, TrendingUp, Users, Globe, Wallet, Copy, Check, QrCode, AlertCircle, Info, Building2, Gamepad2, CreditCard, Coins, Landmark, Briefcase, Star } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import QRCode from 'react-qr-code';
@@ -27,6 +27,7 @@ interface ApplicationFormData {
   tradingVolume: string;
   primaryPlatform: string;
   paymentMethod: string;
+  applicantType: string;
 }
 
 const EnhancedApplicationForm = () => {
@@ -40,7 +41,8 @@ const EnhancedApplicationForm = () => {
     tradingExperience: '',
     tradingVolume: '',
     primaryPlatform: '',
-    paymentMethod: 'BTC'
+    paymentMethod: 'BTC',
+    applicantType: 'business'
   });
   
   const [settings, setSettings] = useState<any>({});
@@ -114,89 +116,6 @@ const EnhancedApplicationForm = () => {
     setFormProgress(Math.min(progress, 100));
   }, [formData]);
 
-  // Enhanced license categories with all types including new ones
-  const licenseCategories = [
-    {
-      id: 'crypto_exchange',
-      name: 'Crypto Exchange License',
-      price: settings.cryptoExchangePrice || '250,000 USDT',
-      available: settings.cryptoExchangeAvailable ?? true,
-      details: { processingTime: '6-12 weeks', minVolume: '$1,000,000+' },
-      features: ['Multi-currency trading', 'API access', 'Cold storage', 'Global compliance'],
-      icon: Coins,
-      color: 'bg-yellow-50 border-yellow-200 text-yellow-800'
-    },
-    {
-      id: 'crypto_wallet',
-      name: 'Crypto Wallet License',
-      price: settings.cryptoWalletPrice || '150,000 USDT',
-      available: settings.cryptoWalletAvailable ?? true,
-      details: { processingTime: '4-8 weeks', minVolume: '$500,000+' },
-      features: ['Multi-sig technology', 'Mobile apps', 'Institutional custody', 'Insurance'],
-      icon: Shield,
-      color: 'bg-blue-50 border-blue-200 text-blue-800'
-    },
-    {
-      id: 'fintech_emi',
-      name: 'Electronic Money Institution',
-      price: settings.fintechEmiPrice || '350,000 USDT',
-      available: settings.fintechEmiAvailable ?? true,
-      details: { processingTime: '8-16 weeks', minVolume: '$2,000,000+' },
-      features: ['E-money issuance', 'SEPA integration', 'Banking partnerships', 'EU passporting'],
-      icon: CreditCard,
-      color: 'bg-green-50 border-green-200 text-green-800'
-    },
-    {
-      id: 'fintech_msp',
-      name: 'Money Service Provider',
-      price: settings.fintechMspPrice || '200,000 USDT',
-      available: settings.fintechMspAvailable ?? true,
-      details: { processingTime: '6-10 weeks', minVolume: '$750,000+' },
-      features: ['Money transmission', 'FX services', 'Remittances', 'Digital payments'],
-      icon: TrendingUp,
-      color: 'bg-purple-50 border-purple-200 text-purple-800'
-    },
-    {
-      id: 'gambling_online',
-      name: 'Online Gambling License',
-      price: settings.gamblingOnlinePrice || '180,000 USDT',
-      available: settings.gamblingOnlineAvailable ?? true,
-      details: { processingTime: '8-12 weeks', minVolume: '$500,000+' },
-      features: ['Online casino', 'Sports betting', 'Live games', 'Mobile platform'],
-      icon: Gamepad2,
-      color: 'bg-red-50 border-red-200 text-red-800'
-    },
-    {
-      id: 'gambling_lottery',
-      name: 'Lottery & Gaming License',
-      price: settings.gamblingLotteryPrice || '120,000 USDT',
-      available: settings.gamblingLotteryAvailable ?? true,
-      details: { processingTime: '4-8 weeks', minVolume: '$300,000+' },
-      features: ['Lottery operations', 'Instant games', 'Skill competitions', 'Prize management'],
-      icon: Star,
-      color: 'bg-indigo-50 border-indigo-200 text-indigo-800'
-    },
-    {
-      id: 'corporate_offshore',
-      name: 'Offshore Corporate License',
-      price: settings.corporateOffshorePrice || '80,000 USDT',
-      available: settings.corporateOffshoreAvailable ?? true,
-      details: { processingTime: '2-4 weeks', minVolume: '$100,000+' },
-      features: ['Tax optimization', 'Asset protection', 'Privacy', 'Nominee services'],
-      icon: Building2,
-      color: 'bg-gray-50 border-gray-200 text-gray-800'
-    },
-    {
-      id: 'corporate_consulting',
-      name: 'Business Consulting License',
-      price: settings.corporateConsultingPrice || '60,000 USDT',
-      available: settings.corporateConsultingAvailable ?? true,
-      details: { processingTime: '2-3 weeks', minVolume: '$50,000+' },
-      features: ['Management consulting', 'Financial advisory', 'Legal support', 'Strategic planning'],
-      icon: Briefcase,
-      color: 'bg-teal-50 border-teal-200 text-teal-800'
-    }
-  ];
 
   const paymentOptions = paymentAddresses.map(addr => ({
     id: addr.cryptocurrency,
@@ -272,27 +191,16 @@ const EnhancedApplicationForm = () => {
         return;
       }
 
-      const selectedCategory = licenseCategories.find(cat => cat.id === formData.category);
-      
-      if (selectedCategory && !selectedCategory.available) {
-        toast({
-          title: "Category Unavailable",
-          description: "The selected license category is currently sold out",
-          variant: "destructive",
-        });
-        return;
-      }
-      
       const applicationData = {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
         company: formData.company,
-        category: selectedCategory?.name || formData.category,
+        category: formData.category,
         notes: formData.notes,
         status: 'pending' as const,
         payment_method: formData.paymentMethod,
-        amount: selectedCategory?.price || 'Contact for pricing'
+        amount: 'Contact for pricing'
       };
 
       console.log('Submitting application data:', applicationData);
@@ -318,7 +226,8 @@ const EnhancedApplicationForm = () => {
           tradingExperience: '',
           tradingVolume: '',
           primaryPlatform: '',
-          paymentMethod: 'BTC'
+          paymentMethod: 'BTC',
+          applicantType: 'business'
         });
         setCurrentStep(1);
       } else {
@@ -336,7 +245,6 @@ const EnhancedApplicationForm = () => {
     }
   };
 
-  const selectedCategory = licenseCategories.find(cat => cat.id === formData.category);
   const selectedPayment = paymentOptions.find(opt => opt.id === formData.paymentMethod);
 
   return (
@@ -392,9 +300,65 @@ const EnhancedApplicationForm = () => {
           onStepChange={setCurrentStep}
         />
 
+        {/* Applicant Type Selection */}
+        <Card className="border-2 transition-all duration-300 hover:shadow-xl bg-gradient-to-br from-background to-muted/20">
+          <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10">
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-primary/20 rounded-xl">
+                <Users className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="text-2xl bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+                  Application Type
+                </CardTitle>
+                <p className="text-muted-foreground mt-1">
+                  Are you applying as a Business or Individual?
+                </p>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="p-6">
+            <div className="grid grid-cols-2 gap-4">
+              <Card 
+                className={`cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
+                  formData.applicantType === 'business' 
+                    ? 'ring-2 ring-primary border-primary shadow-lg scale-105' 
+                    : 'border-border hover:border-primary/50 hover:shadow-md'
+                }`}
+                onClick={() => handleFieldChange('applicantType', 'business')}
+              >
+                <CardContent className="p-6 text-center">
+                  <Building2 className="h-12 w-12 mx-auto mb-4 text-primary" />
+                  <h3 className="font-bold text-lg">Business</h3>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Corporate entities, LLCs, partnerships, and other business structures
+                  </p>
+                </CardContent>
+              </Card>
+              
+              <Card 
+                className={`cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
+                  formData.applicantType === 'individual' 
+                    ? 'ring-2 ring-primary border-primary shadow-lg scale-105' 
+                    : 'border-border hover:border-primary/50 hover:shadow-md'
+                }`}
+                onClick={() => handleFieldChange('applicantType', 'individual')}
+              >
+                <CardContent className="p-6 text-center">
+                  <Users className="h-12 w-12 mx-auto mb-4 text-primary" />
+                  <h3 className="font-bold text-lg">Individual</h3>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    Personal applications for individual entrepreneurs and professionals
+                  </p>
+                </CardContent>
+              </Card>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Enhanced License Categories */}
         <EnhancedLicenseCategorySection
-          categories={licenseCategories}
+          categories={[]}
           selectedCategory={formData.category}
           onCategorySelect={(categoryId) => handleFieldChange('category', categoryId)}
           settings={settings}
@@ -402,7 +366,7 @@ const EnhancedApplicationForm = () => {
 
         {/* Payment Information */}
         <EnhancedPaymentSection
-          selectedCategory={selectedCategory}
+          selectedCategory={undefined}
           paymentOptions={paymentOptions}
           selectedPayment={formData.paymentMethod}
           onPaymentSelect={(method) => handleFieldChange('paymentMethod', method)}
@@ -424,7 +388,7 @@ const EnhancedApplicationForm = () => {
             type="submit"
             size="lg"
             className="px-16 py-8 text-xl font-bold bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:scale-105"
-            disabled={!formData.name || !formData.email || !formData.category || isSubmitting || (selectedCategory && !selectedCategory.available)}
+            disabled={!formData.name || !formData.email || !formData.category || isSubmitting}
           >
             {isSubmitting ? (
               <>

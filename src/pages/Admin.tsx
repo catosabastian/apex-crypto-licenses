@@ -16,6 +16,7 @@ import { ContactsManager } from '@/components/admin/ContactsManager';
 import { SettingsManager } from '@/components/admin/SettingsManager';
 import { LicenseManager } from '@/components/admin/LicenseManager';
 import EnhancedContentManager from '@/components/admin/EnhancedContentManager';
+import LogoManager from '@/components/admin/LogoManager';
 import { PaymentAddressManager } from '@/components/admin/PaymentAddressManager';
 import { ContactSettingsManager } from '@/components/admin/ContactSettingsManager';
 
@@ -299,7 +300,10 @@ const Admin = () => {
         </TabsContent>
 
         <TabsContent value="content" className="space-y-6">
-          <EnhancedContentManager />
+          <div className="space-y-8">
+            <LogoManager />
+            <EnhancedContentManager />
+          </div>
         </TabsContent>
 
         <TabsContent value="payments" className="space-y-6">

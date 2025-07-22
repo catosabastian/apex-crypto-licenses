@@ -114,16 +114,17 @@ const EnhancedPersonalInfoSection = ({
           <div className="space-y-2">
             <Label htmlFor="company" className="flex items-center gap-2">
               <Building className="h-4 w-4" />
-              Company/Organization
+              {formData.applicantType === 'business' ? 'Company/Organization *' : 'Company/Organization'}
             </Label>
             <Input
               id="company"
               value={formData.company}
               onChange={(e) => onChange('company', e.target.value)}
-              placeholder="Your company name (optional)"
+              placeholder={formData.applicantType === 'business' ? 'Your company name (required for business)' : 'Your company name (optional)'}
               className={`transition-all duration-200 ${
                 formData.company ? 'border-green-300 bg-green-50/30' : ''
               }`}
+              required={formData.applicantType === 'business'}
             />
           </div>
         </div>
