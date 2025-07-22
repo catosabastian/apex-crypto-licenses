@@ -10,7 +10,7 @@ import FeaturesSection from '@/components/FeaturesSection';
 import StatsSection from '@/components/StatsSection';
 import VerificationSection from '@/components/VerificationSection';
 import Footer from '@/components/Footer';
-
+import ServicesOverview from '@/components/ServicesOverview';
 import SupportDialog from '@/components/SupportDialog';
 
 const Index = () => {
@@ -34,6 +34,7 @@ const Index = () => {
       <Header />
       <main>
         <Hero />
+        <ServicesOverview />
         <FeaturesSection />
         <EnhancedAboutSection />
         <LicenseCategories />

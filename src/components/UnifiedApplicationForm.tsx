@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
-import { unifiedDataManager, ContentSettings } from '@/utils/unifiedDataManager';
+import { supabaseDataManager } from '@/utils/supabaseDataManager';
 import EnhancedApplicationForm from '@/components/EnhancedApplicationForm';
 
 interface ApplicationFormData {
@@ -15,7 +15,7 @@ interface ApplicationFormData {
 }
 
 const UnifiedApplicationForm = () => {
-  // Use the enhanced form implementation
+  // Use the enhanced form implementation with proper data manager
   return <EnhancedApplicationForm />;
 };
 
