@@ -17,10 +17,16 @@ import PlanValidityManager from '@/components/admin/PlanValidityManager';
 import AuditLogViewer from '@/components/admin/AuditLogViewer';
 import { ContactSettingsManager } from '@/components/admin/ContactSettingsManager';
 import EmailJSManager from '@/components/admin/EmailJSManager';
+import AdminDashboard from '@/components/admin/AdminDashboard';
+import UserManager from '@/components/admin/UserManager';
+import FileManager from '@/components/admin/FileManager';
+import NotificationManager from '@/components/admin/NotificationManager';
+import { UnifiedSettingsManager } from '@/components/admin/UnifiedSettingsManager';
+import EnhancedContentManager from '@/components/admin/EnhancedContentManager';
 import { LogOut, Shield } from 'lucide-react';
 
 const Admin = () => {
-  const [activeTab, setActiveTab] = useState('applications');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const { logout } = useAuth();
   const navigate = useNavigate();
 
@@ -52,18 +58,24 @@ const Admin = () => {
 
       <div className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-10">
+          <TabsList className="grid w-full grid-cols-6 lg:grid-cols-12">
+            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
             <TabsTrigger value="applications">Apps</TabsTrigger>
             <TabsTrigger value="contacts">Contacts</TabsTrigger>
             <TabsTrigger value="licenses">Licenses</TabsTrigger>
+            <TabsTrigger value="users">Users</TabsTrigger>
+            <TabsTrigger value="files">Files</TabsTrigger>
+            <TabsTrigger value="notifications">Alerts</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
-            <TabsTrigger value="payments">Payments</TabsTrigger>
             <TabsTrigger value="content">Content</TabsTrigger>
             <TabsTrigger value="website">Website</TabsTrigger>
             <TabsTrigger value="seo">SEO</TabsTrigger>
-            <TabsTrigger value="emailjs">EmailJS</TabsTrigger>
             <TabsTrigger value="audit">Audit</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="dashboard" className="space-y-6">
+            <AdminDashboard />
+          </TabsContent>
 
           <TabsContent value="applications" className="space-y-6">
             <ApplicationsManager />
@@ -77,17 +89,35 @@ const Admin = () => {
             <LicenseManager />
           </TabsContent>
 
-          <TabsContent value="settings" className="space-y-6">
-            <SettingsManager />
-            <ContactSettingsManager />
+          <TabsContent value="users" className="space-y-6">
+            <UserManager />
           </TabsContent>
 
-          <TabsContent value="payments" className="space-y-6">
-            <PaymentAddressManager />
+          <TabsContent value="files" className="space-y-6">
+            <FileManager />
+          </TabsContent>
+
+          <TabsContent value="notifications" className="space-y-6">
+            <NotificationManager />
+          </TabsContent>
+
+          <TabsContent value="settings" className="space-y-6">
+            <UnifiedSettingsManager />
           </TabsContent>
 
           <TabsContent value="content" className="space-y-6">
-            <DynamicContentManager />
+            <Tabs defaultValue="enhanced" className="w-full">
+              <TabsList>
+                <TabsTrigger value="enhanced">Enhanced Editor</TabsTrigger>
+                <TabsTrigger value="dynamic">Dynamic Manager</TabsTrigger>
+              </TabsList>
+              <TabsContent value="enhanced">
+                <EnhancedContentManager />
+              </TabsContent>
+              <TabsContent value="dynamic">
+                <DynamicContentManager />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
 
           <TabsContent value="website" className="space-y-6">
@@ -97,10 +127,6 @@ const Admin = () => {
 
           <TabsContent value="seo" className="space-y-6">
             <SEOSettingsManager />
-          </TabsContent>
-
-          <TabsContent value="emailjs" className="space-y-6">
-            <EmailJSManager />
           </TabsContent>
 
           <TabsContent value="audit" className="space-y-6">
