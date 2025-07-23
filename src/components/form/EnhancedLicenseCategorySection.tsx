@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Shield, Clock, CheckCircle, AlertCircle, Star, TrendingUp, Users, Globe, Building2, Gamepad2, CreditCard, Coins, Landmark, Briefcase } from 'lucide-react';
+import { Shield, Clock, CheckCircle, AlertCircle, Star, TrendingUp, Users, Globe, Building2, Gamepad2, CreditCard, Coins, Landmark, Briefcase, BarChart, Crown } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Separator } from '@/components/ui/separator';
 
@@ -39,23 +39,100 @@ const EnhancedLicenseCategorySection = ({
   // Enhanced license categories with all types
   const enhancedCategories = [
     {
-      id: 'crypto_exchange',
-      name: 'Crypto Exchange License',
-      price: settings.cryptoExchangePrice || '250,000 USDT',
-      available: settings.cryptoExchangeAvailable ?? true,
-      description: 'Full cryptocurrency exchange operations with trading pairs',
-      processingTime: '6-12 weeks',
-      minVolume: '$1,000,000+',
-      category: 'Crypto',
-      icon: Coins,
-      color: 'bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-200 text-yellow-800',
+      id: 'category_1',
+      name: 'Category 1 - Basic Trader',
+      price: '25,000 USDT',
+      available: false, // Sold out
+      description: 'Entry-level trading license for basic operations',
+      processingTime: '2-4 weeks',
+      minVolume: '$50,000',
+      category: 'Basic',
+      icon: TrendingUp,
+      color: 'bg-gradient-to-br from-gray-50 to-slate-50 border-gray-200 text-gray-600',
       features: [
-        'Multi-currency trading platform',
-        'Spot & margin trading',
-        'API access for institutional clients',
-        'Cold storage integration',
-        'KYC/AML compliance framework',
-        'Global market access'
+        'Basic trading operations',
+        'Limited trading volume',
+        'Standard support',
+        'Basic compliance tools'
+      ]
+    },
+    {
+      id: 'category_2',
+      name: 'Category 2 - Standard Trader',
+      price: '50,000 USDT',
+      available: false, // Sold out
+      description: 'Standard trading license with enhanced features',
+      processingTime: '3-6 weeks',
+      minVolume: '$100,000',
+      category: 'Standard',
+      icon: BarChart,
+      color: 'bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200 text-blue-700',
+      features: [
+        'Enhanced trading operations',
+        'Moderate trading volume',
+        'Priority support',
+        'Advanced compliance tools',
+        'Multi-platform access'
+      ]
+    },
+    {
+      id: 'category_3',
+      name: 'Category 3 - Advanced Trader',
+      price: '70,000 USDT',
+      available: true,
+      description: 'Advanced trading license for professional operations',
+      processingTime: '4-8 weeks',
+      minVolume: '$250,000',
+      category: 'Advanced',
+      icon: Coins,
+      color: 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-200 text-green-700',
+      features: [
+        'Professional trading platform',
+        'High volume trading',
+        'Premium support',
+        'Advanced analytics',
+        'API access',
+        'Multiple exchange connectivity'
+      ]
+    },
+    {
+      id: 'category_4',
+      name: 'Category 4 - Professional Trader',
+      price: '150,000 USDT',
+      available: true,
+      description: 'Professional-grade license for institutional trading',
+      processingTime: '6-10 weeks',
+      minVolume: '$500,000',
+      category: 'Professional',
+      icon: Building2,
+      color: 'bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200 text-purple-700',
+      features: [
+        'Institutional trading access',
+        'Unlimited trading volume',
+        'Dedicated account manager',
+        'Custom compliance solutions',
+        'White-label options',
+        'Global regulatory support'
+      ]
+    },
+    {
+      id: 'category_5',
+      name: 'Category 5 - Institutional Trader',
+      price: '250,000 USDT',
+      available: true,
+      description: 'Top-tier institutional license for enterprise operations',
+      processingTime: '8-12 weeks',
+      minVolume: '$1,000,000+',
+      category: 'Institutional',
+      icon: Crown,
+      color: 'bg-gradient-to-br from-yellow-50 to-amber-50 border-yellow-200 text-yellow-700',
+      features: [
+        'Enterprise-grade platform',
+        'Unlimited institutional access',
+        'Priority regulatory support',
+        'Custom development options',
+        'Global market maker status',
+        'Regulatory consulting included'
       ]
     },
     {

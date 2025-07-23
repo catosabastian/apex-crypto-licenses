@@ -71,9 +71,21 @@ const ServicesOverview = () => {
             </h2>
           </div>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
-            BMP Global offers comprehensive, end-to-end support across a wide range of jurisdictions, helping you navigate 
-            licensing requirements, company formation, policy drafting, and ongoing compliance.
+            APEX Regulations Global offers comprehensive, end-to-end support across a wide range of jurisdictions, helping you navigate 
+            licensing requirements, Individual formation, policy drafting, and ongoing trading compliance.
           </p>
+          
+          {/* Image placeholder area */}
+          <div className="flex justify-center mt-8 mb-12">
+            <div className="w-full max-w-2xl bg-gradient-to-br from-primary/10 to-secondary/10 rounded-2xl p-8 border border-primary/20">
+              <div className="text-center text-primary/60 font-medium">
+                Professional Licensing Solutions Showcase
+              </div>
+              <div className="mt-4 h-32 bg-gradient-to-r from-primary/5 to-secondary/5 rounded-lg flex items-center justify-center">
+                <Shield className="h-16 w-16 text-primary/30" />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Services Grid */}

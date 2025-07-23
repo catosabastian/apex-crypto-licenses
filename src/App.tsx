@@ -11,6 +11,7 @@ import ApplicationForm from "./components/ApplicationForm";
 import CryptoLicensingPage from "./pages/CryptoLicensingPage";
 import FintechPage from "./pages/FintechPage";
 import GamblingPage from "./pages/GamblingPage";
+import VerifyPage from "./pages/VerifyPage";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
             <Route path="/crypto-licensing" element={<CryptoLicensingPage />} />
             <Route path="/fintech" element={<FintechPage />} />
             <Route path="/gambling" element={<GamblingPage />} />
+            <Route path="/verify" element={<VerifyPage />} />
           </Routes>
         </BrowserRouter>
       </ApplicationDialogProvider>

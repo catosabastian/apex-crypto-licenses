@@ -4,10 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Gamepad2, Star, Shield, Globe, CheckCircle, Clock, Users, Building2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import Header from '@/components/Header';
+import Footer from '@/components/Footer';
 
 const GamblingPage = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
+      <Header />
       {/* Hero Section */}
       <section className="relative py-20 px-6">
         <div className="max-w-6xl mx-auto text-center">
@@ -299,6 +302,7 @@ const GamblingPage = () => {
           </Link>
         </div>
       </section>
+      <Footer />
     </div>
   );
 };
