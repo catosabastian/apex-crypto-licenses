@@ -109,10 +109,11 @@ class SupabaseDataManager {
   private isInitialized = false;
   private initializationPromise: Promise<void> | null = null;
   private defaultSettings: Record<string, any> = {};
+  private initializationFailed = false;
 
   constructor() {
     this.initializeDefaultSettings();
-    this.initializationPromise = this.initialize();
+    // Don't start initialization immediately - wait for first data request
   }
 
   private initializeDefaultSettings() {
@@ -172,76 +173,114 @@ class SupabaseDataManager {
   }
 
   private async initialize() {
+    if (this.initializationPromise) {
+      return this.initializationPromise;
+    }
+
+    this.initializationPromise = this.performInitialization();
+    return this.initializationPromise;
+  }
+
+  private async performInitialization() {
     try {
       console.log('[SupabaseDataManager] Starting initialization...');
+      
+      // Test database connection first
+      const { data: testData, error: testError } = await supabase
+        .from('settings')
+        .select('count')
+        .limit(1)
+        .single();
+
+      if (testError && testError.code !== 'PGRST116') {
+        console.warn('[SupabaseDataManager] Database connection test failed:', testError);
+        // Continue with initialization but mark as potentially failed
+        this.initializationFailed = true;
+      }
+
       this.initializeRealtimeSubscriptions();
       await this.loadInitialData();
       await this.initializeDefaultContent();
+      
       this.isInitialized = true;
+      this.initializationFailed = false;
       console.log('[SupabaseDataManager] Initialization complete');
     } catch (error) {
       console.error('[SupabaseDataManager] Initialization failed:', error);
-      // Don't throw error - use defaults instead
-      this.isInitialized = true;
+      this.initializationFailed = true;
+      this.isInitialized = true; // Mark as initialized to prevent hanging
     }
   }
 
   private async ensureInitialized() {
-    if (!this.isInitialized && this.initializationPromise) {
+    if (!this.isInitialized) {
       try {
         await Promise.race([
-          this.initializationPromise,
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Initialization timeout')), 3000))
+          this.initialize(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Initialization timeout')), 5000))
         ]);
       } catch (error) {
-        console.warn('[SupabaseDataManager] Initialization timeout, using defaults');
+        console.warn('[SupabaseDataManager] Initialization timeout or failed, using defaults');
         this.isInitialized = true;
+        this.initializationFailed = true;
       }
     }
   }
 
   private initializeRealtimeSubscriptions() {
-    const tables = ['applications', 'licenses', 'payment_addresses', 'settings', 'contacts', 'content'];
-    
-    tables.forEach(table => {
-      supabase
-        .channel(`${table}-changes`)
-        .on('postgres_changes', { event: '*', schema: 'public', table }, () => {
-          this.loadTableData(table);
-        })
-        .subscribe();
-    });
+    if (this.initializationFailed) return;
+
+    try {
+      const tables = ['applications', 'licenses', 'payment_addresses', 'settings', 'contacts', 'content'];
+      
+      tables.forEach(table => {
+        supabase
+          .channel(`${table}-changes`)
+          .on('postgres_changes', { event: '*', schema: 'public', table }, () => {
+            this.loadTableData(table);
+          })
+          .subscribe();
+      });
+    } catch (error) {
+      console.error('[SupabaseDataManager] Error initializing realtime subscriptions:', error);
+    }
   }
 
   private async loadInitialData() {
     try {
       console.log('[SupabaseDataManager] Loading initial data...');
-      await Promise.all([
+      
+      const loadPromises = [
         this.loadTableData('applications'),
         this.loadTableData('licenses'),
         this.loadTableData('payment_addresses'),
         this.loadTableData('settings'),
         this.loadTableData('contacts'),
         this.loadTableData('content')
-      ]);
-      console.log('[SupabaseDataManager] Initial data loaded successfully');
+      ];
+
+      // Load data with individual error handling
+      await Promise.allSettled(loadPromises);
+      
+      console.log('[SupabaseDataManager] Initial data loaded');
     } catch (error) {
       console.error('[SupabaseDataManager] Error loading initial data:', error);
-      throw error;
     }
   }
 
   private async loadTableData(table: string) {
     try {
       console.log(`[SupabaseDataManager] Loading ${table} data...`);
-      const { data, error } = await (supabase as any)
+      
+      const { data, error } = await supabase
         .from(table)
         .select('*')
         .order('created_at', { ascending: false });
 
       if (error) {
         console.error(`[SupabaseDataManager] Error loading ${table}:`, error);
-        throw error;
+        // Don't throw - just log and continue
+        return;
       }
 
       const subjectKey = table === 'payment_addresses' ? 'paymentAddresses' : table as keyof typeof this.dataSubjects;
@@ -250,7 +289,7 @@ class SupabaseDataManager {
       console.log(`[SupabaseDataManager] ${table} data loaded:`, data?.length || 0, 'records');
     } catch (error) {
       console.error(`Error loading ${table}:`, error);
-      throw error;
+      // Don't throw - just log and continue
     }
   }
 
@@ -274,6 +313,8 @@ class SupabaseDataManager {
   }
 
   private async initializeDefaultContent() {
+    if (this.initializationFailed) return;
+
     try {
       const existingContent = await this.getContent();
       
@@ -400,8 +441,13 @@ class SupabaseDataManager {
   }
 
   async getApplications(): Promise<Application[]> {
-    await this.ensureInitialized();
-    return this.dataSubjects.applications.value;
+    try {
+      await this.ensureInitialized();
+      return this.dataSubjects.applications.value;
+    } catch (error) {
+      console.error('[SupabaseDataManager] Error getting applications:', error);
+      return [];
+    }
   }
 
   async updateApplication(id: string, updates: Partial<Application>): Promise<Application | null> {
@@ -454,8 +500,13 @@ class SupabaseDataManager {
   }
 
   async getLicenses(): Promise<License[]> {
-    await this.ensureInitialized();
-    return this.dataSubjects.licenses.value;
+    try {
+      await this.ensureInitialized();
+      return this.dataSubjects.licenses.value;
+    } catch (error) {
+      console.error('[SupabaseDataManager] Error getting licenses:', error);
+      return [];
+    }
   }
 
   async updateLicense(id: string, updates: Partial<License>): Promise<License | null> {
@@ -509,8 +560,13 @@ class SupabaseDataManager {
 
   // Payment Addresses
   async getPaymentAddresses(): Promise<PaymentAddress[]> {
-    await this.ensureInitialized();
-    return this.dataSubjects.paymentAddresses.value;
+    try {
+      await this.ensureInitialized();
+      return this.dataSubjects.paymentAddresses.value;
+    } catch (error) {
+      console.error('[SupabaseDataManager] Error getting payment addresses:', error);
+      return [];
+    }
   }
 
   async updatePaymentAddress(cryptocurrency: string, updates: Partial<PaymentAddress>): Promise<PaymentAddress | null> {
@@ -557,6 +613,11 @@ class SupabaseDataManager {
   async getSetting(key: string): Promise<any> {
     try {
       await this.ensureInitialized();
+      
+      if (this.initializationFailed) {
+        return this.defaultSettings[key];
+      }
+
       const settings = this.dataSubjects.settings.value;
       const setting = settings.find(s => s.key === key);
       return setting?.value || this.defaultSettings[key];
@@ -602,13 +663,17 @@ class SupabaseDataManager {
   async getSettings(): Promise<Record<string, any>> {
     try {
       await this.ensureInitialized();
+      
+      if (this.initializationFailed) {
+        return this.defaultSettings;
+      }
+
       const settings = this.dataSubjects.settings.value;
       const result = settings.reduce((acc, setting) => {
         acc[setting.key] = setting.value;
         return acc;
       }, {} as Record<string, any>);
       
-      // Merge with defaults for missing keys
       const mergedResult = { ...this.defaultSettings, ...result };
       console.log('[SupabaseDataManager] getSettings result:', mergedResult);
       return mergedResult;
@@ -620,14 +685,24 @@ class SupabaseDataManager {
 
   // Content
   async getContent(section?: string): Promise<Record<string, any>> {
-    await this.ensureInitialized();
-    const content = this.dataSubjects.content.value;
-    const filtered = section ? content.filter(c => c.section === section) : content;
-    
-    return filtered.reduce((acc, item) => {
-      acc[`${item.section}_${item.key}`] = item.value;
-      return acc;
-    }, {} as Record<string, any>);
+    try {
+      await this.ensureInitialized();
+      
+      if (this.initializationFailed) {
+        return {};
+      }
+
+      const content = this.dataSubjects.content.value;
+      const filtered = section ? content.filter(c => c.section === section) : content;
+      
+      return filtered.reduce((acc, item) => {
+        acc[`${item.section}_${item.key}`] = item.value;
+        return acc;
+      }, {} as Record<string, any>);
+    } catch (error) {
+      console.error('[SupabaseDataManager] Error getting content:', error);
+      return {};
+    }
   }
 
   async updateContent(section: string, key: string, value: any): Promise<ContentItem | null> {
@@ -667,8 +742,13 @@ class SupabaseDataManager {
   }
 
   async getContacts(): Promise<Contact[]> {
-    await this.ensureInitialized();
-    return this.dataSubjects.contacts.value;
+    try {
+      await this.ensureInitialized();
+      return this.dataSubjects.contacts.value;
+    } catch (error) {
+      console.error('[SupabaseDataManager] Error getting contacts:', error);
+      return [];
+    }
   }
 
   async updateContact(id: string, updates: Partial<Contact>): Promise<Contact | null> {

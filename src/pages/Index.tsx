@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import DynamicHero from '@/components/DynamicHero';
@@ -14,19 +14,35 @@ import VerificationSection from '@/components/VerificationSection';
 import { supabaseDataManager } from '@/utils/supabaseDataManager';
 
 const Index = () => {
+  const [isInitialized, setIsInitialized] = useState(false);
+
   useEffect(() => {
-    // Ensure data manager is initialized
     const initializeData = async () => {
       try {
-        // This will trigger the initialization of default content
+        console.log('[Index] Initializing data...');
         await supabaseDataManager.getSettings();
+        setIsInitialized(true);
+        console.log('[Index] Data initialized successfully');
       } catch (error) {
-        console.error('Error initializing data:', error);
+        console.error('[Index] Error initializing data:', error);
+        // Still set initialized to true to show the page
+        setIsInitialized(true);
       }
     };
 
     initializeData();
   }, []);
+
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">

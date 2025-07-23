@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabaseDataManager } from '@/utils/supabaseDataManager';
@@ -6,10 +5,12 @@ import { supabaseDataManager } from '@/utils/supabaseDataManager';
 const Logo = () => {
   const navigate = useNavigate();
   const [logoUrl, setLogoUrl] = useState('/lovable-uploads/294fecc6-7027-4dcd-adc8-c71f110e7314.png');
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadLogo = async () => {
       try {
+        setIsLoading(true);
         const settings = await supabaseDataManager.getSettings();
         const currentLogo = settings.websiteLogo;
         if (currentLogo) {
@@ -18,6 +19,8 @@ const Logo = () => {
       } catch (error) {
         console.error('Error loading logo:', error);
         // Keep default logo on error
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -39,6 +42,18 @@ const Logo = () => {
     navigate('/');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center gap-2">
+        <div className="h-12 w-12 bg-muted rounded-lg animate-pulse"></div>
+        <div>
+          <div className="h-5 w-16 bg-muted rounded animate-pulse mb-1"></div>
+          <div className="h-3 w-24 bg-muted rounded animate-pulse"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div 

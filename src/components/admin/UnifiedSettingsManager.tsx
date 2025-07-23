@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -13,6 +13,29 @@ import { ContactSettingsManager } from './ContactSettingsManager';
 export const UnifiedSettingsManager = () => {
   const [activeSettingsTab, setActiveSettingsTab] = useState('pricing');
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  useEffect(() => {
+    const initializeSettings = async () => {
+      try {
+        setIsLoading(true);
+        await supabaseDataManager.getSettings();
+        setIsInitialized(true);
+      } catch (error) {
+        console.error('Error initializing settings:', error);
+        toast({
+          title: "Settings Error",
+          description: "Failed to load settings. Using defaults.",
+          variant: "destructive",
+        });
+        setIsInitialized(true); // Still show the UI
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeSettings();
+  }, []);
 
   const refreshAllSettings = async () => {
     try {
@@ -37,6 +60,22 @@ export const UnifiedSettingsManager = () => {
       setIsLoading(false);
     }
   };
+
+  if (!isInitialized) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-semibold">Settings Management</h2>
+            <p className="text-muted-foreground">Loading settings...</p>
+          </div>
+        </div>
+        <div className="flex items-center justify-center p-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
