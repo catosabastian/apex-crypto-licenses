@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -21,7 +20,7 @@ interface HeroContent {
 }
 
 const DynamicHero = () => {
-  const { openDialog } = useApplicationDialog();
+  const { openApplicationDialog } = useApplicationDialog();
   const [heroContent, setHeroContent] = useState<HeroContent>({
     title: "Professional Cryptocurrency Trading Licenses",
     subtitle: "Secure Your Future in Digital Finance",
@@ -45,8 +44,8 @@ const DynamicHero = () => {
     const loadHeroContent = async () => {
       try {
         const content = await supabaseDataManager.getContentByKey('hero_section');
-        if (content) {
-          setHeroContent(content);
+        if (content && typeof content === 'object') {
+          setHeroContent(content as unknown as HeroContent);
         }
       } catch (error) {
         console.error('Error loading hero content:', error);
@@ -54,6 +53,17 @@ const DynamicHero = () => {
     };
 
     loadHeroContent();
+
+    // Listen for content updates
+    const handleContentUpdate = () => {
+      loadHeroContent();
+    };
+
+    supabaseDataManager.addEventListener('content_updated', handleContentUpdate);
+
+    return () => {
+      supabaseDataManager.removeEventListener('content_updated', handleContentUpdate);
+    };
   }, []);
 
   return (
@@ -86,7 +96,7 @@ const DynamicHero = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
               <Button
                 size="lg"
-                onClick={openDialog}
+                onClick={openApplicationDialog}
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-6 text-lg font-semibold rounded-full transition-all duration-300 transform hover:scale-105 shadow-2xl"
               >
                 {heroContent.primaryCTA}

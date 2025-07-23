@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import Header from "@/components/Header";
 import DynamicHero from "@/components/DynamicHero";
 import DynamicLicenseCategories from "@/components/DynamicLicenseCategories";
-import AboutSection from "@/components/AboutSection";
+import FixedAboutSection from "@/components/FixedAboutSection";
 import ProcessSteps from "@/components/ProcessSteps";
 import FeaturesSection from "@/components/FeaturesSection";
 import StatsSection from "@/components/StatsSection";
@@ -29,8 +29,12 @@ const Index = () => {
       <Header />
       <DynamicHero />
       <DynamicLicenseCategories />
-      <AboutSection id="about" />
-      <ProcessSteps id="process" />
+      <div id="about">
+        <FixedAboutSection />
+      </div>
+      <div id="process">
+        <ProcessSteps />
+      </div>
       <FeaturesSection />
       <StatsSection />
       <Footer />

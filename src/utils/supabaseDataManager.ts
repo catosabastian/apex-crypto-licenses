@@ -409,6 +409,139 @@ class SupabaseDataManager {
       };
     }
   }
+
+  // Content management - alias method for compatibility
+  async getContent(key: string) {
+    return this.getContentByKey(key);
+  }
+
+  // Payment addresses management
+  async getPaymentAddresses() {
+    try {
+      const { data, error } = await supabase
+        .from('settings')
+        .select('key, value')
+        .like('key', '%_payment_address');
+
+      if (error) throw error;
+
+      const addresses: PaymentAddress[] = [];
+      data?.forEach(item => {
+        const method = item.key.replace('_payment_address', '');
+        addresses.push({
+          id: item.key,
+          method: method.charAt(0).toUpperCase() + method.slice(1),
+          address: item.value,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        });
+      });
+
+      return addresses;
+    } catch (error) {
+      console.error('Error getting payment addresses:', error);
+      return [];
+    }
+  }
+
+  async updatePaymentAddress(method: string, address: string) {
+    try {
+      const key = `${method.toLowerCase()}_payment_address`;
+      return await this.updateSetting(key, address);
+    } catch (error) {
+      console.error('Error updating payment address:', error);
+      return false;
+    }
+  }
+
+  async deleteContact(id: string) {
+    try {
+      const { error } = await supabase
+        .from('contacts')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      return true;
+    } catch (error) {
+      console.error('Error deleting contact:', error);
+      return false;
+    }
+  }
+
+  async verifyLicense(licenseId: string) {
+    try {
+      const { data, error } = await supabase
+        .from('licenses')
+        .select('*')
+        .eq('id', licenseId)
+        .single();
+
+      if (error) throw error;
+
+      return data;
+    } catch (error) {
+      console.error('Error verifying license:', error);
+      return null;
+    }
+  }
+}
+
+// Type exports for compatibility
+export interface Application {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  company: string;
+  category: string;
+  amount: string;
+  payment_method: string;
+  transaction_id: string;
+  documents: any;
+  status: string;
+  notes: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Contact {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  company?: string;
+  subject?: string;
+  message: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface License {
+  id: string;
+  license_number?: string;
+  license_id?: string;
+  holder_name: string;
+  category?: string;
+  license_type?: string;
+  application_id?: string;
+  platforms?: string;
+  issue_date: string;
+  expiry_date: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PaymentAddress {
+  id: string;
+  method: string;
+  address: string;
+  created_at: string;
+  updated_at: string;
+  cryptocurrency?: string;
 }
 
 export const supabaseDataManager = new SupabaseDataManager();

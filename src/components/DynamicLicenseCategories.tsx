@@ -21,7 +21,7 @@ interface LicenseCategory {
 }
 
 const DynamicLicenseCategories = () => {
-  const { openDialog } = useApplicationDialog();
+  const { openApplicationDialog } = useApplicationDialog();
   const [categories, setCategories] = useState<LicenseCategory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -205,7 +205,7 @@ const DynamicLicenseCategories = () => {
                           </div>
                           
                           <Button
-                            onClick={openDialog}
+                            onClick={openApplicationDialog}
                             disabled={!category.available}
                             className="w-full"
                             variant={category.available ? "default" : "secondary"}
