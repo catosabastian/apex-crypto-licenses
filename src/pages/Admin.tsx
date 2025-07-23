@@ -23,6 +23,8 @@ import FileManager from '@/components/admin/FileManager';
 import NotificationManager from '@/components/admin/NotificationManager';
 import { UnifiedSettingsManager } from '@/components/admin/UnifiedSettingsManager';
 import EnhancedContentManager from '@/components/admin/EnhancedContentManager';
+import SystemConfigManager from '@/components/admin/SystemConfigManager';
+import DataExportManager from '@/components/admin/DataExportManager';
 import { LogOut, Shield } from 'lucide-react';
 
 const Admin = () => {
@@ -58,7 +60,7 @@ const Admin = () => {
 
       <div className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-6 lg:grid-cols-12">
+          <TabsList className="grid w-full grid-cols-7 lg:grid-cols-14">
             <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
             <TabsTrigger value="applications">Apps</TabsTrigger>
             <TabsTrigger value="contacts">Contacts</TabsTrigger>
@@ -70,6 +72,8 @@ const Admin = () => {
             <TabsTrigger value="content">Content</TabsTrigger>
             <TabsTrigger value="website">Website</TabsTrigger>
             <TabsTrigger value="seo">SEO</TabsTrigger>
+            <TabsTrigger value="system">System</TabsTrigger>
+            <TabsTrigger value="export">Export</TabsTrigger>
             <TabsTrigger value="audit">Audit</TabsTrigger>
           </TabsList>
 
@@ -123,10 +127,21 @@ const Admin = () => {
           <TabsContent value="website" className="space-y-6">
             <WebsiteSettingsManager />
             <PlanValidityManager />
+            <PaymentAddressManager />
+            <ContactSettingsManager />
+            <EmailJSManager />
           </TabsContent>
 
           <TabsContent value="seo" className="space-y-6">
             <SEOSettingsManager />
+          </TabsContent>
+
+          <TabsContent value="system" className="space-y-6">
+            <SystemConfigManager />
+          </TabsContent>
+
+          <TabsContent value="export" className="space-y-6">
+            <DataExportManager />
           </TabsContent>
 
           <TabsContent value="audit" className="space-y-6">
