@@ -1,62 +1,58 @@
 
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import Header from '@/components/Header';
-import Hero from '@/components/Hero';
-import EnhancedAboutSection from '@/components/EnhancedAboutSection';
-import EnhancedWhatIsLicense from '@/components/EnhancedWhatIsLicense';
-import LicenseCategories from '@/components/LicenseCategories';
-import ProcessSteps from '@/components/ProcessSteps';
-import FeaturesSection from '@/components/FeaturesSection';
-import StatsSection from '@/components/StatsSection';
-import VerificationSection from '@/components/VerificationSection';
 import Footer from '@/components/Footer';
-import ServicesOverview from '@/components/ServicesOverview';
-import SupportDialog from '@/components/SupportDialog';
+import DynamicHero from '@/components/DynamicHero';
+import DynamicAboutSection from '@/components/DynamicAboutSection';
+import DynamicLicenseCategories from '@/components/DynamicLicenseCategories';
+import DynamicProcessSteps from '@/components/DynamicProcessSteps';
+import StatsSection from '@/components/StatsSection';
+import FeaturesSection from '@/components/FeaturesSection';
+import VerificationSection from '@/components/VerificationSection';
+import { supabaseDataManager } from '@/utils/supabaseDataManager';
 
 const Index = () => {
-  const [showSupportDialog, setShowSupportDialog] = useState(false);
-
-  // Scroll to hash if present
   useEffect(() => {
-    const hash = window.location.hash;
-    if (hash) {
-      setTimeout(() => {
-        const element = document.getElementById(hash.substring(1));
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth' });
-        }
-      }, 100);
-    }
+    // Ensure data manager is initialized
+    const initializeData = async () => {
+      try {
+        // This will trigger the initialization of default content
+        await supabaseDataManager.getSettings();
+      } catch (error) {
+        console.error('Error initializing data:', error);
+      }
+    };
+
+    initializeData();
   }, []);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-background">
       <Header />
       <main>
-        <Hero />
-        <ServicesOverview />
-        <FeaturesSection />
-        <section id="about">
-          <EnhancedAboutSection />
-        </section>
-        <section id="licenses">
-          <LicenseCategories />
-        </section>
-        <EnhancedWhatIsLicense />
-        <section id="process">
-          <ProcessSteps />
-        </section>
-        <StatsSection />
-        <section id="verification">
+        <div id="hero">
+          <DynamicHero />
+        </div>
+        <div id="about">
+          <DynamicAboutSection />
+        </div>
+        <div id="services">
+          <DynamicLicenseCategories />
+        </div>
+        <div id="process">
+          <DynamicProcessSteps />
+        </div>
+        <div id="stats">
+          <StatsSection />
+        </div>
+        <div id="features">
+          <FeaturesSection />
+        </div>
+        <div id="verification">
           <VerificationSection />
-        </section>
+        </div>
       </main>
       <Footer />
-      
-      <SupportDialog 
-        open={showSupportDialog}
-        onOpenChange={setShowSupportDialog}
-      />
     </div>
   );
 };

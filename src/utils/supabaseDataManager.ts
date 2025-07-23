@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { BehaviorSubject } from 'rxjs';
 
@@ -24,6 +25,7 @@ export interface License {
   license_id: string;
   holder_name: string;
   license_type: string;
+  category?: number;
   issue_date: string;
   expiry_date: string;
   status: 'active' | 'expired' | 'suspended' | 'revoked';
@@ -95,6 +97,7 @@ class SupabaseDataManager {
       console.log('[SupabaseDataManager] Starting initialization...');
       this.initializeRealtimeSubscriptions();
       await this.loadInitialData();
+      await this.initializeDefaultContent();
       this.isInitialized = true;
       console.log('[SupabaseDataManager] Initialization complete');
     } catch (error) {
@@ -110,7 +113,6 @@ class SupabaseDataManager {
   }
 
   private initializeRealtimeSubscriptions() {
-    // Subscribe to real-time changes for all tables
     const tables = ['applications', 'licenses', 'payment_addresses', 'settings', 'contacts', 'content'];
     
     tables.forEach(table => {
@@ -161,6 +163,115 @@ class SupabaseDataManager {
     } catch (error) {
       console.error(`Error loading ${table}:`, error);
       throw error;
+    }
+  }
+
+  private async initializeDefaultContent() {
+    try {
+      const existingContent = await this.getContent();
+      
+      // Initialize hero content if it doesn't exist
+      if (!existingContent.hero_title) {
+        await this.updateContent('hero', 'title', 'Professional Trading License Services');
+        await this.updateContent('hero', 'subtitle', 'Secure Your Trading Future');
+        await this.updateContent('hero', 'description', 'Get licensed to trade across major cryptocurrency exchanges with our comprehensive licensing services. Fast, secure, and legally compliant.');
+        await this.updateContent('hero', 'cta_text', 'Get Licensed Now');
+        await this.updateContent('hero', 'stats', [
+          { value: '2000+', label: 'Licensed Traders' },
+          { value: '15+', label: 'Supported Exchanges' },
+          { value: '99.9%', label: 'Approval Rate' }
+        ]);
+      }
+
+      // Initialize about content if it doesn't exist
+      if (!existingContent.about_title) {
+        await this.updateContent('about', 'title', 'Why Choose Our Licensing Services?');
+        await this.updateContent('about', 'subtitle', 'Industry Leading Expertise');
+        await this.updateContent('about', 'description', 'With years of experience in cryptocurrency regulation and compliance, we provide the most comprehensive licensing services in the industry.');
+        await this.updateContent('about', 'services', [
+          {
+            icon: 'Shield',
+            title: 'Regulatory Compliance',
+            description: 'Full compliance with international trading regulations and standards.'
+          },
+          {
+            icon: 'Clock',
+            title: 'Fast Processing',
+            description: 'Quick turnaround times with our streamlined application process.'
+          },
+          {
+            icon: 'Users',
+            title: 'Expert Support',
+            description: '24/7 support from our team of regulatory experts.'
+          }
+        ]);
+      }
+
+      // Initialize process content if it doesn't exist
+      if (!existingContent.process_title) {
+        await this.updateContent('process', 'title', 'How to Get Your License');
+        await this.updateContent('process', 'subtitle', 'Simple Process');
+        await this.updateContent('process', 'description', 'Follow our streamlined process to get your trading license quickly and efficiently.');
+        await this.updateContent('process', 'steps', [
+          {
+            number: '01',
+            title: 'Choose Your License Category',
+            description: 'Select the appropriate license category based on your trading needs and volume requirements.'
+          },
+          {
+            number: '02',
+            title: 'Submit Application',
+            description: 'Fill out our comprehensive application form with all required documentation.'
+          },
+          {
+            number: '03',
+            title: 'Payment & Verification',
+            description: 'Complete secure payment and undergo our verification process.'
+          },
+          {
+            number: '04',
+            title: 'Receive Your License',
+            description: 'Get your official trading license and start trading on supported exchanges.'
+          }
+        ]);
+        await this.updateContent('process', 'cta_text', 'Start Your Application');
+      }
+
+      // Initialize all 12 license categories with default pricing
+      const defaultCategories = [
+        { id: 1, name: 'Basic Trader', price: '$5,000', status: 'AVAILABLE', description: 'Entry-level trading license for beginners' },
+        { id: 2, name: 'Standard Trader', price: '$15,000', status: 'RECOMMENDED', description: 'Standard license for regular traders' },
+        { id: 3, name: 'Advanced Trader', price: '$25,000', status: 'AVAILABLE', description: 'Advanced license for experienced traders' },
+        { id: 4, name: 'Professional Trader', price: '$50,000', status: 'SELLING FAST', description: 'Professional license for high-volume trading' },
+        { id: 5, name: 'Institutional Trader', price: '$100,000', status: 'AVAILABLE', description: 'Institutional license for large organizations' },
+        { id: 6, name: 'Executive Trader', price: '$200,000', status: 'AVAILABLE', description: 'Executive license for premium trading services' },
+        { id: 7, name: 'Crypto Wallet License', price: '$75,000', status: 'AVAILABLE', description: 'License for cryptocurrency wallet operations' },
+        { id: 8, name: 'Fintech EMI License', price: '$125,000', status: 'AVAILABLE', description: 'Electronic Money Institution license' },
+        { id: 9, name: 'Fintech MSP License', price: '$150,000', status: 'AVAILABLE', description: 'Money Service Provider license' },
+        { id: 10, name: 'Gambling Online License', price: '$300,000', status: 'AVAILABLE', description: 'Online gambling operations license' },
+        { id: 11, name: 'Gambling Lottery License', price: '$250,000', status: 'AVAILABLE', description: 'Lottery operations license' },
+        { id: 12, name: 'Corporate Offshore License', price: '$400,000', status: 'AVAILABLE', description: 'Offshore corporate license' }
+      ];
+
+      for (const category of defaultCategories) {
+        const nameKey = `category${category.id}_name`;
+        const priceKey = `category${category.id}_price`;
+        const statusKey = `category${category.id}_status`;
+        const descriptionKey = `category${category.id}_description`;
+        const availableKey = `category${category.id}_available`;
+
+        if (!existingContent[nameKey]) {
+          await this.updateSetting(nameKey, category.name);
+          await this.updateSetting(priceKey, category.price);
+          await this.updateSetting(statusKey, category.status);
+          await this.updateSetting(descriptionKey, category.description);
+          await this.updateSetting(availableKey, true);
+        }
+      }
+
+      console.log('[SupabaseDataManager] Default content initialized');
+    } catch (error) {
+      console.error('[SupabaseDataManager] Error initializing default content:', error);
     }
   }
 
@@ -345,7 +456,6 @@ class SupabaseDataManager {
 
   async updateSetting(key: string, value: any): Promise<Setting | null> {
     try {
-      // Ensure value is properly formatted for JSON storage
       const settingValue = typeof value === 'string' ? value : value;
       
       const { data, error } = await (supabase as any)
@@ -366,7 +476,6 @@ class SupabaseDataManager {
         throw error;
       }
       
-      // Force reload settings data to ensure consistency
       await this.loadTableData('settings');
       this.notifyListeners('settings_updated', data);
       
@@ -395,21 +504,8 @@ class SupabaseDataManager {
     const content = this.dataSubjects.content.value;
     const filtered = section ? content.filter(c => c.section === section) : content;
     
-    if (section === 'process') {
-      const processContent = filtered.find(c => c.key === 'steps');
-      if (processContent) {
-        const steps = Array.isArray(processContent.value) ? processContent.value : [];
-        const title = filtered.find(c => c.key === 'title')?.value || 'How to Get Your License';
-        const subtitle = filtered.find(c => c.key === 'subtitle')?.value || 'Simple Process';
-        const description = filtered.find(c => c.key === 'description')?.value || 'Follow our streamlined process';
-        const ctaText = filtered.find(c => c.key === 'cta_text')?.value || 'Start Your Application';
-        
-        return { title, subtitle, description, steps, ctaText };
-      }
-    }
-    
     return filtered.reduce((acc, item) => {
-      acc[item.key] = item.value;
+      acc[`${item.section}_${item.key}`] = item.value;
       return acc;
     }, {} as Record<string, any>);
   }
@@ -418,7 +514,9 @@ class SupabaseDataManager {
     try {
       const { data, error } = await (supabase as any)
         .from('content')
-        .upsert({ section, key, value, updated_at: new Date().toISOString() })
+        .upsert({ section, key, value, updated_at: new Date().toISOString() }, {
+          onConflict: 'section,key'
+        })
         .select()
         .single();
 
@@ -485,37 +583,6 @@ class SupabaseDataManager {
     }
   }
 
-  // Bulk operations
-  async bulkUpdateApplications(ids: string[], updates: Partial<Application>): Promise<boolean> {
-    try {
-      const { error } = await (supabase as any)
-        .from('applications')
-        .update({ ...updates, updated_at: new Date().toISOString() })
-        .in('id', ids);
-
-      if (error) throw error;
-      return true;
-    } catch (error) {
-      console.error('Error bulk updating applications:', error);
-      return false;
-    }
-  }
-
-  async bulkDeleteApplications(ids: string[]): Promise<boolean> {
-    try {
-      const { error } = await (supabase as any)
-        .from('applications')
-        .delete()
-        .in('id', ids);
-
-      if (error) throw error;
-      return true;
-    } catch (error) {
-      console.error('Error bulk deleting applications:', error);
-      return false;
-    }
-  }
-
   // Event system for component updates
   addEventListener(event: string, listener: Function) {
     if (!this.eventListeners[event]) {
@@ -558,6 +625,37 @@ class SupabaseDataManager {
       newContacts: contacts.filter(c => c.status === 'unread').length,
       totalRevenue
     };
+  }
+
+  // Bulk operations
+  async bulkUpdateApplications(ids: string[], updates: Partial<Application>): Promise<boolean> {
+    try {
+      const { error } = await (supabase as any)
+        .from('applications')
+        .update({ ...updates, updated_at: new Date().toISOString() })
+        .in('id', ids);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error bulk updating applications:', error);
+      return false;
+    }
+  }
+
+  async bulkDeleteApplications(ids: string[]): Promise<boolean> {
+    try {
+      const { error } = await (supabase as any)
+        .from('applications')
+        .delete()
+        .in('id', ids);
+
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error bulk deleting applications:', error);
+      return false;
+    }
   }
 
   // Export data
