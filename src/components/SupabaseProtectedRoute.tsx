@@ -1,3 +1,4 @@
+
 import { Navigate, useLocation } from "react-router-dom";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { Loader2 } from "lucide-react";
@@ -7,7 +8,7 @@ interface SupabaseProtectedRouteProps {
   requireAdmin?: boolean;
 }
 
-const SupabaseProtectedRoute = ({ children, requireAdmin = true }: SupabaseProtectedRouteProps) => {
+const SupabaseProtectedRoute = ({ children, requireAdmin = false }: SupabaseProtectedRouteProps) => {
   const { isAuthenticated, isAdmin, isLoading } = useSupabaseAuth();
   const location = useLocation();
 

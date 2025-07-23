@@ -8,9 +8,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Edit, Eye, Trash, Search, Download, QrCode, FileText } from 'lucide-react';
+import { Plus, Edit, Trash, Search, Download, QrCode, FileText, RefreshCw } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabaseDataManager, License } from '@/utils/supabaseDataManager';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 export const LicenseManager = () => {
   const [licenses, setLicenses] = useState<License[]>([]);
@@ -19,20 +20,31 @@ export const LicenseManager = () => {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedLicense, setSelectedLicense] = useState<License | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { isAdmin } = useSupabaseAuth();
 
   useEffect(() => {
-    const loadLicenses = async () => {
+    if (isAdmin) {
+      loadLicenses();
+    }
+  }, [isAdmin]);
+
+  const loadLicenses = async () => {
+    try {
+      setIsLoading(true);
       const licenseData = await supabaseDataManager.getLicenses();
       setLicenses(licenseData);
-    };
-
-    loadLicenses();
-    supabaseDataManager.addEventListener('licenses_updated', loadLicenses);
-    
-    return () => {
-      supabaseDataManager.removeEventListener('licenses_updated', loadLicenses);
-    };
-  }, []);
+    } catch (error) {
+      console.error('Error loading licenses:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load licenses",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -44,16 +56,24 @@ export const LicenseManager = () => {
   };
 
   const handleCreateLicense = async (licenseData: Omit<License, 'id' | 'created_at' | 'updated_at'>) => {
-    const newLicense = await supabaseDataManager.createLicense(licenseData);
-    if (newLicense) {
-      const updatedLicenses = await supabaseDataManager.getLicenses();
-      setLicenses(updatedLicenses);
-      setIsCreateDialogOpen(false);
-      toast({
-        title: "License Created",
-        description: `License ${newLicense.license_id} has been created successfully`,
-      });
-    } else {
+    try {
+      const newLicense = await supabaseDataManager.createLicense(licenseData);
+      if (newLicense) {
+        setIsCreateDialogOpen(false);
+        toast({
+          title: "License Created",
+          description: `License ${newLicense.license_id} has been created successfully`,
+        });
+        loadLicenses();
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to create license",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error creating license:', error);
       toast({
         title: "Error",
         description: "Failed to create license",
@@ -65,20 +85,28 @@ export const LicenseManager = () => {
   const handleUpdateLicense = async (updates: Partial<License>) => {
     if (!selectedLicense) return;
 
-    // Note: Add updateLicense method to supabaseDataManager if needed
-    setIsEditDialogOpen(false);
-    toast({
-      title: "License Updated",
-      description: "License has been updated successfully",
-    });
-  };
-
-  const handleDeleteLicense = (licenseId: string) => {
-    if (confirm('Are you sure you want to delete this license?')) {
-      // Note: Add delete method to dataManager if needed
+    try {
+      const success = await supabaseDataManager.updateLicense(selectedLicense.id, updates);
+      if (success) {
+        setIsEditDialogOpen(false);
+        toast({
+          title: "License Updated",
+          description: "License has been updated successfully",
+        });
+        loadLicenses();
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to update license",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error updating license:', error);
       toast({
-        title: "License Deleted",
-        description: "License has been deleted successfully",
+        title: "Error",
+        description: "Failed to update license",
+        variant: "destructive",
       });
     }
   };
@@ -112,6 +140,22 @@ export const LicenseManager = () => {
     });
   };
 
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-semibold">License Management</h2>
+            <p className="text-muted-foreground">Loading licenses...</p>
+          </div>
+        </div>
+        <div className="flex items-center justify-center p-8">
+          <RefreshCw className="h-8 w-8 animate-spin" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -121,6 +165,10 @@ export const LicenseManager = () => {
         </div>
         
         <div className="flex gap-2">
+          <Button onClick={loadLicenses} variant="outline" size="sm">
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
           <Button onClick={exportLicenses} variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />
             Export
@@ -192,62 +240,63 @@ export const LicenseManager = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredLicenses.map((license) => (
-                <TableRow key={license.id}>
-                  <TableCell className="font-mono text-sm">{license.license_id}</TableCell>
-                  <TableCell>{license.holder_name}</TableCell>
-                  <TableCell>{license.license_type}</TableCell>
-                  <TableCell>
-                    <Badge className={getStatusColor(license.status)}>
-                      {license.status.charAt(0).toUpperCase() + license.status.slice(1)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>{license.issue_date}</TableCell>
-                  <TableCell>{license.expiry_date}</TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button size="sm" variant="ghost">
-                        <QrCode className="h-4 w-4" />
-                      </Button>
-                      <Button size="sm" variant="ghost">
-                        <FileText className="h-4 w-4" />
-                      </Button>
-                      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-                        <DialogTrigger asChild>
-                          <Button 
-                            size="sm" 
-                            variant="ghost"
-                            onClick={() => setSelectedLicense(license)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Edit License</DialogTitle>
-                            <DialogDescription>
-                              Update license information
-                            </DialogDescription>
-                          </DialogHeader>
-                          {selectedLicense && (
-                            <LicenseEditForm 
-                              license={selectedLicense}
-                              onSubmit={handleUpdateLicense}
-                            />
-                          )}
-                        </DialogContent>
-                      </Dialog>
-                      <Button 
-                        size="sm" 
-                        variant="ghost"
-                        onClick={() => handleDeleteLicense(license.id)}
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
-                    </div>
+              {filteredLicenses.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                    No licenses found
                   </TableCell>
                 </TableRow>
-              ))}
+              ) : (
+                filteredLicenses.map((license) => (
+                  <TableRow key={license.id}>
+                    <TableCell className="font-mono text-sm">{license.license_id}</TableCell>
+                    <TableCell>{license.holder_name}</TableCell>
+                    <TableCell>{license.license_type}</TableCell>
+                    <TableCell>
+                      <Badge className={getStatusColor(license.status)}>
+                        {license.status.charAt(0).toUpperCase() + license.status.slice(1)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{license.issue_date}</TableCell>
+                    <TableCell>{license.expiry_date}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button size="sm" variant="ghost">
+                          <QrCode className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="ghost">
+                          <FileText className="h-4 w-4" />
+                        </Button>
+                        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+                          <DialogTrigger asChild>
+                            <Button 
+                              size="sm" 
+                              variant="ghost"
+                              onClick={() => setSelectedLicense(license)}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Edit License</DialogTitle>
+                              <DialogDescription>
+                                Update license information
+                              </DialogDescription>
+                            </DialogHeader>
+                            {selectedLicense && (
+                              <LicenseEditForm 
+                                license={selectedLicense}
+                                onSubmit={handleUpdateLicense}
+                              />
+                            )}
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         </CardContent>
