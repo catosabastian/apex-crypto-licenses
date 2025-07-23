@@ -82,7 +82,7 @@ const VerifyPage = () => {
                 </h1>
               </div>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Verify the authenticity and status of any cryptocurrency trading license
+                Verify the authenticity and status of any cryptocurrency trading license issued by APEX Regulations Global
               </p>
             </div>
 
@@ -105,7 +105,7 @@ const VerifyPage = () => {
                         id="licenseId"
                         value={licenseId}
                         onChange={(e) => setLicenseId(e.target.value)}
-                        placeholder="CL-2024-XXXX-TX"
+                        placeholder="CL-2025-XXXX-TX"
                         className="text-lg h-14 border-2"
                         onKeyPress={(e) => e.key === 'Enter' && handleVerification()}
                       />
@@ -129,7 +129,7 @@ const VerifyPage = () => {
                       </Button>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      License IDs follow the format: CL-YYYY-XXXX-TX (e.g., CL-2024-8294-T3)
+                      License IDs follow the format: CL-YYYY-XXXX-TX (e.g., CL-2025-8294-T3)
                     </p>
                   </div>
 

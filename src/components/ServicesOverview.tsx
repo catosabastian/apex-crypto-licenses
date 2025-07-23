@@ -75,15 +75,26 @@ const ServicesOverview = () => {
             licensing requirements, Individual formation, policy drafting, and ongoing trading compliance.
           </p>
           
-          {/* Image placeholder area */}
+          {/* Professional Licensing Showcase Image */}
           <div className="flex justify-center mt-8 mb-12">
-            <div className="w-full max-w-2xl bg-gradient-to-br from-primary/10 to-secondary/10 rounded-2xl p-8 border border-primary/20">
-              <div className="text-center text-primary/60 font-medium">
-                Professional Licensing Solutions Showcase
-              </div>
-              <div className="mt-4 h-32 bg-gradient-to-r from-primary/5 to-secondary/5 rounded-lg flex items-center justify-center">
-                <Shield className="h-16 w-16 text-primary/30" />
-              </div>
+            <div className="w-full max-w-4xl rounded-2xl overflow-hidden shadow-2xl border border-primary/20">
+              <img 
+                src="/src/assets/professional-licensing-showcase.jpg" 
+                alt="Professional Licensing Solutions Showcase"
+                className="w-full h-auto object-cover"
+                onError={(e) => {
+                  // Fallback to a placeholder if image fails to load
+                  e.currentTarget.style.display = 'none';
+                  e.currentTarget.parentElement!.innerHTML = `
+                    <div class="h-64 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-xl flex items-center justify-center">
+                      <div class="text-center">
+                        <div class="text-primary/60 font-medium mb-2">Professional Licensing Solutions</div>
+                        <div class="text-sm text-muted-foreground">Comprehensive regulatory support worldwide</div>
+                      </div>
+                    </div>
+                  `;
+                }}
+              />
             </div>
           </div>
         </div>
