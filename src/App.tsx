@@ -15,6 +15,7 @@ import CryptoLicensingPage from "./pages/CryptoLicensingPage";
 import FintechPage from "./pages/FintechPage";
 import GamblingPage from "./pages/GamblingPage";
 import VerifyPage from "./pages/VerifyPage";
+import SecureAdmin from "./pages/SecureAdmin";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,14 @@ const App = () => (
                 element={
                   <ProtectedRoute>
                     <Admin />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/secure-admin" 
+                element={
+                  <ProtectedRoute>
+                    <SecureAdmin />
                   </ProtectedRoute>
                 } 
               />

@@ -36,12 +36,20 @@ const Index = () => {
         <Hero />
         <ServicesOverview />
         <FeaturesSection />
-        <EnhancedAboutSection />
-        <LicenseCategories />
+        <section id="about">
+          <EnhancedAboutSection />
+        </section>
+        <section id="licenses">
+          <LicenseCategories />
+        </section>
         <EnhancedWhatIsLicense />
-        <ProcessSteps />
+        <section id="process">
+          <ProcessSteps />
+        </section>
         <StatsSection />
-        <VerificationSection />
+        <section id="verification">
+          <VerificationSection />
+        </section>
       </main>
       <Footer />
       

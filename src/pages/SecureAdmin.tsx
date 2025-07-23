@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabaseDataManager } from '@/utils/supabaseDataManager';
 import { ApplicationsManager } from '@/components/admin/ApplicationsManager';
 import { ContactsManager } from '@/components/admin/ContactsManager';
-import { UnifiedSettingsManager } from '@/components/admin/UnifiedSettingsManager';
+import { SettingsManager } from '@/components/admin/SettingsManager';
 import { LicenseManager } from '@/components/admin/LicenseManager';
 import { ContentManager } from '@/components/admin/ContentManager';
 
@@ -228,7 +228,7 @@ const SecureAdmin = () => {
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-6">
-          <UnifiedSettingsManager />
+          <SettingsManager />
         </TabsContent>
       </Tabs>
     </div>

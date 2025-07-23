@@ -3,7 +3,11 @@ import { NavigationMenu, NavigationMenuContent, NavigationMenuItem, NavigationMe
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 
-const DesktopNav = () => {
+interface DesktopNavProps {
+  scrollToSection: (sectionId: string) => void;
+}
+
+const DesktopNav = ({ scrollToSection }: DesktopNavProps) => {
   return (
     <NavigationMenu className="hidden md:flex">
       <NavigationMenuList>
@@ -42,14 +46,7 @@ const DesktopNav = () => {
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
             <button
-              onClick={() => {
-                const aboutSection = document.getElementById('about');
-                if (aboutSection) {
-                  aboutSection.scrollIntoView({ behavior: 'smooth' });
-                } else {
-                  window.location.href = '/#about';
-                }
-              }}
+              onClick={() => scrollToSection('about')}
               className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
             >
               About
@@ -60,14 +57,18 @@ const DesktopNav = () => {
         <NavigationMenuItem>
           <NavigationMenuLink asChild>
             <button
-              onClick={() => {
-                const processSection = document.getElementById('process');
-                if (processSection) {
-                  processSection.scrollIntoView({ behavior: 'smooth' });
-                } else {
-                  window.location.href = '/#process';
-                }
-              }}
+              onClick={() => scrollToSection('licenses')}
+              className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
+            >
+              Licenses
+            </button>
+          </NavigationMenuLink>
+        </NavigationMenuItem>
+
+        <NavigationMenuItem>
+          <NavigationMenuLink asChild>
+            <button
+              onClick={() => scrollToSection('process')}
               className="group inline-flex h-10 w-max items-center justify-center rounded-md bg-background px-4 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground focus:outline-none disabled:pointer-events-none disabled:opacity-50 data-[active]:bg-accent/50 data-[state=open]:bg-accent/50"
             >
               Process
