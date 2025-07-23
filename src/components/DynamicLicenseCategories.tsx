@@ -164,6 +164,8 @@ const DynamicLicenseCategories = () => {
           });
         }
         
+        console.log('DynamicLicenseCategories: Settings loaded:', settings);
+        console.log('DynamicLicenseCategories: Category data created:', categoryData);
         setCategories(categoryData);
         setLastUpdateTime(new Date());
         setIsConnected(true);
