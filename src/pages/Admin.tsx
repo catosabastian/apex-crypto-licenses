@@ -33,7 +33,7 @@ import DataExportManager from '@/components/admin/DataExportManager';
 import { LogOut, Shield } from 'lucide-react';
 
 const AdminLogin = () => {
-  const [email, setEmail] = useState("admin@apex.com");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -90,7 +90,7 @@ const AdminLogin = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                placeholder="admin@apex.com"
+                placeholder="Enter admin email"
               />
             </div>
             <div className="space-y-2">
@@ -101,7 +101,7 @@ const AdminLogin = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                placeholder="apex2025"
+                placeholder="Enter admin password"
               />
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
