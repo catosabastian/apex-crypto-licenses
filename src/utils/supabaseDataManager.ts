@@ -237,7 +237,7 @@ class SupabaseDataManager {
         supabase
           .channel(`${table}-changes`)
           .on('postgres_changes', { event: '*', schema: 'public', table }, () => {
-            this.loadTableData(table);
+            this.reloadTableData(table);
           })
           .subscribe();
       });
@@ -251,12 +251,13 @@ class SupabaseDataManager {
       console.log('[SupabaseDataManager] Loading initial data...');
       
       const loadPromises = [
-        this.loadTableData('applications'),
-        this.loadTableData('licenses'),
-        this.loadTableData('payment_addresses'),
-        this.loadTableData('settings'),
-        this.loadTableData('contacts'),
-        this.loadTableData('content')
+        this.loadApplications(),
+        this.loadLicenses(),
+        this.loadPaymentAddresses(),
+        this.loadSettings(),
+        this.loadContacts(),
+        this.loadContent(),
+        this.loadWebsiteSettings()
       ];
 
       // Load data with individual error handling
@@ -268,28 +269,99 @@ class SupabaseDataManager {
     }
   }
 
-  private async loadTableData(table: string) {
+  private async loadApplications() {
     try {
-      console.log(`[SupabaseDataManager] Loading ${table} data...`);
-      
       const { data, error } = await supabase
-        .from(table)
+        .from('applications')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error(`[SupabaseDataManager] Error loading ${table}:`, error);
-        // Don't throw - just log and continue
-        return;
+      if (!error && data) {
+        this.dataSubjects.applications.next(data as Application[]);
+        this.notifyListeners('applications_updated', data);
       }
-
-      const subjectKey = table === 'payment_addresses' ? 'paymentAddresses' : table as keyof typeof this.dataSubjects;
-      this.dataSubjects[subjectKey].next(data || []);
-      this.notifyListeners(`${table}_updated`, data);
-      console.log(`[SupabaseDataManager] ${table} data loaded:`, data?.length || 0, 'records');
     } catch (error) {
-      console.error(`Error loading ${table}:`, error);
-      // Don't throw - just log and continue
+      console.error('[SupabaseDataManager] Error loading applications:', error);
+    }
+  }
+
+  private async loadLicenses() {
+    try {
+      const { data, error } = await supabase
+        .from('licenses')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!error && data) {
+        this.dataSubjects.licenses.next(data as License[]);
+        this.notifyListeners('licenses_updated', data);
+      }
+    } catch (error) {
+      console.error('[SupabaseDataManager] Error loading licenses:', error);
+    }
+  }
+
+  private async loadPaymentAddresses() {
+    try {
+      const { data, error } = await supabase
+        .from('payment_addresses')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!error && data) {
+        this.dataSubjects.paymentAddresses.next(data);
+        this.notifyListeners('payment_addresses_updated', data);
+      }
+    } catch (error) {
+      console.error('[SupabaseDataManager] Error loading payment addresses:', error);
+    }
+  }
+
+  private async loadSettings() {
+    try {
+      const { data, error } = await supabase
+        .from('settings')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!error && data) {
+        this.dataSubjects.settings.next(data);
+        this.notifyListeners('settings_updated', data);
+      }
+    } catch (error) {
+      console.error('[SupabaseDataManager] Error loading settings:', error);
+    }
+  }
+
+  private async loadContacts() {
+    try {
+      const { data, error } = await supabase
+        .from('contacts')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!error && data) {
+        this.dataSubjects.contacts.next(data as Contact[]);
+        this.notifyListeners('contacts_updated', data);
+      }
+    } catch (error) {
+      console.error('[SupabaseDataManager] Error loading contacts:', error);
+    }
+  }
+
+  private async loadContent() {
+    try {
+      const { data, error } = await supabase
+        .from('content')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!error && data) {
+        this.dataSubjects.content.next(data);
+        this.notifyListeners('content_updated', data);
+      }
+    } catch (error) {
+      console.error('[SupabaseDataManager] Error loading content:', error);
     }
   }
 
@@ -309,6 +381,32 @@ class SupabaseDataManager {
     } catch (error) {
       console.error('Error loading website settings:', error);
       this.dataSubjects.websiteSettings.next(null);
+    }
+  }
+
+  private async reloadTableData(table: string) {
+    switch (table) {
+      case 'applications':
+        await this.loadApplications();
+        break;
+      case 'licenses':
+        await this.loadLicenses();
+        break;
+      case 'payment_addresses':
+        await this.loadPaymentAddresses();
+        break;
+      case 'settings':
+        await this.loadSettings();
+        break;
+      case 'contacts':
+        await this.loadContacts();
+        break;
+      case 'content':
+        await this.loadContent();
+        break;
+      case 'website_settings':
+        await this.loadWebsiteSettings();
+        break;
     }
   }
 
@@ -583,7 +681,7 @@ class SupabaseDataManager {
 
       if (error) throw error;
       
-      await this.loadTableData('payment_addresses');
+      await this.loadPaymentAddresses();
       this.notifyListeners('payment_addresses_updated', data);
       
       return data;
@@ -649,7 +747,7 @@ class SupabaseDataManager {
         throw error;
       }
       
-      await this.loadTableData('settings');
+      await this.loadSettings();
       this.notifyListeners('settings_updated', data);
       
       console.log('Setting updated successfully:', { key, value: settingValue, data });
@@ -716,7 +814,7 @@ class SupabaseDataManager {
         .single();
 
       if (error) throw error;
-      await this.loadTableData('content');
+      await this.loadContent();
       return data;
     } catch (error) {
       console.error('Error updating content:', error);
