@@ -32,6 +32,89 @@ import SystemConfigManager from '@/components/admin/SystemConfigManager';
 import DataExportManager from '@/components/admin/DataExportManager';
 import { LogOut, Shield } from 'lucide-react';
 
+const AdminLogin = () => {
+  const [email, setEmail] = useState("admin@apex.com");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Login Successful",
+        description: "Welcome back, admin!",
+      });
+      
+      // Refresh to update auth state
+      setTimeout(() => window.location.reload(), 1000);
+    } catch (error: any) {
+      toast({
+        title: "Login Failed",
+        description: error.message || "Invalid credentials",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle>Admin Login</CardTitle>
+          <CardDescription>
+            Enter your admin credentials to access the admin panel.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                placeholder="admin@apex.com"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="apex2025"
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Login
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
 const AdminSetup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -295,8 +378,13 @@ const Admin = () => {
     return <AdminSetup />;
   }
 
-  // If user is not authenticated or not admin, redirect to setup
-  if (!isAuthenticated || !isAdmin) {
+  // If user is not authenticated, show a login form instead of setup
+  if (!isAuthenticated) {
+    return <AdminLogin />;
+  }
+
+  // If user is authenticated but not admin, show setup to become admin
+  if (!isAdmin) {
     return <AdminSetup />;
   }
 
