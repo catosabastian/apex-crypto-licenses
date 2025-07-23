@@ -267,7 +267,7 @@ const UnifiedApplicationForm = () => {
                 <h3 className="text-lg font-semibold">License Category *</h3>
               </div>
               
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {categories.map((category) => (
                   <Card
                     key={category.id}
@@ -276,7 +276,7 @@ const UnifiedApplicationForm = () => {
                         ? 'ring-2 ring-primary border-primary shadow-lg' 
                         : category.available 
                           ? 'border-border hover:border-primary/50' 
-                          : 'opacity-60 border-muted cursor-not-allowed'
+                          : 'opacity-70 border-muted cursor-not-allowed bg-muted/20'
                     }`}
                     onClick={() => {
                       if (category.available) {
@@ -286,19 +286,26 @@ const UnifiedApplicationForm = () => {
                   >
                     <CardContent className="p-4">
                       <div className="flex justify-between items-start mb-2">
-                        <h4 className="font-semibold text-sm">{category.name}</h4>
+                        <h4 className="font-semibold text-sm leading-tight">{category.name}</h4>
                         <Badge 
                           variant={category.available ? "default" : "destructive"}
-                          className="text-xs"
+                          className="text-xs ml-2 flex-shrink-0"
                         >
-                          {category.status}
+                          {!category.available ? "SOLD OUT" : category.status}
                         </Badge>
                       </div>
                       <p className="text-xl font-bold text-primary mb-1">{category.price}</p>
                       <p className="text-xs text-muted-foreground">Min Volume: {category.minVolume}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{category.description}</p>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{category.description}</p>
                       
-                      {formData.category === category.id && (
+                      {!category.available && (
+                        <div className="mt-2 flex items-center gap-1 text-xs text-red-600">
+                          <AlertCircle className="h-3 w-3" />
+                          Currently Unavailable
+                        </div>
+                      )}
+                      
+                      {formData.category === category.id && category.available && (
                         <div className="mt-2 flex items-center gap-1 text-xs text-green-600">
                           <CheckCircle className="h-3 w-3" />
                           Selected
