@@ -45,75 +45,97 @@ const DynamicLicenseCategories = () => {
             type: 'trading' as const, 
             icon: Shield, 
             features: ['Basic trading access', 'Email support', 'Standard documentation', '1-year validity'],
-            minVolume: '$50,000'
+            minVolume: '$50,000',
+            popular: false,
+            exclusive: false
           },
           2: { 
             type: 'trading' as const, 
             icon: CheckCircle, 
             features: ['Enhanced trading limits', 'Priority support', 'Advanced analytics', '1-year validity'],
-            minVolume: '$100,000'
+            minVolume: '$100,000',
+            popular: false,
+            exclusive: false
           },
           3: { 
             type: 'trading' as const, 
             icon: Star, 
             features: ['Professional tools', 'API access', 'Dedicated account manager', '1-year validity'],
-            minVolume: '$250,000'
+            minVolume: '$250,000',
+            popular: false,
+            exclusive: false
           },
           4: { 
             type: 'trading' as const, 
             icon: Crown, 
             features: ['Institutional access', 'Custom integrations', 'Premium support', '1-year validity'],
             minVolume: '$500,000',
-            popular: true
+            popular: true,
+            exclusive: false
           },
           5: { 
             type: 'trading' as const, 
             icon: Building, 
             features: ['Enterprise solutions', 'White-label options', 'Global compliance', '1-year validity'],
-            minVolume: '$1,000,000+'
+            minVolume: '$1,000,000+',
+            popular: false,
+            exclusive: false
           },
           6: { 
             type: 'trading' as const, 
             icon: Trophy, 
             features: ['Executive privileges', 'Regulatory assistance', 'Full service package', '1-year validity'],
             minVolume: '$2,500,000+',
+            popular: false,
             exclusive: true
           },
           7: { 
             type: 'crypto' as const, 
             icon: Shield, 
             features: ['Wallet operations', 'Security compliance', 'Multi-currency support', '1-year validity'],
-            minVolume: 'Variable'
+            minVolume: 'Variable',
+            popular: false,
+            exclusive: false
           },
           8: { 
             type: 'fintech' as const, 
             icon: Briefcase, 
             features: ['Electronic money services', 'Payment processing', 'EU compliance', '1-year validity'],
-            minVolume: 'Variable'
+            minVolume: 'Variable',
+            popular: false,
+            exclusive: false
           },
           9: { 
             type: 'fintech' as const, 
             icon: Briefcase, 
             features: ['Money service provider', 'Remittance services', 'Global operations', '1-year validity'],
-            minVolume: 'Variable'
+            minVolume: 'Variable',
+            popular: false,
+            exclusive: false
           },
           10: { 
             type: 'gambling' as const, 
             icon: Gamepad2, 
             features: ['Online gambling', 'Gaming compliance', 'Player protection', '1-year validity'],
-            minVolume: 'Variable'
+            minVolume: 'Variable',
+            popular: false,
+            exclusive: false
           },
           11: { 
             type: 'gambling' as const, 
             icon: Gamepad2, 
             features: ['Lottery operations', 'Prize distribution', 'Regulatory compliance', '1-year validity'],
-            minVolume: 'Variable'
+            minVolume: 'Variable',
+            popular: false,
+            exclusive: false
           },
           12: { 
             type: 'corporate' as const, 
             icon: Building, 
             features: ['Offshore incorporation', 'Tax optimization', 'Privacy protection', '1-year validity'],
-            minVolume: 'Variable'
+            minVolume: 'Variable',
+            popular: false,
+            exclusive: false
           }
         };
 
