@@ -135,7 +135,7 @@ const UnifiedApplicationForm = () => {
         payment_method: formData.paymentMethod,
         transaction_id: formData.transactionId,
         amount: selectedCategory.price,
-        status: 'pending'
+        status: 'pending' as const
       };
 
       const result = await supabaseDataManager.createApplication(applicationData);
