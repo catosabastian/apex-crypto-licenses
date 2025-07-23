@@ -164,6 +164,39 @@ export type Database = {
         }
         Relationships: []
       }
+      emailjs_settings: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          service_id: string
+          template_id: string
+          template_name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          service_id: string
+          template_id: string
+          template_name?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          service_id?: string
+          template_id?: string
+          template_name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       licenses: {
         Row: {
           application_id: string | null

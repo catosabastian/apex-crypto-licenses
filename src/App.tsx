@@ -7,7 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { SupabaseAuthProvider } from "@/contexts/SupabaseAuthContext";
 import { SecureAuthProvider } from "@/contexts/SecureAuthContext";
 import SupabaseProtectedRoute from "@/components/SupabaseProtectedRoute";
-import { ErrorBoundary } from "@/components/ErrorBoundary";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
 import SecureAdmin from "./pages/SecureAdmin";

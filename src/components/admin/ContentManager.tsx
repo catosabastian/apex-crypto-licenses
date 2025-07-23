@@ -21,7 +21,7 @@ export const ContentManager = () => {
     const loadContent = async () => {
       try {
         setIsLoading(true);
-        const contentData = await supabaseDataManager.getContent();
+        const contentData = await supabaseDataManager.getSettings();
         setContent(contentData);
       } catch (error) {
         console.error('Error loading content:', error);
@@ -59,7 +59,7 @@ export const ContentManager = () => {
 
   const handleUpdateContent = async (sectionKey: string, key: string, newContent: any) => {
     try {
-      await supabaseDataManager.updateContent(sectionKey, key, newContent);
+      await supabaseDataManager.updateContent(key, newContent);
       
       toast({
         title: "Content Updated",
@@ -78,7 +78,7 @@ export const ContentManager = () => {
 
   const refreshContent = async () => {
     try {
-      const contentData = await supabaseDataManager.getContent();
+      const contentData = await supabaseDataManager.getSettings();
       setContent(contentData);
       toast({
         title: "Content Refreshed",

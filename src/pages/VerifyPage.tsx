@@ -63,7 +63,10 @@ export default function VerifyPage() {
       }
 
       console.log('License found:', data);
-      setLicenseInfo(data);
+      setLicenseInfo({
+        ...data,
+        status: data.status as 'active' | 'expired' | 'suspended'
+      });
       
       toast({
         title: "License Found",

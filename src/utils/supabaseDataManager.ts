@@ -8,8 +8,9 @@ export interface License {
   license_type: string;
   issue_date: string;
   expiry_date: string;
-  status: 'active' | 'expired' | 'suspended';
+  status: 'active' | 'expired' | 'suspended' | 'revoked';
   platforms?: string;
+  application_id?: string;
   created_at: string;
   updated_at: string;
   category?: number;
@@ -98,7 +99,10 @@ class SupabaseDataManager {
         return [];
       }
 
-      return data || [];
+      return (data || []).map(license => ({
+        ...license,
+        status: license.status as 'active' | 'expired' | 'suspended' | 'revoked'
+      }));
     } catch (error) {
       console.error('Error fetching licenses:', error);
       return [];
@@ -121,7 +125,10 @@ class SupabaseDataManager {
       const updatedLicenses = await this.getLicenses();
       this.emit('licenses_updated', updatedLicenses);
 
-      return data;
+      return {
+        ...data,
+        status: data.status as 'active' | 'expired' | 'suspended' | 'revoked'
+      };
     } catch (error) {
       console.error('Error creating license:', error);
       return null;
@@ -163,7 +170,17 @@ class SupabaseDataManager {
         return [];
       }
 
-      return data || [];
+      return (data || []).map(app => ({
+        ...app,
+        status: app.status as 'pending' | 'processing' | 'approved' | 'rejected',
+        documents: Array.isArray(app.documents) ? app.documents : [],
+        phone: app.phone || '',
+        company: app.company || '',
+        amount: app.amount || '',
+        payment_method: app.payment_method || '',
+        transaction_id: app.transaction_id || '',
+        notes: app.notes || ''
+      }));
     } catch (error) {
       console.error('Error fetching applications:', error);
       return [];
@@ -205,7 +222,10 @@ class SupabaseDataManager {
         return [];
       }
 
-      return data || [];
+      return (data || []).map(contact => ({
+        ...contact,
+        status: contact.status as 'unread' | 'read' | 'responded' | 'archived'
+      }));
     } catch (error) {
       console.error('Error fetching contacts:', error);
       return [];
@@ -394,6 +414,132 @@ class SupabaseDataManager {
     } catch (error) {
       console.error('Error updating setting:', error);
       return false;
+    }
+  }
+
+  // Content management
+  async getContent(section: string): Promise<any> {
+    try {
+      const { data, error } = await supabase
+        .from('content')
+        .select('*')
+        .eq('section', section)
+        .single();
+
+      if (error) {
+        console.error('Error fetching content:', error);
+        return null;
+      }
+
+      return data?.value || null;
+    } catch (error) {
+      console.error('Error fetching content:', error);
+      return null;
+    }
+  }
+
+  async updateContent(key: string, value: any): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('content')
+        .upsert({
+          key,
+          value,
+          section: key.split('.')[0] || 'general'
+        }, {
+          onConflict: 'key'
+        });
+
+      if (error) {
+        console.error('Error updating content:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error updating content:', error);
+      return false;
+    }
+  }
+
+  async createApplication(application: Omit<Application, 'id' | 'created_at' | 'updated_at'>): Promise<Application | null> {
+    try {
+      const { data, error } = await supabase
+        .from('applications')
+        .insert([{
+          ...application,
+          documents: application.documents || []
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating application:', error);
+        return null;
+      }
+
+      const updatedApplications = await this.getApplications();
+      this.emit('applications_updated', updatedApplications);
+
+      return {
+        ...data,
+        status: data.status as 'pending' | 'processing' | 'approved' | 'rejected',
+        documents: Array.isArray(data.documents) ? data.documents : [],
+        phone: data.phone || '',
+        company: data.company || '',
+        amount: data.amount || '',
+        payment_method: data.payment_method || '',
+        transaction_id: data.transaction_id || '',
+        notes: data.notes || ''
+      };
+    } catch (error) {
+      console.error('Error creating application:', error);
+      return null;
+    }
+  }
+
+  async verifyLicense(licenseId: string): Promise<License | null> {
+    try {
+      const { data, error } = await supabase
+        .from('licenses')
+        .select('*')
+        .eq('license_id', licenseId)
+        .single();
+
+      if (error) {
+        console.error('Error verifying license:', error);
+        return null;
+      }
+
+      return {
+        ...data,
+        status: data.status as 'active' | 'expired' | 'suspended' | 'revoked'
+      };
+    } catch (error) {
+      console.error('Error verifying license:', error);
+      return null;
+    }
+  }
+
+  async exportAllData(): Promise<any> {
+    try {
+      const [licenses, applications, contacts, settings] = await Promise.all([
+        this.getLicenses(),
+        this.getApplications(),
+        this.getContacts(),
+        this.getSettings()
+      ]);
+
+      return {
+        licenses,
+        applications,
+        contacts,
+        settings,
+        exportDate: new Date().toISOString()
+      };
+    } catch (error) {
+      console.error('Error exporting data:', error);
+      return null;
     }
   }
 
