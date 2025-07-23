@@ -70,11 +70,7 @@ function App() {
                     {/* Protected Admin Routes */}
                     <Route 
                       path="/admin" 
-                      element={
-            <SupabaseProtectedRoute requiredRole="admin">
-              <Admin />
-            </SupabaseProtectedRoute>
-                      } 
+                      element={<Admin />} 
                     />
                     <Route 
                       path="/secure-admin" 
