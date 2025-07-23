@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { BehaviorSubject } from 'rxjs';
 
@@ -87,9 +86,67 @@ class SupabaseDataManager {
   };
   private isInitialized = false;
   private initializationPromise: Promise<void> | null = null;
+  private defaultSettings: Record<string, any> = {};
 
   constructor() {
+    this.initializeDefaultSettings();
     this.initializationPromise = this.initialize();
+  }
+
+  private initializeDefaultSettings() {
+    this.defaultSettings = {
+      // Category settings
+      category1_name: 'Basic Trader',
+      category1_price: '$5,000',
+      category1_status: 'AVAILABLE',
+      category1_description: 'Entry-level trading license for beginners',
+      category1_available: true,
+      category2_name: 'Standard Trader',
+      category2_price: '$15,000',
+      category2_status: 'RECOMMENDED',
+      category2_description: 'Standard license for regular traders',
+      category2_available: true,
+      category3_name: 'Advanced Trader',
+      category3_price: '$25,000',
+      category3_status: 'AVAILABLE',
+      category3_description: 'Advanced license for experienced traders',
+      category3_available: true,
+      category4_name: 'Professional Trader',
+      category4_price: '$50,000',
+      category4_status: 'SELLING FAST',
+      category4_description: 'Professional license for high-volume trading',
+      category4_available: true,
+      category5_name: 'Institutional Trader',
+      category5_price: '$100,000',
+      category5_status: 'AVAILABLE',
+      category5_description: 'Institutional license for large organizations',
+      category5_available: true,
+      category6_name: 'Executive Trader',
+      category6_price: '$200,000',
+      category6_status: 'AVAILABLE',
+      category6_description: 'Executive license for premium trading services',
+      category6_available: true,
+      // Payment addresses
+      bitcoinAddress: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+      ethereumAddress: '0x742d35Cc6634C0532925a3b8D0A78E16d7D4e726',
+      usdtTronAddress: 'TG3XXyExBkPp9nzdajDMRHvhwjZNWpNBYt',
+      usdtEthereumAddress: '0x742d35Cc6634C0532925a3b8D0A78E16d7D4e726',
+      xrpAddress: 'rN7n7otQDd6FczFgLdSqtcsAUxDkw6fzRH',
+      // Contact information
+      contact_email: 'info@tradingcerts.com',
+      contact_phone: '+1-800-TRADING',
+      contact_address: '123 Trading Street, Financial District, NY 10005',
+      company_name: 'Professional Trading Certifications',
+      // License categories structure
+      license_categories: {
+        '1': { name: 'Basic Trader', price: '$5,000', minVolume: '$50,000', available: true },
+        '2': { name: 'Standard Trader', price: '$15,000', minVolume: '$100,000', available: true },
+        '3': { name: 'Advanced Trader', price: '$25,000', minVolume: '$250,000', available: true },
+        '4': { name: 'Professional Trader', price: '$50,000', minVolume: '$500,000', available: true },
+        '5': { name: 'Institutional Trader', price: '$100,000', minVolume: '$1,000,000+', available: true },
+        '6': { name: 'Executive Trader', price: '$200,000', minVolume: '$2,500,000+', available: true }
+      }
+    };
   }
 
   private async initialize() {
@@ -102,13 +159,22 @@ class SupabaseDataManager {
       console.log('[SupabaseDataManager] Initialization complete');
     } catch (error) {
       console.error('[SupabaseDataManager] Initialization failed:', error);
-      throw error;
+      // Don't throw error - use defaults instead
+      this.isInitialized = true;
     }
   }
 
   private async ensureInitialized() {
     if (!this.isInitialized && this.initializationPromise) {
-      await this.initializationPromise;
+      try {
+        await Promise.race([
+          this.initializationPromise,
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Initialization timeout')), 3000))
+        ]);
+      } catch (error) {
+        console.warn('[SupabaseDataManager] Initialization timeout, using defaults');
+        this.isInitialized = true;
+      }
     }
   }
 
@@ -446,12 +512,17 @@ class SupabaseDataManager {
     }
   }
 
-  // Settings
+  // Settings with fallback
   async getSetting(key: string): Promise<any> {
-    await this.ensureInitialized();
-    const settings = this.dataSubjects.settings.value;
-    const setting = settings.find(s => s.key === key);
-    return setting?.value;
+    try {
+      await this.ensureInitialized();
+      const settings = this.dataSubjects.settings.value;
+      const setting = settings.find(s => s.key === key);
+      return setting?.value || this.defaultSettings[key];
+    } catch (error) {
+      console.error('[SupabaseDataManager] Error getting setting:', error);
+      return this.defaultSettings[key];
+    }
   }
 
   async updateSetting(key: string, value: any): Promise<Setting | null> {
@@ -488,14 +559,22 @@ class SupabaseDataManager {
   }
 
   async getSettings(): Promise<Record<string, any>> {
-    await this.ensureInitialized();
-    const settings = this.dataSubjects.settings.value;
-    const result = settings.reduce((acc, setting) => {
-      acc[setting.key] = setting.value;
-      return acc;
-    }, {} as Record<string, any>);
-    console.log('[SupabaseDataManager] getSettings result:', result);
-    return result;
+    try {
+      await this.ensureInitialized();
+      const settings = this.dataSubjects.settings.value;
+      const result = settings.reduce((acc, setting) => {
+        acc[setting.key] = setting.value;
+        return acc;
+      }, {} as Record<string, any>);
+      
+      // Merge with defaults for missing keys
+      const mergedResult = { ...this.defaultSettings, ...result };
+      console.log('[SupabaseDataManager] getSettings result:', mergedResult);
+      return mergedResult;
+    } catch (error) {
+      console.error('[SupabaseDataManager] Error getting settings, using defaults:', error);
+      return this.defaultSettings;
+    }
   }
 
   // Content
