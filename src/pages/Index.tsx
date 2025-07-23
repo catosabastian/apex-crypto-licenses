@@ -1,62 +1,39 @@
 
-import { useState, useEffect } from 'react';
-import Header from '@/components/Header';
-import Hero from '@/components/Hero';
-import EnhancedAboutSection from '@/components/EnhancedAboutSection';
-import EnhancedWhatIsLicense from '@/components/EnhancedWhatIsLicense';
-import LicenseCategories from '@/components/LicenseCategories';
-import ProcessSteps from '@/components/ProcessSteps';
-import FeaturesSection from '@/components/FeaturesSection';
-import StatsSection from '@/components/StatsSection';
-import VerificationSection from '@/components/VerificationSection';
-import Footer from '@/components/Footer';
-import ServicesOverview from '@/components/ServicesOverview';
-import SupportDialog from '@/components/SupportDialog';
+import { useEffect } from 'react';
+import Header from "@/components/Header";
+import DynamicHero from "@/components/DynamicHero";
+import DynamicLicenseCategories from "@/components/DynamicLicenseCategories";
+import AboutSection from "@/components/AboutSection";
+import ProcessSteps from "@/components/ProcessSteps";
+import FeaturesSection from "@/components/FeaturesSection";
+import StatsSection from "@/components/StatsSection";
+import Footer from "@/components/Footer";
+import { supabaseDataManager } from '@/utils/supabaseDataManager';
 
 const Index = () => {
-  const [showSupportDialog, setShowSupportDialog] = useState(false);
-
-  // Scroll to hash if present
   useEffect(() => {
-    const hash = window.location.hash;
-    if (hash) {
-      setTimeout(() => {
-        const element = document.getElementById(hash.substring(1));
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth' });
-        }
-      }, 100);
-    }
+    // Initialize database content if needed
+    const initializeContent = async () => {
+      try {
+        await supabaseDataManager.initializeDefaultContent();
+      } catch (error) {
+        console.error('Error initializing content:', error);
+      }
+    };
+
+    initializeContent();
   }, []);
 
   return (
     <div className="min-h-screen">
       <Header />
-      <main>
-        <Hero />
-        <ServicesOverview />
-        <FeaturesSection />
-        <section id="about">
-          <EnhancedAboutSection />
-        </section>
-        <section id="licenses">
-          <LicenseCategories />
-        </section>
-        <EnhancedWhatIsLicense />
-        <section id="process">
-          <ProcessSteps />
-        </section>
-        <StatsSection />
-        <section id="verification">
-          <VerificationSection />
-        </section>
-      </main>
+      <DynamicHero />
+      <DynamicLicenseCategories />
+      <AboutSection id="about" />
+      <ProcessSteps id="process" />
+      <FeaturesSection />
+      <StatsSection />
       <Footer />
-      
-      <SupportDialog 
-        open={showSupportDialog}
-        onOpenChange={setShowSupportDialog}
-      />
     </div>
   );
 };

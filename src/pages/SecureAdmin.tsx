@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Shield, LogOut, BarChart3, FileText, Settings, Mail, Globe, Download, RefreshCw } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { useSecureAuth } from '@/contexts/SecureAuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { supabaseDataManager } from '@/utils/supabaseDataManager';
 import { ApplicationsManager } from '@/components/admin/ApplicationsManager';
@@ -25,7 +25,7 @@ const SecureAdmin = () => {
     totalRevenue: 0
   });
   const [isLoading, setIsLoading] = useState(true);
-  const { logout } = useSecureAuth();
+  const { logout } = useAuth();
   const navigate = useNavigate();
 
   // Update analytics when tab changes

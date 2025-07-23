@@ -9,13 +9,13 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
+import SecureAdmin from "./pages/SecureAdmin";
 import Login from "./pages/Login";
 import ApplicationForm from "./components/ApplicationForm";
 import CryptoLicensingPage from "./pages/CryptoLicensingPage";
 import FintechPage from "./pages/FintechPage";
 import GamblingPage from "./pages/GamblingPage";
 import VerifyPage from "./pages/VerifyPage";
-import SecureAdmin from "./pages/SecureAdmin";
 
 const queryClient = new QueryClient();
 

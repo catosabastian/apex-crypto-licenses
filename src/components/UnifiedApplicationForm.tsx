@@ -56,17 +56,30 @@ const UnifiedApplicationForm = () => {
       try {
         setIsLoading(true);
         const settings = await supabaseDataManager.getSettings();
-        const licenseCategories = settings.license_categories || {};
         
-        const categoryList: LicenseCategory[] = Object.entries(licenseCategories).map(([key, category]: [string, any]) => ({
-          id: key,
-          name: category.name,
-          price: category.price,
-          minVolume: category.minVolume,
-          available: category.available,
-          status: category.available ? 'AVAILABLE' : 'SOLD OUT',
-          description: category.description || 'Professional license for trading operations'
-        }));
+        const categoryList: LicenseCategory[] = [];
+        
+        // Load all 12 categories
+        for (let i = 1; i <= 12; i++) {
+          const name = settings[`category${i}_name`];
+          const price = settings[`category${i}_price`];
+          const available = settings[`category${i}_available`];
+          const status = settings[`category${i}_status`];
+          const description = settings[`category${i}_description`];
+          const minVolume = settings[`category${i}_minVolume`];
+          
+          if (name && price) {
+            categoryList.push({
+              id: i.toString(),
+              name,
+              price,
+              minVolume: minVolume || '$0',
+              available: available !== false,
+              status: status || 'AVAILABLE',
+              description: description || 'Professional license for trading operations'
+            });
+          }
+        }
 
         setCategories(categoryList);
         setLastUpdated(new Date());
@@ -130,7 +143,7 @@ const UnifiedApplicationForm = () => {
         email: formData.email,
         phone: formData.phone,
         company: formData.company,
-        category: formData.category,
+        category: selectedCategory.name,
         notes: formData.notes,
         payment_method: formData.paymentMethod,
         transaction_id: formData.transactionId,
@@ -291,7 +304,7 @@ const UnifiedApplicationForm = () => {
                           variant={category.available ? "default" : "destructive"}
                           className="text-xs ml-2 flex-shrink-0"
                         >
-                          {!category.available ? "SOLD OUT" : category.status}
+                          {category.status}
                         </Badge>
                       </div>
                       <p className="text-xl font-bold text-primary mb-1">{category.price}</p>
