@@ -5,10 +5,10 @@ import { Loader2 } from "lucide-react";
 
 interface SupabaseProtectedRouteProps {
   children: React.ReactNode;
-  requireAdmin?: boolean;
+  requiredRole?: string;
 }
 
-const SupabaseProtectedRoute = ({ children, requireAdmin = false }: SupabaseProtectedRouteProps) => {
+const SupabaseProtectedRoute = ({ children, requiredRole }: SupabaseProtectedRouteProps) => {
   const { isAuthenticated, isAdmin, isLoading } = useSupabaseAuth();
   const location = useLocation();
 
@@ -29,7 +29,7 @@ const SupabaseProtectedRoute = ({ children, requireAdmin = false }: SupabaseProt
     return <Navigate to="/setup" state={{ from: location }} replace />;
   }
 
-  if (requireAdmin && !isAdmin) {
+  if (requiredRole === "admin" && !isAdmin) {
     // Redirect to setup page to become admin
     return <Navigate to="/setup" state={{ from: location }} replace />;
   }

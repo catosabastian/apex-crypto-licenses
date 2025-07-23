@@ -1,14 +1,18 @@
 
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useApplicationDialog } from '@/components/ApplicationDialog';
 import { Button } from '@/components/ui/button';
+import { Shield } from 'lucide-react';
 import Logo from './header/Logo';
 import DesktopNav from './header/DesktopNav';
 import MobileNav from './header/MobileNav';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { openApplicationDialog } = useApplicationDialog();
+  const { isAdmin } = useSupabaseAuth();
   
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -31,6 +35,16 @@ const Header = () => {
         
         <div className="flex items-center gap-4">
           <DesktopNav scrollToSection={scrollToSection} />
+          
+          {/* Admin Button */}
+          {isAdmin && (
+            <Button asChild variant="outline" size="sm" className="hidden md:flex">
+              <Link to="/admin" className="flex items-center gap-2">
+                <Shield className="h-4 w-4" />
+                Admin
+              </Link>
+            </Button>
+          )}
           
           {/* Desktop Start Application Button */}
           <Button 
