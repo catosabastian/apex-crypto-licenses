@@ -1,10 +1,42 @@
 
 import emailjs from 'emailjs-com';
+import { supabase } from '@/integrations/supabase/client';
 
-// EmailJS configuration
-const SERVICE_ID = "service_c4j7pma"; // Your EmailJS service ID
-const TEMPLATE_ID = "template_notification"; // Your EmailJS template ID
-const USER_ID = "WgE_CtN7sU876wEGJ"; // Your EmailJS user ID
+// Fallback configuration for when database is unavailable
+const FALLBACK_CONFIG = {
+  SERVICE_ID: "service_c4j7pma",
+  TEMPLATE_ID: "template_notification", 
+  USER_ID: "WgE_CtN7sU876wEGJ"
+};
+
+/**
+ * Gets active EmailJS configuration from database or fallback
+ */
+const getEmailJSConfig = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('emailjs_settings')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (error || !data) {
+      console.warn('No active EmailJS configuration found in database, using fallback');
+      return FALLBACK_CONFIG;
+    }
+
+    return {
+      SERVICE_ID: data.service_id,
+      TEMPLATE_ID: data.template_id,
+      USER_ID: data.user_id
+    };
+  } catch (error) {
+    console.error('Error fetching EmailJS configuration:', error);
+    return FALLBACK_CONFIG;
+  }
+};
 
 /**
  * Sends an email notification to the administrator when a new license application is submitted
@@ -17,9 +49,11 @@ export const sendAdminNotification = async (
   adminEmail: string
 ): Promise<boolean> => {
   try {
-    // Validate required EmailJS configuration
-    if (!SERVICE_ID || !TEMPLATE_ID || !USER_ID) {
-      console.error("Missing EmailJS configuration. Please check your credentials.");
+    // Get EmailJS configuration from database
+    const config = await getEmailJSConfig();
+    
+    if (!config.SERVICE_ID || !config.TEMPLATE_ID || !config.USER_ID) {
+      console.error("Missing EmailJS configuration. Please check your settings in the admin panel.");
       return false;
     }
 
@@ -43,7 +77,7 @@ export const sendAdminNotification = async (
 
     // Prepare email parameters that match exactly what's expected in the template
     const templateParams = {
-      to_name: "Admin", // Added for template compatibility
+      to_name: "Admin",
       to_email: adminEmail,
       admin_email: adminEmail,
       applicant_name: formData.applicantType === 'individual' ? 
@@ -61,17 +95,22 @@ export const sendAdminNotification = async (
       reply_to: formData.email || formData.businessEmail || adminEmail,
       message: `A new license application has been submitted by ${formData.applicantType === 'individual' ? 
         `${formData.firstName} ${formData.lastName}` : 
-        formData.companyName}. Please review the details.`, // Added for template compatibility
+        formData.companyName}. Please review the details.`,
     };
 
     console.log("Sending email notification with parameters:", templateParams);
+    console.log("Using EmailJS configuration:", { 
+      serviceId: config.SERVICE_ID, 
+      templateId: config.TEMPLATE_ID,
+      userId: config.USER_ID 
+    });
     
     // Send the email with EmailJS
     const response = await emailjs.send(
-      SERVICE_ID,
-      TEMPLATE_ID,
+      config.SERVICE_ID,
+      config.TEMPLATE_ID,
       templateParams,
-      USER_ID
+      config.USER_ID
     );
 
     console.log("Email notification sent successfully:", response);

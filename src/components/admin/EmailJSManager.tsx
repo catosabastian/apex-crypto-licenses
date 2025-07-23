@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -5,17 +6,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
-import { Loader2, Save, TestTube } from 'lucide-react';
-
-interface EmailJSSettings {
-  id: string;
-  service_id: string;
-  template_id: string;
-  user_id: string;
-  template_name: string;
-  is_active: boolean;
-}
+import { supabaseDataManager, EmailJSSettings } from '@/utils/supabaseDataManager';
+import { Loader2, Save, TestTube, Trash2, RefreshCw } from 'lucide-react';
 
 export const EmailJSManager: React.FC = () => {
   const [settings, setSettings] = useState<EmailJSSettings[]>([]);
@@ -35,18 +27,9 @@ export const EmailJSManager: React.FC = () => {
 
   const fetchSettings = async () => {
     try {
-      const { data, error } = await supabase
-        .from('emailjs_settings')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching EmailJS settings:', error);
-        toast.error('Failed to load EmailJS settings');
-        return;
-      }
-
-      setSettings(data || []);
+      setLoading(true);
+      const data = await supabaseDataManager.getEmailJSSettings();
+      setSettings(data);
     } catch (error) {
       console.error('Error fetching EmailJS settings:', error);
       toast.error('Failed to load EmailJS settings');
@@ -63,25 +46,21 @@ export const EmailJSManager: React.FC = () => {
 
     setSaving(true);
     try {
-      const { error } = await supabase
-        .from('emailjs_settings')
-        .insert([newSettings]);
+      const result = await supabaseDataManager.createEmailJSSettings(newSettings);
 
-      if (error) {
-        console.error('Error saving EmailJS settings:', error);
+      if (result) {
+        toast.success('EmailJS settings saved successfully');
+        setNewSettings({
+          service_id: '',
+          template_id: '',
+          user_id: '',
+          template_name: 'default',
+          is_active: true
+        });
+        await fetchSettings();
+      } else {
         toast.error('Failed to save EmailJS settings');
-        return;
       }
-
-      toast.success('EmailJS settings saved successfully');
-      setNewSettings({
-        service_id: '',
-        template_id: '',
-        user_id: '',
-        template_name: 'default',
-        is_active: true
-      });
-      await fetchSettings();
     } catch (error) {
       console.error('Error saving EmailJS settings:', error);
       toast.error('Failed to save EmailJS settings');
@@ -92,19 +71,14 @@ export const EmailJSManager: React.FC = () => {
 
   const updateSettings = async (id: string, updates: Partial<EmailJSSettings>) => {
     try {
-      const { error } = await supabase
-        .from('emailjs_settings')
-        .update(updates)
-        .eq('id', id);
+      const success = await supabaseDataManager.updateEmailJSSettings(id, updates);
 
-      if (error) {
-        console.error('Error updating EmailJS settings:', error);
+      if (success) {
+        toast.success('EmailJS settings updated successfully');
+        await fetchSettings();
+      } else {
         toast.error('Failed to update EmailJS settings');
-        return;
       }
-
-      toast.success('EmailJS settings updated successfully');
-      await fetchSettings();
     } catch (error) {
       console.error('Error updating EmailJS settings:', error);
       toast.error('Failed to update EmailJS settings');
@@ -113,19 +87,14 @@ export const EmailJSManager: React.FC = () => {
 
   const deleteSettings = async (id: string) => {
     try {
-      const { error } = await supabase
-        .from('emailjs_settings')
-        .delete()
-        .eq('id', id);
+      const success = await supabaseDataManager.deleteEmailJSSettings(id);
 
-      if (error) {
-        console.error('Error deleting EmailJS settings:', error);
+      if (success) {
+        toast.success('EmailJS settings deleted successfully');
+        await fetchSettings();
+      } else {
         toast.error('Failed to delete EmailJS settings');
-        return;
       }
-
-      toast.success('EmailJS settings deleted successfully');
-      await fetchSettings();
     } catch (error) {
       console.error('Error deleting EmailJS settings:', error);
       toast.error('Failed to delete EmailJS settings');
@@ -152,6 +121,17 @@ export const EmailJSManager: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-semibold">EmailJS Configuration</h2>
+          <p className="text-muted-foreground">Manage EmailJS settings for email notifications</p>
+        </div>
+        <Button onClick={fetchSettings} variant="outline">
+          <RefreshCw className="h-4 w-4 mr-2" />
+          Refresh
+        </Button>
+      </div>
+
       <Card>
         <CardHeader>
           <CardTitle>Add New EmailJS Configuration</CardTitle>
@@ -258,6 +238,7 @@ export const EmailJSManager: React.FC = () => {
                         size="sm"
                         onClick={() => deleteSettings(setting.id)}
                       >
+                        <Trash2 className="h-4 w-4 mr-2" />
                         Delete
                       </Button>
                     </div>

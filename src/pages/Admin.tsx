@@ -15,6 +15,8 @@ import WebsiteSettingsManager from '@/components/admin/WebsiteSettingsManager';
 import SEOSettingsManager from '@/components/admin/SEOSettingsManager';
 import PlanValidityManager from '@/components/admin/PlanValidityManager';
 import AuditLogViewer from '@/components/admin/AuditLogViewer';
+import { ContactSettingsManager } from '@/components/admin/ContactSettingsManager';
+import EmailJSManager from '@/components/admin/EmailJSManager';
 import { LogOut, Shield } from 'lucide-react';
 
 const Admin = () => {
@@ -50,7 +52,7 @@ const Admin = () => {
 
       <div className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-9">
+          <TabsList className="grid w-full grid-cols-5 lg:grid-cols-10">
             <TabsTrigger value="applications">Apps</TabsTrigger>
             <TabsTrigger value="contacts">Contacts</TabsTrigger>
             <TabsTrigger value="licenses">Licenses</TabsTrigger>
@@ -59,6 +61,7 @@ const Admin = () => {
             <TabsTrigger value="content">Content</TabsTrigger>
             <TabsTrigger value="website">Website</TabsTrigger>
             <TabsTrigger value="seo">SEO</TabsTrigger>
+            <TabsTrigger value="emailjs">EmailJS</TabsTrigger>
             <TabsTrigger value="audit">Audit</TabsTrigger>
           </TabsList>
 
@@ -76,6 +79,7 @@ const Admin = () => {
 
           <TabsContent value="settings" className="space-y-6">
             <SettingsManager />
+            <ContactSettingsManager />
           </TabsContent>
 
           <TabsContent value="payments" className="space-y-6">
@@ -93,6 +97,10 @@ const Admin = () => {
 
           <TabsContent value="seo" className="space-y-6">
             <SEOSettingsManager />
+          </TabsContent>
+
+          <TabsContent value="emailjs" className="space-y-6">
+            <EmailJSManager />
           </TabsContent>
 
           <TabsContent value="audit" className="space-y-6">

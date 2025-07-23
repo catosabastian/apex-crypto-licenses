@@ -64,6 +64,17 @@ export interface Setting {
   updated_at: string;
 }
 
+export interface EmailJSSettings {
+  id: string;
+  service_id: string;
+  template_id: string;
+  user_id: string;
+  template_name: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 class SupabaseDataManager {
   private eventListeners: { [key: string]: Function[] } = {};
 
@@ -209,6 +220,42 @@ class SupabaseDataManager {
     }
   }
 
+  async createApplication(application: Omit<Application, 'id' | 'created_at' | 'updated_at'>): Promise<Application | null> {
+    try {
+      const { data, error } = await supabase
+        .from('applications')
+        .insert([{
+          ...application,
+          documents: application.documents || []
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating application:', error);
+        return null;
+      }
+
+      const updatedApplications = await this.getApplications();
+      this.emit('applications_updated', updatedApplications);
+
+      return {
+        ...data,
+        status: data.status as 'pending' | 'processing' | 'approved' | 'rejected',
+        documents: Array.isArray(data.documents) ? data.documents : [],
+        phone: data.phone || '',
+        company: data.company || '',
+        amount: data.amount || '',
+        payment_method: data.payment_method || '',
+        transaction_id: data.transaction_id || '',
+        notes: data.notes || ''
+      };
+    } catch (error) {
+      console.error('Error creating application:', error);
+      return null;
+    }
+  }
+
   // Contact management
   async getContacts(): Promise<Contact[]> {
     try {
@@ -286,7 +333,6 @@ class SupabaseDataManager {
 
       if (error) {
         console.error('Error fetching payment addresses:', error);
-        // Return default addresses if none exist
         return this.getDefaultPaymentAddresses();
       }
 
@@ -462,42 +508,6 @@ class SupabaseDataManager {
     }
   }
 
-  async createApplication(application: Omit<Application, 'id' | 'created_at' | 'updated_at'>): Promise<Application | null> {
-    try {
-      const { data, error } = await supabase
-        .from('applications')
-        .insert([{
-          ...application,
-          documents: application.documents || []
-        }])
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error creating application:', error);
-        return null;
-      }
-
-      const updatedApplications = await this.getApplications();
-      this.emit('applications_updated', updatedApplications);
-
-      return {
-        ...data,
-        status: data.status as 'pending' | 'processing' | 'approved' | 'rejected',
-        documents: Array.isArray(data.documents) ? data.documents : [],
-        phone: data.phone || '',
-        company: data.company || '',
-        amount: data.amount || '',
-        payment_method: data.payment_method || '',
-        transaction_id: data.transaction_id || '',
-        notes: data.notes || ''
-      };
-    } catch (error) {
-      console.error('Error creating application:', error);
-      return null;
-    }
-  }
-
   async verifyLicense(licenseId: string): Promise<License | null> {
     try {
       const { data, error } = await supabase
@@ -540,6 +550,93 @@ class SupabaseDataManager {
     } catch (error) {
       console.error('Error exporting data:', error);
       return null;
+    }
+  }
+
+  // EmailJS Settings management
+  async getEmailJSSettings(): Promise<EmailJSSettings[]> {
+    try {
+      const { data, error } = await supabase
+        .from('emailjs_settings')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching EmailJS settings:', error);
+        return [];
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Error fetching EmailJS settings:', error);
+      return [];
+    }
+  }
+
+  async createEmailJSSettings(settings: Omit<EmailJSSettings, 'id' | 'created_at' | 'updated_at'>): Promise<EmailJSSettings | null> {
+    try {
+      const { data, error } = await supabase
+        .from('emailjs_settings')
+        .insert([settings])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating EmailJS settings:', error);
+        return null;
+      }
+
+      const updatedSettings = await this.getEmailJSSettings();
+      this.emit('emailjs_settings_updated', updatedSettings);
+
+      return data;
+    } catch (error) {
+      console.error('Error creating EmailJS settings:', error);
+      return null;
+    }
+  }
+
+  async updateEmailJSSettings(id: string, updates: Partial<EmailJSSettings>): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('emailjs_settings')
+        .update(updates)
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error updating EmailJS settings:', error);
+        return false;
+      }
+
+      const updatedSettings = await this.getEmailJSSettings();
+      this.emit('emailjs_settings_updated', updatedSettings);
+
+      return true;
+    } catch (error) {
+      console.error('Error updating EmailJS settings:', error);
+      return false;
+    }
+  }
+
+  async deleteEmailJSSettings(id: string): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('emailjs_settings')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error deleting EmailJS settings:', error);
+        return false;
+      }
+
+      const updatedSettings = await this.getEmailJSSettings();
+      this.emit('emailjs_settings_updated', updatedSettings);
+
+      return true;
+    } catch (error) {
+      console.error('Error deleting EmailJS settings:', error);
+      return false;
     }
   }
 
