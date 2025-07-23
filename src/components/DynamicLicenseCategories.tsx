@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -29,17 +28,72 @@ const DynamicLicenseCategories = () => {
   const [lastUpdateTime, setLastUpdateTime] = useState<Date>(new Date());
   const [isConnected, setIsConnected] = useState(true);
   const [isSupportDialogOpen, setSupportDialogOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { openApplicationDialog } = useApplicationDialog();
+
+  // Default categories as fallback
+  const defaultCategories: LicenseCategory[] = [
+    {
+      id: 1,
+      name: 'Basic Trader',
+      price: '$2,500',
+      description: 'Individual trader verification with basic compliance',
+      status: 'AVAILABLE',
+      available: true,
+      type: 'trading',
+      icon: Shield,
+      features: ['Basic trading access', 'Email support', 'Standard documentation', '1-year validity'],
+      minVolume: '$50,000',
+      popular: false,
+      exclusive: false
+    },
+    {
+      id: 2,
+      name: 'Professional Trader',
+      price: '$5,000',
+      description: 'Enhanced verification with advanced compliance',
+      status: 'RECOMMENDED',
+      available: true,
+      type: 'trading',
+      icon: Crown,
+      features: ['Institutional access', 'Custom integrations', 'Premium support', '1-year validity'],
+      minVolume: '$500,000',
+      popular: true,
+      exclusive: false
+    },
+    {
+      id: 3,
+      name: 'Crypto Exchange',
+      price: '$15,000',
+      description: 'Cryptocurrency exchange licensing',
+      status: 'AVAILABLE',
+      available: true,
+      type: 'crypto',
+      icon: Shield,
+      features: ['Exchange operations', 'Multi-currency support', 'KYC/AML compliance', '1-year validity'],
+      minVolume: 'Variable',
+      popular: false,
+      exclusive: false
+    }
+  ];
 
   useEffect(() => {
     const loadCategories = async () => {
       try {
         setIsLoading(true);
-        const settings = await supabaseDataManager.getSettings();
+        setError(null);
+        
+        // Add timeout to prevent infinite loading
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Loading timeout')), 5000)
+        );
+        
+        const settingsPromise = supabaseDataManager.getSettings();
+        const settings = await Promise.race([settingsPromise, timeoutPromise]) as Record<string, any>;
         
         const categoryData: LicenseCategory[] = [];
         
-        // Define category types and icons with enhanced details
+        // Define category types with enhanced details
         const categoryTypes = {
           1: { 
             type: 'trading' as const, 
@@ -88,61 +142,14 @@ const DynamicLicenseCategories = () => {
             minVolume: '$2,500,000+',
             popular: false,
             exclusive: true
-          },
-          7: { 
-            type: 'crypto' as const, 
-            icon: Shield, 
-            features: ['Wallet operations', 'Security compliance', 'Multi-currency support', '1-year validity'],
-            minVolume: 'Variable',
-            popular: false,
-            exclusive: false
-          },
-          8: { 
-            type: 'fintech' as const, 
-            icon: Briefcase, 
-            features: ['Electronic money services', 'Payment processing', 'EU compliance', '1-year validity'],
-            minVolume: 'Variable',
-            popular: false,
-            exclusive: false
-          },
-          9: { 
-            type: 'fintech' as const, 
-            icon: Briefcase, 
-            features: ['Money service provider', 'Remittance services', 'Global operations', '1-year validity'],
-            minVolume: 'Variable',
-            popular: false,
-            exclusive: false
-          },
-          10: { 
-            type: 'gambling' as const, 
-            icon: Gamepad2, 
-            features: ['Online gambling', 'Gaming compliance', 'Player protection', '1-year validity'],
-            minVolume: 'Variable',
-            popular: false,
-            exclusive: false
-          },
-          11: { 
-            type: 'gambling' as const, 
-            icon: Gamepad2, 
-            features: ['Lottery operations', 'Prize distribution', 'Regulatory compliance', '1-year validity'],
-            minVolume: 'Variable',
-            popular: false,
-            exclusive: false
-          },
-          12: { 
-            type: 'corporate' as const, 
-            icon: Building, 
-            features: ['Offshore incorporation', 'Tax optimization', 'Privacy protection', '1-year validity'],
-            minVolume: 'Variable',
-            popular: false,
-            exclusive: false
           }
         };
 
-        for (let i = 1; i <= 12; i++) {
-          const name = settings[`category${i}_name`] || `Category ${i}`;
-          const price = settings[`category${i}_price`] || '$0';
-          const description = settings[`category${i}_description`] || 'Professional license category';
+        // Only create categories 1-6 for now
+        for (let i = 1; i <= 6; i++) {
+          const name = settings[`category${i}_name`] || defaultCategories.find(c => c.id === i)?.name || `Category ${i}`;
+          const price = settings[`category${i}_price`] || defaultCategories.find(c => c.id === i)?.price || '$0';
+          const description = settings[`category${i}_description`] || defaultCategories.find(c => c.id === i)?.description || 'Professional license category';
           const status = settings[`category${i}_status`] || 'AVAILABLE';
           const available = settings[`category${i}_available`] !== false;
           
@@ -164,14 +171,15 @@ const DynamicLicenseCategories = () => {
           });
         }
         
-        console.log('DynamicLicenseCategories: Settings loaded:', settings);
-        console.log('DynamicLicenseCategories: Category data created:', categoryData);
         setCategories(categoryData);
         setLastUpdateTime(new Date());
         setIsConnected(true);
       } catch (error) {
         console.error('Error loading license categories:', error);
+        setError('Failed to load license categories');
         setIsConnected(false);
+        // Use default categories as fallback
+        setCategories(defaultCategories);
       } finally {
         setIsLoading(false);
       }
@@ -213,12 +221,12 @@ const DynamicLicenseCategories = () => {
 
   if (isLoading) {
     return (
-      <section id="licenses" className="py-24 bg-muted/20">
+      <section id="dynamic-licenses" className="py-12 bg-muted/10">
         <div className="container">
           <div className="max-w-7xl mx-auto">
-            <div className="flex items-center justify-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              <span className="ml-3 text-lg">Loading license categories...</span>
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-primary mr-2" />
+              <span className="text-sm">Loading additional categories...</span>
             </div>
           </div>
         </div>
@@ -227,38 +235,28 @@ const DynamicLicenseCategories = () => {
   }
 
   return (
-    <section id="licenses" className="py-24 bg-muted/20">
+    <section id="dynamic-licenses" className="py-12 bg-muted/10">
       <div className="container">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center gap-3 mb-6">
             <div className="h-1 w-16 bg-gradient-to-r from-primary to-accent rounded-full"></div>
-            <span className="text-sm text-muted-foreground uppercase tracking-wider font-semibold">License Categories</span>
+            <span className="text-sm text-muted-foreground uppercase tracking-wider font-semibold">Additional Categories</span>
             <div className="flex items-center gap-2 ml-auto">
               <Wifi className={`h-4 w-4 ${isConnected ? 'text-green-500' : 'text-red-500'}`} />
               <span className={`text-xs ${isConnected ? 'text-green-600' : 'text-red-600'}`}>
-                {isConnected ? 'Live Updates' : 'Disconnected'}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                {lastUpdateTime.toLocaleTimeString()}
+                {isConnected ? 'Connected' : 'Offline'}
               </span>
             </div>
           </div>
-          
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
-            <div>
-              <h2 className="text-4xl md:text-5xl font-bold mb-4">
-                Comprehensive Licensing
-                <span className="block gradient-text">Solutions</span>
-              </h2>
-              <p className="text-xl text-muted-foreground max-w-2xl leading-relaxed">
-                Choose from our specialized license categories, each designed to meet different trading volumes and regulatory requirements.
-              </p>
+
+          {error && (
+            <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-sm text-yellow-800">{error}. Showing default categories.</p>
             </div>
-          </div>
+          )}
           
-          {/* Main License Categories - Show first 6 in 3x2 grid */}
-          <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-8 mb-12">
-            {categories.slice(0, 6).map((category) => (
+          <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-6">
+            {categories.map((category) => (
               <LicenseCategory 
                 key={category.id}
                 category={category}
@@ -266,69 +264,6 @@ const DynamicLicenseCategories = () => {
               />
             ))}
           </div>
-
-          {/* Additional Categories */}
-          {categories.length > 6 && (
-            <div className="mb-12">
-              <h3 className="text-2xl font-bold mb-6 text-center">Additional License Categories</h3>
-              <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-6">
-                {categories.slice(6).map((category) => (
-                  <LicenseCategory 
-                    key={category.id}
-                    category={category}
-                    onApplyClick={category.available && category.status !== 'SOLD OUT' ? openApplicationDialog : undefined}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-          
-          {/* Enterprise Solution */}
-          <Card className="border-2 border-accent/30 shadow-xl">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-3 text-2xl">
-                <MessageSquareText className="h-6 w-6 text-accent" />
-                Enterprise Solution
-              </CardTitle>
-              <CardDescription className="text-lg">
-                Tailored licensing solutions for large corporations and institutional clients requiring customized regulatory frameworks
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-2 gap-8">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span className="font-medium">Corporate entity verification</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span className="font-medium">Custom compliance framework</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span className="font-medium">Dedicated legal advisors</span>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span className="font-medium">Global regulatory coordination</span>
-                  </div>
-                </div>
-                <div className="flex items-center justify-center">
-                  <Button 
-                    size="lg"
-                    variant="outline" 
-                    className="gap-3 border-2 border-accent/30 hover:bg-accent/10 px-8 py-6" 
-                    onClick={() => setSupportDialogOpen(true)}
-                  >
-                    <MessageSquareText className="h-5 w-5" />
-                    Contact Enterprise Team
-                    <ChevronRight className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
           
           <SupportDialog open={isSupportDialogOpen} onOpenChange={setSupportDialogOpen} />
         </div>

@@ -1,4 +1,3 @@
-
 import { Globe, MessageSquare, ShieldCheck } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
@@ -11,7 +10,7 @@ const Footer = () => {
   const [settings, setSettings] = useState<Record<string, any>>({});
   const [isLoading, setIsLoading] = useState(true);
   
-  // Default values for fallback
+  // Default values for immediate display
   const defaults = {
     companyName: "CryptoLicense Pro",
     supportEmail: "support@cryptolicensepro.com",
@@ -25,21 +24,26 @@ const Footer = () => {
   useEffect(() => {
     const loadSettings = async () => {
       try {
-        console.log('[Footer] Loading contact settings...');
-        const loadedSettings = await supabaseDataManager.getSettings();
-        console.log('[Footer] Contact settings loaded:', loadedSettings);
+        // Start with defaults for immediate display
+        setSettings(defaults);
+        setIsLoading(false);
         
-        // Merge with defaults, preferring loaded settings
+        // Then try to load from database with timeout
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Settings loading timeout')), 3000)
+        );
+        
+        const settingsPromise = supabaseDataManager.getSettings();
+        const loadedSettings = await Promise.race([settingsPromise, timeoutPromise]) as Record<string, any>;
+        
+        // Merge with defaults
         setSettings(prev => ({
-          ...defaults,
+          ...prev,
           ...loadedSettings
         }));
       } catch (error) {
         console.error('[Footer] Error loading contact settings:', error);
-        // Use defaults if loading fails
-        setSettings(defaults);
-      } finally {
-        setIsLoading(false);
+        // Keep using defaults if loading fails
       }
     };
 
@@ -47,10 +51,8 @@ const Footer = () => {
 
     // Listen for settings updates
     const handleSettingsUpdate = (data: any) => {
-      console.log('[Footer] Contact settings updated:', data);
       if (data && typeof data === 'object') {
         setSettings(prev => ({
-          ...defaults,
           ...prev,
           ...data
         }));
@@ -68,19 +70,6 @@ const Footer = () => {
   const getSetting = (key: string) => {
     return settings[key] || defaults[key as keyof typeof defaults] || '';
   };
-
-  if (isLoading) {
-    return (
-      <footer className="bg-primary text-primary-foreground vibrant-glow">
-        <div className="container py-12">
-          <div className="flex items-center justify-center">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-foreground"></div>
-            <span className="ml-2 text-sm opacity-80">Loading...</span>
-          </div>
-        </div>
-      </footer>
-    );
-  }
   
   return (
     <footer className="bg-primary text-primary-foreground vibrant-glow">

@@ -4,6 +4,8 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import DynamicHero from '@/components/DynamicHero';
 import DynamicAboutSection from '@/components/DynamicAboutSection';
+import ServicesOverview from '@/components/ServicesOverview';
+import LicenseCategories from '@/components/LicenseCategories';
 import DynamicLicenseCategories from '@/components/DynamicLicenseCategories';
 import DynamicProcessSteps from '@/components/DynamicProcessSteps';
 import StatsSection from '@/components/StatsSection';
@@ -37,6 +39,12 @@ const Index = () => {
           <DynamicAboutSection />
         </div>
         <div id="services">
+          <ServicesOverview />
+        </div>
+        <div id="licenses">
+          <LicenseCategories />
+        </div>
+        <div id="additional-licenses">
           <DynamicLicenseCategories />
         </div>
         <div id="process">
