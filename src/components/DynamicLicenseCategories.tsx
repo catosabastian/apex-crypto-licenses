@@ -180,7 +180,7 @@ const DynamicLicenseCategories = () => {
                   
                   <Button 
                     className="w-full" 
-                    onClick={() => openApplicationDialog(category.id)}
+                    onClick={() => openApplicationDialog()}
                     disabled={isUnavailable}
                   >
                     {isUnavailable ? 'Unavailable' : 'Apply Now'}

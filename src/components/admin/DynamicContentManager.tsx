@@ -156,7 +156,7 @@ export function DynamicContentManager() {
       ...prev,
       [section]: {
         ...prev[section],
-        [field]: prev[section][field as keyof typeof prev[section]].map((item: any, i: number) => 
+        [field]: (prev[section] as any)[field].map((item: any, i: number) => 
           i === index ? { ...item, [itemField]: value } : item
         )
       }
