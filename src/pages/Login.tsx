@@ -1,26 +1,27 @@
 
 import { useState } from "react";
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { ShieldCheck, AlertCircle, User, Key, Activity } from "lucide-react";
-import { useSecureAuth } from "@/contexts/SecureAuthContext";
-import { ConnectionStatus } from "@/components/ConnectionStatus";
+import { ShieldCheck, AlertCircle, User, Key } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loginAttempts, setLoginAttempts] = useState(0);
-  const { isAuthenticated, login, connectionStatus } = useSecureAuth();
+  const { isAuthenticated, login } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   
   // Redirect if already authenticated
   if (isAuthenticated) {
-    return <Navigate to="/admin" replace />;
+    const from = location.state?.from?.pathname || "/admin";
+    return <Navigate to={from} replace />;
   }
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -39,7 +40,10 @@ const Login = () => {
     }
     
     const success = login(username, password);
-    if (!success) {
+    if (success) {
+      const from = location.state?.from?.pathname || "/admin";
+      navigate(from, { replace: true });
+    } else {
       setLoginAttempts(prev => prev + 1);
       setError("Invalid username or password");
       
@@ -56,20 +60,11 @@ const Login = () => {
         <CardHeader className="space-y-1">
           <div className="flex justify-center items-center gap-4 mb-2">
             <ShieldCheck className="h-10 w-10 text-primary" />
-            <ConnectionStatus />
           </div>
-          <CardTitle className="text-2xl font-bold text-center">Secure Admin Login</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">Admin Login</CardTitle>
           <CardDescription className="text-center">
-            Enter your credentials to access the secure admin dashboard
+            Enter your credentials to access the admin dashboard
           </CardDescription>
-          {connectionStatus !== 'connected' && (
-            <Alert className="mt-4">
-              <Activity className="h-4 w-4" />
-              <AlertDescription>
-                Connection status: {connectionStatus}. Some features may be limited.
-              </AlertDescription>
-            </Alert>
-          )}
         </CardHeader>
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
@@ -121,9 +116,9 @@ const Login = () => {
             <Button 
               type="submit" 
               className="w-full" 
-              disabled={loginAttempts >= 3 || connectionStatus === 'disconnected'}
+              disabled={loginAttempts >= 3}
             >
-              {connectionStatus === 'disconnected' ? 'Connection Required' : 'Login'}
+              Login
             </Button>
           </CardFooter>
         </form>
