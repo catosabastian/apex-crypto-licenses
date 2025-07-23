@@ -7,7 +7,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { createClient } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
-import { Shield, Lock, Eye, EyeOff } from 'lucide-react';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { Shield, Lock, Eye, EyeOff, UserPlus } from 'lucide-react';
 
 const Setup = () => {
   const [supabaseUrl, setSupabaseUrl] = useState('');
@@ -17,8 +18,11 @@ const Setup = () => {
   const [showKey, setShowKey] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [adminPassword, setAdminPassword] = useState('');
+  const [adminEmail, setAdminEmail] = useState('');
+  const [showCreateAdmin, setShowCreateAdmin] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { createFirstAdmin, signup, user, isAdmin } = useSupabaseAuth();
 
   useEffect(() => {
     // Check if user is already authenticated
@@ -26,7 +30,12 @@ const Setup = () => {
     if (auth === 'true') {
       setIsAuthenticated(true);
     }
-  }, []);
+
+    // Check if user is already admin via Supabase
+    if (user && isAdmin) {
+      setIsAuthenticated(true);
+    }
+  }, [user, isAdmin]);
 
   const authenticateAdmin = () => {
     // Simple admin authentication - in production, use proper auth
@@ -43,6 +52,58 @@ const Setup = () => {
         description: "Invalid admin password",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleCreateAdminUser = async () => {
+    if (!adminEmail || !adminPassword) {
+      toast({
+        title: "Error",
+        description: "Please enter both email and password",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      
+      // Create the user account
+      const success = await signup(adminEmail, adminPassword);
+      
+      if (success) {
+        // Make them admin
+        const adminSuccess = await createFirstAdmin();
+        
+        if (adminSuccess) {
+          toast({
+            title: "Admin Created Successfully",
+            description: "You are now logged in as admin",
+          });
+          setIsAuthenticated(true);
+        } else {
+          toast({
+            title: "Error",
+            description: "User created but failed to assign admin role",
+            variant: "destructive",
+          });
+        }
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to create admin user",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error creating admin:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create admin user",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -307,25 +368,79 @@ ON CONFLICT (cryptocurrency) DO NOTHING;
             </div>
             <CardTitle className="text-red-600">Restricted Access</CardTitle>
             <CardDescription>
-              This page is restricted to administrators only. Please enter the admin password to continue.
+              This page is restricted to administrators only. You can either use the temporary admin password or create a permanent admin account.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="adminPassword">Admin Password</Label>
-              <Input
-                id="adminPassword"
-                type="password"
-                placeholder="Enter admin password"
-                value={adminPassword}
-                onChange={(e) => setAdminPassword(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && authenticateAdmin()}
-              />
-            </div>
-            <Button onClick={authenticateAdmin} className="w-full">
-              <Shield className="h-4 w-4 mr-2" />
-              Authenticate
-            </Button>
+            {!showCreateAdmin ? (
+              <>
+                <div>
+                  <Label htmlFor="adminPassword">Admin Password</Label>
+                  <Input
+                    id="adminPassword"
+                    type="password"
+                    placeholder="Enter admin password"
+                    value={adminPassword}
+                    onChange={(e) => setAdminPassword(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && authenticateAdmin()}
+                  />
+                </div>
+                <Button onClick={authenticateAdmin} className="w-full">
+                  <Shield className="h-4 w-4 mr-2" />
+                  Authenticate
+                </Button>
+                <div className="text-center">
+                  <Button 
+                    variant="link" 
+                    onClick={() => setShowCreateAdmin(true)}
+                    className="text-primary"
+                  >
+                    <UserPlus className="h-4 w-4 mr-2" />
+                    Create Permanent Admin Account
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div>
+                  <Label htmlFor="adminEmail">Admin Email</Label>
+                  <Input
+                    id="adminEmail"
+                    type="email"
+                    placeholder="admin@yourdomain.com"
+                    value={adminEmail}
+                    onChange={(e) => setAdminEmail(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="adminPassword">Admin Password</Label>
+                  <Input
+                    id="adminPassword"
+                    type="password"
+                    placeholder="Create a secure password"
+                    value={adminPassword}
+                    onChange={(e) => setAdminPassword(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleCreateAdminUser()}
+                  />
+                </div>
+                <Button 
+                  onClick={handleCreateAdminUser} 
+                  className="w-full"
+                  disabled={isLoading}
+                >
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  {isLoading ? 'Creating...' : 'Create Admin Account'}
+                </Button>
+                <div className="text-center">
+                  <Button 
+                    variant="link" 
+                    onClick={() => setShowCreateAdmin(false)}
+                  >
+                    Back to Password Auth
+                  </Button>
+                </div>
+              </>
+            )}
             <div className="text-center">
               <Button variant="link" onClick={() => navigate('/')}>
                 Return to Homepage

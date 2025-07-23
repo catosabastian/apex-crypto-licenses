@@ -465,6 +465,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_first_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       get_admin_users: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -487,6 +491,10 @@ export type Database = {
           created_at: string
         }[]
       }
+      has_admin_users: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _user_id: string
@@ -496,6 +504,10 @@ export type Database = {
       }
       is_admin: {
         Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      setup_admin_user: {
+        Args: { admin_email: string; admin_password: string }
         Returns: boolean
       }
     }

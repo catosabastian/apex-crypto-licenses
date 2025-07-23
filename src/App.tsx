@@ -7,7 +7,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ApplicationDialogProvider } from "@/components/ApplicationDialog";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { SupabaseAuthProvider } from "@/contexts/SupabaseAuthContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import SupabaseProtectedRoute from "@/components/SupabaseProtectedRoute";
+import Setup from "./pages/Setup";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
@@ -34,20 +37,22 @@ const App = () => {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <AuthProvider>
-            <ApplicationDialogProvider>
+          <SupabaseAuthProvider>
+            <AuthProvider>
+              <ApplicationDialogProvider>
               <Toaster />
               <Sonner />
               <BrowserRouter>
                 <Routes>
                   <Route path="/" element={<Index />} />
                   <Route path="/login" element={<Login />} />
+                  <Route path="/setup" element={<Setup />} />
                   <Route 
                     path="/admin" 
                     element={
-                      <ProtectedRoute>
+                      <SupabaseProtectedRoute requireAdmin={true}>
                         <Admin />
-                      </ProtectedRoute>
+                      </SupabaseProtectedRoute>
                     } 
                   />
                   <Route 
@@ -65,8 +70,9 @@ const App = () => {
                   <Route path="/verify" element={<VerifyPage />} />
                 </Routes>
               </BrowserRouter>
-            </ApplicationDialogProvider>
-          </AuthProvider>
+              </ApplicationDialogProvider>
+            </AuthProvider>
+          </SupabaseAuthProvider>
         </TooltipProvider>
       </QueryClientProvider>
     </ErrorBoundary>
