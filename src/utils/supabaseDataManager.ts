@@ -74,6 +74,27 @@ export interface ContentItem {
   updated_at: string;
 }
 
+export interface WebsiteSettings {
+  id: string;
+  site_name: string;
+  site_description: string;
+  logo_url: string;
+  featured_image_url: string | null;
+  favicon_url: string;
+  contact_email: string;
+  contact_phone: string;
+  contact_address: string | null;
+  social_facebook: string | null;
+  social_twitter: string | null;
+  social_linkedin: string | null;
+  social_instagram: string | null;
+  maintenance_mode: boolean;
+  announcement_text: string | null;
+  announcement_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 class SupabaseDataManager {
   private eventListeners: { [key: string]: Function[] } = {};
   private dataSubjects = {
@@ -82,7 +103,8 @@ class SupabaseDataManager {
     paymentAddresses: new BehaviorSubject<PaymentAddress[]>([]),
     settings: new BehaviorSubject<Setting[]>([]),
     contacts: new BehaviorSubject<Contact[]>([]),
-    content: new BehaviorSubject<ContentItem[]>([])
+    content: new BehaviorSubject<ContentItem[]>([]),
+    websiteSettings: new BehaviorSubject<WebsiteSettings | null>(null)
   };
   private isInitialized = false;
   private initializationPromise: Promise<void> | null = null;
@@ -229,6 +251,25 @@ class SupabaseDataManager {
     } catch (error) {
       console.error(`Error loading ${table}:`, error);
       throw error;
+    }
+  }
+
+  private async loadWebsiteSettings() {
+    try {
+      const { data, error } = await supabase
+        .from('website_settings')
+        .select('*')
+        .single();
+
+      if (error) {
+        console.error('Error loading website settings:', error);
+        this.dataSubjects.websiteSettings.next(null);
+      } else {
+        this.dataSubjects.websiteSettings.next(data);
+      }
+    } catch (error) {
+      console.error('Error loading website settings:', error);
+      this.dataSubjects.websiteSettings.next(null);
     }
   }
 

@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          ip_address: unknown | null
+          new_data: Json | null
+          old_data: Json | null
+          record_id: string | null
+          table_name: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          new_data?: Json | null
+          old_data?: Json | null
+          record_id?: string | null
+          table_name: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown | null
+          new_data?: Json | null
+          old_data?: Json | null
+          record_id?: string | null
+          table_name?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       applications: {
         Row: {
           amount: string | null
@@ -205,6 +244,105 @@ export type Database = {
         }
         Relationships: []
       }
+      plan_validity_settings: {
+        Row: {
+          auto_renewal_enabled: boolean | null
+          created_at: string
+          grace_period_days: number
+          id: string
+          license_type: string
+          price_per_period: number | null
+          renewal_reminder_days: number
+          updated_at: string
+          validity_period_months: number
+        }
+        Insert: {
+          auto_renewal_enabled?: boolean | null
+          created_at?: string
+          grace_period_days?: number
+          id?: string
+          license_type: string
+          price_per_period?: number | null
+          renewal_reminder_days?: number
+          updated_at?: string
+          validity_period_months?: number
+        }
+        Update: {
+          auto_renewal_enabled?: boolean | null
+          created_at?: string
+          grace_period_days?: number
+          id?: string
+          license_type?: string
+          price_per_period?: number | null
+          renewal_reminder_days?: number
+          updated_at?: string
+          validity_period_months?: number
+        }
+        Relationships: []
+      }
+      seo_settings: {
+        Row: {
+          canonical_url: string | null
+          created_at: string
+          description: string
+          id: string
+          keywords: string | null
+          og_description: string | null
+          og_image: string | null
+          og_title: string | null
+          og_type: string | null
+          page_path: string
+          robots: string | null
+          schema_markup: Json | null
+          title: string
+          twitter_card: string | null
+          twitter_description: string | null
+          twitter_image: string | null
+          twitter_title: string | null
+          updated_at: string
+        }
+        Insert: {
+          canonical_url?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          keywords?: string | null
+          og_description?: string | null
+          og_image?: string | null
+          og_title?: string | null
+          og_type?: string | null
+          page_path: string
+          robots?: string | null
+          schema_markup?: Json | null
+          title: string
+          twitter_card?: string | null
+          twitter_description?: string | null
+          twitter_image?: string | null
+          twitter_title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          canonical_url?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          keywords?: string | null
+          og_description?: string | null
+          og_image?: string | null
+          og_title?: string | null
+          og_type?: string | null
+          page_path?: string
+          robots?: string | null
+          schema_markup?: Json | null
+          title?: string
+          twitter_card?: string | null
+          twitter_description?: string | null
+          twitter_image?: string | null
+          twitter_title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       settings: {
         Row: {
           category: string
@@ -235,6 +373,93 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      website_settings: {
+        Row: {
+          announcement_active: boolean | null
+          announcement_text: string | null
+          contact_address: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string
+          favicon_url: string | null
+          featured_image_url: string | null
+          id: string
+          logo_url: string | null
+          maintenance_mode: boolean | null
+          site_description: string | null
+          site_name: string
+          social_facebook: string | null
+          social_instagram: string | null
+          social_linkedin: string | null
+          social_twitter: string | null
+          updated_at: string
+        }
+        Insert: {
+          announcement_active?: boolean | null
+          announcement_text?: string | null
+          contact_address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          favicon_url?: string | null
+          featured_image_url?: string | null
+          id?: string
+          logo_url?: string | null
+          maintenance_mode?: boolean | null
+          site_description?: string | null
+          site_name?: string
+          social_facebook?: string | null
+          social_instagram?: string | null
+          social_linkedin?: string | null
+          social_twitter?: string | null
+          updated_at?: string
+        }
+        Update: {
+          announcement_active?: boolean | null
+          announcement_text?: string | null
+          contact_address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string
+          favicon_url?: string | null
+          featured_image_url?: string | null
+          id?: string
+          logo_url?: string | null
+          maintenance_mode?: boolean | null
+          site_description?: string | null
+          site_name?: string
+          social_facebook?: string | null
+          social_instagram?: string | null
+          social_linkedin?: string | null
+          social_twitter?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -262,9 +487,20 @@ export type Database = {
           created_at: string
         }[]
       }
+      has_role: {
+        Args: {
+          _user_id: string
+          _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: boolean
+      }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -391,6 +627,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+    },
   },
 } as const
