@@ -10,7 +10,7 @@ import { CheckCircle, Clock, Shield, TrendingUp, Users, Globe, Wallet, Copy, Che
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import QRCode from 'react-qr-code';
-import { supabaseDataManager } from '@/utils/supabaseDataManager';
+import { supabaseDataManager, type LicenseCategory } from '@/utils/supabaseDataManager';
 import { supabase } from '@/integrations/supabase/client';
 import EnhancedPersonalInfoSection from '@/components/form/EnhancedPersonalInfoSection';
 import EnhancedLicenseCategorySection from '@/components/form/EnhancedLicenseCategorySection';
@@ -46,6 +46,7 @@ const EnhancedApplicationForm = () => {
   
   const [settings, setSettings] = useState<any>({});
   const [paymentAddresses, setPaymentAddresses] = useState<any[]>([]);
+  const [licenseCategories, setLicenseCategories] = useState<LicenseCategory[]>([]);
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copiedAddress, setCopiedAddress] = useState<string | null>(null);
@@ -59,35 +60,39 @@ const EnhancedApplicationForm = () => {
   // Load initial data and set up real-time updates
   useEffect(() => {
     const loadData = async () => {
-      const [settingsData, addressesData] = await Promise.all([
+      const [settingsData, addressesData, categoriesData] = await Promise.all([
         supabaseDataManager.getSettings(),
-        supabaseDataManager.getPaymentAddresses()
+        supabaseDataManager.getPaymentAddresses(),
+        supabaseDataManager.getLicenseCategories()
       ]);
       
       setSettings(settingsData);
       setPaymentAddresses(addressesData);
+      setLicenseCategories(categoriesData.sort((a, b) => a.display_order - b.display_order));
     };
 
-    const handleSettingsUpdate = () => {
+    const handleDataUpdate = () => {
       if (!mountedRef.current) return;
       
       loadData();
       setUpdateCount(prev => prev + 1);
       
       toast({
-        title: "Settings Updated",
+        title: "Data Updated",
         description: "Latest pricing and configuration loaded",
       });
     };
 
     loadData();
-    supabaseDataManager.addEventListener('settings_updated', handleSettingsUpdate);
-    supabaseDataManager.addEventListener('payment_addresses_updated', handleSettingsUpdate);
+    supabaseDataManager.addEventListener('settings_updated', handleDataUpdate);
+    supabaseDataManager.addEventListener('payment_addresses_updated', handleDataUpdate);
+    supabaseDataManager.addEventListener('license_categories_updated', handleDataUpdate);
 
     return () => {
       mountedRef.current = false;
-      supabaseDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
-      supabaseDataManager.removeEventListener('payment_addresses_updated', handleSettingsUpdate);
+      supabaseDataManager.removeEventListener('settings_updated', handleDataUpdate);
+      supabaseDataManager.removeEventListener('payment_addresses_updated', handleDataUpdate);
+      supabaseDataManager.removeEventListener('license_categories_updated', handleDataUpdate);
     };
   }, []);
 
@@ -103,68 +108,30 @@ const EnhancedApplicationForm = () => {
     setFormProgress(Math.min(progress, 100));
   }, [formData]);
 
-  const licenseCategories = [
-    {
-      id: '1',
-      name: 'Basic Trader',
-      price: settings.category1Price,
-      available: settings.category1Available,
-      details: settings.category1Details,
-      features: ['Basic trading support', 'Email support', 'Standard processing'],
-      icon: TrendingUp,
-      color: 'bg-blue-50 border-blue-200 text-blue-800'
-    },
-    {
-      id: '2',
-      name: 'Standard Trader', 
-      price: settings.category2Price,
-      available: settings.category2Available,
-      details: settings.category2Details,
-      features: ['Enhanced trading tools', 'Priority support', 'Faster processing'],
-      icon: Users,
-      color: 'bg-green-50 border-green-200 text-green-800'
-    },
-    {
-      id: '3',
-      name: 'Advanced Trader',
-      price: settings.category3Price,
-      available: settings.category3Available,
-      details: settings.category3Details,
-      features: ['Advanced analytics', 'API access', 'Premium support'],
-      icon: Shield,
-      color: 'bg-purple-50 border-purple-200 text-purple-800'
-    },
-    {
-      id: '4',
-      name: 'Professional Trader',
-      price: settings.category4Price,
-      available: settings.category4Available,
-      details: settings.category4Details,
-      features: ['Professional tools', 'Dedicated support', 'Custom solutions'],
-      icon: Globe,
-      color: 'bg-amber-50 border-amber-200 text-amber-800'
-    },
-    {
-      id: '5',
-      name: 'Institutional Trader',
-      price: settings.category5Price,
-      available: settings.category5Available,
-      details: settings.category5Details,
-      features: ['Enterprise features', '24/7 support', 'Custom integration'],
-      icon: CheckCircle,
-      color: 'bg-red-50 border-red-200 text-red-800'
-    },
-    {
-      id: '6',
-      name: 'Executive Trader',
-      price: settings.category6Price,
-      available: settings.category6Available,
-      details: settings.category6Details,
-      features: ['Executive access', 'White-glove service', 'Custom everything'],
-      icon: Clock,
-      color: 'bg-indigo-50 border-indigo-200 text-indigo-800'
-    }
-  ];
+  // Transform database categories to component format
+  const transformedCategories = licenseCategories.map(cat => ({
+    id: cat.id,
+    name: cat.name,
+    price: cat.price,
+    available: cat.available,
+    details: cat.min_volume,
+    features: cat.features,
+    icon: cat.icon === 'TrendingUp' ? TrendingUp :
+          cat.icon === 'Users' ? Users :
+          cat.icon === 'Shield' ? Shield :
+          cat.icon === 'Globe' ? Globe :
+          cat.icon === 'CheckCircle' ? CheckCircle :
+          cat.icon === 'Clock' ? Clock : Shield,
+    color: cat.color === 'blue' ? 'bg-blue-50 border-blue-200 text-blue-800' :
+           cat.color === 'green' ? 'bg-green-50 border-green-200 text-green-800' :
+           cat.color === 'purple' ? 'bg-purple-50 border-purple-200 text-purple-800' :
+           cat.color === 'gold' ? 'bg-amber-50 border-amber-200 text-amber-800' :
+           cat.color === 'platinum' ? 'bg-gray-50 border-gray-200 text-gray-800' :
+           cat.color === 'diamond' ? 'bg-indigo-50 border-indigo-200 text-indigo-800' :
+           'bg-blue-50 border-blue-200 text-blue-800',
+    popular: cat.popular,
+    exclusive: cat.exclusive
+  }));
 
   const paymentOptions = paymentAddresses.map(addr => ({
     id: addr.cryptocurrency,
@@ -238,7 +205,7 @@ const EnhancedApplicationForm = () => {
         return;
       }
 
-      const selectedCategory = licenseCategories.find(cat => cat.id === formData.category);
+      const selectedCategory = transformedCategories.find(cat => cat.id === formData.category);
       
       if (selectedCategory && !selectedCategory.available) {
         toast({
@@ -296,7 +263,7 @@ const EnhancedApplicationForm = () => {
     }
   };
 
-  const selectedCategory = licenseCategories.find(cat => cat.id === formData.category);
+  const selectedCategory = transformedCategories.find(cat => cat.id === formData.category);
   const selectedPayment = paymentOptions.find(opt => opt.id === formData.paymentMethod);
 
   return (
@@ -347,7 +314,7 @@ const EnhancedApplicationForm = () => {
 
         {/* License Categories */}
         <EnhancedLicenseCategorySection
-          categories={licenseCategories}
+          categories={transformedCategories}
           selectedCategory={formData.category}
           onCategorySelect={(categoryId) => handleFieldChange('category', categoryId)}
           settings={settings}

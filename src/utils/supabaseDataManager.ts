@@ -73,6 +73,25 @@ export interface ContentItem {
   updated_at: string;
 }
 
+export interface LicenseCategory {
+  id: string;
+  category_number: number;
+  name: string;
+  price: string;
+  min_volume: string;
+  validity_period_months: number;
+  available: boolean;
+  features: string[];
+  icon: string;
+  color: string;
+  display_order: number;
+  popular: boolean;
+  exclusive: boolean;
+  description?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 class SupabaseDataManager {
   private eventListeners: { [key: string]: Function[] } = {};
   private dataSubjects = {
@@ -81,7 +100,8 @@ class SupabaseDataManager {
     paymentAddresses: new BehaviorSubject<PaymentAddress[]>([]),
     settings: new BehaviorSubject<Setting[]>([]),
     contacts: new BehaviorSubject<Contact[]>([]),
-    content: new BehaviorSubject<ContentItem[]>([])
+    content: new BehaviorSubject<ContentItem[]>([]),
+    licenseCategories: new BehaviorSubject<LicenseCategory[]>([])
   };
 
   constructor() {
@@ -91,7 +111,7 @@ class SupabaseDataManager {
 
   private initializeRealtimeSubscriptions() {
     // Subscribe to real-time changes for all tables
-    const tables = ['applications', 'licenses', 'payment_addresses', 'settings', 'contacts', 'content'];
+    const tables = ['applications', 'licenses', 'payment_addresses', 'settings', 'contacts', 'content', 'license_categories'];
     
     tables.forEach(table => {
       supabase
@@ -110,7 +130,8 @@ class SupabaseDataManager {
       this.loadTableData('payment_addresses'),
       this.loadTableData('settings'),
       this.loadTableData('contacts'),
-      this.loadTableData('content')
+      this.loadTableData('content'),
+      this.loadTableData('license_categories')
     ]);
   }
 
@@ -123,7 +144,9 @@ class SupabaseDataManager {
 
       if (error) throw error;
 
-      const subjectKey = table === 'payment_addresses' ? 'paymentAddresses' : table as keyof typeof this.dataSubjects;
+      const subjectKey = table === 'payment_addresses' ? 'paymentAddresses' : 
+                        table === 'license_categories' ? 'licenseCategories' : 
+                        table as keyof typeof this.dataSubjects;
       this.dataSubjects[subjectKey].next(data || []);
       this.notifyListeners(`${table}_updated`, data);
     } catch (error) {
@@ -405,6 +428,77 @@ class SupabaseDataManager {
     } catch (error) {
       console.error('Error updating license:', error);
       return null;
+    }
+  }
+
+  // License Categories
+  async getLicenseCategories(): Promise<LicenseCategory[]> {
+    return this.dataSubjects.licenseCategories.value;
+  }
+
+  async createLicenseCategory(categoryData: Omit<LicenseCategory, 'id' | 'created_at' | 'updated_at'>): Promise<LicenseCategory | null> {
+    try {
+      const { data, error } = await (supabase as any)
+        .from('license_categories')
+        .insert([categoryData])
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      // Update local data and emit event
+      await this.loadTableData('license_categories');
+      this.notifyListeners('license_categories_updated', data);
+      
+      return data;
+    } catch (error) {
+      console.error('Error creating license category:', error);
+      return null;
+    }
+  }
+
+  async updateLicenseCategory(id: string, updates: Partial<Omit<LicenseCategory, 'id' | 'created_at' | 'updated_at'>>): Promise<LicenseCategory | null> {
+    try {
+      const { data, error } = await (supabase as any)
+        .from('license_categories')
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      // Update local data and emit event
+      await this.loadTableData('license_categories');
+      this.notifyListeners('license_categories_updated', data);
+      
+      return data;
+    } catch (error) {
+      console.error('Error updating license category:', error);
+      return null;
+    }
+  }
+
+  async deleteLicenseCategory(id: string): Promise<boolean> {
+    try {
+      const { error } = await (supabase as any)
+        .from('license_categories')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      // Update local data and emit event
+      await this.loadTableData('license_categories');
+      this.notifyListeners('license_categories_updated', null);
+      
+      return true;
+    } catch (error) {
+      console.error('Error deleting license category:', error);
+      return false;
     }
   }
 

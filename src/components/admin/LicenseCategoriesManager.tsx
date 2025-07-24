@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { Plus, Edit, Trash2, Shield, CheckCircle, Star, Crown, Building, Trophy, Eye, EyeOff } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabaseDataManager } from '@/utils/supabaseDataManager';
 
 interface LicenseCategory {
   id: string;
@@ -94,13 +94,8 @@ const LicenseCategoriesManager = () => {
 
   const loadCategories = async () => {
     try {
-      const { data, error } = await supabase
-        .from('license_categories')
-        .select('*')
-        .order('display_order', { ascending: true });
-
-      if (error) throw error;
-      setCategories((data || []).map(item => ({
+      const data = await supabaseDataManager.getLicenseCategories();
+      setCategories(data.map(item => ({
         ...item,
         features: Array.isArray(item.features) ? item.features.filter(f => typeof f === 'string') as string[] : [],
         color: item.color || 'blue',
@@ -169,20 +164,19 @@ const LicenseCategoriesManager = () => {
       };
 
       if (editingCategory) {
-        const { error } = await supabase
-          .from('license_categories')
-          .update(categoryData)
-          .eq('id', editingCategory.id);
-
-        if (error) throw error;
-        toast.success('License category updated successfully');
+        const result = await supabaseDataManager.updateLicenseCategory(editingCategory.id, categoryData);
+        if (result) {
+          toast.success('License category updated successfully');
+        } else {
+          throw new Error('Failed to update category');
+        }
       } else {
-        const { error } = await supabase
-          .from('license_categories')
-          .insert([categoryData]);
-
-        if (error) throw error;
-        toast.success('License category created successfully');
+        const result = await supabaseDataManager.createLicenseCategory(categoryData);
+        if (result) {
+          toast.success('License category created successfully');
+        } else {
+          throw new Error('Failed to create category');
+        }
       }
 
       setDialogOpen(false);
@@ -197,14 +191,13 @@ const LicenseCategoriesManager = () => {
     if (!confirm(`Are you sure you want to delete "${category.name}"?`)) return;
 
     try {
-      const { error } = await supabase
-        .from('license_categories')
-        .delete()
-        .eq('id', category.id);
-
-      if (error) throw error;
-      toast.success('License category deleted successfully');
-      loadCategories();
+      const result = await supabaseDataManager.deleteLicenseCategory(category.id);
+      if (result) {
+        toast.success('License category deleted successfully');
+        loadCategories();
+      } else {
+        throw new Error('Failed to delete category');
+      }
     } catch (error) {
       console.error('Error deleting category:', error);
       toast.error('Failed to delete license category');
@@ -213,14 +206,15 @@ const LicenseCategoriesManager = () => {
 
   const toggleAvailability = async (category: LicenseCategory) => {
     try {
-      const { error } = await supabase
-        .from('license_categories')
-        .update({ available: !category.available })
-        .eq('id', category.id);
-
-      if (error) throw error;
-      toast.success(`Category ${!category.available ? 'enabled' : 'disabled'} successfully`);
-      loadCategories();
+      const result = await supabaseDataManager.updateLicenseCategory(category.id, { 
+        available: !category.available 
+      });
+      if (result) {
+        toast.success(`Category ${!category.available ? 'enabled' : 'disabled'} successfully`);
+        loadCategories();
+      } else {
+        throw new Error('Failed to update availability');
+      }
     } catch (error) {
       console.error('Error toggling availability:', error);
       toast.error('Failed to update category availability');
