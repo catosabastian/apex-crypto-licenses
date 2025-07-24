@@ -21,21 +21,21 @@ const Footer = () => {
   useEffect(() => {
     const loadSettings = async () => {
       try {
-        const { data: websiteSettings } = await supabase
-          .from('website_settings')
-          .select('*')
-          .single();
+        // const { data: websiteSettings } = await supabase
+        //   .from('website_settings')
+        //   .select('*')
+        //   .single();
 
-        if (websiteSettings) {
-          setSettings(prev => ({
-            ...prev,
-            companyName: websiteSettings.site_name || prev.companyName,
-            supportEmail: websiteSettings.contact_email || prev.supportEmail,
-            contactPhone: websiteSettings.contact_phone || prev.contactPhone,
-            companyAddress: websiteSettings.contact_address?.split(',')[0] || prev.companyAddress,
-            city: websiteSettings.contact_address?.split(',')[1]?.trim() || prev.city,
-          }));
-        }
+        // if (websiteSettings) {
+        //   setSettings(prev => ({
+        //     ...prev,
+        //     companyName: websiteSettings.site_name || prev.companyName,
+        //     supportEmail: websiteSettings.contact_email || prev.supportEmail,
+        //     contactPhone: websiteSettings.contact_phone || prev.contactPhone,
+        //     companyAddress: websiteSettings.contact_address?.split(',')[0] || prev.companyAddress,
+        //     city: websiteSettings.contact_address?.split(',')[1]?.trim() || prev.city,
+        //   }));
+        // }
       } catch (error) {
         // Error loading settings handled silently, use defaults
       }

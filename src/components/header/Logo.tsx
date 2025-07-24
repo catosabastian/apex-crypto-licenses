@@ -19,7 +19,7 @@ const Logo = () => {
       onKeyDown={(e) => e.key === 'Enter' && handleLogoClick()}
     >
       <img 
-        src="/lovable-uploads/294fecc6-7027-4dcd-adc8-c71f110e7314.png" 
+        src="https://res.cloudinary.com/dxayc3s2a/image/upload/v1753382775/apex-logo_tvrcy6.png"
         alt="APEX Crypto License" 
         className="h-12 w-auto rounded-lg shadow-sm"
       />
