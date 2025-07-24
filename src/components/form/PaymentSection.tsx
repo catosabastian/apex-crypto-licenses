@@ -215,13 +215,13 @@ const PaymentSection = ({ selectedCrypto, onCryptoChange, selectedCategory }: Pa
           <CardContent className="p-0">
             <div className="space-y-4">
               {selectedCategory && (
-                <div className="p-4 bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg transition-all duration-200 hover:shadow-sm">
-                  <div className="flex items-center justify-between">
+                <div className="p-6 bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg transition-all duration-200 hover:shadow-sm">
+                  <div className="flex items-center justify-between mb-4">
                     <div className="flex flex-col">
-                      <span className="text-sm font-medium text-muted-foreground">
+                      <span className="text-lg font-semibold text-foreground">
                         {getCategoryName(selectedCategory)}
                       </span>
-                      <span className="text-xs text-muted-foreground/80">
+                      <span className="text-sm text-muted-foreground">
                         Category {selectedCategory} License
                       </span>
                     </div>
@@ -229,16 +229,23 @@ const PaymentSection = ({ selectedCrypto, onCryptoChange, selectedCategory }: Pa
                       {isLoadingPrice && (
                         <Loader2 className="h-4 w-4 animate-spin text-primary" />
                       )}
-                      <Badge variant="secondary" className="font-semibold text-lg px-3 py-1">
+                      <Badge variant="default" className="font-bold text-2xl px-4 py-2 bg-primary text-primary-foreground">
                         {getCategoryPrice(selectedCategory)}
                       </Badge>
                     </div>
                   </div>
-                  {selectedCategory && !isLoadingPrice && (
-                    <div className="mt-2 text-xs text-muted-foreground">
-                      💡 This price is updated in real-time from our admin system
-                    </div>
-                  )}
+                  
+                  <div className="text-center p-4 bg-background/50 rounded-lg border border-primary/10">
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Selected Plan Price
+                    </p>
+                    <p className="text-3xl font-bold text-primary">
+                      {getCategoryPrice(selectedCategory)}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      💡 Price updated in real-time from admin system
+                    </p>
+                  </div>
                 </div>
               )}
               
