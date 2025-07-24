@@ -10,12 +10,12 @@ const Footer = () => {
   
   const [settings, setSettings] = useState<any>({
     companyName: 'APEX Crypto Licensing',
-    supportEmail: 'support@apexcrypto.com',
-    contactPhone: '+1 (555) 123-4567',
+    supportEmail: 'support@apexregulations.com',
+    contactPhone: '+1 (609) 918-3047',
     companyAddress: '123 Business District',
     city: 'Financial City, FC 12345',
     country: 'United States',
-    website: 'https://apexcrypto.com'
+    website: 'https://apexregulations.com/'
   });
   
   useEffect(() => {
@@ -83,14 +83,14 @@ const Footer = () => {
                 <MessageSquare className="h-4 w-4 opacity-80" />
                 <span className="opacity-80">{settings.contactPhone}</span>
               </li>
-              <li className="flex items-start gap-2">
+              {/* <li className="flex items-start gap-2">
                 <Globe className="h-4 w-4 opacity-80 mt-0.5" />
                 <div className="opacity-80">
                   <div>{settings.companyAddress}</div>
                   <div>{settings.city}</div>
                   <div>{settings.country}</div>
                 </div>
-              </li>
+              </li> */}
               {settings.website && (
                 <li className="flex items-center gap-2">
                   <Globe className="h-4 w-4 opacity-80" />
