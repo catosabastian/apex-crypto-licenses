@@ -543,6 +543,10 @@ export type Database = {
         Args: { admin_email: string; admin_password: string }
         Returns: boolean
       }
+      setup_first_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"

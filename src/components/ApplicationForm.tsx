@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { AlertTriangle, Loader2, ShieldCheck } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { sendAdminNotification } from "@/utils/emailService";
-import { unifiedDataManager, ContentSettings } from "@/utils/unifiedDataManager";
+import { supabaseDataManager } from "@/utils/supabaseDataManager";
 import PaymentSection from "@/components/form/PaymentSection";
 
 const ADMIN_EMAIL = "catosabastian@gmail.com";
@@ -26,27 +26,38 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
   const [applicantType, setApplicantType] = useState<'individual' | 'corporate'>('individual');
   const [selectedCategory, setSelectedCategory] = useState<'3' | '4' | '5'>('3');
   const [selectedCrypto, setSelectedCrypto] = useState<'BTC' | 'ETH' | 'USDT_TRON' | 'USDT_ETH' | 'XRP'>('BTC');
-  const [settings, setSettings] = useState<ContentSettings>(unifiedDataManager.getSettings());
+  const [settings, setSettings] = useState<any>({});
 
-  // Listen for settings updates
+  // Load settings from Supabase
   useEffect(() => {
-    const handleSettingsUpdate = (data: any) => {
-      const newSettings = data.settings || data;
-      setSettings(newSettings);
-      console.log('[ApplicationForm] Settings updated:', newSettings);
+    const loadSettings = async () => {
+      try {
+        const settingsData = await supabaseDataManager.getSettings();
+        const paymentAddresses = await supabaseDataManager.getPaymentAddresses();
+        
+        const formattedSettings = {
+          ...settingsData,
+          bitcoinAddress: paymentAddresses.find(p => p.cryptocurrency === 'BTC')?.address || '',
+          ethereumAddress: paymentAddresses.find(p => p.cryptocurrency === 'ETH')?.address || '',
+          usdtTronAddress: paymentAddresses.find(p => p.cryptocurrency === 'USDT_TRON')?.address || '',
+          usdtEthereumAddress: paymentAddresses.find(p => p.cryptocurrency === 'USDT_ETH')?.address || '',
+          xrpAddress: paymentAddresses.find(p => p.cryptocurrency === 'XRP')?.address || '',
+        };
+        
+        setSettings(formattedSettings);
+      } catch (error) {
+        console.error('Error loading settings:', error);
+      }
     };
 
-    unifiedDataManager.addEventListener('settings_updated', handleSettingsUpdate);
-    return () => {
-      unifiedDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
-    };
+    loadSettings();
   }, []);
 
   const getCategoryPrice = (category: string): string => {
     switch (category) {
-      case '3': return settings.category3Price || '70,000 USDT';
-      case '4': return settings.category4Price || '150,000 USDT';
-      case '5': return settings.category5Price || '250,000 USDT';
+      case '3': return (settings.category3Price || '50,000 USDT').replace(/"/g, '');
+      case '4': return (settings.category4Price || '100,000 USDT').replace(/"/g, '');
+      case '5': return (settings.category5Price || '250,000 USDT').replace(/"/g, '');
       default: return 'Price not available';
     }
   };
@@ -78,29 +89,46 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
         return;
       }
 
-      const completeFormData = {
-        ...formDataObj,
-        submissionTime: new Date().toISOString(),
-        applicantType,
-        selectedCategory,
-        selectedCrypto,
-        categoryPrice: getCategoryPrice(selectedCategory),
-        walletAddress: getSelectedWalletAddress()
+      // Create application in database
+      const applicationData = {
+        name: `${formDataObj.firstName || ''} ${formDataObj.lastName || ''}`.trim() || formDataObj.companyName as string,
+        email: (formDataObj.email || formDataObj.businessEmail) as string,
+        phone: formDataObj.phone as string,
+        company: formDataObj.companyName as string,
+        category: `Category ${selectedCategory}`,
+        notes: JSON.stringify({
+          applicantType,
+          selectedCategory,
+          selectedCrypto,
+          categoryPrice: getCategoryPrice(selectedCategory),
+          walletAddress: getSelectedWalletAddress(),
+          ...formDataObj
+        }),
+        status: 'pending' as const,
+        amount: getCategoryPrice(selectedCategory),
+        payment_method: selectedCrypto,
+        documents: []
       };
       
-      const notificationSent = await sendAdminNotification(
-        completeFormData,
-        ADMIN_EMAIL
-      );
+      const application = await supabaseDataManager.createApplication(applicationData);
       
-      if (!notificationSent) {
-        toast({
-          title: "Admin Notification Status",
-          description: "There was an issue sending the notification to administrators, but your application was received.",
-          variant: "default",
-        });
-      } else {
-        console.log("Admin notification email sent successfully to:", ADMIN_EMAIL);
+      if (!application) {
+        throw new Error('Failed to create application');
+      }
+      
+      // Try to send admin notification (non-blocking)
+      try {
+        await sendAdminNotification({
+          ...formDataObj,
+          submissionTime: new Date().toISOString(),
+          applicantType,
+          selectedCategory,
+          selectedCrypto,
+          categoryPrice: getCategoryPrice(selectedCategory),
+          walletAddress: getSelectedWalletAddress()
+        }, ADMIN_EMAIL);
+      } catch (emailError) {
+        console.log('Email notification failed:', emailError);
       }
       
       toast({

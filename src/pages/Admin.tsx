@@ -8,12 +8,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Shield, Copy, Search, Download, Filter, LogOut, BarChart3, FileText, Settings, Mail, Globe, Layers, Wallet } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useNavigate } from 'react-router-dom';
-import { dataManager } from '@/utils/dataManager';
-import { ApplicationsManager } from '@/components/admin/ApplicationsManager';
+import { supabaseDataManager } from '@/utils/supabaseDataManager';
+import SupabaseApplicationsManager from '@/components/admin/SupabaseApplicationsManager';
 import { ContactsManager } from '@/components/admin/ContactsManager';
-import { SettingsManager } from '@/components/admin/SettingsManager';
+import UnifiedSettingsManager from '@/components/admin/UnifiedSettingsManager';
 import { LicenseManager } from '@/components/admin/LicenseManager';
 import { ContentManager } from '@/components/admin/ContentManager';
 import { PaymentAddressManager } from '@/components/admin/PaymentAddressManager';
@@ -22,13 +22,22 @@ const Admin = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterTier, setFilterTier] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [analytics, setAnalytics] = useState(dataManager.getAnalytics());
-  const { logout } = useAuth();
+  const [analytics, setAnalytics] = useState({ totalApplications: 0, pendingApplications: 0, approvedApplications: 0, activeLicenses: 0, totalRevenue: 0, newContacts: 0 });
+  const { signOut } = useSupabaseAuth();
   const navigate = useNavigate();
 
-  // Update analytics when tab changes
+  // Load analytics data from Supabase
   useEffect(() => {
-    setAnalytics(dataManager.getAnalytics());
+    const loadAnalytics = async () => {
+      try {
+        const analyticsData = await supabaseDataManager.getAnalytics();
+        setAnalytics(analyticsData);
+      } catch (error) {
+        console.error('Error loading analytics:', error);
+      }
+    };
+    
+    loadAnalytics();
   }, [activeTab]);
 
   // Copy license ID to clipboard
@@ -82,9 +91,9 @@ const Admin = () => {
     });
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const handleLogout = async () => {
+    await signOut();
+    navigate('/auth');
   };
 
   return (
@@ -207,7 +216,7 @@ const Admin = () => {
         </TabsContent>
 
         <TabsContent value="applications" className="space-y-6">
-          <ApplicationsManager />
+          <SupabaseApplicationsManager />
         </TabsContent>
 
         <TabsContent value="contacts" className="space-y-6">
@@ -223,7 +232,7 @@ const Admin = () => {
         </TabsContent>
 
         <TabsContent value="settings" className="space-y-6">
-          <SettingsManager />
+          <UnifiedSettingsManager />
         </TabsContent>
 
         <TabsContent value="legacy" className="space-y-6">

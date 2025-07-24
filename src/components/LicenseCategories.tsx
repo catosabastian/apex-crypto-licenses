@@ -6,30 +6,42 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { CheckCircle, ChevronRight, MessageSquareText, XCircle, Shield, Star, Crown, Building, Zap, Trophy, Wifi } from 'lucide-react';
 import { useApplicationDialog } from '@/components/ApplicationDialog';
 import SupportDialog from '@/components/SupportDialog';
-import { unifiedDataManager, ContentSettings } from '@/utils/unifiedDataManager';
+import { supabaseDataManager } from '@/utils/supabaseDataManager';
 
 const LicenseCategories = () => {
   const { openApplicationDialog } = useApplicationDialog();
   const [isSupportDialogOpen, setSupportDialogOpen] = useState(false);
-  const [settings, setSettings] = useState(unifiedDataManager.getSettings());
+  const [settings, setSettings] = useState<any>({});
   const [lastUpdateTime, setLastUpdateTime] = useState<Date>(new Date());
   const [isConnected, setIsConnected] = useState(true);
 
   useEffect(() => {
-    console.log('[LicenseCategories] Component mounted, listening for settings updates');
+    const loadSettings = async () => {
+      try {
+        const settingsData = await supabaseDataManager.getSettings();
+        setSettings(settingsData);
+        setLastUpdateTime(new Date());
+        setIsConnected(true);
+      } catch (error) {
+        console.error('Error loading settings:', error);
+        setIsConnected(false);
+      }
+    };
+
+    loadSettings();
     
+    // Listen for real-time settings updates
     const handleSettingsUpdate = (data: any) => {
       console.log('[LicenseCategories] Settings update received:', data);
-      const newSettings = data.settings || data;
-      setSettings(newSettings);
+      setSettings(data);
       setLastUpdateTime(new Date());
       setIsConnected(true);
     };
 
-    unifiedDataManager.addEventListener('settings_updated', handleSettingsUpdate);
+    supabaseDataManager.addEventListener('settings_updated', handleSettingsUpdate);
 
     return () => {
-      unifiedDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
+      supabaseDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
     };
   }, []);
   
@@ -68,7 +80,7 @@ const LicenseCategories = () => {
             <LicenseCategory 
               category={1}
               title="Basic Trader"
-              price={settings.category1Price}
+              price={(settings.category1Price || '10,000 USDT').replace(/"/g, '')}
               minVolume="$50,000"
               icon={Shield}
               color="blue"
@@ -86,7 +98,7 @@ const LicenseCategories = () => {
             <LicenseCategory 
               category={2}
               title="Standard Trader"
-              price={settings.category2Price}
+              price={(settings.category2Price || '25,000 USDT').replace(/"/g, '')}
               minVolume="$100,000"
               icon={CheckCircle}
               color="green"
@@ -105,7 +117,7 @@ const LicenseCategories = () => {
             <LicenseCategory 
               category={3}
               title="Advanced Trader"
-              price={settings.category3Price}
+              price={(settings.category3Price || '50,000 USDT').replace(/"/g, '')}
               minVolume="$250,000"
               icon={Star}
               color="purple"
@@ -126,7 +138,7 @@ const LicenseCategories = () => {
             <LicenseCategory 
               category={4}
               title="Professional Trader"
-              price={settings.category4Price}
+              price={(settings.category4Price || '100,000 USDT').replace(/"/g, '')}
               minVolume="$500,000"
               icon={Crown}
               color="gold"
@@ -149,7 +161,7 @@ const LicenseCategories = () => {
             <LicenseCategory 
               category={5}
               title="Institutional Trader"
-              price={settings.category5Price}
+              price={(settings.category5Price || '250,000 USDT').replace(/"/g, '')}
               minVolume="$1,000,000+"
               icon={Building}
               color="platinum"
@@ -172,7 +184,7 @@ const LicenseCategories = () => {
             <LicenseCategory 
               category={6}
               title="Executive Trader"
-              price={settings.category6Price}
+              price={(settings.category6Price || '500,000 USDT').replace(/"/g, '')}
               minVolume="$2,500,000+"
               icon={Trophy}
               color="diamond"

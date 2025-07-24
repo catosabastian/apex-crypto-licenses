@@ -1,374 +1,111 @@
-
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
-import { Edit, Save, DollarSign, Wallet, CheckCircle, Wifi } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { unifiedDataManager } from '@/utils/unifiedDataManager';
-import { ContactSettingsManager } from './ContactSettingsManager';
+import { supabaseDataManager } from '@/utils/supabaseDataManager';
 
-export const UnifiedSettingsManager = () => {
-  const [settings, setSettings] = useState(unifiedDataManager.getSettings());
-  const [isEditingPrices, setIsEditingPrices] = useState(false);
-  const [isEditingWallets, setIsEditingWallets] = useState(false);
-  const [tempSettings, setTempSettings] = useState(settings);
-  const [lastUpdateTime, setLastUpdateTime] = useState<Date>(new Date());
-  const [updateCount, setUpdateCount] = useState(0);
+const UnifiedSettingsManager = () => {
+  const [settings, setSettings] = useState<any>({});
+  const [isDirty, setIsDirty] = useState(false);
 
-  const mountedRef = useRef(true);
+  const loadSettings = async () => {
+    try {
+      const currentSettings = await supabaseDataManager.getSettings();
+      setSettings(currentSettings);
+    } catch (error) {
+      console.error('Error loading settings:', error);
+    }
+  };
 
   useEffect(() => {
-    console.log('[UnifiedSettingsManager] Component mounted');
-    
-    const handleSettingsUpdate = (data: any) => {
-      if (!mountedRef.current) return;
-      
-      console.log('[UnifiedSettingsManager] Settings update received:', data);
-      const newSettings = data.settings || data;
-      
-      setSettings(newSettings);
-      setTempSettings(newSettings);
-      setLastUpdateTime(new Date());
-      setUpdateCount(prev => prev + 1);
-      
-      toast({
-        title: "Settings Synchronized",
-        description: "Changes applied across all instances",
-      });
-    };
-
-    unifiedDataManager.addEventListener('settings_updated', handleSettingsUpdate);
-
-    return () => {
-      mountedRef.current = false;
-      unifiedDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
-    };
+    loadSettings();
   }, []);
 
-  const handleSaveSettings = () => {
-    console.log('[UnifiedSettingsManager] Saving settings:', tempSettings);
-    
+  const handlePriceChange = (category: string, price: string) => {
+    setSettings({ ...settings, [category]: price });
+    setIsDirty(true);
+  };
+
+  const handleAvailabilityChange = (category: string, available: boolean) => {
+    setSettings({ ...settings, [category]: available });
+    setIsDirty(true);
+  };
+
+  const handleSaveSettings = async () => {
     try {
-      const updatedSettings = unifiedDataManager.updateSettings(tempSettings);
-      console.log('[UnifiedSettingsManager] Settings saved successfully:', updatedSettings);
-      
-      setSettings(updatedSettings);
-      setIsEditingPrices(false);
-      setIsEditingWallets(false);
-      setLastUpdateTime(new Date());
-      
+      for (const [key, value] of Object.entries(settings)) {
+        await supabaseDataManager.updateSetting(key, value);
+      }
+      setIsDirty(false);
       toast({
-        title: "Settings Updated Successfully",
-        description: "Changes are now live across all instances",
+        title: "Settings Saved",
+        description: "All changes have been saved successfully.",
       });
-      
     } catch (error) {
-      console.error('[UnifiedSettingsManager] Failed to save settings:', error);
-      
       toast({
-        title: "Settings Update Failed",
-        description: "Please try again",
+        title: "Error",
+        description: "Failed to save settings.",
         variant: "destructive",
       });
     }
   };
 
-  const handleAvailabilityToggle = (category: string, value: boolean) => {
-    console.log(`[UnifiedSettingsManager] Toggling availability for ${category}:`, value);
-    
-    try {
-      const updates = { [category]: value };
-      const updatedSettings = unifiedDataManager.updateSettings(updates);
-      console.log('[UnifiedSettingsManager] Availability updated:', updatedSettings);
-      
-      setSettings(updatedSettings);
-      setTempSettings(updatedSettings);
-      setLastUpdateTime(new Date());
-      setUpdateCount(prev => prev + 1);
-      
-      toast({
-        title: "Availability Updated",
-        description: `${String(category)} has been ${value ? 'enabled' : 'disabled'}`,
-      });
-      
-    } catch (error) {
-      console.error('[UnifiedSettingsManager] Failed to toggle availability:', error);
-      
-      toast({
-        title: "Update Failed",
-        description: "Failed to update availability",
-        variant: "destructive",
-      });
-    }
-  };
+  const categories = [
+    { id: 1, name: 'Basic Trader', priceKey: 'category1Price', availKey: 'category1Available' },
+    { id: 2, name: 'Standard Trader', priceKey: 'category2Price', availKey: 'category2Available' },
+    { id: 3, name: 'Advanced Trader', priceKey: 'category3Price', availKey: 'category3Available' },
+    { id: 4, name: 'Professional Trader', priceKey: 'category4Price', availKey: 'category4Available' },
+    { id: 5, name: 'Institutional Trader', priceKey: 'category5Price', availKey: 'category5Available' },
+    { id: 6, name: 'Executive Trader', priceKey: 'category6Price', availKey: 'category6Available' },
+  ];
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold">Website Settings</h2>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 text-sm">
-            <Wifi className="h-4 w-4 text-green-500" />
-            <span className="text-green-600">Connected</span>
+    <Card>
+      <CardHeader>
+        <CardTitle>License Categories Settings</CardTitle>
+        <CardDescription>Configure pricing and availability for each license category.</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {categories.map((category) => (
+          <div key={category.id} className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 border rounded-lg">
+            <div>
+              <Label className="text-sm font-medium">{category.name}</Label>
+              <p className="text-xs text-muted-foreground">Category {category.id}</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor={`price-${category.id}`} className="text-xs">Price</Label>
+              <Input
+                id={`price-${category.id}`}
+                value={(settings[category.priceKey] || '').replace(/"/g, '')}
+                onChange={(e) => handlePriceChange(category.priceKey, e.target.value)}
+                placeholder="e.g., 10,000 USDT"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs">Availability</Label>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  checked={settings[category.availKey] !== false}
+                  onCheckedChange={(checked) => handleAvailabilityChange(category.availKey, checked)}
+                />
+                <span className="text-xs">
+                  {settings[category.availKey] !== false ? 'Available' : 'Sold Out'}
+                </span>
+              </div>
+            </div>
           </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <CheckCircle className="h-4 w-4 text-green-500" />
-            <span className="text-green-600 font-medium">
-              Live Updates: {updateCount} | {lastUpdateTime.toLocaleTimeString()}
-            </span>
-          </div>
+        ))}
+        <div className="flex justify-end pt-4">
+          <Button onClick={handleSaveSettings} disabled={!isDirty}>
+            Save Changes
+          </Button>
         </div>
-      </div>
-      
-      <div className="grid gap-6">
-        {/* Contact Information Management */}
-        <ContactSettingsManager />
-
-        {/* License Pricing Card */}
-        <Card className="modern-card">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <DollarSign className="h-5 w-5" />
-                License Pricing
-                <Badge variant="default" className="bg-green-500 text-white">
-                  Live ✓
-                </Badge>
-              </CardTitle>
-              <CardDescription>Manage license pricing and availability</CardDescription>
-            </div>
-            <Dialog open={isEditingPrices} onOpenChange={setIsEditingPrices}>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm" onClick={() => setTempSettings(settings)} className="glass-button">
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit Prices
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Edit License Prices</DialogTitle>
-                  <DialogDescription>
-                    Update pricing for all license categories
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4">
-                  {[1, 2, 3, 4, 5, 6].map((category) => (
-                    <div key={category} className="flex items-center gap-4">
-                      <Label className="w-24">Category {category}</Label>
-                      <Input
-                        value={(tempSettings as any)[`category${category}Price`] || ''}
-                        onChange={(e) => setTempSettings(prev => ({
-                          ...prev,
-                          [`category${category}Price`]: e.target.value
-                        }))}
-                        placeholder="e.g., 25,000 USDT"
-                        className="glass-card"
-                      />
-                    </div>
-                  ))}
-                </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsEditingPrices(false)}>
-                    Cancel
-                  </Button>
-                  <Button onClick={handleSaveSettings} className="btn-primary">
-                    <Save className="h-4 w-4 mr-2" />
-                    Save Changes
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {[1, 2, 3, 4, 5, 6].map((category) => (
-              <div key={category} className="flex items-center justify-between p-4 border rounded-lg glass-card">
-                <div>
-                  <p className="font-medium">Category {category}</p>
-                  <p className="text-sm text-muted-foreground">
-                    {(settings as any)[`category${category}Price`]}
-                  </p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <Switch
-                      checked={(settings as any)[`category${category}Available`] || false}
-                      onCheckedChange={(checked) => 
-                        handleAvailabilityToggle(`category${category}Available`, checked)
-                      }
-                    />
-                    <Badge variant={(settings as any)[`category${category}Available`] ? "default" : "secondary"}>
-                      {(settings as any)[`category${category}Available`] ? "Available" : "Sold Out"}
-                    </Badge>
-                    <Badge variant="outline" className="text-green-600 border-green-600">
-                      Live ✓
-                    </Badge>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-
-        {/* Enhanced Payment Addresses Card */}
-        <Card className="modern-card">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <Wallet className="h-5 w-5" />
-                Payment Addresses
-                <Badge variant="default" className="bg-green-500 text-white">
-                  Live ✓
-                </Badge>
-              </CardTitle>
-              <CardDescription>Manage all cryptocurrency wallet addresses</CardDescription>
-            </div>
-            <Dialog open={isEditingWallets} onOpenChange={setIsEditingWallets}>
-              <DialogTrigger asChild>
-                <Button variant="outline" size="sm" onClick={() => setTempSettings(settings)} className="glass-button">
-                  <Edit className="h-4 w-4 mr-2" />
-                  Edit Addresses
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle>Edit Payment Addresses</DialogTitle>
-                  <DialogDescription>
-                    Update cryptocurrency wallet addresses for payments
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="bitcoin">Bitcoin (BTC) Address</Label>
-                    <Input
-                      id="bitcoin"
-                      value={tempSettings.bitcoinAddress || ''}
-                      onChange={(e) => setTempSettings(prev => ({
-                        ...prev,
-                        bitcoinAddress: e.target.value
-                      }))}
-                      placeholder="Bitcoin wallet address"
-                      className="font-mono glass-card"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="ethereum">Ethereum (ETH) Address</Label>
-                    <Input
-                      id="ethereum"
-                      value={tempSettings.ethereumAddress || ''}
-                      onChange={(e) => setTempSettings(prev => ({
-                        ...prev,
-                        ethereumAddress: e.target.value
-                      }))}
-                      placeholder="Ethereum wallet address"
-                      className="font-mono glass-card"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="usdtTron">USDT (Tron Network) Address</Label>
-                    <Input
-                      id="usdtTron"
-                      value={tempSettings.usdtTronAddress || ''}
-                      onChange={(e) => setTempSettings(prev => ({
-                        ...prev,
-                        usdtTronAddress: e.target.value
-                      }))}
-                      placeholder="USDT Tron wallet address"
-                      className="font-mono glass-card"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="usdtEthereum">USDT (Ethereum Network) Address</Label>
-                    <Input
-                      id="usdtEthereum"
-                      value={tempSettings.usdtEthereumAddress || ''}
-                      onChange={(e) => setTempSettings(prev => ({
-                        ...prev,
-                        usdtEthereumAddress: e.target.value
-                      }))}
-                      placeholder="USDT Ethereum wallet address"
-                      className="font-mono glass-card"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="xrp">XRP Address</Label>
-                    <Input
-                      id="xrp"
-                      value={tempSettings.xrpAddress || ''}
-                      onChange={(e) => setTempSettings(prev => ({
-                        ...prev,
-                        xrpAddress: e.target.value
-                      }))}
-                      placeholder="XRP wallet address"
-                      className="font-mono glass-card"
-                    />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsEditingWallets(false)}>
-                    Cancel
-                  </Button>
-                  <Button onClick={handleSaveSettings} className="btn-primary">
-                    <Save className="h-4 w-4 mr-2" />
-                    Save Changes
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between p-4 border rounded-lg glass-card">
-              <div>
-                <p className="font-medium">Bitcoin (BTC)</p>
-                <p className="text-sm text-muted-foreground font-mono break-all">{settings.bitcoinAddress}</p>
-              </div>
-              <Badge variant="outline" className="text-green-600 border-green-600">
-                Live ✓
-              </Badge>
-            </div>
-            <div className="flex items-center justify-between p-4 border rounded-lg glass-card">
-              <div>
-                <p className="font-medium">Ethereum (ETH)</p>
-                <p className="text-sm text-muted-foreground font-mono break-all">{settings.ethereumAddress}</p>
-              </div>
-              <Badge variant="outline" className="text-green-600 border-green-600">
-                Live ✓
-              </Badge>
-            </div>
-            <div className="flex items-center justify-between p-4 border rounded-lg glass-card">
-              <div>
-                <p className="font-medium">USDT (Tron Network)</p>
-                <p className="text-sm text-muted-foreground font-mono break-all">{settings.usdtTronAddress}</p>
-              </div>
-              <Badge variant="outline" className="text-green-600 border-green-600">
-                Live ✓
-              </Badge>
-            </div>
-            <div className="flex items-center justify-between p-4 border rounded-lg glass-card">
-              <div>
-                <p className="font-medium">USDT (Ethereum Network)</p>
-                <p className="text-sm text-muted-foreground font-mono break-all">{settings.usdtEthereumAddress}</p>
-              </div>
-              <Badge variant="outline" className="text-green-600 border-green-600">
-                Live ✓
-              </Badge>
-            </div>
-            <div className="flex items-center justify-between p-4 border rounded-lg glass-card">
-              <div>
-                <p className="font-medium">XRP</p>
-                <p className="text-sm text-muted-foreground font-mono break-all">{settings.xrpAddress}</p>
-              </div>
-              <Badge variant="outline" className="text-green-600 border-green-600">
-                Live ✓
-              </Badge>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
+
+export default UnifiedSettingsManager;
