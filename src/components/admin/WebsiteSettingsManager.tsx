@@ -77,30 +77,22 @@ const WebsiteSettingsManager = () => {
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      if (websiteIdRef.current && webbsiteIdRef.current?.id) {
-        const createReq = await supabase
+      const { error } = await supabase
         .from('website_settings')
-        .update({
+        .upsert({
           site_name: settings.companyName,
           contact_email: settings.supportEmail,
           contact_phone: settings.contact_phone,
           contact_address: `${settings.companyAddress}, ${settings.city}`,
-        }).match({ id: websiteIdRef.currrent.id });
-        
-        if (createReq.error) throw createReq.error
-      } else {
-          const { error, data } = await supabase
-            .from('website_settings')
-            .upsert({
-              site_name: settings.companyName,
-              contact_email: settings.supportEmail,
-              contact_phone: settings.contact_phone,
-              contact_address: `${settings.companyAddress}, ${settings.city}`,
-            });
-    
-          if (error) throw error;
-        if (data) websiteIdRef.current = data;
-      }
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Settings Updated",
+        description: "Website settings have been saved successfully.",
+      });
+      setIsDirty(false);
     } catch (error: any) {
       toast({
         title: "Update Failed",
