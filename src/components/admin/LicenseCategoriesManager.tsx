@@ -155,6 +155,12 @@ const LicenseCategoriesManager = () => {
   };
 
   const handleSubmit = async () => {
+    // Validation
+    if (!formData.name || !formData.price || !formData.min_volume) {
+      toast.error('Please fill in all required fields (Name, Price, Min Volume)');
+      return;
+    }
+
     try {
       const features = featuresInput.split('\n').filter(f => f.trim()).map(f => f.trim());
       
@@ -180,7 +186,7 @@ const LicenseCategoriesManager = () => {
       }
 
       setDialogOpen(false);
-      loadCategories();
+      await loadCategories(); // Ensure fresh data is loaded
     } catch (error) {
       console.error('Error saving category:', error);
       toast.error('Failed to save license category');

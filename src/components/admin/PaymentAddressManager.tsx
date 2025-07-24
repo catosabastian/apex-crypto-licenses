@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Copy, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabaseDataManager, PaymentAddress } from '@/utils/supabaseDataManager';
+import { supabase } from '@/integrations/supabase/client';
 
 export function PaymentAddressManager() {
   const [addresses, setAddresses] = useState<PaymentAddress[]>([]);
@@ -16,12 +17,23 @@ export function PaymentAddressManager() {
 
   useEffect(() => {
     const loadAddresses = async () => {
-      const addressData = await supabaseDataManager.getPaymentAddresses();
-      setAddresses(addressData);
+      try {
+        // Load all addresses, not just active ones for admin
+        const { data, error } = await (supabase as any)
+          .from('payment_addresses')
+          .select('*')
+          .order('cryptocurrency');
+        
+        if (error) throw error;
+        setAddresses(data || []);
+      } catch (error) {
+        console.error('Error loading payment addresses:', error);
+      }
     };
 
-    const handleAddressUpdate = (data: PaymentAddress[]) => {
-      setAddresses(data);
+    const handleAddressUpdate = async () => {
+      // Reload fresh data when updates occur
+      await loadAddresses();
       setIsDirty(false);
     };
 

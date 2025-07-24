@@ -508,13 +508,21 @@ class SupabaseDataManager {
     const licenses = this.dataSubjects.licenses.value;
     const contacts = this.dataSubjects.contacts.value;
 
+    // Calculate revenue from applications with amounts
+    const totalRevenue = applications
+      .filter(app => app.amount)
+      .reduce((sum, app) => {
+        const amount = parseFloat(app.amount?.replace(/[^\d.-]/g, '') || '0');
+        return sum + (isNaN(amount) ? 0 : amount);
+      }, 0);
+
     return {
       totalApplications: applications.length,
       pendingApplications: applications.filter(a => a.status === 'pending').length,
       approvedApplications: applications.filter(a => a.status === 'approved').length,
       activeLicenses: licenses.filter(l => l.status === 'active').length,
       newContacts: contacts.filter(c => c.status === 'unread').length,
-      totalRevenue: 0 // Could be calculated from approved applications
+      totalRevenue: Math.round(totalRevenue)
     };
   }
 }
