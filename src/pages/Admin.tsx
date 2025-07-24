@@ -341,64 +341,60 @@ const AdminPanel = () => {
 
 const Admin = () => {
   const [hasAdminUsers, setHasAdminUsers] = useState<boolean | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const { isAuthenticated, isAdmin } = useSupabaseAuth();
+  const [isCheckingAdminUsers, setIsCheckingAdminUsers] = useState(true);
+  const { isAuthenticated, isAdmin, isLoading: authLoading } = useSupabaseAuth();
 
   useEffect(() => {
     const checkAdminUsers = async () => {
       try {
         console.log('[Admin] Checking admin users...');
         
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Admin users check timeout')), 8000)
-        );
-        
-        const rpcPromise = supabase.rpc('has_admin_users');
-        const { data, error } = await Promise.race([rpcPromise, timeoutPromise]) as any;
+        const { data, error } = await supabase.rpc('has_admin_users');
         
         if (error) {
           console.error('Error checking admin users:', error);
-          setHasAdminUsers(false);
+          // Assume admin users exist if there's an error to show login
+          setHasAdminUsers(true);
         } else {
           console.log('[Admin] Admin users check result:', data);
           setHasAdminUsers(data);
         }
       } catch (error) {
         console.error('Error checking admin users:', error);
-        setHasAdminUsers(false);
+        // Assume admin users exist if there's an error to show login
+        setHasAdminUsers(true);
       } finally {
-        setIsLoading(false);
+        setIsCheckingAdminUsers(false);
       }
     };
 
     checkAdminUsers();
   }, []);
 
-  if (isLoading) {
+  // Show loading while checking auth or admin users
+  if (authLoading || isCheckingAdminUsers) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
+        <div className="flex items-center gap-2">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <span>Loading admin panel...</span>
+        </div>
       </div>
     );
   }
 
+  // If user is authenticated and is admin, show admin panel
+  if (isAuthenticated && isAdmin) {
+    return <AdminPanel />;
+  }
+
   // If no admin users exist, show setup
-  if (!hasAdminUsers) {
+  if (hasAdminUsers === false) {
     return <AdminSetup />;
   }
 
-  // If user is not authenticated, show a login form instead of setup
-  if (!isAuthenticated) {
-    return <AdminLogin />;
-  }
-
-  // If user is authenticated but not admin, show setup to become admin
-  if (!isAdmin) {
-    return <AdminSetup />;
-  }
-
-  // Show admin panel
-  return <AdminPanel />;
+  // If admin users exist but user is not authenticated or not admin, show login
+  return <AdminLogin />;
 };
 
 export default Admin;
