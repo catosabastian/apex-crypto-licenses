@@ -55,125 +55,42 @@ const UnifiedApplicationForm = () => {
     const loadCategories = async () => {
       try {
         setIsLoading(true);
-        console.log('[UnifiedApplicationForm] Loading settings...');
         const settings = await supabaseDataManager.getSettings();
-        console.log('[UnifiedApplicationForm] Loaded settings:', settings);
         
-        // Build categories from settings or use defaults
+        // Build categories from individual settings
         const builtCategories: LicenseCategory[] = [];
         
-        if (settings && Object.keys(settings).length > 0) {
-          // Extract category numbers from settings keys
-          const categoryKeys = Object.keys(settings).filter(key => key.startsWith('category') && key.includes('_name'));
-          const categoryNumbers = [...new Set(categoryKeys.map(key => key.match(/category(\d+)_/)?.[1]).filter(Boolean))];
+        // Extract category numbers from settings keys
+        const categoryKeys = Object.keys(settings || {}).filter(key => key.startsWith('category') && key.includes('_name'));
+        const categoryNumbers = [...new Set(categoryKeys.map(key => key.match(/category(\d+)_/)?.[1]).filter(Boolean))];
+        
+        categoryNumbers.forEach(num => {
+          const name = settings?.[`category${num}_name`];
+          const price = settings?.[`category${num}_price`];
+          const available = settings?.[`category${num}_available`];
+          const description = settings?.[`category${num}_description`];
+          const minVolume = settings?.[`category${num}_minVolume`];
           
-          categoryNumbers.forEach(num => {
-            const name = settings[`category${num}_name`];
-            const price = settings[`category${num}_price`];
-            const available = settings[`category${num}_available`];
-            const description = settings[`category${num}_description`];
-            const minVolume = settings[`category${num}_minVolume`];
-            
-            if (name && price !== undefined) {
-              // Parse price properly
-              let formattedPrice = price;
-              if (typeof price === 'string' && price.startsWith('$')) {
-                formattedPrice = price;
-              } else if (typeof price === 'number') {
-                formattedPrice = `$${price.toLocaleString()}`;
-              } else if (typeof price === 'string' && !price.startsWith('$')) {
-                const numPrice = parseFloat(price.replace(/[$,]/g, ''));
-                formattedPrice = `$${numPrice.toLocaleString()}`;
-              }
-              
-              builtCategories.push({
-                id: `category${num}`,
-                name: name,
-                price: formattedPrice,
-                available: available === 'true' || available === true,
-                description: description || 'Professional license for trading operations',
-                minVolume: minVolume || '$50,000',
-                status: (available === 'true' || available === true) ? 'AVAILABLE' : 'SOLD OUT'
-              });
-            }
-          });
-        }
+          if (name && price !== undefined) {
+            builtCategories.push({
+              id: `category${num}`,
+              name: name,
+              price: `$${parseFloat(price).toLocaleString()}`,
+              available: available === 'true' || available === true,
+              description: description || 'Professional license for trading operations',
+              minVolume: minVolume || '1',
+              status: (available === 'true' || available === true) ? 'AVAILABLE' : 'SOLD OUT'
+            });
+          }
+        });
         
-        // If no categories found, use defaults
-        if (builtCategories.length === 0) {
-          console.log('[UnifiedApplicationForm] No categories in settings, using defaults');
-          builtCategories.push(
-            {
-              id: 'category1',
-              name: 'Basic Trader',
-              price: '$5,000',
-              available: true,
-              description: 'Professional license for basic trading operations',
-              minVolume: '$50,000',
-              status: 'AVAILABLE'
-            },
-            {
-              id: 'category2',
-              name: 'Standard Trader',
-              price: '$15,000',
-              available: true,
-              description: 'Professional license for standard trading operations',
-              minVolume: '$100,000',
-              status: 'RECOMMENDED'
-            },
-            {
-              id: 'category3',
-              name: 'Advanced Trader',
-              price: '$25,000',
-              available: true,
-              description: 'Professional license for advanced trading operations',
-              minVolume: '$250,000',
-              status: 'AVAILABLE'
-            }
-          );
-        }
-        
-        console.log('[UnifiedApplicationForm] Built categories:', builtCategories);
         setCategories(builtCategories);
         setLastUpdated(new Date());
       } catch (error) {
-        console.error('[UnifiedApplicationForm] Error loading categories:', error);
-        
-        // Use fallback categories
-        const fallbackCategories: LicenseCategory[] = [
-          {
-            id: 'category1',
-            name: 'Basic Trader',
-            price: '$5,000',
-            available: true,
-            description: 'Professional license for basic trading operations',
-            minVolume: '$50,000',
-            status: 'AVAILABLE'
-          },
-          {
-            id: 'category2',
-            name: 'Standard Trader',
-            price: '$15,000',
-            available: true,
-            description: 'Professional license for standard trading operations',
-            minVolume: '$100,000',
-            status: 'RECOMMENDED'
-          },
-          {
-            id: 'category3',
-            name: 'Advanced Trader',
-            price: '$25,000',
-            available: true,
-            description: 'Professional license for advanced trading operations',
-            minVolume: '$250,000',
-            status: 'AVAILABLE'
-          }
-        ];
-        
-        setCategories(fallbackCategories);
+        console.error('Error loading categories:', error);
         toast({
-          title: "Warning",
-          description: "Using default license categories. Some pricing may be outdated.",
+          title: "Error",
+          description: "Failed to load license categories",
           variant: "destructive",
         });
       } finally {

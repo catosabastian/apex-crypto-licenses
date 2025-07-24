@@ -341,8 +341,8 @@ const AdminPanel = () => {
 
 const Admin = () => {
   const [hasAdminUsers, setHasAdminUsers] = useState<boolean | null>(null);
-  const [isCheckingAdminUsers, setIsCheckingAdminUsers] = useState(true);
-  const { isAuthenticated, isAdmin, isLoading: authLoading } = useSupabaseAuth();
+  const [isLoading, setIsLoading] = useState(true);
+  const { isAuthenticated, isAdmin } = useSupabaseAuth();
 
   useEffect(() => {
     const checkAdminUsers = async () => {
@@ -350,70 +350,58 @@ const Admin = () => {
         console.log('[Admin] Checking admin users...');
         
         // Add timeout to prevent infinite loading
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Admin users check timeout')), 3000)
-        );
+        const timeoutId = setTimeout(() => {
+          console.log('[Admin] Timeout reached, setting hasAdminUsers to true');
+          setHasAdminUsers(true);
+          setIsLoading(false);
+        }, 5000);
         
-        const rpcPromise = supabase.rpc('has_admin_users');
-        const { data, error } = await Promise.race([rpcPromise, timeoutPromise]) as any;
+        const { data, error } = await supabase.rpc('has_admin_users');
+        clearTimeout(timeoutId);
         
         if (error) {
           console.error('Error checking admin users:', error);
-          // Assume admin users exist if there's an error to show login
-          setHasAdminUsers(true);
+          setHasAdminUsers(false);
         } else {
           console.log('[Admin] Admin users check result:', data);
           setHasAdminUsers(data);
         }
       } catch (error) {
         console.error('Error checking admin users:', error);
-        // Assume admin users exist if there's an error to show login
-        setHasAdminUsers(true);
+        setHasAdminUsers(false);
       } finally {
-        setIsCheckingAdminUsers(false);
+        setIsLoading(false);
       }
     };
 
-    // Add a maximum wait time for the entire check
-    const maxWaitTimeout = setTimeout(() => {
-      console.log('[Admin] Maximum wait time exceeded, showing login');
-      setHasAdminUsers(true);
-      setIsCheckingAdminUsers(false);
-    }, 5000);
-
-    checkAdminUsers().finally(() => {
-      clearTimeout(maxWaitTimeout);
-    });
-
-    return () => {
-      clearTimeout(maxWaitTimeout);
-    };
+    checkAdminUsers();
   }, []);
 
-  // Show loading while checking auth or admin users
-  if (authLoading || isCheckingAdminUsers) {
+  if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="flex items-center gap-2">
-          <Loader2 className="h-8 w-8 animate-spin" />
-          <span>Loading admin panel...</span>
-        </div>
+        <Loader2 className="h-8 w-8 animate-spin" />
       </div>
     );
   }
 
-  // If user is authenticated and is admin, show admin panel
-  if (isAuthenticated && isAdmin) {
-    return <AdminPanel />;
-  }
-
   // If no admin users exist, show setup
-  if (hasAdminUsers === false) {
+  if (!hasAdminUsers) {
     return <AdminSetup />;
   }
 
-  // If admin users exist but user is not authenticated or not admin, show login
-  return <AdminLogin />;
+  // If user is not authenticated, show a login form instead of setup
+  if (!isAuthenticated) {
+    return <AdminLogin />;
+  }
+
+  // If user is authenticated but not admin, show setup to become admin
+  if (!isAdmin) {
+    return <AdminSetup />;
+  }
+
+  // Show admin panel
+  return <AdminPanel />;
 };
 
 export default Admin;

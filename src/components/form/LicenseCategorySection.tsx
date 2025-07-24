@@ -41,16 +41,43 @@ const LicenseCategorySection = ({ selectedCategory, onCategorySelect }: LicenseC
         setIsLoading(true);
         setLoadingError(null);
         
-        console.log('[LicenseCategory] Loading settings...');
-        const currentSettings = await supabaseDataManager.getSettings();
+        // Set a reasonable timeout
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Loading timeout after 15 seconds')), 15000)
+        );
         
-        console.log('[LicenseCategory] Loaded settings:', currentSettings);
+        const settingsPromise = supabaseDataManager.getSettings();
+        const currentSettings = await Promise.race([settingsPromise, timeoutPromise]) as Record<string, any>;
+        
+        console.log('Form component loaded settings:', currentSettings);
         setSettings(currentSettings);
         setLastUpdateTime(new Date());
       } catch (error) {
-        console.error('[LicenseCategory] Error loading settings:', error);
+        console.error('Error loading settings in form:', error);
         setLoadingError('Failed to load latest pricing. Using default values.');
-        setSettings({});
+        
+        // Use default settings structure
+        const defaultSettings = {
+          category1_name: 'Basic Trader',
+          category1_price: '$5,000',
+          category1_available: true,
+          category2_name: 'Standard Trader',
+          category2_price: '$15,000',
+          category2_available: true,
+          category3_name: 'Advanced Trader',
+          category3_price: '$25,000',
+          category3_available: true,
+          category4_name: 'Professional Trader',
+          category4_price: '$50,000',
+          category4_available: true,
+          category5_name: 'Institutional Trader',
+          category5_price: '$100,000',
+          category5_available: true,
+          category6_name: 'Executive Trader',
+          category6_price: '$200,000',
+          category6_available: true
+        };
+        setSettings(defaultSettings);
       } finally {
         setIsLoading(false);
       }
