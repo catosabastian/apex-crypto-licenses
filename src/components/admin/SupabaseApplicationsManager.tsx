@@ -154,7 +154,7 @@ const SupabaseApplicationsManager = () => {
                   <TableCell>{new Date(application.created_at).toLocaleDateString()}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <Select value={application.status} onValueChange={(value) => updateStatus(application.id, value)}>
+                      <Select value={application.status} onValueChange={(value) => updateStatus(application.id, value as 'pending' | 'approved' | 'rejected' | 'processing')}>
                         <SelectTrigger className="w-32">
                           <SelectValue />
                         </SelectTrigger>

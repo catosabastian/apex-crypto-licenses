@@ -10,7 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { unifiedDataManager } from '@/utils/unifiedDataManager';
 import { ApplicationsManager } from '@/components/admin/ApplicationsManager';
 import { ContactsManager } from '@/components/admin/ContactsManager';
-import { UnifiedSettingsManager } from '@/components/admin/UnifiedSettingsManager';
+import UnifiedSettingsManager from '@/components/admin/UnifiedSettingsManager';
 import { LicenseManager } from '@/components/admin/LicenseManager';
 import { ContentManager } from '@/components/admin/ContentManager';
 
