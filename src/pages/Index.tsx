@@ -20,7 +20,15 @@ const Index = () => {
     const initializeData = async () => {
       try {
         console.log('[Index] Initializing data...');
+        
+        // Add timeout to prevent infinite loading
+        const timeoutId = setTimeout(() => {
+          console.log('[Index] Timeout reached, setting initialized to true');
+          setIsInitialized(true);
+        }, 5000);
+        
         await supabaseDataManager.getSettings();
+        clearTimeout(timeoutId);
         setIsInitialized(true);
         console.log('[Index] Data initialized successfully');
       } catch (error) {

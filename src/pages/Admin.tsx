@@ -347,11 +347,23 @@ const Admin = () => {
   useEffect(() => {
     const checkAdminUsers = async () => {
       try {
+        console.log('[Admin] Checking admin users...');
+        
+        // Add timeout to prevent infinite loading
+        const timeoutId = setTimeout(() => {
+          console.log('[Admin] Timeout reached, setting hasAdminUsers to true');
+          setHasAdminUsers(true);
+          setIsLoading(false);
+        }, 5000);
+        
         const { data, error } = await supabase.rpc('has_admin_users');
+        clearTimeout(timeoutId);
+        
         if (error) {
           console.error('Error checking admin users:', error);
           setHasAdminUsers(false);
         } else {
+          console.log('[Admin] Admin users check result:', data);
           setHasAdminUsers(data);
         }
       } catch (error) {
