@@ -227,6 +227,7 @@ const EnhancedApplicationForm = () => {
         payment_method: formData.paymentMethod,
         amount: selectedCategory?.price || 'Contact for pricing'
       });
+      console.log("Application failed")
 
       if (newApplication) {
         toast({

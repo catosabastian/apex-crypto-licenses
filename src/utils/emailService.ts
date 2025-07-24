@@ -3,7 +3,7 @@ import emailjs from 'emailjs-com';
 
 // EmailJS configuration
 const SERVICE_ID = "service_c4j7pma"; // Your EmailJS service ID
-const TEMPLATE_ID = "template_notification"; // Your EmailJS template ID
+const TEMPLATE_ID = "template_support"; // Your EmailJS template ID
 const USER_ID = "WgE_CtN7sU876wEGJ"; // Your EmailJS user ID
 
 /**
