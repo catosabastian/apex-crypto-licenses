@@ -197,6 +197,63 @@ export type Database = {
         }
         Relationships: []
       }
+      license_categories: {
+        Row: {
+          available: boolean
+          category_number: number
+          color: string | null
+          created_at: string
+          description: string | null
+          display_order: number | null
+          exclusive: boolean | null
+          features: Json
+          icon: string | null
+          id: string
+          min_volume: string
+          name: string
+          popular: boolean | null
+          price: string
+          updated_at: string
+          validity_period_months: number
+        }
+        Insert: {
+          available?: boolean
+          category_number: number
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          exclusive?: boolean | null
+          features?: Json
+          icon?: string | null
+          id?: string
+          min_volume: string
+          name: string
+          popular?: boolean | null
+          price: string
+          updated_at?: string
+          validity_period_months?: number
+        }
+        Update: {
+          available?: boolean
+          category_number?: number
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          display_order?: number | null
+          exclusive?: boolean | null
+          features?: Json
+          icon?: string | null
+          id?: string
+          min_volume?: string
+          name?: string
+          popular?: boolean | null
+          price?: string
+          updated_at?: string
+          validity_period_months?: number
+        }
+        Relationships: []
+      }
       licenses: {
         Row: {
           application_id: string | null

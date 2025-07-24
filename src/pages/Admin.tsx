@@ -10,6 +10,7 @@ import SupabaseApplicationsManager from '@/components/admin/SupabaseApplications
 import { PaymentAddressManager } from '@/components/admin/PaymentAddressManager';
 import WebsiteSettingsManager from '@/components/admin/WebsiteSettingsManager';
 import LicenseManager from '@/components/admin/LicenseManager';
+import LicenseCategoriesManager from '@/components/admin/LicenseCategoriesManager';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -59,27 +60,13 @@ const Admin = () => {
       </header>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="dashboard" className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
-            Dashboard
-          </TabsTrigger>
-          <TabsTrigger value="applications" className="flex items-center gap-2">
-            <FileText className="h-4 w-4" />
-            Applications
-          </TabsTrigger>
-          <TabsTrigger value="licenses" className="flex items-center gap-2">
-            <Shield className="h-4 w-4" />
-            Licenses
-          </TabsTrigger>
-          <TabsTrigger value="payments" className="flex items-center gap-2">
-            <Wallet className="h-4 w-4" />
-            Payment Addresses
-          </TabsTrigger>
-          <TabsTrigger value="website" className="flex items-center gap-2">
-            <Shield className="h-4 w-4" />
-            Website Settings
-          </TabsTrigger>
+        <TabsList className="grid w-full grid-cols-6">
+          <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+          <TabsTrigger value="applications">Applications</TabsTrigger>
+          <TabsTrigger value="licenses">Licenses</TabsTrigger>
+          <TabsTrigger value="categories">Categories</TabsTrigger>
+          <TabsTrigger value="payments">Payments</TabsTrigger>
+          <TabsTrigger value="website">Website</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard" className="space-y-6">
@@ -142,6 +129,10 @@ const Admin = () => {
 
         <TabsContent value="licenses" className="space-y-6">
           <LicenseManager />
+        </TabsContent>
+
+        <TabsContent value="categories" className="space-y-6">
+          <LicenseCategoriesManager />
         </TabsContent>
 
         <TabsContent value="payments" className="space-y-6">

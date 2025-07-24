@@ -11,6 +11,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import QRCode from 'react-qr-code';
 import { supabaseDataManager } from '@/utils/supabaseDataManager';
+import { supabase } from '@/integrations/supabase/client';
 import EnhancedPersonalInfoSection from '@/components/form/EnhancedPersonalInfoSection';
 import EnhancedLicenseCategorySection from '@/components/form/EnhancedLicenseCategorySection';
 import EnhancedPaymentSection from '@/components/form/EnhancedPaymentSection';

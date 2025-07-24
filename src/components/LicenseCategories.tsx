@@ -6,42 +6,73 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { CheckCircle, ChevronRight, MessageSquareText, XCircle, Shield, Star, Crown, Building, Zap, Trophy, Wifi } from 'lucide-react';
 
 import SupportDialog from '@/components/SupportDialog';
-import { supabaseDataManager } from '@/utils/supabaseDataManager';
+import { supabase } from '@/integrations/supabase/client';
+
+interface LicenseCategory {
+  id: string;
+  category_number: number;
+  name: string;
+  price: string;
+  min_volume: string;
+  available: boolean;
+  features: string[];
+  icon: string;
+  color: string;
+  popular: boolean;
+  exclusive: boolean;
+}
 
 const LicenseCategories = () => {
-  
   const [isSupportDialogOpen, setSupportDialogOpen] = useState(false);
-  const [settings, setSettings] = useState<any>({});
+  const [categories, setCategories] = useState<LicenseCategory[]>([]);
+  const [loading, setLoading] = useState(true);
   const [lastUpdateTime, setLastUpdateTime] = useState<Date>(new Date());
   const [isConnected, setIsConnected] = useState(true);
 
   useEffect(() => {
-    const loadSettings = async () => {
+    const loadCategories = async () => {
       try {
-        const settingsData = await supabaseDataManager.getSettings();
-        setSettings(settingsData);
+        const { data, error } = await supabase
+          .from('license_categories')
+          .select('*')
+          .order('display_order', { ascending: true });
+
+        if (error) throw error;
+        setCategories((data || []).map(item => ({
+          ...item,
+          features: Array.isArray(item.features) ? item.features.filter(f => typeof f === 'string') as string[] : [],
+          color: item.color || 'blue',
+          display_order: item.display_order || 0,
+          popular: item.popular || false,
+          exclusive: item.exclusive || false,
+          description: item.description || undefined
+        })));
         setLastUpdateTime(new Date());
         setIsConnected(true);
       } catch (error) {
-        console.error('Error loading settings:', error);
+        console.error('Error loading categories:', error);
         setIsConnected(false);
+      } finally {
+        setLoading(false);
       }
     };
 
-    loadSettings();
+    loadCategories();
     
-    // Listen for real-time settings updates
-    const handleSettingsUpdate = (data: any) => {
-      console.log('[LicenseCategories] Settings update received:', data);
-      setSettings(data);
-      setLastUpdateTime(new Date());
-      setIsConnected(true);
-    };
-
-    supabaseDataManager.addEventListener('settings_updated', handleSettingsUpdate);
+    // Set up real-time subscription for license categories
+    const channel = supabase
+      .channel('license_categories_changes')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'license_categories'
+      }, () => {
+        loadCategories();
+      })
+      .subscribe();
 
     return () => {
-      supabaseDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
+      supabase.removeChannel(channel);
     };
   }, []);
   
@@ -75,137 +106,44 @@ const LicenseCategories = () => {
             </div>
           </div>
           
-          {/* Main License Categories - 3x2 Grid */}
-          <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-8 mb-12">
-            <LicenseCategory 
-              category={1}
-              title="Basic Trader"
-              price={(settings.category1Price || '10,000 USDT').replace(/"/g, '')}
-              minVolume="$50,000"
-              icon={Shield}
-              color="blue"
-              features={[
-                "1-year validity period",
-                "Individual trader verification",
-                "Basic compliance certification",
-                "Standard support response",
-                "Recognized on major exchanges",
-                "Email support during business hours"
-              ]}
-              soldOut={!settings.category1Available}
-            />
-            
-            <LicenseCategory 
-              category={2}
-              title="Standard Trader"
-              price={(settings.category2Price || '25,000 USDT').replace(/"/g, '')}
-              minVolume="$100,000"
-              icon={CheckCircle}
-              color="green"
-              features={[
-                "1-year validity period",
-                "Enhanced verification process",
-                "Standard compliance certification",
-                "Priority support response",
-                "Recognized on major exchanges",
-                "Basic trading protection coverage",
-                "Phone support during business hours"
-              ]}
-              soldOut={!settings.category2Available}
-            />
-            
-            <LicenseCategory 
-              category={3}
-              title="Advanced Trader"
-              price={(settings.category3Price || '50,000 USDT').replace(/"/g, '')}
-              minVolume="$250,000"
-              icon={Star}
-              color="purple"
-              features={[
-                "1-year validity period",
-                "Priority verification process",
-                "Advanced compliance certification",
-                "24/7 support response",
-                "Recognized on major exchanges",
-                "Trading strategy protection",
-                "Dedicated account manager",
-                "Advanced risk management tools"
-              ]}
-              soldOut={!settings.category3Available}
-              onApplyClick={() => document.getElementById('application')?.scrollIntoView({ behavior: 'smooth' })}
-            />
-
-            <LicenseCategory 
-              category={4}
-              title="Professional Trader"
-              price={(settings.category4Price || '100,000 USDT').replace(/"/g, '')}
-              minVolume="$500,000"
-              icon={Crown}
-              color="gold"
-              features={[
-                "1-year validity period",
-                "Fast-track verification",
-                "Professional compliance cert",
-                "Dedicated support line",
-                "Global regulatory recognition",
-                "Advanced trading protection",
-                "Multi-exchange access privileges",
-                "Custom compliance framework",
-                "Premium trading tools access"
-              ]}
-              popular
-              soldOut={!settings.category4Available}
-              onApplyClick={() => document.getElementById('application')?.scrollIntoView({ behavior: 'smooth' })}
-            />
-            
-            <LicenseCategory 
-              category={5}
-              title="Institutional Trader"
-              price={(settings.category5Price || '250,000 USDT').replace(/"/g, '')}
-              minVolume="$1,000,000+"
-              icon={Building}
-              color="platinum"
-              features={[
-                "1-year validity period",
-                "Expedited verification process",
-                "Comprehensive compliance cert",
-                "Dedicated account representative",
-                "Global regulatory recognition",
-                "Full trading strategy protection",
-                "Multi-user access controls",
-                "Custom compliance framework",
-                "White-label solutions available",
-                "API access for system integration"
-              ]}
-              soldOut={!settings.category5Available}
-              onApplyClick={() => document.getElementById('application')?.scrollIntoView({ behavior: 'smooth' })}
-            />
-
-            <LicenseCategory 
-              category={6}
-              title="Executive Trader"
-              price={(settings.category6Price || '500,000 USDT').replace(/"/g, '')}
-              minVolume="$2,500,000+"
-              icon={Trophy}
-              color="diamond"
-              features={[
-                "1-year validity period",
-                "Instant verification process",
-                "Executive compliance certification",
-                "Personal account executive",
-                "Worldwide regulatory recognition",
-                "Complete trading ecosystem protection",
-                "Unlimited user access controls",
-                "Bespoke compliance framework",
-                "Private trading infrastructure",
-                "Direct regulatory liaison",
-                "Custom integration solutions"
-              ]}
-              exclusive
-              soldOut={!settings.category6Available}
-              onApplyClick={() => document.getElementById('application')?.scrollIntoView({ behavior: 'smooth' })}
-            />
-          </div>
+          {/* Main License Categories - Dynamic from Database */}
+          {loading ? (
+            <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-8 mb-12">
+              {[...Array(6)].map((_, i) => (
+                <Card key={i} className="h-96 animate-pulse">
+                  <CardContent className="p-6">
+                    <div className="space-y-4">
+                      <div className="h-4 bg-muted rounded w-3/4"></div>
+                      <div className="h-8 bg-muted rounded w-1/2"></div>
+                      <div className="space-y-2">
+                        <div className="h-3 bg-muted rounded"></div>
+                        <div className="h-3 bg-muted rounded w-5/6"></div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-8 mb-12">
+              {categories.map((category) => (
+                <LicenseCategory 
+                  key={category.id}
+                  category={category.category_number}
+                  title={category.name}
+                  price={category.price}
+                  minVolume={category.min_volume}
+                  icon={getIconComponent(category.icon)}
+                  color={category.color}
+                  features={category.features}
+                  popular={category.popular}
+                  exclusive={category.exclusive}
+                  soldOut={!category.available}
+                  onApplyClick={() => document.getElementById('application')?.scrollIntoView({ behavior: 'smooth' })}
+                />
+              ))}
+            </div>
+          )}
           
           {/* Enterprise Solution Card */}
           <Card className="border-2 border-accent/30 shadow-xl">
@@ -259,6 +197,19 @@ const LicenseCategories = () => {
       </div>
     </section>
   );
+};
+
+// Helper function to get icon component from string
+const getIconComponent = (iconName: string) => {
+  const iconMap: { [key: string]: any } = {
+    Shield,
+    CheckCircle,
+    Star,
+    Crown,
+    Building,
+    Trophy
+  };
+  return iconMap[iconName] || Shield;
 };
 
 interface LicenseCategoryProps {
