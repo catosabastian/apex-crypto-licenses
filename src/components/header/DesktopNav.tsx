@@ -16,7 +16,7 @@ const DesktopNav = () => {
   
   return (
     <nav className="hidden md:flex items-center gap-6">
-      <a href="#about" className="text-sm font-medium hover:text-accent transition-colors">About</a>
+      <Link to="/about" className="text-sm font-medium hover:text-accent transition-colors">About</Link>
       <a href="#licenses" className="text-sm font-medium hover:text-accent transition-colors">Licenses</a>
       <Link to="/regulations" className="text-sm font-medium hover:text-accent transition-colors">Regulations</Link>
       <DropdownMenu>
@@ -39,9 +39,9 @@ const DesktopNav = () => {
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-      <a href="#verification" className="text-sm font-medium hover:text-accent transition-colors">Verification</a>
+      <Link to="/verify" className="text-sm font-medium hover:text-accent transition-colors">Verification</Link>
       <Button asChild>
-        <a href="/apply">Apply Now</a>
+        <Link to="/apply">Apply Now</Link>
       </Button>
     </nav>
   );

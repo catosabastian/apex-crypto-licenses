@@ -9,20 +9,9 @@ import { SimpleAuthProvider } from '@/contexts/SimpleAuthContext';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import Index from '@/pages/Index';
 import AboutPage from '@/pages/AboutPage';
-import LicenseTypesPage from '@/pages/LicenseTypesPage';
-import ProcessPage from '@/pages/ProcessPage';
-import PricingPage from '@/pages/PricingPage';
-import CompliancePage from '@/pages/CompliancePage';
-// import ContactPage from '@/pages/ContactPage';
-import SupportPage from '@/pages/SupportPage';
-import FAQPage from '@/pages/FAQPage';
-import ResourcesPage from '@/pages/ResourcesPage';
-import NewsPage from '@/pages/NewsPage';
-import TestimonialsPage from '@/pages/TestimonialsPage';
 import VerifyPage from '@/pages/VerifyPage';
 import AdminLogin from '@/pages/AdminLogin';
 import Admin from '@/pages/Admin';
-import Setup from '@/pages/Setup';
 import NotFound from '@/pages/NotFound';
 import CryptoServicesPage from '@/pages/services/CryptoServicesPage';
 import FinTechServicesPage from '@/pages/services/FinTechServicesPage';
@@ -59,21 +48,10 @@ function App() {
                       <Routes>
                         <Route path="/" element={<Index />} />
                         <Route path="/about" element={<AboutPage />} />
-                        <Route path="/license-types" element={<LicenseTypesPage />} />
-                        <Route path="/process" element={<ProcessPage />} />
-                        <Route path="/pricing" element={<PricingPage />} />
-                        <Route path="/compliance" element={<CompliancePage />} />
-                        <Route path="/contact" element={<SupportPage />} />
-                        <Route path="/support" element={<SupportPage />} />
-                        <Route path="/faq" element={<FAQPage />} />
-                        <Route path="/resources" element={<ResourcesPage />} />
-                        <Route path="/news" element={<NewsPage />} />
-                        <Route path="/testimonials" element={<TestimonialsPage />} />
                         <Route path="/regulations" element={<RegulationsPage />} />
-        <Route path="/apply" element={<ApplicationPage />} />
-        <Route path="/verify" element={<VerifyPage />} />
+                        <Route path="/apply" element={<ApplicationPage />} />
+                        <Route path="/verify" element={<VerifyPage />} />
                         <Route path="/admin-login" element={<AdminLogin />} />
-                        <Route path="/setup" element={<Setup />} />
                         <Route path="/services/crypto" element={<CryptoServicesPage />} />
                         <Route path="/services/fintech" element={<FinTechServicesPage />} />
                         <Route path="/services/gambling" element={<GamblingServicesPage />} />

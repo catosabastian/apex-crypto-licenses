@@ -15,10 +15,6 @@ const MobileNav = ({ isOpen, onToggle, onNavItemClick }: MobileNavProps) => {
   
   const [servicesOpen, setServicesOpen] = useState(false);
   
-  const handleApplyClick = () => {
-    window.location.href = '/apply';
-    onNavItemClick();
-  };
 
   const handleServiceClick = () => {
     onNavItemClick();
@@ -40,13 +36,13 @@ const MobileNav = ({ isOpen, onToggle, onNavItemClick }: MobileNavProps) => {
       {isOpen && (
         <div className="md:hidden bg-background border-t border-border animate-fade-in">
           <nav className="container flex flex-col py-4 gap-4">
-            <a 
-              href="#about" 
+            <Link 
+              to="/about" 
               className="text-sm font-medium py-2 hover:text-accent transition-colors" 
               onClick={onNavItemClick}
             >
               About
-            </a>
+            </Link>
             <a 
               href="#licenses" 
               className="text-sm font-medium py-2 hover:text-accent transition-colors" 
@@ -105,20 +101,15 @@ const MobileNav = ({ isOpen, onToggle, onNavItemClick }: MobileNavProps) => {
               )}
             </div>
             
-            <a 
-              href="#verification" 
+            <Link 
+              to="/verify" 
               className="text-sm font-medium py-2 hover:text-accent transition-colors" 
               onClick={onNavItemClick}
             >
               Verification
-            </a>
-            <Button 
-              variant="default" 
-              size="sm" 
-              className="w-full" 
-              onClick={handleApplyClick}
-            >
-              Apply Now
+            </Link>
+            <Button asChild variant="default" size="sm" className="w-full">
+              <Link to="/apply" onClick={onNavItemClick}>Apply Now</Link>
             </Button>
           </nav>
         </div>

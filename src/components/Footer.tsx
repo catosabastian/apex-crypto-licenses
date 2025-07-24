@@ -65,10 +65,10 @@ const Footer = () => {
           <div>
             <h3 className="font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2 text-sm">
-              <li><a href="#about" className="opacity-80 hover:opacity-100 transition-opacity">About Us</a></li>
+              <li><Link to="/about" className="opacity-80 hover:opacity-100 transition-opacity">About Us</Link></li>
               <li><a href="#licenses" className="opacity-80 hover:opacity-100 transition-opacity">License Categories</a></li>
-              <li><a href="#verification" className="opacity-80 hover:opacity-100 transition-opacity">Verification Process</a></li>
-              <li><a href="/#application" className="opacity-80 hover:opacity-100 transition-opacity">Application</a></li>
+              <li><Link to="/verify" className="opacity-80 hover:opacity-100 transition-opacity">Verification Process</Link></li>
+              <li><Link to="/apply" className="opacity-80 hover:opacity-100 transition-opacity">Application</Link></li>
             </ul>
           </div>
           
