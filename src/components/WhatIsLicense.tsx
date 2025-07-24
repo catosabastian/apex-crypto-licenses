@@ -4,23 +4,41 @@ import { Button } from '@/components/ui/button';
 import { Shield, FileText, Globe, CheckCircle } from 'lucide-react';
 import { useApplicationDialog } from '@/components/ApplicationDialog';
 import { useEffect, useState } from 'react';
-import { unifiedDataManager } from '@/utils/unifiedDataManager';
+//
 
 const WhatIsLicense = () => {
-  const [content, setContent] = useState(unifiedDataManager.getContent().whatIsLicense);
+  const content = {
+    subtitle: "Understanding Licenses",
+    title: "What is a Crypto Trading License?",
+    description: [
+      "A cryptocurrency trading license is an official authorization that allows individuals and organizations to legally trade digital assets in compliance with regulatory requirements.",
+      "Our licenses provide comprehensive legal coverage, ensuring your trading activities are fully compliant with international cryptocurrency regulations and local jurisdiction requirements."
+    ],
+    features: [
+      {
+        icon: 'Shield',
+        title: 'Legal Protection',
+        description: 'Complete legal framework for your trading operations'
+      },
+      {
+        icon: 'FileText',
+        title: 'Regulatory Compliance',
+        description: 'Full compliance with international crypto regulations'
+      },
+      {
+        icon: 'Globe',
+        title: 'Global Recognition',
+        description: 'Accepted in 180+ countries worldwide'
+      },
+      {
+        icon: 'CheckCircle',
+        title: 'Verified Status',
+        description: 'Officially verified and registered license status'
+      }
+    ],
+    ctaText: "Apply for License"
+  };
   const { openApplicationDialog } = useApplicationDialog();
-
-  useEffect(() => {
-    const handleContentUpdate = () => {
-      setContent(unifiedDataManager.getContent().whatIsLicense);
-    };
-
-    unifiedDataManager.addEventListener('content_updated', handleContentUpdate);
-    
-    return () => {
-      unifiedDataManager.removeEventListener('content_updated', handleContentUpdate);
-    };
-  }, []);
 
   const iconMap: Record<string, any> = {
     Shield,

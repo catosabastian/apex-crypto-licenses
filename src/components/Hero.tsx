@@ -3,12 +3,29 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, Shield, Award, Users, Globe, CheckCircle, Star, Zap, Sparkles } from 'lucide-react';
 import { useApplicationDialog } from '@/components/ApplicationDialog';
-import { unifiedDataManager } from '@/utils/unifiedDataManager';
+//
 
 const Hero = () => {
   const [scrolled, setScrolled] = useState(false);
   const [currentStat, setCurrentStat] = useState(0);
-  const [content, setContent] = useState(unifiedDataManager.getContent().hero);
+  const content = {
+    headline: "World's Leading Crypto Trading License Provider",
+    subheadline: "Get your official cryptocurrency trading license from a globally recognized regulatory authority. Fast, secure, and compliant with international standards.",
+    ctaText: "Get Licensed Now",
+    ctaSecondaryText: "Verify License",
+    stats: [
+      { icon: 'Users', value: '10,000+', label: 'Licensed Traders', color: 'text-blue-500' },
+      { icon: 'Globe', value: '150+', label: 'Countries Served', color: 'text-green-500' },
+      { icon: 'Award', value: '99.9%', label: 'Success Rate', color: 'text-purple-500' },
+      { icon: 'Shield', value: '24/7', label: 'Support Available', color: 'text-orange-500' }
+    ],
+    trustBadges: [
+      { name: 'ISO Certified', color: 'bg-green-50' },
+      { name: 'Regulatory Approved', color: 'bg-blue-50' },
+      { name: 'Globally Recognized', color: 'bg-purple-50' },
+      { name: 'Secure Platform', color: 'bg-orange-50' }
+    ]
+  };
   const { openApplicationDialog } = useApplicationDialog();
   
   useEffect(() => {
@@ -18,18 +35,6 @@ const Hero = () => {
     
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  useEffect(() => {
-    const handleContentUpdate = () => {
-      setContent(unifiedDataManager.getContent().hero);
-    };
-
-    unifiedDataManager.addEventListener('content_updated', handleContentUpdate);
-    
-    return () => {
-      unifiedDataManager.removeEventListener('content_updated', handleContentUpdate);
-    };
   }, []);
 
   const iconMap: Record<string, any> = {

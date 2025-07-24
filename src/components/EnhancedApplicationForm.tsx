@@ -284,7 +284,7 @@ const EnhancedApplicationForm = () => {
       });
       setCurrentStep(1);
     } catch (error) {
-      console.error('Application submission error:', error);
+      // Application submission error handled by toast
       toast({
         title: "Submission Failed",
         description: "Please try again",

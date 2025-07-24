@@ -8,23 +8,46 @@ import {
   Building, 
   HeadphonesIcon 
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { unifiedDataManager } from '@/utils/unifiedDataManager';
+//
 
 const FeaturesSection = () => {
-  const [content, setContent] = useState(unifiedDataManager.getContent().features);
-
-  useEffect(() => {
-    const handleContentUpdate = () => {
-      setContent(unifiedDataManager.getContent().features);
-    };
-
-    unifiedDataManager.addEventListener('content_updated', handleContentUpdate);
-    
-    return () => {
-      unifiedDataManager.removeEventListener('content_updated', handleContentUpdate);
-    };
-  }, []);
+  const content = {
+    subtitle: "Why Choose Us",
+    title: "Comprehensive Licensing Solutions",
+    description: "Our platform offers everything you need to obtain and maintain your cryptocurrency trading license.",
+    items: [
+      {
+        icon: 'Zap',
+        title: 'Fast Processing',
+        description: 'Get your license approved in as little as 24 hours with our streamlined process.'
+      },
+      {
+        icon: 'Shield',
+        title: 'Secure & Compliant',
+        description: 'Bank-level security with full regulatory compliance and legal backing.'
+      },
+      {
+        icon: 'Users',
+        title: 'Expert Support',
+        description: '24/7 dedicated support from our team of regulatory and compliance experts.'
+      },
+      {
+        icon: 'Lock',
+        title: 'Data Protection',
+        description: 'Your sensitive information is protected with military-grade encryption.'
+      },
+      {
+        icon: 'Building',
+        title: 'Institutional Grade',
+        description: 'Solutions designed for both individual traders and large institutions.'
+      },
+      {
+        icon: 'HeadphonesIcon',
+        title: 'Ongoing Support',
+        description: 'Continuous support and guidance throughout your licensing journey.'
+      }
+    ]
+  };
 
   const iconMap: Record<string, any> = {
     Zap,

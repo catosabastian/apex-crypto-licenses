@@ -12,10 +12,7 @@ import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useNavigate } from 'react-router-dom';
 import { supabaseDataManager } from '@/utils/supabaseDataManager';
 import SupabaseApplicationsManager from '@/components/admin/SupabaseApplicationsManager';
-import { ContactsManager } from '@/components/admin/ContactsManager';
 import UnifiedSettingsManager from '@/components/admin/UnifiedSettingsManager';
-import { LicenseManager } from '@/components/admin/LicenseManager';
-import { ContentManager } from '@/components/admin/ContentManager';
 import { PaymentAddressManager } from '@/components/admin/PaymentAddressManager';
 
 const Admin = () => {
@@ -33,7 +30,7 @@ const Admin = () => {
         const analyticsData = await supabaseDataManager.getAnalytics();
         setAnalytics(analyticsData);
       } catch (error) {
-        console.error('Error loading analytics:', error);
+        // Error loading analytics handled silently
       }
     };
     
@@ -212,7 +209,9 @@ const Admin = () => {
         </TabsContent>
 
         <TabsContent value="licenses" className="space-y-6">
-          <LicenseManager />
+          <div className="p-6 text-center text-muted-foreground">
+            License management moved to Supabase dashboard
+          </div>
         </TabsContent>
 
         <TabsContent value="applications" className="space-y-6">
@@ -220,11 +219,15 @@ const Admin = () => {
         </TabsContent>
 
         <TabsContent value="contacts" className="space-y-6">
-          <ContactsManager />
+          <div className="p-6 text-center text-muted-foreground">
+            Contact management moved to Supabase dashboard
+          </div>
         </TabsContent>
 
         <TabsContent value="content" className="space-y-6">
-          <ContentManager />
+          <div className="p-6 text-center text-muted-foreground">
+            Content management moved to Supabase dashboard
+          </div>
         </TabsContent>
 
         <TabsContent value="payments" className="space-y-6">

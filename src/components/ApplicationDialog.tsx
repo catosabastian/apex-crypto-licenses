@@ -19,12 +19,12 @@ export const ApplicationDialogProvider = ({ children }: { children: ReactNode })
   const [isOpen, setIsOpen] = useState(false);
 
   const openApplicationDialog = () => {
-    console.log('Opening application dialog');
+    // Opening application dialog
     setIsOpen(true);
   };
   
   const closeApplicationDialog = () => {
-    console.log('Closing application dialog');
+    // Closing application dialog
     setIsOpen(false);
   };
 
@@ -65,7 +65,7 @@ export const ApplicationDialogProvider = ({ children }: { children: ReactNode })
 export const useApplicationDialog = () => {
   const context = useContext(ApplicationDialogContext);
   if (!context) {
-    console.error('useApplicationDialog must be used within an ApplicationDialogProvider');
+    // useApplicationDialog must be used within an ApplicationDialogProvider
     throw new Error('useApplicationDialog must be used within an ApplicationDialogProvider');
   }
   return context;

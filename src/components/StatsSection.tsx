@@ -2,22 +2,52 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { TrendingUp, Users, Globe, Award, Shield, Star } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { unifiedDataManager } from '@/utils/unifiedDataManager';
+//
 
 const StatsSection = () => {
-  const [content, setContent] = useState(unifiedDataManager.getContent().stats);
-
-  useEffect(() => {
-    const handleContentUpdate = () => {
-      setContent(unifiedDataManager.getContent().stats);
-    };
-
-    unifiedDataManager.addEventListener('content_updated', handleContentUpdate);
-    
-    return () => {
-      unifiedDataManager.removeEventListener('content_updated', handleContentUpdate);
-    };
-  }, []);
+  const content = {
+    subtitle: "Our Impact",
+    title: "Trusted by Thousands Worldwide",
+    description: "Join the growing community of licensed cryptocurrency traders and institutions.",
+    items: [
+      {
+        icon: 'TrendingUp',
+        number: '15,000+',
+        label: 'Active Licenses',
+        description: 'Currently active trading licenses',
+        bgColor: 'bg-primary/10',
+        color: 'text-primary'
+      },
+      {
+        icon: 'Users',
+        number: '8,500+',
+        label: 'Licensed Traders',
+        description: 'Individual traders licensed',
+        bgColor: 'bg-accent-emerald/10',
+        color: 'text-accent-emerald'
+      },
+      {
+        icon: 'Globe',
+        number: '180+',
+        label: 'Countries',
+        description: 'Global market coverage',
+        bgColor: 'bg-accent-amber/10',
+        color: 'text-accent-amber'
+      },
+      {
+        icon: 'Award',
+        number: '99.8%',
+        label: 'Success Rate',
+        description: 'Application approval rate',
+        bgColor: 'bg-accent/10',
+        color: 'text-accent'
+      }
+    ],
+    trustIndicator: {
+      title: "Regulatory Authority Certification",
+      description: "All licenses are issued under the authority of international cryptocurrency regulatory frameworks and are legally binding in participating jurisdictions."
+    }
+  };
 
   const iconMap: Record<string, any> = {
     TrendingUp,

@@ -1,22 +1,35 @@
 
 import { Shield, CheckCircle, FileCheck, AlertTriangle } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { unifiedDataManager } from '@/utils/unifiedDataManager';
+import { supabaseDataManager } from '@/utils/supabaseDataManager';
 
 const AboutSection = () => {
-  const [content, setContent] = useState(unifiedDataManager.getContent().about);
-
-  useEffect(() => {
-    const handleContentUpdate = () => {
-      setContent(unifiedDataManager.getContent().about);
-    };
-
-    unifiedDataManager.addEventListener('content_updated', handleContentUpdate);
-    
-    return () => {
-      unifiedDataManager.removeEventListener('content_updated', handleContentUpdate);
-    };
-  }, []);
+  const [content, setContent] = useState({
+    subtitle: "About Our Authority",
+    title: "The Global Standard for Crypto Trading Compliance",
+    description: [
+      "As the world's leading cryptocurrency regulatory authority, we provide comprehensive licensing solutions for traders, exchanges, and financial institutions operating in the digital asset space.",
+      "Our licenses are recognized globally and ensure full compliance with international cryptocurrency trading regulations, giving you the confidence to operate legally in any jurisdiction."
+    ],
+    features: [
+      {
+        icon: 'Shield',
+        title: 'Regulatory Compliance',
+        description: 'Full compliance with international crypto trading laws and regulations.'
+      },
+      {
+        icon: 'CheckCircle',
+        title: 'Global Recognition',
+        description: 'Our licenses are accepted and recognized in over 150 countries worldwide.'
+      },
+      {
+        icon: 'FileCheck',
+        title: 'Legal Protection',
+        description: 'Complete legal protection for your trading activities and business operations.'
+      }
+    ],
+    legalNotice: "This regulatory authority is duly authorized to issue cryptocurrency trading licenses under international financial regulations. All licenses issued are legally binding and provide full regulatory compliance for cryptocurrency trading activities."
+  });
 
   const iconMap: Record<string, any> = {
     Shield,

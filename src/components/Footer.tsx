@@ -4,24 +4,31 @@ import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
 import { useApplicationDialog } from "./ApplicationDialog";
 import { useState, useEffect } from "react";
-import { unifiedDataManager, ContentSettings } from "@/utils/unifiedDataManager";
+import { supabaseDataManager } from "@/utils/supabaseDataManager";
 
 const Footer = () => {
   const { openApplicationDialog } = useApplicationDialog();
-  const [settings, setSettings] = useState<ContentSettings>(unifiedDataManager.getSettings());
+  const [settings, setSettings] = useState<any>({
+    companyName: 'APEX Crypto Licensing',
+    supportEmail: 'support@apexcrypto.com',
+    contactPhone: '+1 (555) 123-4567',
+    companyAddress: '123 Business District',
+    city: 'Financial City, FC 12345',
+    country: 'United States',
+    website: 'https://apexcrypto.com'
+  });
   
   useEffect(() => {
-    // Real-time settings update handler
-    const handleSettingsUpdate = (data: { settings: ContentSettings }) => {
-      setSettings(data.settings);
+    const loadSettings = async () => {
+      try {
+        const settingsData = await supabaseDataManager.getSettings();
+        setSettings(settingsData);
+      } catch (error) {
+        // Error loading settings handled silently
+      }
     };
 
-    // Listen to unified data manager events
-    unifiedDataManager.addEventListener('settings_updated', handleSettingsUpdate);
-
-    return () => {
-      unifiedDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
-    };
+    loadSettings();
   }, []);
   
   return (

@@ -12,7 +12,7 @@ import LicenseTypesPage from '@/pages/LicenseTypesPage';
 import ProcessPage from '@/pages/ProcessPage';
 import PricingPage from '@/pages/PricingPage';
 import CompliancePage from '@/pages/CompliancePage';
-import ContactPage from '@/pages/ContactPage';
+// import ContactPage from '@/pages/ContactPage';
 import SupportPage from '@/pages/SupportPage';
 import FAQPage from '@/pages/FAQPage';
 import ResourcesPage from '@/pages/ResourcesPage';
@@ -60,7 +60,7 @@ function App() {
                         <Route path="/process" element={<ProcessPage />} />
                         <Route path="/pricing" element={<PricingPage />} />
                         <Route path="/compliance" element={<CompliancePage />} />
-                        <Route path="/contact" element={<ContactPage />} />
+                        <Route path="/contact" element={<SupportPage />} />
                         <Route path="/support" element={<SupportPage />} />
                         <Route path="/faq" element={<FAQPage />} />
                         <Route path="/resources" element={<ResourcesPage />} />

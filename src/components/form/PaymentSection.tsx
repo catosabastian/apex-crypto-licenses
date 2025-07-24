@@ -9,14 +9,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Copy, Check, QrCode, Wallet, AlertCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { ContentSettings } from '@/utils/unifiedDataManager';
+//
 import QRCode from 'react-qr-code';
 
 interface PaymentSectionProps {
   selectedCrypto: string;
   onCryptoChange: (crypto: string) => void;
   selectedCategory: string;
-  settings: ContentSettings;
+  settings: any;
 }
 
 const PaymentSection = ({ selectedCrypto, onCryptoChange, selectedCategory, settings }: PaymentSectionProps) => {

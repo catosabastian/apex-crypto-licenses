@@ -46,7 +46,7 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
         
         setSettings(formattedSettings);
       } catch (error) {
-        console.error('Error loading settings:', error);
+        // Error loading settings silently handled
       }
     };
 
@@ -128,7 +128,7 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
           walletAddress: getSelectedWalletAddress()
         }, ADMIN_EMAIL);
       } catch (emailError) {
-        console.log('Email notification failed:', emailError);
+        // Email notification failed - continue silently
       }
       
       toast({
@@ -142,7 +142,7 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
         setTimeout(onClose, 1500);
       }
     } catch (error) {
-      console.error("Error submitting application:", error);
+      // Error submitting application handled by toast
       toast({
         title: "Submission Failed",
         description: "There was an error submitting your application. Please try again.",
