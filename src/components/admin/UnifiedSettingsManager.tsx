@@ -6,9 +6,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Settings, Wallet, Mail, Globe } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabaseDataManager } from '@/utils/supabaseDataManager';
-import { SettingsManager } from './SettingsManager';
+import EnhancedSettingsManager from './EnhancedSettingsManager';
 import { PaymentAddressManager } from './PaymentAddressManager';
 import { ContactSettingsManager } from './ContactSettingsManager';
+import WebsiteSettingsManager from './WebsiteSettingsManager';
+import SEOSettingsManager from './SEOSettingsManager';
+import PlanValidityManager from './PlanValidityManager';
 
 export const UnifiedSettingsManager = () => {
   const [activeSettingsTab, setActiveSettingsTab] = useState('pricing');
@@ -111,7 +114,7 @@ export const UnifiedSettingsManager = () => {
         </TabsList>
 
         <TabsContent value="pricing" className="space-y-6">
-          <SettingsManager />
+          <EnhancedSettingsManager />
         </TabsContent>
 
         <TabsContent value="payments" className="space-y-6">
@@ -123,22 +126,9 @@ export const UnifiedSettingsManager = () => {
         </TabsContent>
 
         <TabsContent value="website" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Website Settings</CardTitle>
-              <CardDescription>
-                Configure website-wide settings and preferences
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <p className="text-muted-foreground">
-                  Website settings management will be available in a future update.
-                  Use the Content Management section to update website content.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <WebsiteSettingsManager />
+          <SEOSettingsManager />
+          <PlanValidityManager />
         </TabsContent>
       </Tabs>
     </div>

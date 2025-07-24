@@ -8,12 +8,8 @@ import { useNavigate } from 'react-router-dom';
 import { ApplicationsManager } from '@/components/admin/ApplicationsManager';
 import { ContactsManager } from '@/components/admin/ContactsManager';
 import { LicenseManager } from '@/components/admin/LicenseManager';
-import { SettingsManager } from '@/components/admin/SettingsManager';
-import { PaymentAddressManager } from '@/components/admin/PaymentAddressManager';
+import { UnifiedSettingsManager } from '@/components/admin/UnifiedSettingsManager';
 import { DynamicContentManager } from '@/components/admin/DynamicContentManager';
-import WebsiteSettingsManager from '@/components/admin/WebsiteSettingsManager';
-import SEOSettingsManager from '@/components/admin/SEOSettingsManager';
-import PlanValidityManager from '@/components/admin/PlanValidityManager';
 import AuditLogViewer from '@/components/admin/AuditLogViewer';
 import { LogOut, Shield } from 'lucide-react';
 
@@ -50,16 +46,12 @@ const Admin = () => {
 
       <div className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-9">
-            <TabsTrigger value="applications">Apps</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="applications">Applications</TabsTrigger>
             <TabsTrigger value="contacts">Contacts</TabsTrigger>
             <TabsTrigger value="licenses">Licenses</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
-            <TabsTrigger value="payments">Payments</TabsTrigger>
             <TabsTrigger value="content">Content</TabsTrigger>
-            <TabsTrigger value="website">Website</TabsTrigger>
-            <TabsTrigger value="seo">SEO</TabsTrigger>
-            <TabsTrigger value="audit">Audit</TabsTrigger>
           </TabsList>
 
           <TabsContent value="applications" className="space-y-6">
@@ -75,28 +67,12 @@ const Admin = () => {
           </TabsContent>
 
           <TabsContent value="settings" className="space-y-6">
-            <SettingsManager />
-          </TabsContent>
-
-          <TabsContent value="payments" className="space-y-6">
-            <PaymentAddressManager />
+            <UnifiedSettingsManager />
+            <AuditLogViewer />
           </TabsContent>
 
           <TabsContent value="content" className="space-y-6">
             <DynamicContentManager />
-          </TabsContent>
-
-          <TabsContent value="website" className="space-y-6">
-            <WebsiteSettingsManager />
-            <PlanValidityManager />
-          </TabsContent>
-
-          <TabsContent value="seo" className="space-y-6">
-            <SEOSettingsManager />
-          </TabsContent>
-
-          <TabsContent value="audit" className="space-y-6">
-            <AuditLogViewer />
           </TabsContent>
         </Tabs>
       </div>

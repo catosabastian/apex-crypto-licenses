@@ -641,17 +641,24 @@ class SupabaseDataManager {
 
   async verifyLicense(licenseId: string): Promise<License | null> {
     try {
-      const { data, error } = await (supabase as any)
+      console.log('[SupabaseDataManager] Verifying license:', licenseId);
+      
+      const { data, error } = await supabase
         .from('licenses')
         .select('*')
         .eq('license_id', licenseId)
         .eq('status', 'active')
-        .single();
+        .maybeSingle();
 
-      if (error) throw error;
-      return data;
+      if (error) {
+        console.error('[SupabaseDataManager] Error verifying license:', error);
+        return null;
+      }
+      
+      console.log('[SupabaseDataManager] License verification result:', data);
+      return data as License;
     } catch (error) {
-      console.error('Error verifying license:', error);
+      console.error('[SupabaseDataManager] Error verifying license:', error);
       return null;
     }
   }
@@ -727,33 +734,66 @@ class SupabaseDataManager {
 
   async updateSetting(key: string, value: any): Promise<Setting | null> {
     try {
-      const settingValue = typeof value === 'string' ? value : value;
+      console.log('[SupabaseDataManager] Updating setting:', { key, value });
       
-      const { data, error } = await (supabase as any)
+      // Ensure initialization before updating
+      await this.ensureInitialized();
+      
+      // Handle different value types
+      let settingValue = value;
+      if (typeof value === 'object' && value !== null) {
+        settingValue = value;
+      } else if (typeof value === 'boolean') {
+        settingValue = value;
+      } else {
+        settingValue = value;
+      }
+      
+      const settingData = { 
+        key, 
+        value: settingValue, 
+        category: key.startsWith('category') ? 'pricing' : 'general',
+        updated_at: new Date().toISOString()
+      };
+      
+      console.log('[SupabaseDataManager] Upserting setting data:', settingData);
+      
+      const { data, error } = await supabase
         .from('settings')
-        .upsert({ 
-          key, 
-          value: settingValue, 
-          category: key.startsWith('category') ? 'pricing' : 'general',
-          updated_at: new Date().toISOString()
-        }, {
+        .upsert(settingData, {
           onConflict: 'key'
         })
         .select()
         .single();
 
       if (error) {
-        console.error('Error updating setting:', error);
-        throw error;
+        console.error('[SupabaseDataManager] Error updating setting:', error);
+        
+        // Try insert if upsert fails
+        const { data: insertData, error: insertError } = await supabase
+          .from('settings')
+          .insert(settingData)
+          .select()
+          .single();
+          
+        if (insertError) {
+          console.error('[SupabaseDataManager] Error inserting setting:', insertError);
+          throw insertError;
+        }
+        
+        console.log('[SupabaseDataManager] Setting inserted successfully:', insertData);
+        await this.loadSettings();
+        this.notifyListeners('settings_updated', insertData);
+        return insertData;
       }
       
+      console.log('[SupabaseDataManager] Setting updated successfully:', data);
       await this.loadSettings();
       this.notifyListeners('settings_updated', data);
       
-      console.log('Setting updated successfully:', { key, value: settingValue, data });
       return data;
     } catch (error) {
-      console.error('Error updating setting:', error);
+      console.error('[SupabaseDataManager] Error updating setting:', error);
       throw error;
     }
   }
@@ -952,6 +992,56 @@ class SupabaseDataManager {
       return true;
     } catch (error) {
       console.error('Error bulk deleting applications:', error);
+      return false;
+    }
+  }
+
+  // Bulk settings operations
+  async bulkUpdateSettings(settingsToUpdate: Record<string, any>): Promise<boolean> {
+    try {
+      console.log('[SupabaseDataManager] Bulk updating settings:', settingsToUpdate);
+      
+      await this.ensureInitialized();
+      
+      const settingsData = Object.entries(settingsToUpdate).map(([key, value]) => ({
+        key,
+        value,
+        category: key.startsWith('category') ? 'pricing' : 'general',
+        updated_at: new Date().toISOString()
+      }));
+      
+      console.log('[SupabaseDataManager] Bulk upsert data:', settingsData);
+      
+      const { data, error } = await supabase
+        .from('settings')
+        .upsert(settingsData, {
+          onConflict: 'key'
+        })
+        .select();
+
+      if (error) {
+        console.error('[SupabaseDataManager] Error bulk updating settings:', error);
+        
+        // Try individual inserts if bulk upsert fails
+        let success = true;
+        for (const setting of settingsData) {
+          try {
+            await this.updateSetting(setting.key, setting.value);
+          } catch (err) {
+            console.error(`[SupabaseDataManager] Error updating setting ${setting.key}:`, err);
+            success = false;
+          }
+        }
+        return success;
+      }
+      
+      console.log('[SupabaseDataManager] Bulk settings updated successfully:', data);
+      await this.loadSettings();
+      this.notifyListeners('settings_updated', data);
+      
+      return true;
+    } catch (error) {
+      console.error('[SupabaseDataManager] Error bulk updating settings:', error);
       return false;
     }
   }
