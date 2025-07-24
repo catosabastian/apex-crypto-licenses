@@ -39,9 +39,6 @@ const DesktopNav = () => {
         </DropdownMenuContent>
       </DropdownMenu>
       <a href="#verification" className="text-sm font-medium hover:text-accent transition-colors">Verification</a>
-      <Button variant="outline" size="sm" asChild>
-        <Link to="/setup">Setup</Link>
-      </Button>
       <Button variant="default" size="sm" onClick={() => document.getElementById('application')?.scrollIntoView({ behavior: 'smooth' })}>Apply Now</Button>
     </nav>
   );

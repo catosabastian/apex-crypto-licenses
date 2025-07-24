@@ -9,6 +9,7 @@ import ProcessSteps from '@/components/ProcessSteps';
 import FeaturesSection from '@/components/FeaturesSection';
 import StatsSection from '@/components/StatsSection';
 import VerificationSection from '@/components/VerificationSection';
+import EnhancedApplicationForm from '@/components/EnhancedApplicationForm';
 import Footer from '@/components/Footer';
 
 import SupportDialog from '@/components/SupportDialog';
@@ -41,6 +42,11 @@ const Index = () => {
         <FeaturesSection />
         <StatsSection />
         <VerificationSection />
+        <section id="application" className="py-20 bg-muted/30">
+          <div className="container">
+            <EnhancedApplicationForm />
+          </div>
+        </section>
       </main>
       <Footer />
       

@@ -4,7 +4,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 
-import { SupabaseAuthProvider } from '@/contexts/SupabaseAuthContext';
+import { SimpleAuthProvider } from '@/contexts/SimpleAuthContext';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import Index from '@/pages/Index';
 import AboutPage from '@/pages/AboutPage';
@@ -19,7 +19,7 @@ import ResourcesPage from '@/pages/ResourcesPage';
 import NewsPage from '@/pages/NewsPage';
 import TestimonialsPage from '@/pages/TestimonialsPage';
 import VerifyPage from '@/pages/VerifyPage';
-import AuthPage from '@/pages/AuthPage';
+import AdminLogin from '@/pages/AdminLogin';
 import Admin from '@/pages/Admin';
 import Setup from '@/pages/Setup';
 import NotFound from '@/pages/NotFound';
@@ -45,7 +45,7 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
           <BrowserRouter>
-        <SupabaseAuthProvider>
+        <SimpleAuthProvider>
                   <div className="min-h-screen bg-background font-sans antialiased">
                     <Suspense fallback={
                       <div className="min-h-screen flex items-center justify-center">
@@ -66,7 +66,7 @@ function App() {
                         <Route path="/news" element={<NewsPage />} />
                         <Route path="/testimonials" element={<TestimonialsPage />} />
                         <Route path="/verify" element={<VerifyPage />} />
-                        <Route path="/auth" element={<AuthPage />} />
+                        <Route path="/admin-login" element={<AdminLogin />} />
                         <Route path="/setup" element={<Setup />} />
                         <Route path="/services/crypto" element={<CryptoServicesPage />} />
                         <Route path="/services/fintech" element={<FinTechServicesPage />} />
@@ -85,7 +85,7 @@ function App() {
                     </Suspense>
                   </div>
                   <Toaster />
-              </SupabaseAuthProvider>
+              </SimpleAuthProvider>
           </BrowserRouter>
         </TooltipProvider>
       </QueryClientProvider>

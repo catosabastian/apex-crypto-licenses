@@ -3,16 +3,17 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Shield, LogOut, BarChart3, FileText, Wallet, Mail } from 'lucide-react';
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useSimpleAuth } from '@/contexts/SimpleAuthContext';
 import { useNavigate } from 'react-router-dom';
 import { supabaseDataManager } from '@/utils/supabaseDataManager';
 import SupabaseApplicationsManager from '@/components/admin/SupabaseApplicationsManager';
 import { PaymentAddressManager } from '@/components/admin/PaymentAddressManager';
+import WebsiteSettingsManager from '@/components/admin/WebsiteSettingsManager';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [analytics, setAnalytics] = useState({ totalApplications: 0, pendingApplications: 0, approvedApplications: 0, activeLicenses: 0, totalRevenue: 0, newContacts: 0 });
-  const { signOut } = useSupabaseAuth();
+  const { logout } = useSimpleAuth();
   const navigate = useNavigate();
 
   // Load analytics data from Supabase
@@ -31,8 +32,8 @@ const Admin = () => {
 
 
   const handleLogout = async () => {
-    await signOut();
-    navigate('/auth');
+    logout();
+    navigate('/admin-login');
   };
 
   return (
@@ -57,7 +58,7 @@ const Admin = () => {
       </header>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="dashboard" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             Dashboard
@@ -73,6 +74,10 @@ const Admin = () => {
           <TabsTrigger value="payments" className="flex items-center gap-2">
             <Wallet className="h-4 w-4" />
             Payment Addresses
+          </TabsTrigger>
+          <TabsTrigger value="website" className="flex items-center gap-2">
+            <Shield className="h-4 w-4" />
+            Website Settings
           </TabsTrigger>
         </TabsList>
 
@@ -142,6 +147,10 @@ const Admin = () => {
 
         <TabsContent value="payments" className="space-y-6">
           <PaymentAddressManager />
+        </TabsContent>
+
+        <TabsContent value="website" className="space-y-6">
+          <WebsiteSettingsManager />
         </TabsContent>
       </Tabs>
     </div>

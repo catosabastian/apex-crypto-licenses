@@ -1,13 +1,13 @@
 
 import { Navigate, useLocation } from "react-router-dom";
-import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
+import { useSimpleAuth } from "@/contexts/SimpleAuthContext";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
-  const { isAuthenticated, isAdmin, loading } = useSupabaseAuth();
+  const { isAuthenticated, isAdmin, loading } = useSimpleAuth();
   const location = useLocation();
 
   if (loading) {

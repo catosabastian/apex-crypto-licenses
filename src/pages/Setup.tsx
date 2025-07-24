@@ -9,12 +9,63 @@ import { createClient } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
 
 const Setup = () => {
+  const [accessCode, setAccessCode] = useState('');
+  const [isAuthorized, setIsAuthorized] = useState(false);
   const [supabaseUrl, setSupabaseUrl] = useState('');
   const [supabaseKey, setSupabaseKey] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [testResult, setTestResult] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  const checkAccessCode = () => {
+    if (accessCode === '2058') {
+      setIsAuthorized(true);
+      toast({
+        title: "Access Granted",
+        description: "You can now proceed with the setup",
+      });
+    } else {
+      toast({
+        title: "Access Denied",
+        description: "Invalid access code",
+        variant: "destructive",
+      });
+    }
+  };
+
+  if (!isAuthorized) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-background to-muted/50 p-4">
+        <div className="max-w-md mx-auto pt-20">
+          <Card>
+            <CardHeader>
+              <CardTitle>Setup Access</CardTitle>
+              <CardDescription>
+                Enter the access code to proceed with setup
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="accessCode">Access Code</Label>
+                <Input
+                  id="accessCode"
+                  type="password"
+                  placeholder="Enter access code"
+                  value={accessCode}
+                  onChange={(e) => setAccessCode(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && checkAccessCode()}
+                />
+              </div>
+              <Button onClick={checkAccessCode} className="w-full">
+                Verify Access
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   const databaseSchema = `
 -- Create applications table
