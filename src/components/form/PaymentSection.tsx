@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Copy, Check, QrCode, Wallet, AlertCircle, Loader2 } from 'lucide-react';
+import { Copy, Check, QrCode, Wallet, AlertCircle, Loader2, Shield, Star, Crown, Trophy, Building, CheckCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabaseDataManager } from '@/utils/supabaseDataManager';
 import QRCode from 'react-qr-code';
@@ -169,6 +169,42 @@ const PaymentSection = ({ selectedCrypto, onCryptoChange, selectedCategory }: Pa
     }
   };
 
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case '1': return Shield;
+      case '2': return CheckCircle;
+      case '3': return Star;
+      case '4': return Crown;
+      case '5': return Building;
+      case '6': return Trophy;
+      case '7': return Wallet;
+      case '8': return Building;
+      case '9': return Building;
+      case '10': return Star;
+      case '11': return Crown;
+      case '12': return Trophy;
+      default: return Shield;
+    }
+  };
+
+  const getCategoryFeatures = (category: string): string[] => {
+    switch (category) {
+      case '1': return ['Basic trading access', 'Email support', 'Standard documentation', '1-year validity'];
+      case '2': return ['Enhanced trading limits', 'Priority support', 'Advanced analytics', '1-year validity'];
+      case '3': return ['Professional tools', 'API access', 'Dedicated account manager', '1-year validity'];
+      case '4': return ['Institutional access', 'Custom integrations', 'Premium support', '1-year validity'];
+      case '5': return ['Enterprise solutions', 'White-label options', 'Global compliance', '1-year validity'];
+      case '6': return ['Executive privileges', 'Regulatory assistance', 'Full service package', '1-year validity'];
+      case '7': return ['Crypto wallet services', 'Multi-currency support', 'Security features', '1-year validity'];
+      case '8': return ['EMI license', 'Payment processing', 'Compliance support', '1-year validity'];
+      case '9': return ['MSP license', 'Money services', 'Regulatory compliance', '1-year validity'];
+      case '10': return ['Online gambling license', 'Gaming compliance', 'Regulatory support', '1-year validity'];
+      case '11': return ['Lottery license', 'Gaming operations', 'Legal compliance', '1-year validity'];
+      case '12': return ['Corporate services', 'Offshore solutions', 'Business setup', '1-year validity'];
+      default: return ['Standard features', 'Basic support', '1-year validity'];
+    }
+  };
+
   const handleCopyAddress = async (address: string, type: string) => {
     if (!address) {
       toast({
@@ -253,13 +289,21 @@ const PaymentSection = ({ selectedCrypto, onCryptoChange, selectedCategory }: Pa
               {selectedCategory && (
                 <div className="p-6 bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg transition-all duration-200 hover:shadow-sm">
                   <div className="flex items-center justify-between mb-4">
-                    <div className="flex flex-col">
-                      <span className="text-lg font-semibold text-foreground">
-                        {getCategoryName(selectedCategory)}
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        Category {selectedCategory} License
-                      </span>
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-xl bg-primary/20 border border-primary/30 flex items-center justify-center">
+                        {(() => {
+                          const Icon = getCategoryIcon(selectedCategory);
+                          return <Icon className="h-6 w-6 text-primary" />;
+                        })()}
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-lg font-semibold text-foreground">
+                          {getCategoryName(selectedCategory)}
+                        </span>
+                        <span className="text-sm text-muted-foreground">
+                          Category {selectedCategory} License
+                        </span>
+                      </div>
                     </div>
                     <div className="flex items-center gap-2">
                       {isLoadingPrice && (
@@ -271,16 +315,27 @@ const PaymentSection = ({ selectedCrypto, onCryptoChange, selectedCategory }: Pa
                     </div>
                   </div>
                   
-                  <div className="text-center p-4 bg-background/50 rounded-lg border border-primary/10">
-                    <p className="text-sm text-muted-foreground mb-2">
-                      Selected Plan Price
-                    </p>
-                    <p className="text-3xl font-bold text-primary">
-                      {getCategoryPrice(selectedCategory)}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      💡 Price updated in real-time from admin system
-                    </p>
+                  <div className="space-y-3">
+                    <div className="text-center p-4 bg-background/50 rounded-lg border border-primary/10">
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Total Amount Due
+                      </p>
+                      <p className="text-3xl font-bold text-primary">
+                        {getCategoryPrice(selectedCategory)}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        💡 Real-time pricing from admin system
+                      </p>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {getCategoryFeatures(selectedCategory).map((feature, index) => (
+                        <div key={index} className="flex items-center gap-2 text-sm">
+                          <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                          <span className="text-muted-foreground">{feature}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               )}
