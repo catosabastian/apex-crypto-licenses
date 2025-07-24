@@ -133,9 +133,9 @@ const RegulationsPage = () => {
       <div className="container mx-auto px-4 py-12 space-y-12">
         {/* Hero Section */}
         <div className="text-center space-y-6">
-          <div className="flex items-center justify-center gap-3 mb-6">
+          <div className="flex flex-col items-center justify-center gap-4 mb-6">
             <Scale className="h-12 w-12 text-primary" />
-            <div>
+            <div className="text-center">
               <h1 className="text-4xl md:text-5xl font-bold gradient-text">
                 APEX Regulations
               </h1>
