@@ -64,7 +64,7 @@ export function DynamicContentManager() {
     const loadContent = async () => {
       try {
         setIsLoading(true);
-        const allContent = await supabaseDataManager.getSettings();
+        const allContent = await supabaseDataManager.getContent();
         
         setContent({
           hero: {
@@ -122,7 +122,7 @@ export function DynamicContentManager() {
       const sectionContent = content[section];
       
       for (const [key, value] of Object.entries(sectionContent)) {
-        await supabaseDataManager.updateContent(key, value);
+        await supabaseDataManager.updateContent(section, key, value);
       }
       
       toast({

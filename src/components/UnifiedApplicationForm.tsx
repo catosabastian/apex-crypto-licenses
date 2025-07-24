@@ -56,35 +56,19 @@ const UnifiedApplicationForm = () => {
       try {
         setIsLoading(true);
         const settings = await supabaseDataManager.getSettings();
+        const licenseCategories = settings.license_categories || {};
         
-        // Build categories from individual settings
-        const builtCategories: LicenseCategory[] = [];
-        
-        // Extract category numbers from settings keys
-        const categoryKeys = Object.keys(settings || {}).filter(key => key.startsWith('category') && key.includes('_name'));
-        const categoryNumbers = [...new Set(categoryKeys.map(key => key.match(/category(\d+)_/)?.[1]).filter(Boolean))];
-        
-        categoryNumbers.forEach(num => {
-          const name = settings?.[`category${num}_name`];
-          const price = settings?.[`category${num}_price`];
-          const available = settings?.[`category${num}_available`];
-          const description = settings?.[`category${num}_description`];
-          const minVolume = settings?.[`category${num}_minVolume`];
-          
-          if (name && price !== undefined) {
-            builtCategories.push({
-              id: `category${num}`,
-              name: name,
-              price: `$${parseFloat(price).toLocaleString()}`,
-              available: available === 'true' || available === true,
-              description: description || 'Professional license for trading operations',
-              minVolume: minVolume || '1',
-              status: (available === 'true' || available === true) ? 'AVAILABLE' : 'SOLD OUT'
-            });
-          }
-        });
-        
-        setCategories(builtCategories);
+        const categoryList: LicenseCategory[] = Object.entries(licenseCategories).map(([key, category]: [string, any]) => ({
+          id: key,
+          name: category.name,
+          price: category.price,
+          minVolume: category.minVolume,
+          available: category.available,
+          status: category.available ? 'AVAILABLE' : 'SOLD OUT',
+          description: category.description || 'Professional license for trading operations'
+        }));
+
+        setCategories(categoryList);
         setLastUpdated(new Date());
       } catch (error) {
         console.error('Error loading categories:', error);
@@ -150,13 +134,11 @@ const UnifiedApplicationForm = () => {
         notes: formData.notes,
         payment_method: formData.paymentMethod,
         transaction_id: formData.transactionId,
-        amount: selectedCategory.price.replace('$', '').replace(',', ''), // Remove formatting for DB
+        amount: selectedCategory.price,
         status: 'pending' as const
       };
 
-      console.log('Submitting application data:', applicationData);
       const result = await supabaseDataManager.createApplication(applicationData);
-      console.log('Application result:', result);
       
       if (result) {
         toast({

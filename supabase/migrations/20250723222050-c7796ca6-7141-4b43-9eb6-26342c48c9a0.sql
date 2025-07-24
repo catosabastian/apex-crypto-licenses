@@ -1,4 +1,0 @@
--- Confirm the admin user's email
-UPDATE auth.users 
-SET email_confirmed_at = now()
-WHERE email = 'admin@apex.com' AND email_confirmed_at IS NULL;

@@ -1,14 +1,13 @@
-
 import { Navigate, useLocation } from "react-router-dom";
 import { useSupabaseAuth } from "@/contexts/SupabaseAuthContext";
 import { Loader2 } from "lucide-react";
 
 interface SupabaseProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: string;
+  requireAdmin?: boolean;
 }
 
-const SupabaseProtectedRoute = ({ children, requiredRole }: SupabaseProtectedRouteProps) => {
+const SupabaseProtectedRoute = ({ children, requireAdmin = true }: SupabaseProtectedRouteProps) => {
   const { isAuthenticated, isAdmin, isLoading } = useSupabaseAuth();
   const location = useLocation();
 
@@ -29,7 +28,7 @@ const SupabaseProtectedRoute = ({ children, requiredRole }: SupabaseProtectedRou
     return <Navigate to="/setup" state={{ from: location }} replace />;
   }
 
-  if (requiredRole === "admin" && !isAdmin) {
+  if (requireAdmin && !isAdmin) {
     // Redirect to setup page to become admin
     return <Navigate to="/setup" state={{ from: location }} replace />;
   }

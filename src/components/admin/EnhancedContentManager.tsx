@@ -49,7 +49,7 @@ const EnhancedContentManager = () => {
   const saveContent = async (content: any) => {
     try {
       setSaving(true);
-      await supabaseDataManager.updateContent(content.key, content.value);
+      await supabaseDataManager.updateContent(content.section, content.key, content.value);
       
       toast({
         title: "Success",
