@@ -1,8 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { X, Menu } from 'lucide-react';
+import { X, Menu, ChevronDown, ChevronUp } from 'lucide-react';
 import { useApplicationDialog } from '@/components/ApplicationDialog';
+import { Link } from 'react-router-dom';
 
 interface MobileNavProps {
   isOpen: boolean;
@@ -12,10 +13,16 @@ interface MobileNavProps {
 
 const MobileNav = ({ isOpen, onToggle, onNavItemClick }: MobileNavProps) => {
   const { openApplicationDialog } = useApplicationDialog();
+  const [servicesOpen, setServicesOpen] = useState(false);
   
   const handleApplyClick = () => {
     openApplicationDialog();
     onNavItemClick();
+  };
+
+  const handleServiceClick = () => {
+    onNavItemClick();
+    setServicesOpen(false);
   };
 
   return (
@@ -47,6 +54,50 @@ const MobileNav = ({ isOpen, onToggle, onNavItemClick }: MobileNavProps) => {
             >
               Licenses
             </a>
+            
+            {/* Services Dropdown */}
+            <div>
+              <button 
+                className="text-sm font-medium py-2 hover:text-accent transition-colors flex items-center justify-between w-full"
+                onClick={() => setServicesOpen(!servicesOpen)}
+              >
+                Services
+                {servicesOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+              </button>
+              {servicesOpen && (
+                <div className="ml-4 space-y-2 mt-2">
+                  <Link 
+                    to="/services/crypto" 
+                    className="block text-sm text-muted-foreground py-1 hover:text-accent transition-colors"
+                    onClick={handleServiceClick}
+                  >
+                    Crypto Licensing
+                  </Link>
+                  <Link 
+                    to="/services/fintech" 
+                    className="block text-sm text-muted-foreground py-1 hover:text-accent transition-colors"
+                    onClick={handleServiceClick}
+                  >
+                    FinTech Services
+                  </Link>
+                  <Link 
+                    to="/services/gambling" 
+                    className="block text-sm text-muted-foreground py-1 hover:text-accent transition-colors"
+                    onClick={handleServiceClick}
+                  >
+                    Gambling Licensing
+                  </Link>
+                  <Link 
+                    to="/services/corporate" 
+                    className="block text-sm text-muted-foreground py-1 hover:text-accent transition-colors"
+                    onClick={handleServiceClick}
+                  >
+                    Corporate Services
+                  </Link>
+                </div>
+              )}
+            </div>
+            
             <a 
               href="#verification" 
               className="text-sm font-medium py-2 hover:text-accent transition-colors" 
