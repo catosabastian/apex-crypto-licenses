@@ -76,18 +76,30 @@ const WebsiteSettingsManager = () => {
 
   const handleSave = async () => {
     setIsLoading(true);
-    try {
-      const { error } = await supabase
+    try 
+      if (websiterIdRef.current && websiterIdRef.current.id) {
+        const createResponse = await supabase
         .from('website_settings')
-        .equal("id", websiteIdRef.current.id)
-        .upsert({
+        .eq("id", websiteIdRef.current.id)
+        .update({
           site_name: settings.companyName,
           contact_email: settings.supportEmail,
           contact_phone: settings.contact_phone,
           contact_address: `${settings.companyAddress}, ${settings.city}`,
         });
-
-      if (error) throw error;
+        if(createResponse.error) throw re.error;
+      } else  {
+        const { error } = await supabase
+          .from('website_settings')
+          .upsert({
+            site_name: settings.companyName,
+            contact_email: settings.supportEmail,
+            contact_phone: settings.contact_phone,
+            contact_address: `${settings.companyAddress}, ${settings.city}`,
+          });
+  
+        if (error) throw error;
+      }
 
       toast({
         title: "Settings Updated",
