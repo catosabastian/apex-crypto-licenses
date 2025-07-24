@@ -24,18 +24,9 @@ interface PaymentSettings {
   usdtTronAddress?: string;
   usdtEthereumAddress?: string;
   xrpAddress?: string;
-  category1Price?: string;
-  category2Price?: string;
   category3Price?: string;
   category4Price?: string;
   category5Price?: string;
-  category6Price?: string;
-  category7Price?: string;
-  category8Price?: string;
-  category9Price?: string;
-  category10Price?: string;
-  category11Price?: string;
-  category12Price?: string;
 }
 
 const PaymentSection = ({ selectedCrypto, onCryptoChange, selectedCategory }: PaymentSectionProps) => {
@@ -62,18 +53,9 @@ const PaymentSection = ({ selectedCrypto, onCryptoChange, selectedCategory }: Pa
           usdtTronAddress: addresses?.find(a => a.cryptocurrency === 'USDT_TRON')?.address || '',
           usdtEthereumAddress: addresses?.find(a => a.cryptocurrency === 'USDT_ETH')?.address || '',
           xrpAddress: addresses?.find(a => a.cryptocurrency === 'XRP')?.address || '',
-          category1Price: settingsData.category1_price || '$25,000',
-          category2Price: settingsData.category2_price || '$45,000',
           category3Price: settingsData.category3_price || '$70,000',
           category4Price: settingsData.category4_price || '$150,000',
-          category5Price: settingsData.category5_price || '$250,000',
-          category6Price: settingsData.category6_price || '$350,000',
-          category7Price: settingsData.category7_price || '$50,000',
-          category8Price: settingsData.category8_price || '$75,000',
-          category9Price: settingsData.category9_price || '$100,000',
-          category10Price: settingsData.category10_price || '$125,000',
-          category11Price: settingsData.category11_price || '$200,000',
-          category12Price: settingsData.category12_price || '$300,000'
+          category5Price: settingsData.category5_price || '$250,000'
         });
       } catch (error) {
         console.error('Error loading payment data:', error);
@@ -135,36 +117,18 @@ const PaymentSection = ({ selectedCrypto, onCryptoChange, selectedCategory }: Pa
     if (isLoadingPrice) return 'Loading...';
     
     switch (category) {
-      case '1': return settings.category1Price || '$25,000';
-      case '2': return settings.category2Price || '$45,000';
       case '3': return settings.category3Price || '$70,000';
       case '4': return settings.category4Price || '$150,000';
       case '5': return settings.category5Price || '$250,000';
-      case '6': return settings.category6Price || '$350,000';
-      case '7': return settings.category7Price || '$50,000';
-      case '8': return settings.category8Price || '$75,000';
-      case '9': return settings.category9Price || '$100,000';
-      case '10': return settings.category10Price || '$125,000';
-      case '11': return settings.category11Price || '$200,000';
-      case '12': return settings.category12Price || '$300,000';
       default: return 'Contact for pricing';
     }
   };
 
   const getCategoryName = (category: string): string => {
     switch (category) {
-      case '1': return 'Basic Trader';
-      case '2': return 'Standard Trader';
-      case '3': return 'Advanced Trader';
-      case '4': return 'Professional Trader';
-      case '5': return 'Institutional Trader';
-      case '6': return 'Executive Trader';
-      case '7': return 'Crypto Wallet';
-      case '8': return 'Fintech EMI';
-      case '9': return 'Fintech MSP';
-      case '10': return 'Gambling Online';
-      case '11': return 'Gambling Lottery';
-      case '12': return 'Corporate Offshore';
+      case '3': return 'Professional License';
+      case '4': return 'Enterprise License';
+      case '5': return 'Premium License';
       default: return `Category ${category}`;
     }
   };
