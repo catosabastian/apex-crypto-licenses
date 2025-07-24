@@ -46,12 +46,13 @@ const Admin = () => {
 
       <div className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="applications">Applications</TabsTrigger>
             <TabsTrigger value="contacts">Contacts</TabsTrigger>
             <TabsTrigger value="licenses">Licenses</TabsTrigger>
             <TabsTrigger value="settings">Settings</TabsTrigger>
             <TabsTrigger value="content">Content</TabsTrigger>
+            <TabsTrigger value="audit">Audit Logs</TabsTrigger>
           </TabsList>
 
           <TabsContent value="applications" className="space-y-6">
@@ -68,11 +69,14 @@ const Admin = () => {
 
           <TabsContent value="settings" className="space-y-6">
             <UnifiedSettingsManager />
-            <AuditLogViewer />
           </TabsContent>
 
           <TabsContent value="content" className="space-y-6">
             <DynamicContentManager />
+          </TabsContent>
+
+          <TabsContent value="audit" className="space-y-6">
+            <AuditLogViewer />
           </TabsContent>
         </Tabs>
       </div>

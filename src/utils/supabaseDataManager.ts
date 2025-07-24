@@ -667,6 +667,26 @@ class SupabaseDataManager {
   async getPaymentAddresses(): Promise<PaymentAddress[]> {
     try {
       await this.ensureInitialized();
+      
+      // Always fetch fresh data from database to avoid stale data
+      const { data, error } = await supabase
+        .from('payment_addresses')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('[SupabaseDataManager] Database error getting payment addresses:', error);
+        return this.dataSubjects.paymentAddresses.value;
+      }
+
+      if (data && data.length > 0) {
+        this.dataSubjects.paymentAddresses.next(data);
+        this.notifyListeners('payment_addresses_updated', data);
+        console.log('[SupabaseDataManager] Payment addresses loaded:', data);
+        return data;
+      }
+
+      // If no data, return current subject value
       return this.dataSubjects.paymentAddresses.value;
     } catch (error) {
       console.error('[SupabaseDataManager] Error getting payment addresses:', error);
@@ -676,7 +696,9 @@ class SupabaseDataManager {
 
   async updatePaymentAddress(cryptocurrency: string, updates: Partial<PaymentAddress>): Promise<PaymentAddress | null> {
     try {
-      const { data, error } = await (supabase as any)
+      console.log('[SupabaseDataManager] Updating payment address:', { cryptocurrency, updates });
+      
+      const { data, error } = await supabase
         .from('payment_addresses')
         .update({
           ...updates,
@@ -739,15 +761,19 @@ class SupabaseDataManager {
       // Ensure initialization before updating
       await this.ensureInitialized();
       
-      // Handle different value types
+      // Ensure proper serialization for database storage
       let settingValue = value;
       if (typeof value === 'object' && value !== null) {
         settingValue = value;
       } else if (typeof value === 'boolean') {
         settingValue = value;
-      } else {
+      } else if (typeof value === 'number') {
         settingValue = value;
+      } else {
+        settingValue = String(value);
       }
+
+      console.log('[SupabaseDataManager] Serialized setting value:', { key, settingValue });
       
       const settingData = { 
         key, 
@@ -1003,43 +1029,34 @@ class SupabaseDataManager {
       
       await this.ensureInitialized();
       
-      const settingsData = Object.entries(settingsToUpdate).map(([key, value]) => ({
-        key,
-        value,
-        category: key.startsWith('category') ? 'pricing' : 'general',
-        updated_at: new Date().toISOString()
-      }));
-      
-      console.log('[SupabaseDataManager] Bulk upsert data:', settingsData);
-      
-      const { data, error } = await supabase
-        .from('settings')
-        .upsert(settingsData, {
-          onConflict: 'key'
-        })
-        .select();
+      // Process each setting individually to ensure proper error handling and validation
+      let allSuccessful = true;
+      const results = [];
 
-      if (error) {
-        console.error('[SupabaseDataManager] Error bulk updating settings:', error);
-        
-        // Try individual inserts if bulk upsert fails
-        let success = true;
-        for (const setting of settingsData) {
-          try {
-            await this.updateSetting(setting.key, setting.value);
-          } catch (err) {
-            console.error(`[SupabaseDataManager] Error updating setting ${setting.key}:`, err);
-            success = false;
+      for (const [key, value] of Object.entries(settingsToUpdate)) {
+        try {
+          const result = await this.updateSetting(key, value);
+          if (result) {
+            results.push(result);
+            console.log(`[SupabaseDataManager] Successfully updated setting: ${key}`);
+          } else {
+            allSuccessful = false;
+            console.error(`[SupabaseDataManager] Failed to update setting: ${key}`);
           }
+        } catch (err) {
+          allSuccessful = false;
+          console.error(`[SupabaseDataManager] Error updating setting ${key}:`, err);
         }
-        return success;
       }
       
-      console.log('[SupabaseDataManager] Bulk settings updated successfully:', data);
-      await this.loadSettings();
-      this.notifyListeners('settings_updated', data);
+      if (allSuccessful) {
+        console.log('[SupabaseDataManager] All settings updated successfully');
+        // Reload settings to ensure cache is updated
+        await this.loadSettings();
+        this.notifyListeners('settings_updated', this.dataSubjects.settings.value);
+      }
       
-      return true;
+      return allSuccessful;
     } catch (error) {
       console.error('[SupabaseDataManager] Error bulk updating settings:', error);
       return false;
