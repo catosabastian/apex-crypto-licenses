@@ -415,25 +415,63 @@ class SupabaseDataManager {
   // Settings management
   async getSettings(): Promise<Record<string, any>> {
     try {
-      const { data, error } = await supabase
+      console.log('[SupabaseDataManager] Starting getSettings...');
+      
+      // Add timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Settings fetch timeout after 10 seconds')), 10000)
+      );
+      
+      const fetchPromise = supabase
         .from('settings')
         .select('*');
+      
+      const { data, error } = await Promise.race([fetchPromise, timeoutPromise]) as any;
 
       if (error) {
         console.error('Error fetching settings:', error);
-        return {};
+        return this.getDefaultSettings();
+      }
+
+      if (!data || data.length === 0) {
+        console.log('[SupabaseDataManager] No settings found, using defaults');
+        return this.getDefaultSettings();
       }
 
       const settings: Record<string, any> = {};
-      data?.forEach(setting => {
+      data.forEach(setting => {
         settings[setting.key] = setting.value;
       });
 
+      console.log('[SupabaseDataManager] Successfully loaded settings:', Object.keys(settings).length);
       return settings;
     } catch (error) {
       console.error('Error fetching settings:', error);
-      return {};
+      return this.getDefaultSettings();
     }
+  }
+
+  private getDefaultSettings(): Record<string, any> {
+    return {
+      category1_name: 'Basic Trader',
+      category1_price: '$5,000',
+      category1_available: true,
+      category2_name: 'Standard Trader', 
+      category2_price: '$15,000',
+      category2_available: true,
+      category3_name: 'Advanced Trader',
+      category3_price: '$25,000', 
+      category3_available: true,
+      category4_name: 'Professional Trader',
+      category4_price: '$50,000',
+      category4_available: true,
+      category5_name: 'Institutional Trader',
+      category5_price: '$100,000',
+      category5_available: true,
+      category6_name: 'Executive Trader',
+      category6_price: '$200,000',
+      category6_available: true
+    };
   }
 
   async updateSetting(key: string, value: any): Promise<boolean> {

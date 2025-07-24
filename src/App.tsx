@@ -11,7 +11,7 @@ import SupabaseProtectedRoute from "@/components/SupabaseProtectedRoute";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import Index from "./pages/Index";
 import Admin from "./pages/Admin";
-import SecureAdmin from "./pages/SecureAdmin";
+
 import Setup from "./pages/Setup";
 import Login from "./pages/Login";
 import AboutPage from "./pages/AboutPage";
@@ -71,14 +71,6 @@ function App() {
                     <Route 
                       path="/admin" 
                       element={<Admin />} 
-                    />
-                    <Route 
-                      path="/secure-admin" 
-                      element={
-            <SupabaseProtectedRoute requiredRole="admin">
-              <SecureAdmin />
-            </SupabaseProtectedRoute>
-                      } 
                     />
                     
                     {/* 404 Route */}

@@ -349,15 +349,12 @@ const Admin = () => {
       try {
         console.log('[Admin] Checking admin users...');
         
-        // Add timeout to prevent infinite loading
-        const timeoutId = setTimeout(() => {
-          console.log('[Admin] Timeout reached, setting hasAdminUsers to true');
-          setHasAdminUsers(true);
-          setIsLoading(false);
-        }, 5000);
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Admin users check timeout')), 8000)
+        );
         
-        const { data, error } = await supabase.rpc('has_admin_users');
-        clearTimeout(timeoutId);
+        const rpcPromise = supabase.rpc('has_admin_users');
+        const { data, error } = await Promise.race([rpcPromise, timeoutPromise]) as any;
         
         if (error) {
           console.error('Error checking admin users:', error);
