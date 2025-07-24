@@ -133,7 +133,7 @@ const RegulationsPage = () => {
       <div className="container mx-auto px-4 py-12 space-y-12">
         {/* Hero Section */}
         <div className="text-center space-y-6">
-          <div className="flex flex-col items-center justify-center gap-6 mb-8">
+          <div className="flex flex-col items-center gap-6 mb-8 pt-8">
             <div className="p-4 rounded-full bg-primary/10 border border-primary/20">
               <Scale className="h-12 w-12 text-primary" />
             </div>
