@@ -49,7 +49,7 @@ const WebsiteSettingsManager = () => {
         .single();
 
       if (websiteSettings) {
-        websiteIdRef.current = websiteSettings;
+        websiteIdRef.current = websiteSettings.id;
         
         setSettings({
           site_name: websiteSettings.site_name,
@@ -77,7 +77,7 @@ const WebsiteSettingsManager = () => {
   const handleSave = async () => {
     setIsLoading(true);
     try {
-      if (webbsiteIdRef.current?.id) {
+      if (websiteIdRef.current && webbsiteIdRef.current?.id) {
         const createReq = await supabase
         .from('website_settings')
         .update({
@@ -99,14 +99,8 @@ const WebsiteSettingsManager = () => {
             });
     
           if (error) throw error;
-        if (data) websiteIdRef.current.id = data;
+        if (data) websiteIdRef.current = data;
       }
-
-      toast({
-        title: "Settings Updated",
-        description: "Website settings have been saved successfully.",
-      });
-      setIsDirty(false);
     } catch (error: any) {
       toast({
         title: "Update Failed",
