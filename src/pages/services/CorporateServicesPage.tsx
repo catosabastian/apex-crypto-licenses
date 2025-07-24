@@ -202,7 +202,11 @@ const CorporateServicesPage = () => {
                           </div>
                         </div>
                       </div>
-                      <Button className="w-full mt-4" variant="outline">
+                      <Button 
+                        className="w-full mt-4" 
+                        variant="outline"
+                        onClick={service.action}
+                      >
                         Learn More
                       </Button>
                     </CardContent>
@@ -358,7 +362,11 @@ const CorporateServicesPage = () => {
             <p className="text-xl mb-8 opacity-90">
               Let our experts handle your corporate setup and ongoing administration
             </p>
-            <Button size="lg" variant="secondary">
+            <Button 
+              size="lg" 
+              variant="secondary"
+              onClick={() => navigate('/services/corporate/consultation')}
+            >
               Schedule Consultation
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
