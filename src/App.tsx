@@ -50,9 +50,9 @@ const App = () => {
                   <Route 
                     path="/admin" 
                     element={
-                      <SupabaseProtectedRoute requireAdmin={true}>
+                      <ProtectedRoute>
                         <Admin />
-                      </SupabaseProtectedRoute>
+                      </ProtectedRoute>
                     } 
                   />
                   <Route 
