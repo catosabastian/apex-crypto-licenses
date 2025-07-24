@@ -23,61 +23,17 @@ const LicenseCategorySection = ({ selectedCategory, onCategorySelect }: LicenseC
   const [settings, setSettings] = useState<Record<string, any>>({});
   const [lastUpdateTime, setLastUpdateTime] = useState<Date>(new Date());
   const [isLoading, setIsLoading] = useState(true);
-  const [loadingError, setLoadingError] = useState<string | null>(null);
-
-  // Default categories for immediate display
-  const defaultCategories = [
-    { id: '1', name: 'Basic Trader', price: '$5,000', available: true, minVolume: '$50,000', status: 'AVAILABLE' },
-    { id: '2', name: 'Standard Trader', price: '$15,000', available: true, minVolume: '$100,000', status: 'RECOMMENDED' },
-    { id: '3', name: 'Advanced Trader', price: '$25,000', available: true, minVolume: '$250,000', status: 'AVAILABLE' },
-    { id: '4', name: 'Professional Trader', price: '$50,000', available: true, minVolume: '$500,000', status: 'SELLING FAST' },
-    { id: '5', name: 'Institutional Trader', price: '$100,000', available: true, minVolume: '$1,000,000+', status: 'AVAILABLE' },
-    { id: '6', name: 'Executive Trader', price: '$200,000', available: true, minVolume: '$2,500,000+', status: 'AVAILABLE' }
-  ];
 
   useEffect(() => {
     const loadSettings = async () => {
       try {
         setIsLoading(true);
-        setLoadingError(null);
-        
-        // Set a reasonable timeout
-        const timeoutPromise = new Promise((_, reject) => 
-          setTimeout(() => reject(new Error('Loading timeout after 15 seconds')), 15000)
-        );
-        
-        const settingsPromise = supabaseDataManager.getSettings();
-        const currentSettings = await Promise.race([settingsPromise, timeoutPromise]) as Record<string, any>;
-        
+        const currentSettings = await supabaseDataManager.getSettings();
         console.log('Form component loaded settings:', currentSettings);
         setSettings(currentSettings);
         setLastUpdateTime(new Date());
       } catch (error) {
         console.error('Error loading settings in form:', error);
-        setLoadingError('Failed to load latest pricing. Using default values.');
-        
-        // Use default settings structure
-        const defaultSettings = {
-          category1_name: 'Basic Trader',
-          category1_price: '$5,000',
-          category1_available: true,
-          category2_name: 'Standard Trader',
-          category2_price: '$15,000',
-          category2_available: true,
-          category3_name: 'Advanced Trader',
-          category3_price: '$25,000',
-          category3_available: true,
-          category4_name: 'Professional Trader',
-          category4_price: '$50,000',
-          category4_available: true,
-          category5_name: 'Institutional Trader',
-          category5_price: '$100,000',
-          category5_available: true,
-          category6_name: 'Executive Trader',
-          category6_price: '$200,000',
-          category6_available: true
-        };
-        setSettings(defaultSettings);
       } finally {
         setIsLoading(false);
       }
@@ -89,8 +45,6 @@ const LicenseCategorySection = ({ selectedCategory, onCategorySelect }: LicenseC
     };
 
     supabaseDataManager.addEventListener('settings_updated', handleSettingsUpdate);
-    
-    // Load immediately, don't wait
     loadSettings();
 
     return () => {
@@ -99,29 +53,77 @@ const LicenseCategorySection = ({ selectedCategory, onCategorySelect }: LicenseC
   }, []);
 
   const generateCategories = (): LicenseCategory[] => {
-    // If we have no settings yet, use defaults
-    if (Object.keys(settings).length === 0) {
-      return defaultCategories;
-    }
-
-    const categories = [];
-    for (let i = 1; i <= 6; i++) {
-      const category = {
-        id: i.toString(),
-        name: settings[`category${i}_name`] || defaultCategories[i-1].name,
-        price: settings[`category${i}_price`] || defaultCategories[i-1].price,
-        minVolume: defaultCategories[i-1].minVolume,
-        available: settings[`category${i}_available`] !== false,
-        status: settings[`category${i}_status`] || defaultCategories[i-1].status
-      };
-      categories.push(category);
-    }
-    return categories;
+    return [
+      {
+        id: "1", 
+        name: "Basic Trader",
+        price: settings.category1_price || "Loading...",
+        available: settings.category1_available !== false,
+        minVolume: "Up to $100K",
+        status: settings.category1_status || "AVAILABLE"
+      },
+      {
+        id: "2", 
+        name: "Standard Trader", 
+        price: settings.category2_price || "Loading...",
+        available: settings.category2_available !== false,
+        minVolume: "Up to $500K",
+        status: settings.category2_status || "AVAILABLE"
+      },
+      {
+        id: "3", 
+        name: "Advanced Trader",
+        price: settings.category3_price || "Loading...",
+        available: settings.category3_available !== false,
+        minVolume: "Up to $1M",
+        status: settings.category3_status || "AVAILABLE"
+      },
+      {
+        id: "4", 
+        name: "Professional Trader",
+        price: settings.category4_price || "Loading...",
+        available: settings.category4_available !== false,
+        minVolume: "Up to $5M",
+        status: settings.category4_status || "AVAILABLE"
+      },
+      {
+        id: "5", 
+        name: "Institutional Trader",
+        price: settings.category5_price || "Loading...",
+        available: settings.category5_available !== false,
+        minVolume: "Up to $10M",
+        status: settings.category5_status || "AVAILABLE"
+      },
+      {
+        id: "6", 
+        name: "Executive Trader",
+        price: settings.category6_price || "Loading...",
+        available: settings.category6_available !== false,
+        minVolume: "Unlimited",
+        status: settings.category6_status || "AVAILABLE"
+      }
+    ];
   };
 
   const categories = generateCategories();
 
-  // Show categories immediately, even while loading
+  if (isLoading) {
+    return (
+      <div className="form-section">
+        <div className="section-heading">
+          <div className="section-icon">
+            <Shield className="h-5 w-5" />
+          </div>
+          <h3 className="text-xl font-semibold">License Category *</h3>
+        </div>
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-6 w-6 animate-spin mr-2" />
+          <span>Loading license categories...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="form-section">
       <div className="section-heading">
@@ -130,33 +132,13 @@ const LicenseCategorySection = ({ selectedCategory, onCategorySelect }: LicenseC
         </div>
         <h3 className="text-xl font-semibold">License Category *</h3>
         <div className="flex items-center gap-2 ml-auto">
-          {isLoading ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
-              <span className="text-xs text-blue-600">Loading latest pricing...</span>
-            </>
-          ) : loadingError ? (
-            <>
-              <AlertCircle className="h-4 w-4 text-amber-500" />
-              <span className="text-xs text-amber-600">Using cached data</span>
-            </>
-          ) : (
-            <>
-              <Wifi className="h-4 w-4 text-green-500" />
-              <span className="text-xs text-green-600">Live Updates</span>
-            </>
-          )}
+          <Wifi className="h-4 w-4 text-green-500" />
+          <span className="text-xs text-green-600">Live Updates</span>
           <span className="text-xs text-muted-foreground">
             {lastUpdateTime.toLocaleTimeString()}
           </span>
         </div>
       </div>
-      
-      {loadingError && (
-        <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-          <p className="text-sm text-amber-800">{loadingError}</p>
-        </div>
-      )}
       
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
         <TooltipProvider>

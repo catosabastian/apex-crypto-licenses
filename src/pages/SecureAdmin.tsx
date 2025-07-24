@@ -1,27 +1,20 @@
 
 import { useState, useEffect } from 'react';
-import { validLicenses, generateLicenseId } from '@/utils/licenseData';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Shield, Copy, Search, Download, Filter, LogOut, BarChart3, FileText, Settings, Mail, Globe, Layers, Wallet, RefreshCw } from 'lucide-react';
+import { Shield, LogOut, BarChart3, FileText, Settings, Mail, Globe, Download, RefreshCw } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSecureAuth } from '@/contexts/SecureAuthContext';
 import { useNavigate } from 'react-router-dom';
 import { supabaseDataManager } from '@/utils/supabaseDataManager';
 import { ApplicationsManager } from '@/components/admin/ApplicationsManager';
 import { ContactsManager } from '@/components/admin/ContactsManager';
-import { SettingsManager } from '@/components/admin/SettingsManager';
+import { UnifiedSettingsManager } from '@/components/admin/UnifiedSettingsManager';
 import { LicenseManager } from '@/components/admin/LicenseManager';
 import { ContentManager } from '@/components/admin/ContentManager';
-import { PaymentAddressManager } from '@/components/admin/PaymentAddressManager';
 
-const Admin = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterTier, setFilterTier] = useState<number | null>(null);
+const SecureAdmin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [analytics, setAnalytics] = useState({
     totalApplications: 0,
@@ -32,7 +25,7 @@ const Admin = () => {
     totalRevenue: 0
   });
   const [isLoading, setIsLoading] = useState(true);
-  const { logout } = useAuth();
+  const { logout } = useSecureAuth();
   const navigate = useNavigate();
 
   // Update analytics when tab changes
@@ -57,59 +50,12 @@ const Admin = () => {
     loadAnalytics();
   }, [activeTab]);
 
-  // Copy license ID to clipboard
-  const handleCopy = (licenseId: string) => {
-    navigator.clipboard.writeText(licenseId)
-      .then(() => {
-        toast({
-          title: "Copied!",
-          description: `License ID ${licenseId} copied to clipboard`,
-        });
-      })
-      .catch(() => {
-        toast({
-          title: "Error",
-          description: "Failed to copy to clipboard",
-          variant: "destructive",
-        });
-      });
-  };
-  
-  // Extract tier from license ID
-  const getLicenseTier = (licenseId: string): number => {
-    const tierMatch = licenseId.match(/T(\d)/);
-    return tierMatch ? parseInt(tierMatch[1], 10) : 0;
-  };
-  
-  // Filter licenses based on search term and tier filter
-  const filteredLicenses = validLicenses.filter(license => {
-    const matchesSearch = searchTerm === '' || license.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesTier = filterTier === null || getLicenseTier(license) === filterTier;
-    return matchesSearch && matchesTier;
-  });
-  
-  // Generate CSV of licenses
-  const exportCsv = () => {
-    const csvContent = "data:text/csv;charset=utf-8," 
-      + "License ID,Tier\n" 
-      + validLicenses.map(license => `${license},${getLicenseTier(license)}`).join("\n");
-    
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "apex_crypto_licenses.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    toast({
-      title: "Exported!",
-      description: "Licenses exported as CSV",
-    });
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
   };
 
-  // Export all data from Supabase
-  const exportAllData = async () => {
+  const exportData = async () => {
     try {
       const allData = await supabaseDataManager.exportAllData();
       const csvContent = "data:text/csv;charset=utf-8," 
@@ -123,7 +69,7 @@ const Admin = () => {
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
       link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `apex_admin_data_${new Date().toISOString().split('T')[0]}.csv`);
+      link.setAttribute("download", `apex_secure_admin_data_${new Date().toISOString().split('T')[0]}.csv`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -141,11 +87,6 @@ const Admin = () => {
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
-
   const refreshData = async () => {
     const analyticsData = await supabaseDataManager.getAnalytics();
     setAnalytics(analyticsData);
@@ -161,10 +102,10 @@ const Admin = () => {
         <div>
           <h1 className="text-3xl font-bold flex items-center gap-2">
             <Shield className="text-primary" />
-            APEX Admin Dashboard
+            APEX Secure Admin Dashboard
           </h1>
           <p className="text-muted-foreground mt-2">
-            Comprehensive business management system with real-time sync
+            Secure business management system with real-time sync
           </p>
         </div>
         
@@ -173,7 +114,7 @@ const Admin = () => {
             <RefreshCw className="h-4 w-4" />
             Refresh
           </Button>
-          <Button onClick={exportAllData} className="flex items-center gap-2">
+          <Button onClick={exportData} className="flex items-center gap-2">
             <Download className="h-4 w-4" />
             Export Data
           </Button>
@@ -185,14 +126,10 @@ const Admin = () => {
       </header>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-8">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="dashboard" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             Dashboard
-          </TabsTrigger>
-          <TabsTrigger value="licenses" className="flex items-center gap-2">
-            <Shield className="h-4 w-4" />
-            Licenses
           </TabsTrigger>
           <TabsTrigger value="applications" className="flex items-center gap-2">
             <FileText className="h-4 w-4" />
@@ -202,21 +139,17 @@ const Admin = () => {
             <Mail className="h-4 w-4" />
             Contacts
           </TabsTrigger>
+          <TabsTrigger value="licenses" className="flex items-center gap-2">
+            <Shield className="h-4 w-4" />
+            Licenses
+          </TabsTrigger>
           <TabsTrigger value="content" className="flex items-center gap-2">
             <Globe className="h-4 w-4" />
             Content
           </TabsTrigger>
-          <TabsTrigger value="payments" className="flex items-center gap-2">
-            <Wallet className="h-4 w-4" />
-            Payments
-          </TabsTrigger>
           <TabsTrigger value="settings" className="flex items-center gap-2">
             <Settings className="h-4 w-4" />
             Settings
-          </TabsTrigger>
-          <TabsTrigger value="legacy" className="flex items-center gap-2">
-            <Layers className="h-4 w-4" />
-            Legacy
           </TabsTrigger>
         </TabsList>
 
@@ -278,10 +211,6 @@ const Admin = () => {
           )}
         </TabsContent>
 
-        <TabsContent value="licenses" className="space-y-6">
-          <LicenseManager />
-        </TabsContent>
-
         <TabsContent value="applications" className="space-y-6">
           <ApplicationsManager />
         </TabsContent>
@@ -290,93 +219,20 @@ const Admin = () => {
           <ContactsManager />
         </TabsContent>
 
+        <TabsContent value="licenses" className="space-y-6">
+          <LicenseManager />
+        </TabsContent>
+
         <TabsContent value="content" className="space-y-6">
           <ContentManager />
         </TabsContent>
 
-        <TabsContent value="payments" className="space-y-6">
-          <PaymentAddressManager />
-        </TabsContent>
-
         <TabsContent value="settings" className="space-y-6">
-          <SettingsManager />
-        </TabsContent>
-
-        <TabsContent value="legacy" className="space-y-6">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative flex-grow">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search licenses..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8"
-              />
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm whitespace-nowrap">Filter by tier:</span>
-              {[1, 2, 3].map((tier) => (
-                <Button
-                  key={tier}
-                  variant={filterTier === tier ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setFilterTier(filterTier === tier ? null : tier)}
-                  className="min-w-[40px]"
-                >
-                  {tier}
-                </Button>
-              ))}
-            </div>
-          </div>
-          
-          <div className="border rounded-lg overflow-hidden">
-            <Table>
-              <TableCaption>
-                Showing {filteredLicenses.length} of {validLicenses.length} total licenses
-              </TableCaption>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[50px]">#</TableHead>
-                  <TableHead>License ID</TableHead>
-                  <TableHead className="w-[100px]">Tier</TableHead>
-                  <TableHead className="text-right w-[100px]">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredLicenses.map((license, index) => (
-                  <TableRow key={license}>
-                    <TableCell className="font-medium">{index + 1}</TableCell>
-                    <TableCell>{license}</TableCell>
-                    <TableCell>
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        getLicenseTier(license) === 1 ? 'bg-blue-100 text-blue-800' : 
-                        getLicenseTier(license) === 2 ? 'bg-purple-100 text-purple-800' : 
-                        'bg-amber-100 text-amber-800'
-                      }`}>
-                        Tier {getLicenseTier(license)}
-                      </span>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button 
-                        variant="ghost" 
-                        size="icon"
-                        onClick={() => handleCopy(license)}
-                        title="Copy license ID"
-                      >
-                        <Copy className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+          <UnifiedSettingsManager />
         </TabsContent>
       </Tabs>
     </div>
   );
 };
 
-export default Admin;
+export default SecureAdmin;

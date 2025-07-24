@@ -16,24 +16,12 @@ export function PaymentAddressManager() {
 
   useEffect(() => {
     const loadAddresses = async () => {
-      try {
-        console.log('[PaymentAddressManager] Loading payment addresses...');
-        const addressData = await supabaseDataManager.getPaymentAddresses();
-        console.log('[PaymentAddressManager] Loaded addresses:', addressData);
-        setAddresses(addressData || []);
-      } catch (error) {
-        console.error('[PaymentAddressManager] Error loading addresses:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load payment addresses",
-          variant: "destructive",
-        });
-      }
+      const addressData = await supabaseDataManager.getPaymentAddresses();
+      setAddresses(addressData);
     };
 
     const handleAddressUpdate = (data: PaymentAddress[]) => {
-      console.log('[PaymentAddressManager] Address update received:', data);
-      setAddresses(data || []);
+      setAddresses(data);
       setIsDirty(false);
     };
 
@@ -57,42 +45,24 @@ export function PaymentAddressManager() {
 
   const handleSaveAddresses = async () => {
     try {
-      console.log('[PaymentAddressManager] Saving addresses:', addresses);
-      
-      let successCount = 0;
       for (const address of addresses) {
-        try {
-          const result = await supabaseDataManager.updatePaymentAddress(address.cryptocurrency, {
-            address: address.address,
-            is_active: address.is_active
-          });
-          if (result) {
-            successCount++;
-          }
-        } catch (err) {
-          console.error(`Error updating ${address.cryptocurrency}:`, err);
-        }
+        await supabaseDataManager.updatePaymentAddress(address.cryptocurrency, {
+          address: address.address,
+          is_active: address.is_active
+        });
       }
       
-      if (successCount > 0) {
-        // Reload addresses to confirm updates
-        const addressData = await supabaseDataManager.getPaymentAddresses();
-        setAddresses(addressData || []);
-        
-        setIsDirty(false);
-        toast({
-          title: "Success",
-          description: `${successCount} payment address${successCount > 1 ? 'es' : ''} updated successfully`,
-        });
-      } else {
-        toast({
-          title: "Error", 
-          description: "Failed to update any payment addresses",
-          variant: "destructive",
-        });
-      }
+      // Reload addresses to confirm updates
+      const addressData = await supabaseDataManager.getPaymentAddresses();
+      setAddresses(addressData);
+      
+      setIsDirty(false);
+      toast({
+        title: "Success",
+        description: "Payment addresses updated successfully",
+      });
     } catch (error) {
-      console.error('[PaymentAddressManager] Error saving payment addresses:', error);
+      console.error('Error saving payment addresses:', error);
       toast({
         title: "Error", 
         description: "Failed to update payment addresses",
@@ -153,56 +123,50 @@ export function PaymentAddressManager() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        {addresses.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-muted-foreground">No payment addresses found. Loading...</p>
-          </div>
-        ) : (
-          addresses.map((address) => {
-            const crypto = address.cryptocurrency;
-            const label = cryptoLabels[crypto as keyof typeof cryptoLabels];
-            const isValid = validateAddress(address.address, crypto);
-            
-            return (
-              <div key={crypto} className="space-y-2">
-                <Label htmlFor={crypto} className="text-sm font-medium">
-                  {label?.name || crypto}
-                </Label>
-                <p className="text-xs text-muted-foreground mb-2">
-                  {label?.desc || `${crypto} wallet address`}
-                </p>
-                <div className="flex space-x-2">
-                  <Input
-                    id={crypto}
-                    value={address.address}
-                    onChange={(e) => handleAddressChange(crypto, e.target.value)}
-                    placeholder={`Enter ${crypto} address`}
-                    className={`flex-1 ${!isValid && address.address ? 'border-destructive' : ''}`}
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleCopyAddress(address.address, crypto)}
-                    disabled={!address.address}
-                    className="px-3"
-                  >
-                    {copiedAddress === address.address ? (
-                      <Check className="h-4 w-4" />
-                    ) : (
-                      <Copy className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
-                {!isValid && address.address && (
-                  <p className="text-xs text-destructive">
-                    Invalid {crypto} address format
-                  </p>
-                )}
+        {addresses.map((address) => {
+          const crypto = address.cryptocurrency;
+          const label = cryptoLabels[crypto as keyof typeof cryptoLabels];
+          const isValid = validateAddress(address.address, crypto);
+          
+          return (
+            <div key={crypto} className="space-y-2">
+              <Label htmlFor={crypto} className="text-sm font-medium">
+                {label?.name || crypto}
+              </Label>
+              <p className="text-xs text-muted-foreground mb-2">
+                {label?.desc || `${crypto} wallet address`}
+              </p>
+              <div className="flex space-x-2">
+                <Input
+                  id={crypto}
+                  value={address.address}
+                  onChange={(e) => handleAddressChange(crypto, e.target.value)}
+                  placeholder={`Enter ${crypto} address`}
+                  className={`flex-1 ${!isValid && address.address ? 'border-destructive' : ''}`}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleCopyAddress(address.address, crypto)}
+                  disabled={!address.address}
+                  className="px-3"
+                >
+                  {copiedAddress === address.address ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </Button>
               </div>
-            );
-          })
-        )}
+              {!isValid && address.address && (
+                <p className="text-xs text-destructive">
+                  Invalid {crypto} address format
+                </p>
+              )}
+            </div>
+          );
+        })}
         
         <div className="flex justify-end pt-4">
           <Button 

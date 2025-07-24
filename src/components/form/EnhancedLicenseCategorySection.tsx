@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { Shield, Clock, CheckCircle, AlertCircle, Star, TrendingUp, Users, Globe, Building2, Gamepad2, CreditCard, Coins, Landmark, Briefcase, BarChart, Crown } from 'lucide-react';
+import { Shield, Clock, CheckCircle, AlertCircle, Star, TrendingUp, Users, Globe } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Separator } from '@/components/ui/separator';
 
@@ -16,10 +16,6 @@ interface LicenseCategory {
   features: string[];
   icon: any;
   color: string;
-  description: string;
-  processingTime: string;
-  minVolume: string;
-  category: string;
 }
 
 interface EnhancedLicenseCategorySectionProps {
@@ -35,462 +31,188 @@ const EnhancedLicenseCategorySection = ({
   onCategorySelect,
   settings 
 }: EnhancedLicenseCategorySectionProps) => {
-  
-  // Enhanced license categories with all types
-  const enhancedCategories = [
-    {
-      id: 'category_1',
-      name: 'Category 1 - Basic Trader',
-      price: '25,000 USDT',
-      available: false, // Sold out
-      description: 'Entry-level trading license for basic operations',
-      processingTime: '2-4 weeks',
-      minVolume: '$50,000',
-      category: 'Basic',
-      icon: TrendingUp,
-      color: 'bg-gradient-to-br from-gray-50 to-slate-50 border-gray-200 text-gray-600',
-      features: [
-        'Basic trading operations',
-        'Limited trading volume',
-        'Standard support',
-        'Basic compliance tools'
-      ]
-    },
-    {
-      id: 'category_2',
-      name: 'Category 2 - Standard Trader',
-      price: '50,000 USDT',
-      available: false, // Sold out
-      description: 'Standard trading license with enhanced features',
-      processingTime: '3-6 weeks',
-      minVolume: '$100,000',
-      category: 'Standard',
-      icon: BarChart,
-      color: 'bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200 text-blue-700',
-      features: [
-        'Enhanced trading operations',
-        'Moderate trading volume',
-        'Priority support',
-        'Advanced compliance tools',
-        'Multi-platform access'
-      ]
-    },
-    {
-      id: 'category_3',
-      name: 'Category 3 - Advanced Trader',
-      price: '70,000 USDT',
-      available: true,
-      description: 'Advanced trading license for professional operations (Lifetime Validity)',
-      processingTime: '4-8 weeks',
-      minVolume: '$250,000',
-      category: 'Advanced',
-      icon: Coins,
-      color: 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-200 text-green-700',
-      features: [
-        'Professional trading platform',
-        'High volume trading',
-        'Premium support',
-        'Advanced analytics',
-        'API access',
-        'Multiple exchange connectivity'
-      ]
-    },
-    {
-      id: 'category_4',
-      name: 'Category 4 - Professional Trader',
-      price: '150,000 USDT',
-      available: true,
-      description: 'Professional-grade license for institutional trading (Lifetime Validity)',
-      processingTime: '6-10 weeks',
-      minVolume: '$500,000',
-      category: 'Professional',
-      icon: Building2,
-      color: 'bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200 text-purple-700',
-      features: [
-        'Institutional trading access',
-        'Unlimited trading volume',
-        'Dedicated account manager',
-        'Custom compliance solutions',
-        'White-label options',
-        'Global regulatory support'
-      ]
-    },
-    {
-      id: 'category_5',
-      name: 'Category 5 - Institutional Trader',
-      price: '250,000 USDT',
-      available: true,
-      description: 'Top-tier institutional license for enterprise operations (Lifetime Validity)',
-      processingTime: '8-12 weeks',
-      minVolume: '$1,000,000+',
-      category: 'Institutional',
-      icon: Crown,
-      color: 'bg-gradient-to-br from-yellow-50 to-amber-50 border-yellow-200 text-yellow-700',
-      features: [
-        'Enterprise-grade platform',
-        'Unlimited institutional access',
-        'Priority regulatory support',
-        'Custom development options',
-        'Global market maker status',
-        'Regulatory consulting included'
-      ]
-    },
-    {
-      id: 'crypto_wallet',
-      name: 'Crypto Wallet License',
-      price: settings.cryptoWalletPrice || '150,000 USDT',
-      available: settings.cryptoWalletAvailable ?? true,
-      description: 'Digital wallet services for cryptocurrency custody',
-      processingTime: '4-8 weeks',
-      minVolume: '$500,000+',
-      category: 'Crypto',
-      icon: Shield,
-      color: 'bg-gradient-to-br from-blue-50 to-cyan-50 border-blue-200 text-blue-800',
-      features: [
-        'Multi-signature wallet technology',
-        'Hardware security modules',
-        'Mobile & web applications',
-        'Cross-chain compatibility',
-        'Institutional custody solutions',
-        'Insurance coverage'
-      ]
-    },
-    {
-      id: 'fintech_emi',
-      name: 'Electronic Money Institution',
-      price: settings.fintechEmiPrice || '350,000 USDT',
-      available: settings.fintechEmiAvailable ?? true,
-      description: 'Issue electronic money and provide payment services',
-      processingTime: '8-16 weeks',
-      minVolume: '$2,000,000+',
-      category: 'FinTech',
-      icon: CreditCard,
-      color: 'bg-gradient-to-br from-green-50 to-emerald-50 border-green-200 text-green-800',
-      features: [
-        'Electronic money issuance',
-        'Payment processing',
-        'SEPA integration',
-        'Cross-border transfers',
-        'Merchant services',
-        'Banking partnerships'
-      ]
-    },
-    {
-      id: 'fintech_msp',
-      name: 'Money Service Provider',
-      price: settings.fintechMspPrice || '200,000 USDT',
-      available: settings.fintechMspAvailable ?? true,
-      description: 'Money transmission and payment services',
-      processingTime: '6-10 weeks',
-      minVolume: '$750,000+',
-      category: 'FinTech',
-      icon: TrendingUp,
-      color: 'bg-gradient-to-br from-purple-50 to-violet-50 border-purple-200 text-purple-800',
-      features: [
-        'Money transmission services',
-        'Foreign exchange',
-        'Remittance services',
-        'Digital payment solutions',
-        'Compliance monitoring',
-        'Risk management systems'
-      ]
-    },
-    {
-      id: 'gambling_online',
-      name: 'Online Gambling License',
-      price: settings.gamblingOnlinePrice || '180,000 USDT',
-      available: settings.gamblingOnlineAvailable ?? true,
-      description: 'Online casino, sports betting, and gaming operations',
-      processingTime: '8-12 weeks',
-      minVolume: '$500,000+',
-      category: 'Gambling',
-      icon: Gamepad2,
-      color: 'bg-gradient-to-br from-red-50 to-pink-50 border-red-200 text-red-800',
-      features: [
-        'Online casino operations',
-        'Sports betting platform',
-        'Live dealer games',
-        'Mobile gaming apps',
-        'Player protection measures',
-        'Responsible gambling tools'
-      ]
-    },
-    {
-      id: 'gambling_lottery',
-      name: 'Lottery & Gaming License',
-      price: settings.gamblingLotteryPrice || '120,000 USDT',
-      available: settings.gamblingLotteryAvailable ?? true,
-      description: 'Lottery operations and skill-based gaming',
-      processingTime: '4-8 weeks',
-      minVolume: '$300,000+',
-      category: 'Gambling',
-      icon: Star,
-      color: 'bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-200 text-indigo-800',
-      features: [
-        'Lottery ticket sales',
-        'Instant win games',
-        'Skill-based competitions',
-        'Prize management',
-        'Random number generation',
-        'Regulatory compliance'
-      ]
-    },
-    {
-      id: 'corporate_offshore',
-      name: 'Offshore Corporate License',
-      price: settings.corporateOffshorePrice || '80,000 USDT',
-      available: settings.corporateOffshoreAvailable ?? true,
-      description: 'International business company formation',
-      processingTime: '2-4 weeks',
-      minVolume: '$100,000+',
-      category: 'Corporate',
-      icon: Building2,
-      color: 'bg-gradient-to-br from-gray-50 to-slate-50 border-gray-200 text-gray-800',
-      features: [
-        'Tax optimization structures',
-        'Asset protection',
-        'International banking',
-        'Privacy protection',
-        'Nominee services',
-        'Corporate governance'
-      ]
-    },
-    {
-      id: 'corporate_consulting',
-      name: 'Business Consulting License',
-      price: settings.corporateConsultingPrice || '60,000 USDT',
-      available: settings.corporateConsultingAvailable ?? true,
-      description: 'Professional consulting and advisory services',
-      processingTime: '2-3 weeks',
-      minVolume: '$50,000+',
-      category: 'Corporate',
-      icon: Briefcase,
-      color: 'bg-gradient-to-br from-teal-50 to-cyan-50 border-teal-200 text-teal-800',
-      features: [
-        'Management consulting',
-        'Financial advisory',
-        'Legal compliance support',
-        'Market research',
-        'Strategic planning',
-        'Risk assessment'
-      ]
-    }
-  ];
-
-  // Group categories by type
-  const groupedCategories = enhancedCategories.reduce((acc, category) => {
-    if (!acc[category.category]) {
-      acc[category.category] = [];
-    }
-    acc[category.category].push(category);
-    return acc;
-  }, {} as Record<string, typeof enhancedCategories>);
-
-  const availableCategories = enhancedCategories.filter(cat => cat.available);
-  const soldOutCategories = enhancedCategories.filter(cat => !cat.available);
+  const availableCategories = categories.filter(cat => cat.available);
+  const soldOutCategories = categories.filter(cat => !cat.available);
 
   return (
-    <Card className="border-2 transition-all duration-300 hover:shadow-xl bg-gradient-to-br from-background to-muted/20">
-      <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/10">
+    <Card className="border-2 transition-all duration-200 hover:shadow-lg">
+      <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-primary/20 rounded-xl">
-              <Shield className="h-6 w-6 text-primary" />
+            <div className="p-2 bg-primary/10 rounded-lg">
+              <Shield className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-2xl bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                Professional License Selection
-              </CardTitle>
-              <p className="text-muted-foreground mt-1">
-                Choose from our comprehensive range of financial services licenses
+              <CardTitle className="text-xl">License Category Selection</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Choose the license category that best fits your trading needs
               </p>
             </div>
           </div>
-          <Badge variant={selectedCategory ? "default" : "secondary"} className="px-4 py-2">
+          <Badge variant={selectedCategory ? "default" : "secondary"}>
             {selectedCategory ? "Selected" : "Required"}
           </Badge>
         </div>
       </CardHeader>
       
-      <CardContent className="space-y-8 p-6">
+      <CardContent className="space-y-6">
         {/* Availability Status */}
-        <div className="flex items-center justify-between p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl">
-          <div className="flex items-center gap-3">
-            <CheckCircle className="h-6 w-6 text-green-600" />
-            <div>
-              <span className="font-semibold text-green-800">{availableCategories.length} Licenses Available</span>
-              <p className="text-sm text-green-600">Ready for immediate processing</p>
-            </div>
+        <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg">
+          <div className="flex items-center gap-2">
+            <CheckCircle className="h-5 w-5 text-green-600" />
+            <span className="font-medium">{availableCategories.length} Categories Available</span>
           </div>
           {soldOutCategories.length > 0 && (
             <div className="flex items-center gap-2">
               <AlertCircle className="h-5 w-5 text-amber-600" />
-              <span className="text-sm text-amber-700 font-medium">
-                {soldOutCategories.length} Currently Unavailable
+              <span className="text-sm text-muted-foreground">
+                {soldOutCategories.length} Sold Out
               </span>
             </div>
           )}
         </div>
 
-        {/* License Categories by Type */}
-        {Object.entries(groupedCategories).map(([categoryType, categoryList]) => (
-          <div key={categoryType} className="space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="h-px bg-gradient-to-r from-primary/30 to-transparent flex-1" />
-              <h3 className="text-lg font-semibold text-primary bg-background px-4 py-2 rounded-full border">
-                {categoryType} Licenses
-              </h3>
-              <div className="h-px bg-gradient-to-l from-primary/30 to-transparent flex-1" />
-            </div>
-            
-            <div className="grid lg:grid-cols-2 gap-6">
-              <TooltipProvider>
-                {categoryList.map((category) => {
-                  const IconComponent = category.icon;
-                  const isSelected = selectedCategory === category.id;
-                  
-                  return (
-                    <Tooltip key={category.id}>
-                      <TooltipTrigger asChild>
-                        <Card 
-                          className={`cursor-pointer transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
-                            isSelected 
-                              ? 'ring-2 ring-primary border-primary shadow-lg scale-105' 
-                              : category.available 
-                                ? 'border-border hover:border-primary/50 hover:shadow-md' 
-                                : 'opacity-60 border-muted cursor-not-allowed grayscale'
-                          } ${category.color}`}
-                          onClick={() => {
-                            if (category.available) {
-                              onCategorySelect(category.id);
-                            }
-                          }}
-                        >
-                          <CardHeader className="pb-3">
-                            <div className="flex items-start justify-between">
-                              <div className="flex items-center gap-3">
-                                <div className={`p-3 rounded-xl bg-white/70 shadow-sm`}>
-                                  <IconComponent className="h-6 w-6" />
-                                </div>
-                                <div>
-                                  <h3 className="font-bold text-lg leading-tight">{category.name}</h3>
-                                  <p className="text-3xl font-bold text-primary mt-1">{category.price}</p>
-                                </div>
-                              </div>
-                              
-                              <div className="flex flex-col items-end gap-2">
-                                {!category.available && (
-                                  <Badge variant="destructive" className="text-xs font-semibold">
-                                    SOLD OUT
-                                  </Badge>
-                                )}
-                                {isSelected && (
-                                  <Badge className="text-xs font-semibold bg-green-600">
-                                    ✓ SELECTED
-                                  </Badge>
-                                )}
-                                {category.id.includes('crypto') && category.available && (
-                                  <Badge variant="secondary" className="text-xs bg-yellow-100 text-yellow-800">
-                                    HOT
-                                  </Badge>
-                                )}
-                              </div>
+        {/* Available Categories */}
+        <div className="grid lg:grid-cols-2 gap-6">
+          <TooltipProvider>
+            {categories.map((category) => {
+              const IconComponent = category.icon;
+              const isSelected = selectedCategory === category.id;
+              
+              return (
+                <Tooltip key={category.id}>
+                  <TooltipTrigger asChild>
+                    <Card 
+                      className={`cursor-pointer transition-all duration-300 hover:shadow-md ${
+                        isSelected 
+                          ? 'ring-2 ring-primary border-primary bg-primary/5' 
+                          : category.available 
+                            ? 'border-border hover:border-primary/50' 
+                            : 'opacity-60 border-muted cursor-not-allowed'
+                      }`}
+                      onClick={() => {
+                        if (category.available) {
+                          onCategorySelect(category.id);
+                        }
+                      }}
+                    >
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-lg ${category.color}`}>
+                              <IconComponent className="h-5 w-5" />
                             </div>
-                            
-                            <p className="text-sm text-muted-foreground mt-2 leading-relaxed">
-                              {category.description}
-                            </p>
-                          </CardHeader>
-                          
-                          <CardContent className="pt-0">
-                            <div className="space-y-4">
-                              {/* Processing Time & Volume */}
-                              <div className="grid grid-cols-2 gap-4">
-                                <div className="flex items-center gap-2 text-sm">
-                                  <Clock className="h-4 w-4 text-muted-foreground" />
-                                  <span>{category.processingTime}</span>
-                                </div>
-                                <div className="flex items-center gap-2 text-sm">
-                                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                                  <span>{category.minVolume}</span>
-                                </div>
-                              </div>
-
-                              <Separator />
-
-                              {/* Features */}
-                              <div className="space-y-3">
-                                <h4 className="text-sm font-semibold flex items-center gap-2">
-                                  <Star className="h-4 w-4 text-yellow-500" />
-                                  Key Features
-                                </h4>
-                                <div className="grid gap-2">
-                                  {category.features.slice(0, 4).map((feature, index) => (
-                                    <div key={index} className="text-sm text-muted-foreground flex items-center gap-2">
-                                      <CheckCircle className="h-3 w-3 text-green-600 flex-shrink-0" />
-                                      {feature}
-                                    </div>
-                                  ))}
-                                  {category.features.length > 4 && (
-                                    <div className="text-xs text-muted-foreground font-medium">
-                                      +{category.features.length - 4} more features
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
+                            <div>
+                              <h3 className="font-semibold text-lg">{category.name}</h3>
+                              <p className="text-2xl font-bold text-primary">{category.price}</p>
                             </div>
-                          </CardContent>
-                        </Card>
-                      </TooltipTrigger>
-                      
-                      <TooltipContent side="top" className="max-w-sm p-4">
-                        <div className="space-y-3">
-                          <div>
-                            <p className="font-semibold">{category.name}</p>
-                            <p className="text-sm text-muted-foreground">{category.description}</p>
                           </div>
                           
-                          <div className="space-y-1">
-                            <p className="text-sm"><strong>Processing:</strong> {category.processingTime}</p>
-                            <p className="text-sm"><strong>Min Volume:</strong> {category.minVolume}</p>
-                          </div>
-                          
-                          <div className="pt-2 border-t">
-                            <p className="text-xs text-muted-foreground">
-                              {category.available 
-                                ? `Click to select this license for ${category.price}` 
-                                : 'This license type is currently unavailable'
-                              }
-                            </p>
+                          <div className="flex flex-col items-end gap-2">
+                            {!category.available && (
+                              <Badge variant="destructive" className="text-xs">
+                                SOLD OUT
+                              </Badge>
+                            )}
+                            {isSelected && (
+                              <Badge className="text-xs">
+                                SELECTED
+                              </Badge>
+                            )}
+                            {category.id === '3' && category.available && (
+                              <Badge variant="secondary" className="text-xs">
+                                POPULAR
+                              </Badge>
+                            )}
                           </div>
                         </div>
-                      </TooltipContent>
-                    </Tooltip>
-                  );
-                })}
-              </TooltipProvider>
-            </div>
-          </div>
-        ))}
+                      </CardHeader>
+                      
+                      <CardContent className="pt-0">
+                        <div className="space-y-4">
+                          {/* Processing Time */}
+                          <div className="flex items-center gap-2 text-sm">
+                            <Clock className="h-4 w-4 text-muted-foreground" />
+                            <span>Processing: {category.details?.processingTime || '5-7 business days'}</span>
+                          </div>
+
+                          {/* Minimum Volume */}
+                          <div className="flex items-center gap-2 text-sm">
+                            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                            <span>Min Volume: {category.details?.minVolume || 'No minimum'}</span>
+                          </div>
+
+                          <Separator />
+
+                          {/* Features */}
+                          <div className="space-y-2">
+                            <h4 className="text-sm font-semibold flex items-center gap-2">
+                              <Star className="h-4 w-4" />
+                              Key Features
+                            </h4>
+                            <ul className="space-y-1">
+                              {category.features.map((feature, index) => (
+                                <li key={index} className="text-sm text-muted-foreground flex items-center gap-2">
+                                  <CheckCircle className="h-3 w-3 text-green-600 flex-shrink-0" />
+                                  {feature}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+
+                          {/* Additional Details */}
+                          {category.details?.features && (
+                            <div className="pt-2 border-t">
+                              <div className="flex flex-wrap gap-1">
+                                {category.details.features.slice(0, 3).map((feature: string, index: number) => (
+                                  <Badge key={index} variant="outline" className="text-xs">
+                                    {feature}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </TooltipTrigger>
+                  
+                  <TooltipContent side="top" className="max-w-sm">
+                    <div className="space-y-2">
+                      <p className="font-semibold">{category.name}</p>
+                      <p className="text-sm">
+                        {category.available 
+                          ? `Click to select this license category for ${category.price}` 
+                          : 'This category is currently sold out'
+                        }
+                      </p>
+                      {category.details?.description && (
+                        <p className="text-xs text-muted-foreground">
+                          {category.details.description}
+                        </p>
+                      )}
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
+              );
+            })}
+          </TooltipProvider>
+        </div>
 
         {/* Selection Summary */}
         {selectedCategory && (
-          <div className="p-6 bg-gradient-to-r from-primary/5 to-primary/10 border border-primary/20 rounded-xl">
+          <div className="p-4 bg-primary/5 border border-primary/20 rounded-lg">
             <div className="flex items-center justify-between">
               <div>
-                <h4 className="font-bold text-primary text-lg">Selected License</h4>
-                <p className="text-muted-foreground">
-                  {enhancedCategories.find(c => c.id === selectedCategory)?.name} - {enhancedCategories.find(c => c.id === selectedCategory)?.price}
-                </p>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Processing time: {enhancedCategories.find(c => c.id === selectedCategory)?.processingTime}
+                <h4 className="font-semibold text-primary">Selected License Category</h4>
+                <p className="text-sm text-muted-foreground">
+                  {categories.find(c => c.id === selectedCategory)?.name} - {categories.find(c => c.id === selectedCategory)?.price}
                 </p>
               </div>
               <Button 
                 variant="outline" 
                 size="sm"
                 onClick={() => onCategorySelect('')}
-                className="hover:bg-primary/10"
               >
                 Change Selection
               </Button>
@@ -499,10 +221,9 @@ const EnhancedLicenseCategorySection = ({
         )}
 
         {!selectedCategory && (
-          <div className="text-center py-8 text-muted-foreground">
-            <AlertCircle className="h-8 w-8 mx-auto mb-3 text-amber-500" />
-            <p className="text-lg font-medium">Please select a license category to continue</p>
-            <p className="text-sm">Choose from our comprehensive range of professional licenses above</p>
+          <div className="text-center py-4 text-muted-foreground">
+            <AlertCircle className="h-6 w-6 mx-auto mb-2" />
+            <p>Please select an available license category to continue</p>
           </div>
         )}
       </CardContent>

@@ -49,8 +49,8 @@ const LicenseCategories = () => {
   const categories = [
     { 
       id: '1', 
-      name: settings.category1_name || 'Basic Trader', 
-      price: settings.category1_price || 'Price not available', 
+      name: 'Basic Trader', 
+      price: settings.category1_price || 'Loading...', 
       minVolume: '$50,000',
       icon: Shield, 
       color: 'blue',
@@ -67,8 +67,8 @@ const LicenseCategories = () => {
     },
     { 
       id: '2', 
-      name: settings.category2_name || 'Standard Trader', 
-      price: settings.category2_price || 'Price not available', 
+      name: 'Standard Trader', 
+      price: settings.category2_price || 'Loading...', 
       minVolume: '$100,000',
       icon: CheckCircle, 
       color: 'green',
@@ -86,8 +86,8 @@ const LicenseCategories = () => {
     },
     { 
       id: '3', 
-      name: settings.category3_name || 'Advanced Trader', 
-      price: settings.category3_price || 'Price not available', 
+      name: 'Advanced Trader', 
+      price: settings.category3_price || 'Loading...', 
       minVolume: '$250,000',
       icon: Star, 
       color: 'purple',
@@ -106,8 +106,8 @@ const LicenseCategories = () => {
     },
     { 
       id: '4', 
-      name: settings.category4_name || 'Professional Trader', 
-      price: settings.category4_price || 'Price not available', 
+      name: 'Professional Trader', 
+      price: settings.category4_price || 'Loading...', 
       minVolume: '$500,000',
       icon: Crown, 
       color: 'gold',
@@ -128,8 +128,8 @@ const LicenseCategories = () => {
     },
     { 
       id: '5', 
-      name: settings.category5_name || 'Institutional Trader', 
-      price: settings.category5_price || 'Price not available', 
+      name: 'Institutional Trader', 
+      price: settings.category5_price || 'Loading...', 
       minVolume: '$1,000,000+',
       icon: Building, 
       color: 'platinum',
@@ -150,8 +150,8 @@ const LicenseCategories = () => {
     },
     { 
       id: '6', 
-      name: settings.category6_name || 'Executive Trader', 
-      price: settings.category6_price || 'Price not available', 
+      name: 'Executive Trader', 
+      price: settings.category6_price || 'Loading...', 
       minVolume: '$2,500,000+',
       icon: Trophy, 
       color: 'diamond',

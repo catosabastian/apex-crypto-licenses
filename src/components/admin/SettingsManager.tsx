@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -5,20 +6,9 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { supabaseDataManager } from '@/utils/supabaseDataManager';
-import { Loader2, DollarSign, Shield, Briefcase, Gamepad2, Building } from 'lucide-react';
-
-interface LicenseCategory {
-  id: string;
-  name: string;
-  type: string;
-  icon: React.ComponentType<any>;
-  color: string;
-}
+import { Loader2 } from 'lucide-react';
 
 export function SettingsManager() {
   const [settings, setSettings] = useState<Record<string, any>>({});
@@ -26,41 +16,6 @@ export function SettingsManager() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
-
-  // All 12 license categories grouped by type
-  const licenseCategories: LicenseCategory[] = [
-    // Trading Licenses (1-6)
-    { id: '1', name: 'Basic Trader', type: 'trading', icon: DollarSign, color: 'blue' },
-    { id: '2', name: 'Standard Trader', type: 'trading', icon: DollarSign, color: 'blue' },
-    { id: '3', name: 'Advanced Trader', type: 'trading', icon: DollarSign, color: 'blue' },
-    { id: '4', name: 'Professional Trader', type: 'trading', icon: DollarSign, color: 'blue' },
-    { id: '5', name: 'Institutional Trader', type: 'trading', icon: DollarSign, color: 'blue' },
-    { id: '6', name: 'Executive Trader', type: 'trading', icon: DollarSign, color: 'blue' },
-    
-    // Crypto Licenses (7)
-    { id: '7', name: 'Crypto Wallet License', type: 'crypto', icon: Shield, color: 'purple' },
-    
-    // Fintech Licenses (8-9)
-    { id: '8', name: 'Fintech EMI License', type: 'fintech', icon: Briefcase, color: 'green' },
-    { id: '9', name: 'Fintech MSP License', type: 'fintech', icon: Briefcase, color: 'green' },
-    
-    // Gambling Licenses (10-11)
-    { id: '10', name: 'Gambling Online License', type: 'gambling', icon: Gamepad2, color: 'red' },
-    { id: '11', name: 'Gambling Lottery License', type: 'gambling', icon: Gamepad2, color: 'red' },
-    
-    // Corporate License (12)
-    { id: '12', name: 'Corporate Offshore License', type: 'corporate', icon: Building, color: 'yellow' },
-  ];
-
-  const categoryGroups = {
-    trading: { title: 'Trading Licenses', color: 'blue', categories: licenseCategories.filter(c => c.type === 'trading') },
-    crypto: { title: 'Crypto Licenses', color: 'purple', categories: licenseCategories.filter(c => c.type === 'crypto') },
-    fintech: { title: 'Fintech Licenses', color: 'green', categories: licenseCategories.filter(c => c.type === 'fintech') },
-    gambling: { title: 'Gambling Licenses', color: 'red', categories: licenseCategories.filter(c => c.type === 'gambling') },
-    corporate: { title: 'Corporate Licenses', color: 'yellow', categories: licenseCategories.filter(c => c.type === 'corporate') },
-  };
-
-  const statusOptions = ['AVAILABLE', 'RECOMMENDED', 'SELLING FAST', 'SOLD OUT', 'COMING SOON'];
 
   useEffect(() => {
     const handleSettingsUpdate = () => {
@@ -80,6 +35,7 @@ export function SettingsManager() {
     try {
       setIsLoading(true);
       const currentSettings = await supabaseDataManager.getSettings();
+      console.log('Loaded settings in SettingsManager:', currentSettings);
       setSettings(currentSettings);
     } catch (error) {
       console.error('Error loading settings:', error);
@@ -93,8 +49,18 @@ export function SettingsManager() {
     }
   };
 
-  const handleFieldChange = (categoryId: string, field: string, value: any) => {
-    setSettings(prev => ({ ...prev, [`category${categoryId}_${field}`]: value }));
+  const handlePriceChange = (category: string, value: string) => {
+    setSettings(prev => ({ ...prev, [`category${category}_price`]: value }));
+    setIsDirty(true);
+  };
+
+  const handleAvailabilityChange = (category: string, available: boolean) => {
+    setSettings(prev => ({ ...prev, [`category${category}_available`]: available }));
+    setIsDirty(true);
+  };
+
+  const handleStatusChange = (category: string, status: string) => {
+    setSettings(prev => ({ ...prev, [`category${category}_status`]: status }));
     setIsDirty(true);
   };
 
@@ -103,28 +69,29 @@ export function SettingsManager() {
     
     try {
       setIsSaving(true);
+      console.log('Saving settings:', settings);
       
-      // Update each setting individually
+      // Update each setting individually with proper error handling
       const settingsToUpdate = Object.entries(settings).filter(([key]) => 
         key.startsWith('category') && (
           key.includes('_price') || 
           key.includes('_available') || 
-          key.includes('_status') ||
-          key.includes('_name') ||
-          key.includes('_description') ||
-          key.includes('_minVolume')
+          key.includes('_status')
         )
       );
       
       for (const [key, value] of settingsToUpdate) {
+        console.log(`Updating setting ${key} with value:`, value);
         await supabaseDataManager.updateSetting(key, value);
       }
       
+      // Force reload to confirm updates
       await loadSettings();
+      
       setIsDirty(false);
       toast({
         title: "Success",
-        description: "All license categories updated successfully",
+        description: "Settings updated successfully",
       });
     } catch (error) {
       console.error('Error saving settings:', error);
@@ -138,23 +105,23 @@ export function SettingsManager() {
     }
   };
 
-  const getStatusBadgeColor = (status: string) => {
-    switch (status) {
-      case 'AVAILABLE': return 'bg-green-100 text-green-800 border-green-200';
-      case 'RECOMMENDED': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'SELLING FAST': return 'bg-orange-100 text-orange-800 border-orange-200';
-      case 'SOLD OUT': return 'bg-red-100 text-red-800 border-red-200';
-      case 'COMING SOON': return 'bg-gray-100 text-gray-800 border-gray-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
+  const categories = [
+    { id: '1', name: 'Basic Trader', defaultPrice: '$25,000', defaultStatus: 'SOLD OUT' },
+    { id: '2', name: 'Standard Trader', defaultPrice: '$50,000', defaultStatus: 'SOLD OUT' },
+    { id: '3', name: 'Advanced Trader', defaultPrice: '$70,000', defaultStatus: 'RECOMMENDED' },
+    { id: '4', name: 'Professional Trader', defaultPrice: '$150,000', defaultStatus: 'SELLING FAST' },
+    { id: '5', name: 'Institutional Trader', defaultPrice: '$250,000', defaultStatus: 'SELLING FAST' },
+    { id: '6', name: 'Executive Trader', defaultPrice: '$500,000', defaultStatus: 'SELLING FAST' }
+  ];
+
+  const statusOptions = ['AVAILABLE', 'RECOMMENDED', 'SELLING FAST', 'SOLD OUT'];
 
   if (isLoading) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>License Categories & Pricing Management</CardTitle>
-          <CardDescription>Loading all license categories...</CardDescription>
+          <CardTitle>License Categories & Pricing</CardTitle>
+          <CardDescription>Loading settings...</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
@@ -169,143 +136,78 @@ export function SettingsManager() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Shield className="h-5 w-5" />
-          License Categories & Pricing Management
-        </CardTitle>
+        <CardTitle>License Categories & Pricing</CardTitle>
         <CardDescription>
-          Configure all 12 license categories with pricing, availability, status, and descriptions
+          Configure pricing, availability, and status for all license categories
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-8">
-        {Object.entries(categoryGroups).map(([groupKey, group]) => (
-          <div key={groupKey} className="space-y-4">
-            <div className="flex items-center gap-2">
-              <h2 className="text-xl font-semibold">{group.title}</h2>
-              <Badge variant="outline" className={`bg-${group.color}-50 text-${group.color}-700 border-${group.color}-200`}>
-                {group.categories.length} License{group.categories.length > 1 ? 's' : ''}
-              </Badge>
+      <CardContent className="space-y-6">
+        {categories.map((category, index) => {
+          const price = settings[`category${category.id}_price`] || category.defaultPrice;
+          const available = settings[`category${category.id}_available`] !== false;
+          const status = settings[`category${category.id}_status`] || category.defaultStatus;
+          
+          return (
+            <div key={category.id}>
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">{category.name}</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor={`price-${category.id}`}>Price</Label>
+                    <Input
+                      id={`price-${category.id}`}
+                      value={price}
+                      onChange={(e) => handlePriceChange(category.id, e.target.value)}
+                      placeholder="e.g. $25,000"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor={`status-${category.id}`}>Status</Label>
+                    <select
+                      id={`status-${category.id}`}
+                      value={status}
+                      onChange={(e) => handleStatusChange(category.id, e.target.value)}
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {statusOptions.map(option => (
+                        <option key={option} value={option}>{option}</option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div className="space-y-2 flex items-center">
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id={`available-${category.id}`}
+                        checked={available}
+                        onCheckedChange={(checked) => handleAvailabilityChange(category.id, checked)}
+                      />
+                      <Label htmlFor={`available-${category.id}`}>Available</Label>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              {index < categories.length - 1 && <Separator className="mt-6" />}
             </div>
-            
-            <div className="grid gap-6">
-              {group.categories.map((category) => {
-                const categorySettings = {
-                  name: settings[`category${category.id}_name`] || category.name,
-                  price: settings[`category${category.id}_price`] || '$0',
-                  available: settings[`category${category.id}_available`] !== false,
-                  status: settings[`category${category.id}_status`] || 'AVAILABLE',
-                  description: settings[`category${category.id}_description`] || '',
-                  minVolume: settings[`category${category.id}_minVolume`] || '$0',
-                };
-
-                const IconComponent = category.icon;
-
-                return (
-                  <Card key={category.id} className="border-2">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <IconComponent className="h-5 w-5 text-muted-foreground" />
-                          <CardTitle className="text-lg">Category {category.id}</CardTitle>
-                          <Badge className={getStatusBadgeColor(categorySettings.status)}>
-                            {categorySettings.status}
-                          </Badge>
-                        </div>
-                        <Switch
-                          checked={categorySettings.available}
-                          onCheckedChange={(checked) => handleFieldChange(category.id, 'available', checked)}
-                        />
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor={`name-${category.id}`}>License Name</Label>
-                          <Input
-                            id={`name-${category.id}`}
-                            value={categorySettings.name}
-                            onChange={(e) => handleFieldChange(category.id, 'name', e.target.value)}
-                            placeholder="e.g. Advanced Trader"
-                          />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor={`price-${category.id}`}>Price</Label>
-                          <Input
-                            id={`price-${category.id}`}
-                            value={categorySettings.price}
-                            onChange={(e) => handleFieldChange(category.id, 'price', e.target.value)}
-                            placeholder="e.g. $25,000"
-                          />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor={`minVolume-${category.id}`}>Minimum Volume</Label>
-                          <Input
-                            id={`minVolume-${category.id}`}
-                            value={categorySettings.minVolume}
-                            onChange={(e) => handleFieldChange(category.id, 'minVolume', e.target.value)}
-                            placeholder="e.g. $100K"
-                          />
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor={`status-${category.id}`}>Status</Label>
-                          <Select
-                            value={categorySettings.status}
-                            onValueChange={(value) => handleFieldChange(category.id, 'status', value)}
-                          >
-                            <SelectTrigger>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {statusOptions.map(option => (
-                                <SelectItem key={option} value={option}>{option}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor={`description-${category.id}`}>Description</Label>
-                          <Textarea
-                            id={`description-${category.id}`}
-                            value={categorySettings.description}
-                            onChange={(e) => handleFieldChange(category.id, 'description', e.target.value)}
-                            placeholder="Brief description of this license..."
-                            rows={3}
-                          />
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-            
-            <Separator />
-          </div>
-        ))}
+          );
+        })}
         
-        <div className="flex justify-between items-center pt-6 border-t">
-          <div className="text-sm text-muted-foreground">
-            Managing {licenseCategories.length} license categories across {Object.keys(categoryGroups).length} different types
-          </div>
+        <div className="flex justify-end pt-6">
           <Button 
             onClick={handleSaveSettings}
             disabled={!isDirty || isSaving}
-            className="min-w-[140px]"
-            size="lg"
+            className="min-w-[120px]"
           >
             {isSaving ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                Saving All...
+                Saving...
               </>
             ) : (
-              'Save All Changes'
+              'Save Changes'
             )}
           </Button>
         </div>

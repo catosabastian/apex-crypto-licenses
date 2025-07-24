@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Copy, Check, QrCode, Wallet, AlertCircle, Loader2 } from 'lucide-react';
+import { Copy, Check, QrCode, Wallet, AlertCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { supabaseDataManager } from '@/utils/supabaseDataManager';
 import QRCode from 'react-qr-code';
@@ -34,71 +34,53 @@ const PaymentSection = ({ selectedCrypto, onCryptoChange, selectedCategory }: Pa
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [paymentAddresses, setPaymentAddresses] = useState<any[]>([]);
   const [settings, setSettings] = useState<PaymentSettings>({});
-  const [isLoading, setIsLoading] = useState(true);
-  const [isLoadingPrice, setIsLoadingPrice] = useState(false);
 
   useEffect(() => {
     const loadPaymentData = async () => {
       try {
-        setIsLoading(true);
-        const [addresses, settingsData] = await Promise.all([
-          supabaseDataManager.getPaymentAddresses(),
-          supabaseDataManager.getSettings()
-        ]);
+        const addresses = await supabaseDataManager.getPaymentAddresses();
+        setPaymentAddresses(addresses);
         
-        setPaymentAddresses(addresses || []);
+        const settingsData = await supabaseDataManager.getSettings();
         setSettings({
-          bitcoinAddress: addresses?.find(a => a.cryptocurrency === 'BTC')?.address || '',
-          ethereumAddress: addresses?.find(a => a.cryptocurrency === 'ETH')?.address || '',
-          usdtTronAddress: addresses?.find(a => a.cryptocurrency === 'USDT_TRON')?.address || '',
-          usdtEthereumAddress: addresses?.find(a => a.cryptocurrency === 'USDT_ETH')?.address || '',
-          xrpAddress: addresses?.find(a => a.cryptocurrency === 'XRP')?.address || '',
+          bitcoinAddress: addresses.find(a => a.cryptocurrency === 'BTC')?.address,
+          ethereumAddress: addresses.find(a => a.cryptocurrency === 'ETH')?.address,
+          usdtTronAddress: addresses.find(a => a.cryptocurrency === 'USDT_TRON')?.address,
+          usdtEthereumAddress: addresses.find(a => a.cryptocurrency === 'USDT_ETH')?.address,
+          xrpAddress: addresses.find(a => a.cryptocurrency === 'XRP')?.address,
           category3Price: settingsData.category3_price || '$70,000',
           category4Price: settingsData.category4_price || '$150,000',
           category5Price: settingsData.category5_price || '$250,000'
         });
       } catch (error) {
         console.error('Error loading payment data:', error);
-        toast({
-          title: "Loading Error",
-          description: "Failed to load payment information. Please refresh the page.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
       }
     };
 
     loadPaymentData();
-    
-    const handleUpdate = () => {
-      setIsLoadingPrice(true);
-      loadPaymentData().finally(() => setIsLoadingPrice(false));
-    };
-
-    supabaseDataManager.addEventListener('payment_addresses_updated', handleUpdate);
-    supabaseDataManager.addEventListener('settings_updated', handleUpdate);
+    supabaseDataManager.addEventListener('payment_addresses_updated', loadPaymentData);
+    supabaseDataManager.addEventListener('settings_updated', loadPaymentData);
     
     return () => {
-      supabaseDataManager.removeEventListener('payment_addresses_updated', handleUpdate);
-      supabaseDataManager.removeEventListener('settings_updated', handleUpdate);
+      supabaseDataManager.removeEventListener('payment_addresses_updated', loadPaymentData);
+      supabaseDataManager.removeEventListener('settings_updated', loadPaymentData);
     };
   }, []);
 
   const getWalletAddress = (crypto: string): string => {
     switch (crypto) {
       case 'BTC':
-        return settings.bitcoinAddress || '';
+        return settings.bitcoinAddress || 'Address not configured';
       case 'ETH':
-        return settings.ethereumAddress || '';
+        return settings.ethereumAddress || 'Address not configured';
       case 'USDT_TRON':
-        return settings.usdtTronAddress || '';
+        return settings.usdtTronAddress || 'Address not configured';
       case 'USDT_ETH':
-        return settings.usdtEthereumAddress || '';
+        return settings.usdtEthereumAddress || 'Address not configured';
       case 'XRP':
-        return settings.xrpAddress || '';
+        return settings.xrpAddress || 'Address not configured';
       default:
-        return '';
+        return 'Address not available';
     }
   };
 
@@ -114,27 +96,16 @@ const PaymentSection = ({ selectedCrypto, onCryptoChange, selectedCategory }: Pa
   };
 
   const getCategoryPrice = (category: string): string => {
-    if (isLoadingPrice) return 'Loading...';
-    
     switch (category) {
       case '3': return settings.category3Price || '$70,000';
       case '4': return settings.category4Price || '$150,000';
       case '5': return settings.category5Price || '$250,000';
-      default: return 'Contact for pricing';
-    }
-  };
-
-  const getCategoryName = (category: string): string => {
-    switch (category) {
-      case '3': return 'Professional License';
-      case '4': return 'Enterprise License';
-      case '5': return 'Premium License';
-      default: return `Category ${category}`;
+      default: return 'Price not available';
     }
   };
 
   const handleCopyAddress = async (address: string, type: string) => {
-    if (!address) {
+    if (!address || address === 'Address not configured') {
       toast({
         title: "Address Not Available",
         description: "This wallet address hasn't been configured yet.",
@@ -161,19 +132,7 @@ const PaymentSection = ({ selectedCrypto, onCryptoChange, selectedCategory }: Pa
   };
 
   const selectedAddress = getWalletAddress(selectedCrypto);
-  const isAddressValid = selectedAddress && selectedAddress.length > 0;
-
-  if (isLoading) {
-    return (
-      <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Payment Information</h3>
-        <div className="flex items-center justify-center py-8">
-          <Loader2 className="h-6 w-6 animate-spin mr-2" />
-          <span>Loading payment information...</span>
-        </div>
-      </div>
-    );
-  }
+  const isAddressValid = selectedAddress && selectedAddress !== 'Address not configured';
 
   return (
     <div className="space-y-4">
@@ -215,47 +174,12 @@ const PaymentSection = ({ selectedCrypto, onCryptoChange, selectedCategory }: Pa
           <CardContent className="p-0">
             <div className="space-y-4">
               {selectedCategory && (
-                <div className="p-6 bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg transition-all duration-200 hover:shadow-sm">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex flex-col">
-                      <span className="text-lg font-semibold text-foreground">
-                        {getCategoryName(selectedCategory)}
-                      </span>
-                      <span className="text-sm text-muted-foreground">
-                        Category {selectedCategory} License
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {isLoadingPrice && (
-                        <Loader2 className="h-4 w-4 animate-spin text-primary" />
-                      )}
-                      <Badge variant="default" className="font-bold text-2xl px-4 py-2 bg-primary text-primary-foreground">
-                        {getCategoryPrice(selectedCategory)}
-                      </Badge>
-                    </div>
-                  </div>
-                  
-                  <div className="text-center p-4 bg-background/50 rounded-lg border border-primary/10">
-                    <p className="text-sm text-muted-foreground mb-2">
-                      Selected Plan Price
-                    </p>
-                    <p className="text-3xl font-bold text-primary">
+                <div className="p-3 bg-primary/10 border border-primary/20 rounded-md">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">License Category {selectedCategory} Price:</span>
+                    <Badge variant="secondary" className="font-semibold">
                       {getCategoryPrice(selectedCategory)}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      💡 Price updated in real-time from admin system
-                    </p>
-                  </div>
-                </div>
-              )}
-              
-              {!selectedCategory && (
-                <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                  <div className="flex items-center gap-2 text-amber-700">
-                    <AlertCircle className="h-4 w-4" />
-                    <span className="text-sm font-medium">
-                      Please select a license category above to see pricing
-                    </span>
+                    </Badge>
                   </div>
                 </div>
               )}

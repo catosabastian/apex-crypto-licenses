@@ -51,11 +51,11 @@ export const sampleLicense = {
 
 // License category information
 export const licenseCategories = {
-  1: { name: "Basic Trader", price: "25,000 USDT", minVolume: "$50,000", available: false, validity: "1 year" },
-  2: { name: "Standard Trader", price: "50,000 USDT", minVolume: "$100,000", available: false, validity: "1 year" },
-  3: { name: "Advanced Trader", price: "70,000 USDT", minVolume: "$250,000", available: true, validity: "Lifetime" },
-  4: { name: "Professional Trader", price: "150,000 USDT", minVolume: "$500,000", available: true, validity: "Lifetime" },
-  5: { name: "Institutional Trader", price: "250,000 USDT", minVolume: "$1,000,000+", available: true, validity: "Lifetime" },
+  1: { name: "Basic Trader", price: "25,000 USDT", minVolume: "$50,000", available: false },
+  2: { name: "Standard Trader", price: "50,000 USDT", minVolume: "$100,000", available: false },
+  3: { name: "Advanced Trader", price: "70,000 USDT", minVolume: "$250,000", available: true },
+  4: { name: "Professional Trader", price: "150,000 USDT", minVolume: "$500,000", available: true },
+  5: { name: "Institutional Trader", price: "250,000 USDT", minVolume: "$1,000,000+", available: true },
 };
 
 // Get license category info by tier
