@@ -35,12 +35,12 @@ const VerificationSection = () => {
   const [verifiedLicense, setVerifiedLicense] = useState<any>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [sampleLicense] = useState({
-    id: 'CL-2025-0001-T1',
+    id: 'CL-2023-8294-T2',
     holder: 'APEX Trading Solutions Ltd.',
-    type: 'Tier 1',
-    issueDate: '2025-01-20',
-    expiryDate: '2026-01-20',
-    platforms: 'Binance, Coinbase Pro, Kraken, KuCoin'
+    type: 'Professional Trader',
+    issueDate: '2023-11-15',
+    expiryDate: '2024-11-15',
+    platforms: 'Binance, Coinbase Pro, Kraken, FTX'
   });
 
   useEffect(() => {

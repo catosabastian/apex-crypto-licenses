@@ -1,3 +1,4 @@
+
 import { useState, useEffect, FormEvent } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,10 +9,10 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { AlertTriangle, Loader2, ShieldCheck, RefreshCw, AlertCircle } from "lucide-react";
+import { AlertTriangle, Loader2, ShieldCheck } from "lucide-react";
 import { toast } from "@/components/ui/use-toast";
 import { sendAdminNotification } from "@/utils/emailService";
-import { supabaseDataManager } from "@/utils/supabaseDataManager";
+import { unifiedDataManager, ContentSettings } from "@/utils/unifiedDataManager";
 import PaymentSection from "@/components/form/PaymentSection";
 
 const ADMIN_EMAIL = "catosabastian@gmail.com";
@@ -22,93 +23,40 @@ interface ApplicationFormProps {
 
 const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadingError, setLoadingError] = useState<string | null>(null);
-  const [retryCount, setRetryCount] = useState(0);
   const [applicantType, setApplicantType] = useState<'individual' | 'corporate'>('individual');
   const [selectedCategory, setSelectedCategory] = useState<'3' | '4' | '5'>('3');
   const [selectedCrypto, setSelectedCrypto] = useState<'BTC' | 'ETH' | 'USDT_TRON' | 'USDT_ETH' | 'XRP'>('BTC');
-  const [settings, setSettings] = useState<any>({});
+  const [settings, setSettings] = useState<ContentSettings>(unifiedDataManager.getSettings());
 
-  const loadData = async (attempt = 1) => {
-    try {
-      console.log(`[ApplicationForm] Loading data, attempt ${attempt}`);
-      setIsLoading(true);
-      setLoadingError(null);
-
-      // Wait for data manager to be ready
-      await new Promise(resolve => setTimeout(resolve, 100 * attempt)); // Exponential backoff
-      
-      const currentSettings = await supabaseDataManager.getSettings();
-      console.log('[ApplicationForm] Settings loaded successfully:', currentSettings);
-      
-      setSettings(currentSettings);
-      setIsLoading(false);
-    } catch (error) {
-      console.error(`[ApplicationForm] Error loading data (attempt ${attempt}):`, error);
-      setLoadingError(`Failed to load application data: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      setIsLoading(false);
-      
-      // Auto-retry up to 3 times
-      if (attempt < 3) {
-        console.log(`[ApplicationForm] Auto-retrying in ${attempt * 1000}ms...`);
-        setTimeout(() => {
-          setRetryCount(attempt);
-          loadData(attempt + 1);
-        }, attempt * 1000);
-      }
-    }
-  };
-
-  const handleRetry = () => {
-    console.log('[ApplicationForm] Manual retry triggered');
-    loadData(1);
-  };
-
+  // Listen for settings updates
   useEffect(() => {
-    loadData();
-
     const handleSettingsUpdate = (data: any) => {
-      try {
-        console.log('[ApplicationForm] Settings updated via event:', data);
-        const newSettings = data.settings || data;
-        setSettings(newSettings);
-      } catch (error) {
-        console.error('[ApplicationForm] Error handling settings update:', error);
-      }
+      const newSettings = data.settings || data;
+      setSettings(newSettings);
+      console.log('[ApplicationForm] Settings updated:', newSettings);
     };
 
-    supabaseDataManager.addEventListener('settings_updated', handleSettingsUpdate);
+    unifiedDataManager.addEventListener('settings_updated', handleSettingsUpdate);
     return () => {
-      supabaseDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
+      unifiedDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
     };
   }, []);
 
   const getCategoryPrice = (category: string): string => {
-    try {
-      switch (category) {
-        case '3': return settings.category3Price || '70,000 USDT';
-        case '4': return settings.category4Price || '150,000 USDT';
-        case '5': return settings.category5Price || '250,000 USDT';
-        default: return 'Price not available';
-      }
-    } catch (error) {
-      console.error('[ApplicationForm] Error getting category price:', error);
-      return 'Price not available';
+    switch (category) {
+      case '3': return settings.category3Price || '70,000 USDT';
+      case '4': return settings.category4Price || '150,000 USDT';
+      case '5': return settings.category5Price || '250,000 USDT';
+      default: return 'Price not available';
     }
   };
 
   const isCategoryAvailable = (category: string): boolean => {
-    try {
-      switch (category) {
-        case '3': return settings.category3_available ?? true;
-        case '4': return settings.category4_available ?? true;
-        case '5': return settings.category5_available ?? true;
-        default: return false;
-      }
-    } catch (error) {
-      console.error('[ApplicationForm] Error checking category availability:', error);
-      return false;
+    switch (category) {
+      case '3': return settings.category3Available ?? true;
+      case '4': return settings.category4Available ?? true;
+      case '5': return settings.category5Available ?? true;
+      default: return false;
     }
   };
   
@@ -116,11 +64,10 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
     e.preventDefault();
     setIsSubmitting(true);
     
+    const formData = new FormData(e.target as HTMLFormElement);
+    const formDataObj = Object.fromEntries(formData.entries());
+    
     try {
-      console.log('[ApplicationForm] Starting form submission');
-      const formData = new FormData(e.target as HTMLFormElement);
-      const formDataObj = Object.fromEntries(formData.entries());
-      
       // Validate that the selected category is still available
       if (!isCategoryAvailable(selectedCategory)) {
         toast({
@@ -131,11 +78,6 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
         return;
       }
 
-      // Get wallet address first (await the async function)
-      console.log('[ApplicationForm] Getting wallet address...');
-      const walletAddress = await getSelectedWalletAddress();
-      console.log('[ApplicationForm] Wallet address retrieved:', walletAddress);
-
       const completeFormData = {
         ...formDataObj,
         submissionTime: new Date().toISOString(),
@@ -143,34 +85,9 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
         selectedCategory,
         selectedCrypto,
         categoryPrice: getCategoryPrice(selectedCategory),
-        walletAddress
+        walletAddress: getSelectedWalletAddress()
       };
       
-      console.log('[ApplicationForm] Complete form data:', completeFormData);
-      
-      // Save application to Supabase
-      const applicationData = {
-        name: `${formDataObj.firstName || formDataObj.companyName} ${formDataObj.lastName || ''}`.trim(),
-        email: (formDataObj.email || formDataObj.businessEmail) as string,
-        phone: formDataObj.phone as string,
-        company: formDataObj.companyName as string,
-        category: selectedCategory,
-        notes: JSON.stringify(completeFormData),
-        status: 'pending' as const,
-        amount: getCategoryPrice(selectedCategory),
-        payment_method: selectedCrypto,
-        transaction_id: null
-      };
-
-      console.log('[ApplicationForm] Saving application to database...');
-      const savedApplication = await supabaseDataManager.createApplication(applicationData);
-      
-      if (!savedApplication) {
-        throw new Error('Failed to save application to database');
-      }
-
-      console.log('[ApplicationForm] Application saved successfully:', savedApplication.id);
-
       const notificationSent = await sendAdminNotification(
         completeFormData,
         ADMIN_EMAIL
@@ -208,64 +125,16 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
     }
   };
 
-  const getSelectedWalletAddress = async (): Promise<string> => {
-    try {
-      console.log('[ApplicationForm] Getting payment addresses...');
-      const paymentAddresses = await supabaseDataManager.getPaymentAddresses();
-      console.log('[ApplicationForm] Payment addresses retrieved:', paymentAddresses);
-      
-      const addressMap: Record<string, string> = {};
-      
-      paymentAddresses.forEach(addr => {
-        addressMap[addr.cryptocurrency] = addr.address;
-      });
-
-      const address = (() => {
-        switch (selectedCrypto) {
-          case 'BTC': return addressMap['BTC'] || '';
-          case 'ETH': return addressMap['ETH'] || '';
-          case 'USDT_TRON': return addressMap['USDT_TRON'] || '';
-          case 'USDT_ETH': return addressMap['USDT_ETH'] || '';
-          case 'XRP': return addressMap['XRP'] || '';
-          default: return '';
-        }
-      })();
-
-      console.log(`[ApplicationForm] Selected ${selectedCrypto} address:`, address);
-      return address;
-    } catch (error) {
-      console.error('Error getting wallet address:', error);
-      return '';
+  const getSelectedWalletAddress = (): string => {
+    switch (selectedCrypto) {
+      case 'BTC': return settings.bitcoinAddress || '';
+      case 'ETH': return settings.ethereumAddress || '';
+      case 'USDT_TRON': return settings.usdtTronAddress || '';
+      case 'USDT_ETH': return settings.usdtEthereumAddress || '';
+      case 'XRP': return settings.xrpAddress || '';
+      default: return '';
     }
   };
-
-  // Show loading state
-  if (isLoading) {
-    return (
-      <div id="application" className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="text-muted-foreground">Loading application form...</p>
-        {retryCount > 0 && (
-          <p className="text-xs text-muted-foreground">Retry attempt {retryCount}/3</p>
-        )}
-      </div>
-    );
-  }
-
-  // Show error state
-  if (loadingError) {
-    return (
-      <div id="application" className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-        <AlertCircle className="h-8 w-8 text-destructive" />
-        <p className="text-destructive font-medium">Failed to Load Application Form</p>
-        <p className="text-sm text-muted-foreground text-center max-w-md">{loadingError}</p>
-        <Button onClick={handleRetry} variant="outline" className="gap-2">
-          <RefreshCw className="h-4 w-4" />
-          Try Again
-        </Button>
-      </div>
-    );
-  }
 
   return (
     <div id="application">
@@ -576,6 +445,7 @@ const ApplicationForm = ({ onClose }: ApplicationFormProps) => {
             selectedCrypto={selectedCrypto}
             onCryptoChange={(crypto) => setSelectedCrypto(crypto as 'BTC' | 'ETH' | 'USDT_TRON' | 'USDT_ETH' | 'XRP')}
             selectedCategory={selectedCategory}
+            settings={settings}
           />
           
           {/* Additional Information */}

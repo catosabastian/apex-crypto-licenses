@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,44 +7,14 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { createClient } from '@supabase/supabase-js';
 import { useNavigate } from 'react-router-dom';
-import { Shield, Lock, Eye, EyeOff } from 'lucide-react';
 
 const Setup = () => {
   const [supabaseUrl, setSupabaseUrl] = useState('');
   const [supabaseKey, setSupabaseKey] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [testResult, setTestResult] = useState<string | null>(null);
-  const [showKey, setShowKey] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [adminPassword, setAdminPassword] = useState('');
   const { toast } = useToast();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    // Check if user is already authenticated
-    const auth = localStorage.getItem('admin_authenticated');
-    if (auth === 'true') {
-      setIsAuthenticated(true);
-    }
-  }, []);
-
-  const authenticateAdmin = () => {
-    // Simple admin authentication - in production, use proper auth
-    if (adminPassword === 'admin123' || adminPassword === 'apex_admin_2024') {
-      setIsAuthenticated(true);
-      localStorage.setItem('admin_authenticated', 'true');
-      toast({
-        title: "Authentication Successful",
-        description: "Welcome to the setup page",
-      });
-    } else {
-      toast({
-        title: "Authentication Failed",
-        description: "Invalid admin password",
-        variant: "destructive",
-      });
-    }
-  };
 
   const databaseSchema = `
 -- Create applications table
@@ -296,56 +266,11 @@ ON CONFLICT (cryptocurrency) DO NOTHING;
     }
   };
 
-  // Admin authentication gate
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-muted/50 p-4 flex items-center justify-center">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <div className="mx-auto w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
-              <Lock className="h-6 w-6 text-red-600" />
-            </div>
-            <CardTitle className="text-red-600">Restricted Access</CardTitle>
-            <CardDescription>
-              This page is restricted to administrators only. Please enter the admin password to continue.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <Label htmlFor="adminPassword">Admin Password</Label>
-              <Input
-                id="adminPassword"
-                type="password"
-                placeholder="Enter admin password"
-                value={adminPassword}
-                onChange={(e) => setAdminPassword(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && authenticateAdmin()}
-              />
-            </div>
-            <Button onClick={authenticateAdmin} className="w-full">
-              <Shield className="h-4 w-4 mr-2" />
-              Authenticate
-            </Button>
-            <div className="text-center">
-              <Button variant="link" onClick={() => navigate('/')}>
-                Return to Homepage
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/50 p-4">
       <div className="max-w-2xl mx-auto pt-20">
         <Card>
           <CardHeader>
-            <div className="flex items-center gap-2 mb-2">
-              <Shield className="h-6 w-6 text-primary" />
-              <span className="text-sm text-muted-foreground">ADMIN ONLY</span>
-            </div>
             <CardTitle>Supabase Project Setup</CardTitle>
             <CardDescription>
               Connect your project to Supabase and set up the database automatically
@@ -365,29 +290,13 @@ ON CONFLICT (cryptocurrency) DO NOTHING;
               
               <div>
                 <Label htmlFor="key">Supabase Anon Key</Label>
-                <div className="relative">
-                  <Input
-                    id="key"
-                    type={showKey ? "text" : "password"}
-                    placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
-                    value={supabaseKey}
-                    onChange={(e) => setSupabaseKey(e.target.value)}
-                    className="pr-10"
-                  />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowKey(!showKey)}
-                  >
-                    {showKey ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </Button>
-                </div>
+                <Input
+                  id="key"
+                  type="password"
+                  placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  value={supabaseKey}
+                  onChange={(e) => setSupabaseKey(e.target.value)}
+                />
               </div>
 
               {testResult && (

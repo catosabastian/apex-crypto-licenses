@@ -4,45 +4,21 @@ import { Button } from '@/components/ui/button';
 import { Shield, FileText, Globe, CheckCircle } from 'lucide-react';
 import { useApplicationDialog } from '@/components/ApplicationDialog';
 import { useEffect, useState } from 'react';
-import { supabaseDataManager } from '@/utils/supabaseDataManager';
+import { unifiedDataManager } from '@/utils/unifiedDataManager';
 
 const WhatIsLicense = () => {
-  const [content, setContent] = useState({
-    title: 'What is a Cryptocurrency License?',
-    subtitle: 'Understanding Licensing',
-    description: ['A cryptocurrency license is a legal authorization that allows businesses to operate in the digital asset space while maintaining compliance with local and international regulations.'],
-    content: 'Our comprehensive licensing solutions ensure your business operates within legal frameworks while providing the flexibility to grow and expand in the cryptocurrency market.',
-    benefits: ['Legal compliance with cryptocurrency regulations', 'Access to banking services and financial institutions'],
-    features: [],
-    ctaText: 'Get Your License'
-  });
+  const [content, setContent] = useState(unifiedDataManager.getContent().whatIsLicense);
   const { openApplicationDialog } = useApplicationDialog();
 
   useEffect(() => {
-    const loadContent = async () => {
-      const whatIsLicenseContent = await supabaseDataManager.getContent('whatIsLicense');
-      if (whatIsLicenseContent && Object.keys(whatIsLicenseContent).length > 0) {
-        setContent({
-          title: whatIsLicenseContent.title || 'What is a Cryptocurrency License?',
-          subtitle: whatIsLicenseContent.subtitle || 'Understanding Licensing',
-          description: typeof whatIsLicenseContent.description === 'string' ? [whatIsLicenseContent.description] : whatIsLicenseContent.description || ['A cryptocurrency license is a legal authorization that allows businesses to operate in the digital asset space while maintaining compliance with local and international regulations.'],
-          content: whatIsLicenseContent.content || 'Our comprehensive licensing solutions ensure your business operates within legal frameworks while providing the flexibility to grow and expand in the cryptocurrency market.',
-          benefits: whatIsLicenseContent.benefits || ['Legal compliance with cryptocurrency regulations', 'Access to banking services and financial institutions'],
-          features: whatIsLicenseContent.features || [],
-          ctaText: 'Get Your License'
-        });
-      }
-    };
-
     const handleContentUpdate = () => {
-      loadContent();
+      setContent(unifiedDataManager.getContent().whatIsLicense);
     };
 
-    loadContent();
-    supabaseDataManager.addEventListener('content_updated', handleContentUpdate);
+    unifiedDataManager.addEventListener('content_updated', handleContentUpdate);
     
     return () => {
-      supabaseDataManager.removeEventListener('content_updated', handleContentUpdate);
+      unifiedDataManager.removeEventListener('content_updated', handleContentUpdate);
     };
   }, []);
 

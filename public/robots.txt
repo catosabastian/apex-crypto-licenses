@@ -1,18 +1,14 @@
-User-agent: *
-Allow: /
-Disallow: /setup
-Disallow: /admin
-Disallow: /login
-
-# Block search engines from indexing sensitive admin pages
 User-agent: Googlebot
-Disallow: /setup
-Disallow: /admin
-Disallow: /login
+Allow: /
 
 User-agent: Bingbot
-Disallow: /setup
-Disallow: /admin
-Disallow: /login
+Allow: /
 
-Sitemap: https://apexcrypto.auth/sitemap.xml
+User-agent: Twitterbot
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: *
+Allow: /

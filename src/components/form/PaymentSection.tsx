@@ -9,63 +9,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Copy, Check, QrCode, Wallet, AlertCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { supabaseDataManager } from '@/utils/supabaseDataManager';
+import { ContentSettings } from '@/utils/unifiedDataManager';
 import QRCode from 'react-qr-code';
 
 interface PaymentSectionProps {
   selectedCrypto: string;
   onCryptoChange: (crypto: string) => void;
   selectedCategory: string;
+  settings: ContentSettings;
 }
 
-interface PaymentSettings {
-  bitcoinAddress?: string;
-  ethereumAddress?: string; 
-  usdtTronAddress?: string;
-  usdtEthereumAddress?: string;
-  xrpAddress?: string;
-  category3Price?: string;
-  category4Price?: string;
-  category5Price?: string;
-}
-
-const PaymentSection = ({ selectedCrypto, onCryptoChange, selectedCategory }: PaymentSectionProps) => {
+const PaymentSection = ({ selectedCrypto, onCryptoChange, selectedCategory, settings }: PaymentSectionProps) => {
   const [copySuccess, setCopySuccess] = useState<string | null>(null);
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
-  const [paymentAddresses, setPaymentAddresses] = useState<any[]>([]);
-  const [settings, setSettings] = useState<PaymentSettings>({});
-
-  useEffect(() => {
-    const loadPaymentData = async () => {
-      try {
-        const addresses = await supabaseDataManager.getPaymentAddresses();
-        setPaymentAddresses(addresses);
-        
-        const settingsData = await supabaseDataManager.getSettings();
-        setSettings({
-          bitcoinAddress: addresses.find(a => a.cryptocurrency === 'BTC')?.address,
-          ethereumAddress: addresses.find(a => a.cryptocurrency === 'ETH')?.address,
-          usdtTronAddress: addresses.find(a => a.cryptocurrency === 'USDT_TRON')?.address,
-          usdtEthereumAddress: addresses.find(a => a.cryptocurrency === 'USDT_ETH')?.address,
-          xrpAddress: addresses.find(a => a.cryptocurrency === 'XRP')?.address,
-          category3Price: settingsData.category3_price || '$70,000',
-          category4Price: settingsData.category4_price || '$150,000',
-          category5Price: settingsData.category5_price || '$250,000'
-        });
-      } catch (error) {
-        console.error('Error loading payment data:', error);
-      }
-    };
-
-    loadPaymentData();
-    supabaseDataManager.addEventListener('payment_addresses_updated', loadPaymentData);
-    supabaseDataManager.addEventListener('settings_updated', loadPaymentData);
-    
-    return () => {
-      supabaseDataManager.removeEventListener('payment_addresses_updated', loadPaymentData);
-      supabaseDataManager.removeEventListener('settings_updated', loadPaymentData);
-    };
-  }, []);
 
   const getWalletAddress = (crypto: string): string => {
     switch (crypto) {
@@ -97,9 +53,9 @@ const PaymentSection = ({ selectedCrypto, onCryptoChange, selectedCategory }: Pa
 
   const getCategoryPrice = (category: string): string => {
     switch (category) {
-      case '3': return settings.category3Price || '$70,000';
-      case '4': return settings.category4Price || '$150,000';
-      case '5': return settings.category5Price || '$250,000';
+      case '3': return settings.category3Price || '70,000 USDT';
+      case '4': return settings.category4Price || '150,000 USDT';
+      case '5': return settings.category5Price || '250,000 USDT';
       default: return 'Price not available';
     }
   };

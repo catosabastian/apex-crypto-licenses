@@ -108,10 +108,7 @@ export function PaymentAddressManager() {
     ETH: { name: 'Ethereum (ETH)', desc: 'ERC-20 compatible address starting with 0x' },
     USDT_TRON: { name: 'USDT (TRC-20)', desc: 'Tron network address starting with T' },
     USDT_ETH: { name: 'USDT (ERC-20)', desc: 'Ethereum network address starting with 0x' },
-    XRP: { name: 'Ripple (XRP)', desc: 'Classic address starting with r' },
-    bitcoin: { name: 'Bitcoin (BTC)', desc: 'Legacy bitcoin address format' },
-    ethereum: { name: 'Ethereum (ETH)', desc: 'Standard ethereum address' },
-    usdt: { name: 'USDT', desc: 'USDT address (multiple networks supported)' }
+    XRP: { name: 'Ripple (XRP)', desc: 'Classic address starting with r' }
   };
 
   return (

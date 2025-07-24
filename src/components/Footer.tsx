@@ -1,77 +1,28 @@
+
 import { Globe, MessageSquare, ShieldCheck } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
 import { useApplicationDialog } from "./ApplicationDialog";
 import { useState, useEffect } from "react";
-import { supabaseDataManager } from "@/utils/supabaseDataManager";
+import { unifiedDataManager, ContentSettings } from "@/utils/unifiedDataManager";
 
 const Footer = () => {
   const { openApplicationDialog } = useApplicationDialog();
-  const [settings, setSettings] = useState<Record<string, any>>({
-    companyName: "CryptoLicense Pro",
-    supportEmail: "support@cryptolicensepro.com", 
-    contactPhone: "+1 (555) 123-4567",
-    companyAddress: "123 Business Ave",
-    city: "New York, NY 10001",
-    country: "United States",
-    website: ""
-  });
-  const [isLoading, setIsLoading] = useState(true);
+  const [settings, setSettings] = useState<ContentSettings>(unifiedDataManager.getSettings());
   
   useEffect(() => {
-    const loadSettings = async () => {
-      try {
-        console.log('[Footer] Loading settings...');
-        const loadedSettings = await supabaseDataManager.getSettings();
-        console.log('[Footer] Settings loaded:', loadedSettings);
-        
-        if (loadedSettings && Object.keys(loadedSettings).length > 0) {
-          setSettings(prev => ({
-            ...prev,
-            ...loadedSettings
-          }));
-        }
-      } catch (error) {
-        console.error('[Footer] Error loading settings:', error);
-        // Keep default settings if loading fails
-      } finally {
-        setIsLoading(false);
-      }
+    // Real-time settings update handler
+    const handleSettingsUpdate = (data: { settings: ContentSettings }) => {
+      setSettings(data.settings);
     };
 
-    loadSettings();
-
-    // Listen for settings updates
-    const handleSettingsUpdate = (data: any) => {
-      console.log('[Footer] Settings updated:', data);
-      if (data && typeof data === 'object') {
-        setSettings(prev => ({
-          ...prev,
-          ...data
-        }));
-      }
-    };
-
-    // Listen to supabase data manager events
-    supabaseDataManager.addEventListener('settings_updated', handleSettingsUpdate);
+    // Listen to unified data manager events
+    unifiedDataManager.addEventListener('settings_updated', handleSettingsUpdate);
 
     return () => {
-      supabaseDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
+      unifiedDataManager.removeEventListener('settings_updated', handleSettingsUpdate);
     };
   }, []);
-
-  if (isLoading) {
-    return (
-      <footer className="bg-primary text-primary-foreground vibrant-glow">
-        <div className="container py-12">
-          <div className="flex items-center justify-center">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary-foreground"></div>
-            <span className="ml-2 text-sm opacity-80">Loading...</span>
-          </div>
-        </div>
-      </footer>
-    );
-  }
   
   return (
     <footer className="bg-primary text-primary-foreground vibrant-glow">
@@ -81,13 +32,13 @@ const Footer = () => {
             <div className="flex items-center gap-2">
               <ShieldCheck className="h-6 w-6" />
               <div>
-                <h2 className="text-xl font-bold">{settings.companyName || "CryptoLicense Pro"}</h2>
+                <h2 className="text-xl font-bold">{settings.companyName}</h2>
                 <p className="text-xs opacity-80">Crypto Licensing Regulatory</p>
               </div>
             </div>
             
             <p className="mt-4 text-sm opacity-80 max-w-md">
-              {settings.companyName || "CryptoLicense Pro"} provides official regulatory licensing for cryptocurrency traders and institutions. Our mission is to ensure compliance and security in digital asset trading.
+              {settings.companyName} provides official regulatory licensing for cryptocurrency traders and institutions. Our mission is to ensure compliance and security in digital asset trading.
             </p>
           </div>
           
@@ -106,18 +57,18 @@ const Footer = () => {
             <ul className="space-y-2 text-sm">
               <li className="flex items-center gap-2">
                 <Globe className="h-4 w-4 opacity-80" />
-                <span className="opacity-80">{settings.supportEmail || "support@cryptolicensepro.com"}</span>
+                <span className="opacity-80">{settings.supportEmail}</span>
               </li>
               <li className="flex items-center gap-2">
                 <MessageSquare className="h-4 w-4 opacity-80" />
-                <span className="opacity-80">{settings.contactPhone || "+1 (555) 123-4567"}</span>
+                <span className="opacity-80">{settings.contactPhone}</span>
               </li>
               <li className="flex items-start gap-2">
                 <Globe className="h-4 w-4 opacity-80 mt-0.5" />
                 <div className="opacity-80">
-                  <div>{settings.companyAddress || "123 Business Ave"}</div>
-                  <div>{settings.city || "New York, NY 10001"}</div>
-                  <div>{settings.country || "United States"}</div>
+                  <div>{settings.companyAddress}</div>
+                  <div>{settings.city}</div>
+                  <div>{settings.country}</div>
                 </div>
               </li>
               {settings.website && (
@@ -136,7 +87,7 @@ const Footer = () => {
         
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
           <div className="text-xs opacity-70">
-            © {new Date().getFullYear()} {settings.companyName || "CryptoLicense Pro"}. All rights reserved.
+            © {new Date().getFullYear()} {settings.companyName}. All rights reserved.
           </div>
           
           <div className="flex gap-6 text-xs opacity-70">
