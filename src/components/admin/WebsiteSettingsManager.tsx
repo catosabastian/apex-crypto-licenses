@@ -76,31 +76,31 @@ const WebsiteSettingsManager = () => {
 
   const handleSave = async () => {
     setIsLoading(true);
-    try 
-      if (websiterIdRef.current && websiterIdRef.current.id) {
-        const createResponse = await supabase
-        .from('website_settings')
-        .eq("id", websiteIdRef.current.id)
-        .update({
-          site_name: settings.companyName,
-          contact_email: settings.supportEmail,
-          contact_phone: settings.contact_phone,
-          contact_address: `${settings.companyAddress}, ${settings.city}`,
-        });
-        if(createResponse.error) throw re.error;
-      } else  {
-        const { error } = await supabase
+    try {
+        if (websiteIdRef.current && websiteRef.current.id) {
+          const createReq = await supabase
           .from('website_settings')
-          .upsert({
+          .update({
             site_name: settings.companyName,
             contact_email: settings.supportEmail,
             contact_phone: settings.contact_phone,
             contact_address: `${settings.companyAddress}, ${settings.city}`,
           });
-  
-        if (error) throw error;
-      }
-
+          .match({ id: websiteIdRef.current.id })
+          if (createReq.error) throw new createReq.error;
+        } else {
+          const { error } = await supabase
+            .from('website_settings')
+            .equal("id", websiteIdRef.current.id)
+            .upsert({
+              site_name: settings.companyName,
+              contact_email: settings.supportEmail,
+              contact_phone: settings.contact_phone,
+              contact_address: `${settings.companyAddress}, ${settings.city}`,
+            });
+    
+          if (error) throw error;
+        }
       toast({
         title: "Settings Updated",
         description: "Website settings have been saved successfully.",
