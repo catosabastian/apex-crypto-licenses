@@ -41,9 +41,9 @@ const VerifyPage = () => {
       const result = await supabaseDataManager.verifyLicense(licenseId);
       setVerificationResult(result);
       
-      if (result && result.license) {
+      if (result) {
         toast.success('License verified successfully!');
-        setVerificationResult({ isValid: true, license: result.license });
+        setVerificationResult({ isValid: true, license: result });
       } else {
         toast.error('License not found or invalid');
         setVerificationResult({ isValid: false });

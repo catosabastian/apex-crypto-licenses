@@ -66,7 +66,8 @@ function App() {
                         <Route path="/resources" element={<ResourcesPage />} />
                         <Route path="/news" element={<NewsPage />} />
                         <Route path="/testimonials" element={<TestimonialsPage />} />
-                        <Route path="/verify" element={<VerifyPage />} />
+        <Route path="/apply" element={<ApplicationPage />} />
+        <Route path="/verify" element={<VerifyPage />} />
                         <Route path="/admin-login" element={<AdminLogin />} />
                         <Route path="/setup" element={<Setup />} />
                         <Route path="/services/crypto" element={<CryptoServicesPage />} />

@@ -71,22 +71,35 @@ const CorporateServicesPage = () => {
       
       <main className="pt-16">
         {/* Hero Section */}
-        <section className="bg-gradient-to-r from-primary/10 to-accent/10 py-20">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto text-center">
-              <Building className="h-16 w-16 text-primary mx-auto mb-6" />
-              <h1 className="text-4xl font-bold mb-6">Corporate Services</h1>
-              <p className="text-xl text-muted-foreground mb-8">
+        <section className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white py-24 overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,_rgba(255,255,255,0.15)_1px,_transparent_0)] bg-[length:20px_20px] opacity-20"></div>
+          <div className="container relative mx-auto px-4">
+            <div className="max-w-5xl mx-auto text-center">
+              <div className="mb-8">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 mb-6">
+                  <Building className="h-5 w-5" />
+                  <span className="text-sm font-medium">Official Corporate Authority</span>
+                </div>
+              </div>
+              <h1 className="text-5xl font-bold mb-6 leading-tight">
+                Corporate Services <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-blue-400">
+                  Regulatory Authority
+                </span>
+              </h1>
+              <p className="text-xl text-slate-300 mb-8 max-w-3xl mx-auto leading-relaxed">
                 Comprehensive corporate services from company formation to ongoing administration. 
                 We support clients throughout their entire journey with professional, compliant solutions.
               </p>
-              <Button size="lg" className="mr-4">
-                Get Started
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="lg">
-                Download Services Guide
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 text-lg">
+                  Start Company Formation
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+                <Button variant="outline" size="lg" className="border-white/30 text-white hover:bg-white/10 px-8 py-3 text-lg">
+                  Download Services Guide
+                </Button>
+              </div>
             </div>
           </div>
         </section>
