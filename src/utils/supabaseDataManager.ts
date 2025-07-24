@@ -26,7 +26,7 @@ export interface License {
   license_type: string;
   issue_date: string;
   expiry_date: string;
-  status: 'active' | 'expired' | 'suspended' | 'revoked';
+  status: 'active' | 'pending' | 'expired' | 'rejected' | 'suspended';
   platforms?: string;
   application_id?: string;
   created_at: string;
@@ -170,21 +170,6 @@ class SupabaseDataManager {
   }
 
   // Licenses
-  async createLicense(license: Omit<License, 'id' | 'created_at' | 'updated_at'>): Promise<License | null> {
-    try {
-      const { data, error } = await (supabase as any)
-        .from('licenses')
-        .insert([license])
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('Error creating license:', error);
-      return null;
-    }
-  }
 
   async getLicenses(): Promise<License[]> {
     return this.dataSubjects.licenses.value;
@@ -373,6 +358,53 @@ class SupabaseDataManager {
   private notifyListeners(event: string, data: any) {
     if (this.eventListeners[event]) {
       this.eventListeners[event].forEach(listener => listener(data));
+    }
+  }
+
+  // License Management
+  async createLicense(licenseData: Omit<License, 'id' | 'created_at' | 'updated_at'>): Promise<License | null> {
+    try {
+      const { data, error } = await (supabase as any)
+        .from('licenses')
+        .insert(licenseData)
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      // Update local data and emit event
+      await this.loadTableData('licenses');
+      this.notifyListeners('licenses_updated', data);
+      
+      return data;
+    } catch (error) {
+      console.error('Error creating license:', error);
+      return null;
+    }
+  }
+
+  async updateLicense(id: string, updates: Partial<Omit<License, 'id' | 'created_at' | 'updated_at'>>): Promise<License | null> {
+    try {
+      const { data, error } = await (supabase as any)
+        .from('licenses')
+        .update({
+          ...updates,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      // Update local data and emit event
+      await this.loadTableData('licenses');
+      this.notifyListeners('licenses_updated', data);
+      
+      return data;
+    } catch (error) {
+      console.error('Error updating license:', error);
+      return null;
     }
   }
 

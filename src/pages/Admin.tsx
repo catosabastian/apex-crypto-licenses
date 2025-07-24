@@ -9,6 +9,7 @@ import { supabaseDataManager } from '@/utils/supabaseDataManager';
 import SupabaseApplicationsManager from '@/components/admin/SupabaseApplicationsManager';
 import { PaymentAddressManager } from '@/components/admin/PaymentAddressManager';
 import WebsiteSettingsManager from '@/components/admin/WebsiteSettingsManager';
+import LicenseManager from '@/components/admin/LicenseManager';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -140,9 +141,7 @@ const Admin = () => {
         </TabsContent>
 
         <TabsContent value="licenses" className="space-y-6">
-          <div className="p-6 text-center text-muted-foreground">
-            License management coming soon
-          </div>
+          <LicenseManager />
         </TabsContent>
 
         <TabsContent value="payments" className="space-y-6">
