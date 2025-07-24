@@ -6,10 +6,10 @@ import { FileText, CreditCard, Shield, Award, Clock, CheckCircle } from 'lucide-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useApplicationDialog } from '@/components/ApplicationDialog';
+
 
 const ProcessPage = () => {
-  const { openApplicationDialog } = useApplicationDialog();
+  
   
   const steps = [
     {
@@ -284,7 +284,7 @@ const ProcessPage = () => {
               <p className="text-lg text-muted-foreground mb-8">
                 Join thousands of traders who have successfully obtained their cryptocurrency trading licenses through our streamlined process.
               </p>
-              <Button size="lg" onClick={openApplicationDialog} className="gap-2">
+              <Button size="lg" onClick={() => window.location.href = '/#application'} className="gap-2">
                 Begin Application
                 <FileText className="h-5 w-5" />
               </Button>

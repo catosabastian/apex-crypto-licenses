@@ -1,13 +1,13 @@
 
 import { useState } from 'react';
-import { useApplicationDialog } from '@/components/ApplicationDialog';
+
 import Logo from './header/Logo';
 import DesktopNav from './header/DesktopNav';
 import MobileNav from './header/MobileNav';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { openApplicationDialog } = useApplicationDialog();
+  
   
   const scrollToSection = (sectionId: string) => {
     document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });

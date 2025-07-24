@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { CreditCard, Upload, Award, ArrowRight } from 'lucide-react';
-import { useApplicationDialog } from '@/components/ApplicationDialog';
+
 import { useEffect, useState } from 'react';
 import { supabaseDataManager } from '@/utils/supabaseDataManager';
 
@@ -14,7 +14,7 @@ const ProcessSteps = () => {
     steps: [],
     ctaText: 'Start Your Application'
   });
-  const { openApplicationDialog } = useApplicationDialog();
+  
 
   useEffect(() => {
     const loadContent = async () => {
@@ -102,7 +102,7 @@ const ProcessSteps = () => {
             <Button 
               size="lg" 
               className="gap-2 px-8 py-4" 
-              onClick={openApplicationDialog}
+              onClick={() => document.getElementById('application')?.scrollIntoView({ behavior: 'smooth' })}
             >
               {content.ctaText}
               <ArrowRight className="h-4 w-4" />

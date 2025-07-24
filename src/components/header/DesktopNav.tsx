@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { useApplicationDialog } from '@/components/ApplicationDialog';
+
 import { Link } from 'react-router-dom';
 import {
   DropdownMenu,
@@ -12,7 +12,7 @@ import {
 import { ChevronDown } from 'lucide-react';
 
 const DesktopNav = () => {
-  const { openApplicationDialog } = useApplicationDialog();
+  
   
   return (
     <nav className="hidden md:flex items-center gap-6">
@@ -42,7 +42,7 @@ const DesktopNav = () => {
       <Button variant="outline" size="sm" asChild>
         <Link to="/setup">Setup</Link>
       </Button>
-      <Button variant="default" size="sm" onClick={openApplicationDialog}>Apply Now</Button>
+      <Button variant="default" size="sm" onClick={() => document.getElementById('application')?.scrollIntoView({ behavior: 'smooth' })}>Apply Now</Button>
     </nav>
   );
 };

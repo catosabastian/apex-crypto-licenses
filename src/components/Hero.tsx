@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronDown, Shield, Award, Users, Globe, CheckCircle, Star, Zap, Sparkles } from 'lucide-react';
-import { useApplicationDialog } from '@/components/ApplicationDialog';
+
 //
 
 const Hero = () => {
@@ -26,7 +26,7 @@ const Hero = () => {
       { name: 'Secure Platform', color: 'bg-orange-50' }
     ]
   };
-  const { openApplicationDialog } = useApplicationDialog();
+  
   
   useEffect(() => {
     const handleScroll = () => {
@@ -95,7 +95,7 @@ const Hero = () => {
                 <Button 
                   size="lg" 
                   className="glass-button gap-3 px-10 py-8 text-lg font-bold rounded-2xl hover-lift hover-glow" 
-                  onClick={openApplicationDialog}
+                  onClick={() => document.getElementById('application')?.scrollIntoView({ behavior: 'smooth' })}
                 >
                   <Zap className="h-6 w-6" />
                   {content.ctaText}

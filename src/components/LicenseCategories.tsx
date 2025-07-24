@@ -4,12 +4,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckCircle, ChevronRight, MessageSquareText, XCircle, Shield, Star, Crown, Building, Zap, Trophy, Wifi } from 'lucide-react';
-import { useApplicationDialog } from '@/components/ApplicationDialog';
+
 import SupportDialog from '@/components/SupportDialog';
 import { supabaseDataManager } from '@/utils/supabaseDataManager';
 
 const LicenseCategories = () => {
-  const { openApplicationDialog } = useApplicationDialog();
+  
   const [isSupportDialogOpen, setSupportDialogOpen] = useState(false);
   const [settings, setSettings] = useState<any>({});
   const [lastUpdateTime, setLastUpdateTime] = useState<Date>(new Date());
@@ -132,7 +132,7 @@ const LicenseCategories = () => {
                 "Advanced risk management tools"
               ]}
               soldOut={!settings.category3Available}
-              onApplyClick={openApplicationDialog}
+              onApplyClick={() => document.getElementById('application')?.scrollIntoView({ behavior: 'smooth' })}
             />
 
             <LicenseCategory 
@@ -155,7 +155,7 @@ const LicenseCategories = () => {
               ]}
               popular
               soldOut={!settings.category4Available}
-              onApplyClick={openApplicationDialog}
+              onApplyClick={() => document.getElementById('application')?.scrollIntoView({ behavior: 'smooth' })}
             />
             
             <LicenseCategory 
@@ -178,7 +178,7 @@ const LicenseCategories = () => {
                 "API access for system integration"
               ]}
               soldOut={!settings.category5Available}
-              onApplyClick={openApplicationDialog}
+              onApplyClick={() => document.getElementById('application')?.scrollIntoView({ behavior: 'smooth' })}
             />
 
             <LicenseCategory 
@@ -203,7 +203,7 @@ const LicenseCategories = () => {
               ]}
               exclusive
               soldOut={!settings.category6Available}
-              onApplyClick={openApplicationDialog}
+              onApplyClick={() => document.getElementById('application')?.scrollIntoView({ behavior: 'smooth' })}
             />
           </div>
           

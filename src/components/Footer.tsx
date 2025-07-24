@@ -2,12 +2,12 @@
 import { Globe, MessageSquare, ShieldCheck } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
-import { useApplicationDialog } from "./ApplicationDialog";
+
 import { useState, useEffect } from "react";
 import { supabaseDataManager } from "@/utils/supabaseDataManager";
 
 const Footer = () => {
-  const { openApplicationDialog } = useApplicationDialog();
+  
   const [settings, setSettings] = useState<any>({
     companyName: 'APEX Crypto Licensing',
     supportEmail: 'support@apexcrypto.com',
@@ -55,7 +55,7 @@ const Footer = () => {
               <li><a href="#about" className="opacity-80 hover:opacity-100 transition-opacity">About Us</a></li>
               <li><a href="#licenses" className="opacity-80 hover:opacity-100 transition-opacity">License Categories</a></li>
               <li><a href="#verification" className="opacity-80 hover:opacity-100 transition-opacity">Verification Process</a></li>
-              <li><button onClick={openApplicationDialog} className="opacity-80 hover:opacity-100 transition-opacity text-left">Application</button></li>
+              <li><a href="/#application" className="opacity-80 hover:opacity-100 transition-opacity">Application</a></li>
             </ul>
           </div>
           

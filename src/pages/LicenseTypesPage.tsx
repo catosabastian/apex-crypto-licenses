@@ -6,10 +6,10 @@ import { Shield, CheckCircle, Star, Crown, Building } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { useApplicationDialog } from '@/components/ApplicationDialog';
+
 
 const LicenseTypesPage = () => {
-  const { openApplicationDialog } = useApplicationDialog();
+  
   
   const licenseTypes = [
     {
@@ -194,7 +194,7 @@ const LicenseTypesPage = () => {
                         
                         <Button 
                           className="w-full" 
-                          onClick={openApplicationDialog}
+                          onClick={() => window.location.href = '/#application'}
                           disabled={license.soldOut}
                           variant={license.popular ? "default" : "outline"}
                         >
@@ -301,7 +301,7 @@ const LicenseTypesPage = () => {
               <p className="text-lg text-muted-foreground mb-8">
                 Join thousands of successful traders who have chosen APEX for their regulatory compliance needs.
               </p>
-              <Button size="lg" onClick={openApplicationDialog} className="gap-2">
+              <Button size="lg" onClick={() => window.location.href = '/#application'} className="gap-2">
                 Start Your Application
                 <Shield className="h-5 w-5" />
               </Button>

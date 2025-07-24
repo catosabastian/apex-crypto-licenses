@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { X, Menu, ChevronDown, ChevronUp } from 'lucide-react';
-import { useApplicationDialog } from '@/components/ApplicationDialog';
+
 import { Link } from 'react-router-dom';
 
 interface MobileNavProps {
@@ -12,11 +12,11 @@ interface MobileNavProps {
 }
 
 const MobileNav = ({ isOpen, onToggle, onNavItemClick }: MobileNavProps) => {
-  const { openApplicationDialog } = useApplicationDialog();
+  
   const [servicesOpen, setServicesOpen] = useState(false);
   
   const handleApplyClick = () => {
-    openApplicationDialog();
+    document.getElementById('application')?.scrollIntoView({ behavior: 'smooth' });
     onNavItemClick();
   };
 

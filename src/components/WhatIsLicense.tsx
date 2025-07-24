@@ -2,7 +2,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Shield, FileText, Globe, CheckCircle } from 'lucide-react';
-import { useApplicationDialog } from '@/components/ApplicationDialog';
+
 import { useEffect, useState } from 'react';
 //
 
@@ -38,7 +38,7 @@ const WhatIsLicense = () => {
     ],
     ctaText: "Apply for License"
   };
-  const { openApplicationDialog } = useApplicationDialog();
+  
 
   const iconMap: Record<string, any> = {
     Shield,
@@ -74,7 +74,7 @@ const WhatIsLicense = () => {
               <Button 
                 size="lg" 
                 className="gap-2" 
-                onClick={openApplicationDialog}
+                onClick={() => document.getElementById('application')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 {content.ctaText}
                 <Shield className="h-4 w-4" />
