@@ -28,6 +28,12 @@ import Setup from '@/pages/Setup';
 import NotFound from '@/pages/NotFound';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
+// Service Pages
+import CryptoServicesPage from '@/pages/services/CryptoServicesPage';
+import FinTechServicesPage from '@/pages/services/FinTechServicesPage';
+import GamblingServicesPage from '@/pages/services/GamblingServicesPage';
+import CorporateServicesPage from '@/pages/services/CorporateServicesPage';
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -104,6 +110,12 @@ function App() {
                         <Route path="/verify" element={<VerifyPage />} />
                         <Route path="/login" element={<Login />} />
                         <Route path="/setup" element={<Setup />} />
+                        
+                        {/* Service Routes */}
+                        <Route path="/services/crypto" element={<CryptoServicesPage />} />
+                        <Route path="/services/fintech" element={<FinTechServicesPage />} />
+                        <Route path="/services/gambling" element={<GamblingServicesPage />} />
+                        <Route path="/services/corporate" element={<CorporateServicesPage />} />
                         <Route 
                           path="/admin" 
                           element={
