@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -7,34 +8,40 @@ import { Badge } from '@/components/ui/badge';
 import { Building, Users, FileText, CheckCircle, ArrowRight, Globe, Shield, Briefcase } from 'lucide-react';
 
 const CorporateServicesPage = () => {
+  const navigate = useNavigate();
+
   const corporateServices = [
     {
       title: "Company Formation",
       description: "Global company incorporations and business setup",
       icon: Building,
       features: ["Offshore incorporations", "EU company setup", "Nominee services", "Share capital management"],
-      jurisdictions: ["BVI", "Seychelles", "Cyprus", "Estonia", "Malta", "Switzerland"]
+      jurisdictions: ["BVI", "Seychelles", "Cyprus", "Estonia", "Malta", "Switzerland"],
+      action: () => navigate('/services/corporate/company-formation')
     },
     {
       title: "Banking Solutions", 
       description: "Access to global banking and payment networks",
       icon: Shield,
       features: ["Business account opening", "Multi-currency accounts", "Payment processing", "Merchant services"],
-      jurisdictions: ["EU Banking", "UK Banking", "Offshore Banking", "Crypto-friendly Banks"]
+      jurisdictions: ["EU Banking", "UK Banking", "Offshore Banking", "Crypto-friendly Banks"],
+      action: () => navigate('/services/corporate/banking-solutions')
     },
     {
       title: "Compliance & Administration",
       description: "Ongoing corporate compliance and administration",
       icon: FileText,
       features: ["Statutory reporting", "AML compliance", "Tax planning", "Corporate governance"],
-      jurisdictions: ["Global Coverage", "EU Compliance", "FATCA/CRS", "Local Regulations"]
+      jurisdictions: ["Global Coverage", "EU Compliance", "FATCA/CRS", "Local Regulations"],
+      action: () => navigate('/apply')
     },
     {
       title: "Accounting Services",
       description: "Professional accounting and financial management",
       icon: Briefcase,
       features: ["Monthly bookkeeping", "Financial statements", "Tax returns", "Audit support"],
-      jurisdictions: ["IFRS", "Local GAAP", "Tax Optimization", "Multi-jurisdiction"]
+      jurisdictions: ["IFRS", "Local GAAP", "Tax Optimization", "Multi-jurisdiction"],
+      action: () => navigate('/apply')
     }
   ];
 
@@ -92,11 +99,20 @@ const CorporateServicesPage = () => {
                 We support clients throughout their entire journey with professional, compliant solutions.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 text-lg">
+                <Button 
+                  size="lg" 
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-3 text-lg"
+                  onClick={() => navigate('/apply')}
+                >
                   Start Company Formation
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
-                <Button variant="outline" size="lg" className="border-white/30 text-white hover:bg-white/10 px-8 py-3 text-lg">
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="border-white/30 text-white hover:bg-white/10 px-8 py-3 text-lg"
+                  onClick={() => navigate('/services/corporate/consultation')}
+                >
                   Download Services Guide
                 </Button>
               </div>
