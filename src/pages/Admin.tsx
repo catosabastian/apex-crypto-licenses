@@ -11,6 +11,9 @@ import { PaymentAddressManager } from '@/components/admin/PaymentAddressManager'
 import WebsiteSettingsManager from '@/components/admin/WebsiteSettingsManager';
 import LicenseManager from '@/components/admin/LicenseManager';
 import LicenseCategoriesManager from '@/components/admin/LicenseCategoriesManager';
+import EmailJSManager from '@/components/admin/EmailJSManager';
+import SEOManager from '@/components/admin/SEOManager';
+import SupabaseManager from '@/components/admin/SupabaseManager';
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -60,13 +63,16 @@ const Admin = () => {
       </header>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-9 text-xs">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="applications">Applications</TabsTrigger>
           <TabsTrigger value="licenses">Licenses</TabsTrigger>
           <TabsTrigger value="categories">Categories</TabsTrigger>
           <TabsTrigger value="payments">Payments</TabsTrigger>
           <TabsTrigger value="website">Website</TabsTrigger>
+          <TabsTrigger value="emailjs">EmailJS</TabsTrigger>
+          <TabsTrigger value="seo">SEO</TabsTrigger>
+          <TabsTrigger value="supabase">Supabase</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard" className="space-y-6">
@@ -141,6 +147,18 @@ const Admin = () => {
 
         <TabsContent value="website" className="space-y-6">
           <WebsiteSettingsManager />
+        </TabsContent>
+
+        <TabsContent value="emailjs" className="space-y-6">
+          <EmailJSManager />
+        </TabsContent>
+
+        <TabsContent value="seo" className="space-y-6">
+          <SEOManager />
+        </TabsContent>
+
+        <TabsContent value="supabase" className="space-y-6">
+          <SupabaseManager />
         </TabsContent>
       </Tabs>
     </div>
