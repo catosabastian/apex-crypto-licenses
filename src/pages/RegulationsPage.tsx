@@ -133,13 +133,15 @@ const RegulationsPage = () => {
       <div className="container mx-auto px-4 py-12 space-y-12">
         {/* Hero Section */}
         <div className="text-center space-y-6">
-          <div className="flex flex-col items-center justify-center gap-4 mb-6">
-            <Scale className="h-12 w-12 text-primary" />
-            <div className="text-center">
+          <div className="flex flex-col items-center justify-center gap-6 mb-8">
+            <div className="p-4 rounded-full bg-primary/10 border border-primary/20">
+              <Scale className="h-12 w-12 text-primary" />
+            </div>
+            <div className="text-center space-y-2">
               <h1 className="text-4xl md:text-5xl font-bold gradient-text">
                 APEX Regulations
               </h1>
-              <p className="text-lg text-muted-foreground mt-2">
+              <p className="text-lg text-muted-foreground">
                 Comprehensive Regulatory Framework for Digital Assets
               </p>
             </div>
