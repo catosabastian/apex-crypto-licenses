@@ -59,7 +59,17 @@ export const SupabaseAuthProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const checkAdminStatus = async (userId: string) => {
     try {
-      const { data } = await supabase.rpc('is_admin');
+      console.log('[Auth] Checking admin status for user:', userId);
+      
+      // Add timeout to prevent infinite loading
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Admin check timeout')), 5000)
+      );
+      
+      const rpcPromise = supabase.rpc('is_admin');
+      const { data } = await Promise.race([rpcPromise, timeoutPromise]) as any;
+      
+      console.log('[Auth] Admin status result:', data);
       setIsAdmin(data === true);
     } catch (error) {
       console.error('Error checking admin status:', error);

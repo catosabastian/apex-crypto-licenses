@@ -349,7 +349,13 @@ const Admin = () => {
       try {
         console.log('[Admin] Checking admin users...');
         
-        const { data, error } = await supabase.rpc('has_admin_users');
+        // Add timeout to prevent infinite loading
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Admin users check timeout')), 3000)
+        );
+        
+        const rpcPromise = supabase.rpc('has_admin_users');
+        const { data, error } = await Promise.race([rpcPromise, timeoutPromise]) as any;
         
         if (error) {
           console.error('Error checking admin users:', error);
@@ -368,7 +374,20 @@ const Admin = () => {
       }
     };
 
-    checkAdminUsers();
+    // Add a maximum wait time for the entire check
+    const maxWaitTimeout = setTimeout(() => {
+      console.log('[Admin] Maximum wait time exceeded, showing login');
+      setHasAdminUsers(true);
+      setIsCheckingAdminUsers(false);
+    }, 5000);
+
+    checkAdminUsers().finally(() => {
+      clearTimeout(maxWaitTimeout);
+    });
+
+    return () => {
+      clearTimeout(maxWaitTimeout);
+    };
   }, []);
 
   // Show loading while checking auth or admin users
