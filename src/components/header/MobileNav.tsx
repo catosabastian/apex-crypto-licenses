@@ -54,6 +54,13 @@ const MobileNav = ({ isOpen, onToggle, onNavItemClick }: MobileNavProps) => {
             >
               Licenses
             </a>
+            <Link 
+              to="/regulations" 
+              className="text-sm font-medium py-2 hover:text-accent transition-colors" 
+              onClick={onNavItemClick}
+            >
+              Regulations
+            </Link>
             
             {/* Services Dropdown */}
             <div>
