@@ -95,7 +95,7 @@ const Hero = () => {
                 <Button 
                   size="lg" 
                   className="glass-button gap-3 px-10 py-8 text-lg font-bold rounded-2xl hover-lift hover-glow" 
-                  onClick={() => document.getElementById('application')?.scrollIntoView({ behavior: 'smooth' })}
+                  onClick={() => window.location.href = '/apply'}
                 >
                   <Zap className="h-6 w-6" />
                   {content.ctaText}

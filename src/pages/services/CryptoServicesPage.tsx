@@ -61,50 +61,102 @@ const CryptoServicesPage = () => {
       
       <main className="pt-16">
         {/* Hero Section */}
-        <section className="bg-gradient-to-r from-primary/10 to-accent/10 py-20">
-          <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto text-center">
-              <Shield className="h-16 w-16 text-primary mx-auto mb-6" />
-              <h1 className="text-4xl font-bold mb-6">Crypto Licensing Services</h1>
-              <p className="text-xl text-muted-foreground mb-8">
-                Professional cryptocurrency licensing solutions for exchanges, wallets, and digital asset businesses. 
-                Navigate complex regulations with our expert guidance and end-to-end support.
+        <section className="relative bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white py-24 overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,_rgba(255,255,255,0.15)_1px,_transparent_0)] bg-[length:20px_20px] opacity-20"></div>
+          <div className="container relative mx-auto px-4">
+            <div className="max-w-5xl mx-auto text-center">
+              <div className="mb-8">
+                <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full border border-white/20 mb-6">
+                  <Shield className="h-5 w-5" />
+                  <span className="text-sm font-medium">Official Government Services</span>
+                </div>
+              </div>
+              <h1 className="text-5xl font-bold mb-6 leading-tight">
+                Cryptocurrency Licensing <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-emerald-400">
+                  Regulatory Authority
+                </span>
+              </h1>
+              <p className="text-xl text-slate-300 mb-8 max-w-3xl mx-auto leading-relaxed">
+                Official cryptocurrency licensing services for exchanges, wallets, and digital asset businesses. 
+                Navigate complex regulatory frameworks with our government-grade compliance and expert guidance.
               </p>
-              <Button size="lg" className="mr-4">
-                Get Free Consultation
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="lg">
-                Download Guide
-              </Button>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg">
+                  Request Official Consultation
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+                <Button variant="outline" size="lg" className="border-white/30 text-white hover:bg-white/10 px-8 py-3 text-lg">
+                  Download Regulatory Guide
+                </Button>
+              </div>
+              <div className="mt-8 flex justify-center gap-8 text-sm text-slate-400">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>Government Certified</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>Regulatory Compliant</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="w-4 h-4 text-green-400" />
+                  <span>International Recognition</span>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Why Crypto Licensing Matters */}
-        <section className="py-16">
+        {/* Regulatory Framework */}
+        <section className="py-20 bg-gradient-to-br from-slate-50 to-white">
           <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto">
-              <h2 className="text-3xl font-bold text-center mb-12">Why Crypto Licensing is Crucial</h2>
-              <div className="grid md:grid-cols-2 gap-8 mb-12">
-                <div>
-                  <p className="text-lg text-muted-foreground mb-6">
-                    The right crypto license is crucial for building trust, ensuring compliance, and accessing 
-                    essential financial services. Whether you're launching a crypto exchange, wallet service, 
-                    or token project, proper licensing can open doors to banking and liquidity providers.
-                  </p>
-                  <p className="text-lg text-muted-foreground">
-                    Our team helps you identify the most suitable regulatory framework based on your business 
-                    model, future goals, and operational needs.
-                  </p>
-                </div>
-                <div className="space-y-4">
-                  {benefits.map((benefit, index) => (
-                    <div key={index} className="flex items-start gap-3">
-                      <CheckCircle className="h-5 w-5 text-primary mt-1 flex-shrink-0" />
-                      <span className="text-muted-foreground">{benefit}</span>
+            <div className="max-w-6xl mx-auto">
+              <div className="text-center mb-16">
+                <h2 className="text-4xl font-bold text-slate-900 mb-6">Regulatory Framework & Compliance</h2>
+                <p className="text-xl text-slate-600 max-w-3xl mx-auto">
+                  Navigate the complex landscape of cryptocurrency regulations with our comprehensive compliance framework 
+                  designed to meet international standards and regulatory requirements.
+                </p>
+              </div>
+              <div className="grid md:grid-cols-2 gap-12">
+                <div className="space-y-6">
+                  <div className="bg-white p-6 rounded-lg border border-slate-200 shadow-sm">
+                    <h3 className="text-xl font-semibold text-slate-900 mb-4">Regulatory Compliance Requirements</h3>
+                    <p className="text-slate-600 mb-6">
+                      Cryptocurrency licensing requires adherence to strict regulatory frameworks. Our compliance experts 
+                      ensure your operations meet all necessary requirements for legal operation and international recognition.
+                    </p>
+                    <div className="space-y-3">
+                      {benefits.map((benefit, index) => (
+                        <div key={index} className="flex items-start gap-3">
+                          <div className="w-5 h-5 bg-green-100 rounded-full flex items-center justify-center mt-0.5">
+                            <CheckCircle className="h-3 w-3 text-green-600" />
+                          </div>
+                          <span className="text-slate-700 text-sm">{benefit}</span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
+                </div>
+                <div className="space-y-6">
+                  <div className="bg-gradient-to-br from-blue-50 to-slate-50 p-6 rounded-lg border border-blue-200">
+                    <h3 className="text-xl font-semibold text-slate-900 mb-4">Government-Grade Standards</h3>
+                    <p className="text-slate-600 mb-6">
+                      Our licensing process follows government-grade standards for security, compliance, and operational integrity. 
+                      We work directly with regulatory authorities to ensure full compliance.
+                    </p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-4 bg-white rounded border border-blue-100">
+                        <div className="text-2xl font-bold text-blue-600 mb-1">99.9%</div>
+                        <div className="text-xs text-slate-600">Compliance Rate</div>
+                      </div>
+                      <div className="text-center p-4 bg-white rounded border border-blue-100">
+                        <div className="text-2xl font-bold text-blue-600 mb-1">24/7</div>
+                        <div className="text-xs text-slate-600">Monitoring</div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

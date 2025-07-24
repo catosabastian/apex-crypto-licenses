@@ -27,6 +27,7 @@ import CryptoServicesPage from '@/pages/services/CryptoServicesPage';
 import FinTechServicesPage from '@/pages/services/FinTechServicesPage';
 import GamblingServicesPage from '@/pages/services/GamblingServicesPage';
 import CorporateServicesPage from '@/pages/services/CorporateServicesPage';
+import ApplicationPage from '@/pages/ApplicationPage';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
 const queryClient = new QueryClient({

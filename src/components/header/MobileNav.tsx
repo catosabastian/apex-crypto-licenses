@@ -16,7 +16,7 @@ const MobileNav = ({ isOpen, onToggle, onNavItemClick }: MobileNavProps) => {
   const [servicesOpen, setServicesOpen] = useState(false);
   
   const handleApplyClick = () => {
-    document.getElementById('application')?.scrollIntoView({ behavior: 'smooth' });
+    window.location.href = '/apply';
     onNavItemClick();
   };
 

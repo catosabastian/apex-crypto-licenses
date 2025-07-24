@@ -42,9 +42,22 @@ const Index = () => {
         <FeaturesSection />
         <StatsSection />
         <VerificationSection />
-        <section id="application" className="py-20 bg-muted/30">
+        <section id="application" className="py-20 bg-gradient-to-br from-primary/10 to-accent/10">
           <div className="container">
-            <EnhancedApplicationForm />
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold mb-4">Ready to Get Licensed?</h2>
+              <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+                Start your cryptocurrency licensing journey with our comprehensive application process.
+              </p>
+              <div className="flex justify-center">
+                <a 
+                  href="/apply" 
+                  className="inline-flex items-center justify-center h-12 px-8 py-3 text-lg font-medium text-primary-foreground bg-primary rounded-md hover:bg-primary/90 transition-colors"
+                >
+                  Apply for License
+                </a>
+              </div>
+            </div>
           </div>
         </section>
       </main>
