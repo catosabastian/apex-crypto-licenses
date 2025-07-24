@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -34,6 +34,7 @@ const WebsiteSettingsManager = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
+  const websiterIdRef = useRef(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -48,6 +49,8 @@ const WebsiteSettingsManager = () => {
         .single();
 
       if (websiteSettings) {
+        websiteIdRef.current = websiteSettings.id;
+        
         setSettings({
           site_name: websiteSettings.site_name,
           contact_email: websiteSettings.contact_email,
@@ -76,6 +79,7 @@ const WebsiteSettingsManager = () => {
     try {
       const { error } = await supabase
         .from('website_settings')
+        .equal("id", websiteIdRef.current.id)
         .upsert({
           site_name: settings.companyName,
           contact_email: settings.supportEmail,
