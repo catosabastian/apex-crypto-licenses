@@ -116,6 +116,8 @@ const EnhancedApplicationForm = () => {
     available: cat.available,
     details: cat.min_volume,
     features: cat.features,
+    minVolume: cat.min_volume,
+    // processingTime: cat.
     icon: cat.icon === 'TrendingUp' ? TrendingUp :
           cat.icon === 'Users' ? Users :
           cat.icon === 'Shield' ? Shield :
