@@ -412,7 +412,7 @@ const LicenseManager = () => {
                 <Label htmlFor="license_id">License ID</Label>
                 <Input
                   id="license_id"
-                  value={formData.license_id}
+                  value={formData?.license_id}
                   onChange={(e) => setFormData(prev => ({ ...prev, license_id: e.target.value }))}
                   disabled={!!editingLicense}
                   required
@@ -423,7 +423,7 @@ const LicenseManager = () => {
                 <Label htmlFor="holder_name">Holder Name</Label>
                 <Input
                   id="holder_name"
-                  value={formData.holder_name}
+                  value={formData?.holder_name}
                   onChange={(e) => setFormData(prev => ({ ...prev, holder_name: e.target.value }))}
                   required
                 />
@@ -434,7 +434,7 @@ const LicenseManager = () => {
               <div className="space-y-2">
                 <Label htmlFor="license_type">License Type</Label>
                 <Select 
-                  value={formData.license_type} 
+                  value={formData?.license_type} 
                   onValueChange={(value) => setFormData(prev => ({ ...prev, license_type: value }))}
                 >
                   <SelectTrigger>
@@ -454,7 +454,7 @@ const LicenseManager = () => {
               <div className="space-y-2">
                 <Label htmlFor="status">Status</Label>
                 <Select 
-                  value={formData.status} 
+                  value={formData?.status} 
                   onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as LicenseFormData['status'] }))}
                 >
                   <SelectTrigger>
@@ -477,7 +477,7 @@ const LicenseManager = () => {
                 <Input
                   id="issue_date"
                   type="date"
-                  value={formData.issue_date}
+                  value={formData?.issue_date}
                   onChange={(e) => setFormData(prev => ({ ...prev, issue_date: e.target.value }))}
                   required
                 />
@@ -488,7 +488,7 @@ const LicenseManager = () => {
                 <Input
                   id="expiry_date"
                   type="date"
-                  value={formData.expiry_date}
+                  value={formData?.expiry_date}
                   onChange={(e) => setFormData(prev => ({ ...prev, expiry_date: e.target.value }))}
                   required
                 />
@@ -499,7 +499,7 @@ const LicenseManager = () => {
               <Label htmlFor="platforms">Platforms (Optional)</Label>
               <Textarea
                 id="platforms"
-                value={formData.platforms}
+                value={formData?.platforms}
                 onChange={(e) => setFormData(prev => ({ ...prev, platforms: e.target.value }))}
                 placeholder="List approved trading platforms..."
               />
@@ -508,7 +508,7 @@ const LicenseManager = () => {
             <div className="space-y-2">
               <Label htmlFor="application_id">Link to Application (Optional)</Label>
               <Select 
-                value={formData.application_id} 
+                value={formData?.application_id} 
                 onValueChange={(value) => setFormData(prev => ({ ...prev, application_id: value }))}
               >
                 <SelectTrigger>
@@ -516,9 +516,9 @@ const LicenseManager = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">No Application</SelectItem>
-                  {applications.map((app) => (
-                    <SelectItem key={app.id} value={app.id}>
-                      {app.name} - {app.email} ({app.category})
+                  {applications?.map((app) => (
+                    <SelectItem key={app?.id} value={app?.id}>
+                      {app?.name} - {app?.email} ({app?.category})
                     </SelectItem>
                   ))}
                 </SelectContent>
