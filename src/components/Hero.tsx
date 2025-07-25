@@ -14,7 +14,7 @@ const Hero = () => {
     ctaText: "Get Licensed Now",
     ctaSecondaryText: "Verify License",
     stats: [
-      { icon: 'Users', value: '10,000+', label: 'Licensed Traders', color: 'text-blue-500' },
+      { icon: 'Users', value: '20,000+', label: 'Licensed Traders', color: 'text-blue-500' },
       { icon: 'Globe', value: '150+', label: 'Countries Served', color: 'text-green-500' },
       { icon: 'Award', value: '99.9%', label: 'Success Rate', color: 'text-purple-500' },
       { icon: 'Shield', value: '24/7', label: 'Support Available', color: 'text-orange-500' }

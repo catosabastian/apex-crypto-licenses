@@ -20,7 +20,7 @@ const StatsSection = () => {
       },
       {
         icon: 'Users',
-        number: '8,500+',
+        number: '20,000+',
         label: 'Licensed Traders',
         description: 'Individual traders licensed',
         bgColor: 'bg-accent-emerald/10',
@@ -28,7 +28,7 @@ const StatsSection = () => {
       },
       {
         icon: 'Globe',
-        number: '180+',
+        number: '150+',
         label: 'Countries',
         description: 'Global market coverage',
         bgColor: 'bg-accent-amber/10',
@@ -36,7 +36,7 @@ const StatsSection = () => {
       },
       {
         icon: 'Award',
-        number: '99.8%',
+        number: '99.9%',
         label: 'Success Rate',
         description: 'Application approval rate',
         bgColor: 'bg-accent/10',
