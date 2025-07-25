@@ -64,7 +64,7 @@ const LicenseManager = () => {
   const [formData, setFormData] = useState<LicenseFormData>({
     license_id: '',
     holder_name: '',
-    license_type: '',
+    license_type: 'Basic Trader',
     status: 'pending' as const,
     issue_date: new Date().toISOString().split('T')[0],
     expiry_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
