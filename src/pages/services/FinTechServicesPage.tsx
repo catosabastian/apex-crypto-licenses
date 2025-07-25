@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -7,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { CreditCard, Building2, Globe, CheckCircle, ArrowRight, Users } from 'lucide-react';
 
 const FinTechServicesPage = () => {
+  const navigate = useNavigate();
+  
   const fintechLicenses = [
     {
       name: "EMI Cyprus",
@@ -97,11 +100,11 @@ const FinTechServicesPage = () => {
                 From payment services to banking partnerships - we ensure full regulatory compliance.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg">
+                <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg" onClick={() => navigate('/apply')}>
                   Request Official Consultation
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
-                <Button variant="outline" size="lg" className="border-white/30 text-white hover:bg-white/10 px-8 py-3 text-lg">
+                <Button variant="outline" size="lg" className="border-white/30 bg-white/10 text-white hover:bg-white/20 px-8 py-3 text-lg" onClick={() => navigate('/apply')}>
                   Download Regulatory Brochure
                 </Button>
               </div>
@@ -198,7 +201,7 @@ const FinTechServicesPage = () => {
                         ))}
                       </ul>
                     </div>
-                    <Button className="w-full mt-4" variant="outline">
+                    <Button className="w-full mt-4" variant="outline" onClick={() => navigate('/apply')}>
                       Get Details
                     </Button>
                   </CardContent>
@@ -240,7 +243,7 @@ const FinTechServicesPage = () => {
             <p className="text-xl text-muted-foreground mb-8">
               Partner with APEX Global for expert guidance in financial licensing and compliance
             </p>
-            <Button size="lg">
+            <Button size="lg" onClick={() => navigate('/apply')}>
               Get Started Today
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>

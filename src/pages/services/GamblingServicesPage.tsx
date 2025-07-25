@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -7,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Dice6, Globe, Shield, CheckCircle, ArrowRight, Users, CreditCard } from 'lucide-react';
 
 const GamblingServicesPage = () => {
+  const navigate = useNavigate();
+  
   const gamblingLicenses = [
     {
       name: "Kahnawake",
@@ -97,11 +100,11 @@ const GamblingServicesPage = () => {
                 Navigate complex gaming regulations with our specialized regulatory expertise.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 text-lg">
+                <Button size="lg" className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 text-lg" onClick={() => navigate('/apply')}>
                   Apply for Gaming License
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
-                <Button variant="outline" size="lg" className="border-white/30 text-white hover:bg-white/10 px-8 py-3 text-lg">
+                <Button variant="outline" size="lg" className="border-white/30 bg-white/10 text-white hover:bg-white/20 px-8 py-3 text-lg" onClick={() => navigate('/apply')}>
                   Compare Jurisdictions
                 </Button>
               </div>
@@ -203,7 +206,7 @@ const GamblingServicesPage = () => {
                         ))}
                       </ul>
                     </div>
-                    <Button className="w-full mt-4" variant="outline">
+                    <Button className="w-full mt-4" variant="outline" onClick={() => navigate('/apply')}>
                       Get Quote
                     </Button>
                   </CardContent>
@@ -267,7 +270,7 @@ const GamblingServicesPage = () => {
             <p className="text-xl mb-8 opacity-90">
               Get your gaming license and start operating legally worldwide
             </p>
-            <Button size="lg" variant="secondary">
+            <Button size="lg" variant="secondary" onClick={() => navigate('/apply')}>
               Start License Application
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -7,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Shield, Globe, Building, CheckCircle, ArrowRight } from 'lucide-react';
 
 const CryptoServicesPage = () => {
+  const navigate = useNavigate();
+  
   const cryptoLicenses = [
     {
       name: "MSB Canada",
@@ -82,11 +85,11 @@ const CryptoServicesPage = () => {
                 Navigate complex regulatory frameworks with our government-grade compliance and expert guidance.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg">
+                <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 text-lg" onClick={() => navigate('/apply')}>
                   Request Official Consultation
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
-                <Button variant="outline" size="lg" className="border-white/30 text-white hover:bg-white/10 px-8 py-3 text-lg">
+                <Button variant="outline" size="lg" className="border-white/30 bg-white/10 text-white hover:bg-white/20 px-8 py-3 text-lg" onClick={() => navigate('/apply')}>
                   Download Regulatory Guide
                 </Button>
               </div>
@@ -190,7 +193,7 @@ const CryptoServicesPage = () => {
                         ))}
                       </ul>
                     </div>
-                    <Button className="w-full mt-4" variant="outline">
+                    <Button className="w-full mt-4" variant="outline" onClick={() => navigate('/apply')}>
                       Learn More
                     </Button>
                   </CardContent>
@@ -245,7 +248,7 @@ const CryptoServicesPage = () => {
             <p className="text-xl mb-8 opacity-90">
               Let our experts guide you through the crypto licensing process
             </p>
-            <Button size="lg" variant="secondary">
+            <Button size="lg" variant="secondary" onClick={() => navigate('/apply')}>
               Schedule Free Consultation
               <ArrowRight className="ml-2 h-4 w-4" />
             </Button>

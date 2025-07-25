@@ -49,7 +49,7 @@ const WebsiteSettingsManager = () => {
         .single();
 
       if (websiteSettings) {
-        websiteIdRef.current = websiteSettings.id;
+        websiterIdRef.current = websiteSettings.id;
         
         setSettings({
           site_name: websiteSettings.site_name,
