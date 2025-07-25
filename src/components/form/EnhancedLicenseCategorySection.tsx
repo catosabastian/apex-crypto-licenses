@@ -32,6 +32,7 @@ const EnhancedLicenseCategorySection = ({
   settings 
 }: EnhancedLicenseCategorySectionProps) => {
   const availableCategories = categories.filter(cat => cat.available);
+  console.log("categories::",categories)
   const soldOutCategories = categories.filter(cat => !cat.available);
 
   return (
@@ -78,6 +79,7 @@ const EnhancedLicenseCategorySection = ({
             {categories.map((category) => {
               const IconComponent = category.icon;
               const isSelected = selectedCategory === category.id;
+              console.log("category:", category)
               
               return (
                 <Tooltip key={category.id}>
