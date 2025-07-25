@@ -78,7 +78,7 @@ const ProcessSteps = () => {
             <div className="flex flex-wrap items-center justify-center gap-6 mt-8 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4 text-green-500" />
-                <span>Trusted by 1000+ clients</span>
+                <span>Trusted by 20,000+ clients</span>
               </div>
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-blue-500" />
