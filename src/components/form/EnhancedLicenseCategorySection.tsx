@@ -32,7 +32,6 @@ const EnhancedLicenseCategorySection = ({
   settings 
 }: EnhancedLicenseCategorySectionProps) => {
   const availableCategories = categories.filter(cat => cat.available);
-  console.log("categories::",categories)
   const soldOutCategories = categories.filter(cat => !cat.available);
 
   return (
@@ -141,7 +140,7 @@ const EnhancedLicenseCategorySection = ({
                           {/* Minimum Volume */}
                           <div className="flex items-center gap-2 text-sm">
                             <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                            <span>Min Volume: {category.details?.minVolume || 'No minimum'}</span>
+                            <span>Min Volume: {category?.minVolume || 'No minimum'}</span>
                           </div>
 
                           <Separator />
