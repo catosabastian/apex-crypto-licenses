@@ -388,14 +388,14 @@ const LicenseManager = () => {
             </Table>
           </div>
           
-          {filteredLicense?s.length === 0 && (
+          {filteredLicenses.length === 0 && (
             <div className="text-center py-8">?
               <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground">No licenses found matching your crite?ria</p>
             </div>
           )}
-        </CardContent>?
-      </Ca?rd>
+        </CardContent>
+      </Card>
 
      {/* Create/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
