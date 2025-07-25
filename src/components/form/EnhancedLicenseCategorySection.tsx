@@ -15,6 +15,7 @@ interface LicenseCategory {
   details: any;
   features: string[];
   icon: any;
+  minVolume: string;
   color: string;
 }
 
