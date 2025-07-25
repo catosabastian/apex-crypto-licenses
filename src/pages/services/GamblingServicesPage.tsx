@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ServiceInfoModal } from '@/components/ServiceInfoModal';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,28 @@ import { Dice6, Globe, Shield, CheckCircle, ArrowRight, Users, CreditCard } from
 
 const GamblingServicesPage = () => {
   const navigate = useNavigate();
+  const [selectedService, setSelectedService] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleOpenModal = (license: any) => {
+    const serviceInfo = {
+      title: license.name,
+      description: license.description,
+      features: license.features,
+      requirements: [
+        "Gaming business plan",
+        "Financial guarantees", 
+        "Technical compliance",
+        "Responsible gaming measures",
+        "Anti-money laundering procedures"
+      ],
+      price: "€50,000",
+      timeline: "6-12 months",
+      jurisdiction: license.jurisdiction
+    };
+    setSelectedService(serviceInfo);
+    setIsModalOpen(true);
+  };
   
   const gamblingLicenses = [
     {
@@ -206,7 +229,7 @@ const GamblingServicesPage = () => {
                         ))}
                       </ul>
                     </div>
-                    <Button className="w-full mt-4" variant="outline" onClick={() => navigate('/apply')}>
+                    <Button className="w-full mt-4" variant="outline" onClick={() => handleOpenModal(license)}>
                       Get Quote
                     </Button>
                   </CardContent>
@@ -279,6 +302,15 @@ const GamblingServicesPage = () => {
       </main>
 
       <Footer />
+      
+      {selectedService && (
+        <ServiceInfoModal
+          open={isModalOpen}
+          onOpenChange={setIsModalOpen}
+          serviceInfo={selectedService}
+          serviceType="gambling"
+        />
+      )}
     </div>
   );
 };

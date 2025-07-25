@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -256,7 +257,8 @@ const LicenseManager = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <ErrorBoundary>
+      <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-2xl font-semibold flex items-center gap-2">
@@ -534,7 +536,8 @@ const LicenseManager = () => {
           </form>
         </DialogContent>
       </Dialog>
-    </div>
+      </div>
+    </ErrorBoundary>
   );
 };
 

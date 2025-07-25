@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ServiceInfoModal } from '@/components/ServiceInfoModal';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,29 @@ import { Shield, Globe, Building, CheckCircle, ArrowRight } from 'lucide-react';
 
 const CryptoServicesPage = () => {
   const navigate = useNavigate();
+  const [selectedService, setSelectedService] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   
+  const handleOpenModal = (license: any) => {
+    const serviceInfo = {
+      title: license.name,
+      description: license.description,
+      features: license.features,
+      requirements: [
+        "Valid business registration",
+        "Compliance officer appointment", 
+        "AML/KYC procedures",
+        "Minimum capital requirements",
+        "Operational documentation"
+      ],
+      price: "€15,000",
+      timeline: "3-6 months",
+      jurisdiction: license.jurisdiction
+    };
+    setSelectedService(serviceInfo);
+    setIsModalOpen(true);
+  };
+
   const cryptoLicenses = [
     {
       name: "MSB Canada",
@@ -193,7 +216,7 @@ const CryptoServicesPage = () => {
                         ))}
                       </ul>
                     </div>
-                    <Button className="w-full mt-4" variant="outline" onClick={() => navigate('/apply')}>
+                    <Button className="w-full mt-4" variant="outline" onClick={() => handleOpenModal(license)}>
                       Learn More
                     </Button>
                   </CardContent>
@@ -257,6 +280,15 @@ const CryptoServicesPage = () => {
       </main>
 
       <Footer />
+      
+      {selectedService && (
+        <ServiceInfoModal
+          open={isModalOpen}
+          onOpenChange={setIsModalOpen}
+          serviceInfo={selectedService}
+          serviceType="crypto"
+        />
+      )}
     </div>
   );
 };

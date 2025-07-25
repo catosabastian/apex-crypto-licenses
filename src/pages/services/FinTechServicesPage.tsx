@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ServiceInfoModal } from '@/components/ServiceInfoModal';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -9,6 +10,28 @@ import { CreditCard, Building2, Globe, CheckCircle, ArrowRight, Users } from 'lu
 
 const FinTechServicesPage = () => {
   const navigate = useNavigate();
+  const [selectedService, setSelectedService] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleOpenModal = (service: any) => {
+    const serviceInfo = {
+      title: service.title,
+      description: service.description,
+      features: service.features,
+      requirements: [
+        "Business registration documents",
+        "Financial statements", 
+        "Compliance framework",
+        "Capital adequacy proof",
+        "Risk management procedures"
+      ],
+      price: service.price || "€25,000",
+      timeline: "4-8 months",
+      jurisdiction: service.jurisdiction || "EU/UK"
+    };
+    setSelectedService(serviceInfo);
+    setIsModalOpen(true);
+  };
   
   const fintechLicenses = [
     {
@@ -201,7 +224,7 @@ const FinTechServicesPage = () => {
                         ))}
                       </ul>
                     </div>
-                    <Button className="w-full mt-4" variant="outline" onClick={() => navigate('/apply')}>
+                     <Button className="w-full mt-4" variant="outline" onClick={() => handleOpenModal(license)}>
                       Get Details
                     </Button>
                   </CardContent>
@@ -252,6 +275,15 @@ const FinTechServicesPage = () => {
       </main>
 
       <Footer />
+      
+      {selectedService && (
+        <ServiceInfoModal
+          open={isModalOpen}
+          onOpenChange={setIsModalOpen}
+          serviceInfo={selectedService}
+          serviceType="fintech"
+        />
+      )}
     </div>
   );
 };
