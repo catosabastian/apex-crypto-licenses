@@ -121,14 +121,14 @@ const LicenseManager = () => {
   const handleEditLicense = (license: License) => {
     setEditingLicense(license);
     setFormData({
-      license_id: license.license_id,
-      holder_name: license.holder_name,
-      license_type: license.license_type,
-      status: license.status as LicenseFormData['status'],
-      issue_date: license.issue_date,
-      expiry_date: license.expiry_date,
-      platforms: license.platforms || '',
-      application_id: license.application_id || ''
+      license_id: license?.license_id,
+      holder_name: license?.holder_name,
+      license_type: license?.license_type,
+      status: license?.status as LicenseFormData['status'],
+      issue_date: license?.issue_date,
+      expiry_date: license?.expiry_date,
+      platforms: license?.platforms || '',
+      application_id: license?.application_id || ''
     });
     setIsDialogOpen(true);
   };
@@ -136,7 +136,7 @@ const LicenseManager = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.holder_name || !formData.license_type) {
+    if (!formData?.holder_name || !formData?.license_type) {
       toast({
         title: "Validation Error",
         description: "Please fill in all required fields",
@@ -147,18 +147,18 @@ const LicenseManager = () => {
 
     try {
       const licenseData = {
-        license_id: formData.license_id,
-        holder_name: formData.holder_name,
-        license_type: formData.license_type,
-        status: formData.status,
-        issue_date: formData.issue_date,
-        expiry_date: formData.expiry_date,
-        platforms: formData.platforms || null,
-        application_id: formData.application_id || null
+        license_id: formData?.license_id,
+        holder_name: formData?.holder_name,
+        license_type: formData?.license_type,
+        status: formData?.status,
+        issue_date: formData?.issue_date,
+        expiry_date: formData?.expiry_date,
+        platforms: formData?.platforms || null,
+        application_id: formData?.application_id || null
       };
 
       if (editingLicense) {
-        await supabaseDataManager.updateLicense(editingLicense.id, licenseData);
+        await supabaseDataManager.updateLicense(editingLicense?.id, licenseData);
         toast({
           title: "License Updated",
           description: `License ${formData.license_id} has been updated successfully`,
@@ -184,10 +184,10 @@ const LicenseManager = () => {
 
   const handleApprove = async (license: License) => {
     try {
-      await supabaseDataManager.updateLicense(license.id, { status: 'active' });
+      await supabaseDataManager.updateLicense(license?.id, { status: 'active' });
       toast({
         title: "License Approved",
-        description: `License ${license.license_id} has been approved and is now active`,
+        description: `License ${license?.license_id} has been approved and is now active`,
       });
       loadData();
     } catch (error) {
@@ -201,10 +201,10 @@ const LicenseManager = () => {
 
   const handleReject = async (license: License) => {
     try {
-      await supabaseDataManager.updateLicense(license.id, { status: 'rejected' as const });
+      await supabaseDataManager.updateLicense(license?.id, { status: 'rejected' as const });
       toast({
         title: "License Rejected",
-        description: `License ${license.license_id} has been rejected`,
+        description: `License ${license?.license_id} has been rejected`,
         variant: "destructive",
       });
       loadData();
@@ -239,11 +239,11 @@ const LicenseManager = () => {
 
   const filteredLicenses = licenses.filter(license => {
     const matchesSearch = 
-      license.license_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      license.holder_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      license.license_type.toLowerCase().includes(searchTerm.toLowerCase());
+      license?.license_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      license?.holder_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      license?.license_type?.toLowerCase().includes(searchTerm.toLowerCase());
     
-    const matchesStatus = statusFilter === 'all' || license.status === statusFilter;
+    const matchesStatus = statusFilter === 'all' || license?.status === statusFilter;
     
     return matchesSearch && matchesStatus;
   });
@@ -326,7 +326,7 @@ const LicenseManager = () => {
       {/* Licenses Table */}
       <Card>
         <CardHeader>
-          <CardTitle>All Licenses ({filteredLicenses.length})</CardTitle>
+          <CardTitle>All Licenses ({filteredLicenses?.length})</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
@@ -344,9 +344,9 @@ const LicenseManager = () => {
               </TableHeader>
               <TableBody>
                 {filteredLicenses.map((license) => (
-                  <TableRow key={license.id}>
-                    <TableCell className="font-mono">{license.license_id}</TableCell>
-                    <TableCell className="font-medium">{license.holder_name}</TableCell>
+                  <TableRow key={license?.id}>
+                    <TableCell className="font-mono">{license?.license_id}</TableCell>
+                    <TableCell className="font-medium">{license?.holder_name}</TableCell>
                     <TableCell>{license.license_type}</TableCell>
                     <TableCell>{getStatusBadge(license.status)}</TableCell>
                     <TableCell>{new Date(license.issue_date).toLocaleDateString()}</TableCell>
@@ -388,16 +388,16 @@ const LicenseManager = () => {
             </Table>
           </div>
           
-          {filteredLicenses.length === 0 && (
-            <div className="text-center py-8">
-              <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No licenses found matching your criteria</p>
+          {filteredLicense?s.length === 0 && (
+            <div className="text-center py-8">?
+              <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />?
+              <p className="text-muted-foreground">No licenses found matching your crite?ria</p>
             </div>
-          )}
-        </CardContent>
-      </Card>
+  ?        )}
+        </CardContent>?
+      </Ca?rd>
 
-      {/* Create/Edit Dialog */}
+   ?   {/* Create/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
