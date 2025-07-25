@@ -515,7 +515,7 @@ const LicenseManager = () => {
                   <SelectValue placeholder="Select an application" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No Application</SelectItem>
+                  <SelectItem value={null}>No Application</SelectItem>
                   {applications?.map((app) => (
                     <SelectItem key={app?.id} value={app?.id}>
                       {app?.name} - {app?.email} ({app?.category})
