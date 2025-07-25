@@ -64,7 +64,7 @@ const LicenseManager = () => {
   const [formData, setFormData] = useState<LicenseFormData>({
     license_id: '',
     holder_name: '',
-    license_type: 'Basic Trader',
+    license_type: '',
     status: 'pending' as const,
     issue_date: new Date().toISOString().split('T')[0],
     expiry_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
@@ -108,7 +108,7 @@ const LicenseManager = () => {
     setFormData({
       license_id: generateLicenseId(),
       holder_name: '',
-      license_type: 'Basic Trader',
+      license_type: '',
       status: 'pending' as const,
       issue_date: new Date().toISOString().split('T')[0],
       expiry_date: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
@@ -123,8 +123,8 @@ const LicenseManager = () => {
     setFormData({
       license_id: license?.license_id,
       holder_name: license?.holder_name,
-      license_type: license?.license_type || 'Basic Trader',
-      status: license?.status as LicenseFormData['status'] || 'pending' as const,
+      license_type: license?.license_type,
+      status: license?.status as LicenseFormData['status'],
       issue_date: license?.issue_date,
       expiry_date: license?.expiry_date,
       platforms: license?.platforms || '',
@@ -515,7 +515,7 @@ const LicenseManager = () => {
                   <SelectValue placeholder="Select an application" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value={null}>No Application</SelectItem>
+                  <SelectItem value="NoApplication">No Application</SelectItem>
                   {applications?.map((app) => (
                     <SelectItem key={app?.id} value={app?.id}>
                       {app?.name} - {app?.email} ({app?.category})
