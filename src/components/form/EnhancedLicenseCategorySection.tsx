@@ -135,7 +135,7 @@ const EnhancedLicenseCategorySection = ({
                           {/* Processing Time */}
                           <div className="flex items-center gap-2 text-sm">
                             <Clock className="h-4 w-4 text-muted-foreground" />
-                            <span>Processing: {category.details?.processingTime || '5-7 business days'}</span>
+                            <span>Processing: {category.details?.processingTime || '3-5 business days'}</span>
                           </div>
 
                           {/* Minimum Volume */}
