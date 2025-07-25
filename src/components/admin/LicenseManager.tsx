@@ -389,9 +389,9 @@ const LicenseManager = () => {
           </div>
           
           {filteredLicenses.length === 0 && (
-            <div className="text-center py-8">?
+            <div className="text-center py-8">
               <Shield className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No licenses found matching your crite?ria</p>
+              <p className="text-muted-foreground">No licenses found matching your criteria</p>
             </div>
           )}
         </CardContent>
