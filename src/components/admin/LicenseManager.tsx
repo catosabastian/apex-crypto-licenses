@@ -123,8 +123,8 @@ const LicenseManager = () => {
     setFormData({
       license_id: license?.license_id,
       holder_name: license?.holder_name,
-      license_type: license?.license_type,
-      status: license?.status as LicenseFormData['status'],
+      license_type: license?.license_type || 'Basic Trader',
+      status: license?.status as LicenseFormData['status'] || 'pending' as const,
       issue_date: license?.issue_date,
       expiry_date: license?.expiry_date,
       platforms: license?.platforms || '',
