@@ -15,8 +15,6 @@ const LegalNoticePage = () => {
           <div className="max-w-4xl mx-auto">
             <div className="bg-card rounded-lg border p-6 md:p-8">
               <h1 className="text-2xl md:text-4xl font-bold mb-4 md:mb-8 text-foreground">Legal Notice</h1>
-              <p className="text-xs md:text-sm text-muted-foreground mb-6 md:mb-8">Last updated: {new Date().toLocaleDateString()}</p>
-              
               <div className="space-y-6 md:space-y-8 text-foreground">
                 <section className="border-b pb-6 mb-6">
                   <h2 className="text-xl md:text-2xl font-semibold mb-4 text-primary">Company Information and Registration</h2>
@@ -39,7 +37,6 @@ const LegalNoticePage = () => {
                     </div>
                   </div>
                   <div className="mt-4 text-xs bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 p-3 rounded">
-                    <strong>Registered Agent:</strong> Corporate Services Inc., 456 Legal Plaza, Wilmington, DE 19801
                   </div>
                 </section>
 
