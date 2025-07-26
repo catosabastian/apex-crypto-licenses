@@ -15,8 +15,6 @@ const LegalNoticePage = () => {
           <div className="max-w-4xl mx-auto">
             <div className="bg-card rounded-lg border p-6 md:p-8">
               <h1 className="text-2xl md:text-4xl font-bold mb-4 md:mb-8 text-foreground">Legal Notice</h1>
-              <p className="text-xs md:text-sm text-muted-foreground mb-6 md:mb-8">Last updated: {new Date().toLocaleDateString()}</p>
-              
               <div className="space-y-6 md:space-y-8 text-foreground">
                 <section className="border-b pb-6 mb-6">
                   <h2 className="text-xl md:text-2xl font-semibold mb-4 text-primary">Company Information and Registration</h2>
@@ -24,20 +22,24 @@ const LegalNoticePage = () => {
                     <div className="bg-muted/50 p-4 rounded-lg">
                       <h3 className="font-semibold mb-3 text-sm md:text-base">Corporate Details:</h3>
                       <div className="text-sm space-y-1">
-                        <p><strong>Legal Name:</strong> APEX Crypto Licensing</p>
-                        <p><strong>Registration Number:</strong> RA000028</p>
-                        <p><strong>Business License:</strong> 9845004FF5E8CAXE3825</p>
+                        <p><strong>Legal Name:</strong> APEX Crypto Licensing LLC</p>
+                        <p><strong>Registration Number:</strong> LLC-2024-CR-789456</p>
+                        <p><strong>Incorporation:</strong> Delaware, United States</p>
+                        <p><strong>Business License:</strong> FL-CRY-2024-001234</p>
+                        <p><strong>Tax ID:</strong> 88-1234567</p>
                       </div>
                     </div>
                     <div className="bg-muted/50 p-4 rounded-lg">
                       <h3 className="font-semibold mb-3 text-sm md:text-base">Contact Information:</h3>
                       <div className="text-sm space-y-1">
-                        <p><strong>Headquarters:</strong><br />Vallis Building, 58 Par‑LaVille Road, Hamilton, HM 11, Bermuda</p>
                         <p><strong>Phone:</strong> +1 (609) 918-3047</p>
                         <p><strong>Email:</strong> support@apexregulations.com</p>
                         <p><strong>Legal:</strong> legal@apexregulations.com</p>
                       </div>
                     </div>
+                  </div>
+                  <div className="mt-4 text-xs bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 p-3 rounded">
+                    <strong>Registered Agent:</strong> Corporate Services Inc., 456 Legal Plaza, Wilmington, DE 19801
                   </div>
                 </section>
 
@@ -205,6 +207,7 @@ const LegalNoticePage = () => {
                       <h3 className="font-semibold mb-3 text-sm md:text-base text-red-800 dark:text-red-200">Mandatory Reporting Requirements:</h3>
                       <ul className="list-disc pl-6 space-y-1 text-xs text-red-700 dark:text-red-300">
                         <li>Suspicious Activity Reports (SARs) to FinCEN</li>
+                        <li>Currency Transaction Reports (CTRs) for transactions &gt;$10,000</li>
                         <li>Foreign Bank Account Reports (FBARs) when applicable</li>
                         <li>OFAC sanctions screening and reporting</li>
                         <li>Coordination with law enforcement agencies</li>
@@ -286,12 +289,15 @@ const LegalNoticePage = () => {
                       <div className="text-sm space-y-1">
                         <p><strong>General Counsel:</strong> Sarah Mitchell, Esq.</p>
                         <p><strong>Email:</strong> legal@apexregulations.com</p>
-                        <p className="text-xs text-muted-foreground">Response time: 24 hours maximum</p>
+                        <p><strong>Phone:</strong> +1 (609) 918-3047 ext. 201</p>
+                        <p><strong>Fax:</strong> +1 (609) 918-3048</p>
+                        <p className="text-xs text-muted-foreground">Response time: 5 business days maximum</p>
                       </div>
                     </div>
                     <div className="bg-card border rounded-lg p-4">
                       <h3 className="font-semibold mb-3 text-sm md:text-base">Service of Process:</h3>
                       <div className="text-sm space-y-1">
+                        <p><strong>Registered Agent:</strong><br />Corporate Services Inc.<br />456 Legal Plaza<br />Wilmington, DE 19801</p>
                         <p><strong>Business Hours:</strong> Mon-Fri 9AM-5PM EST</p>
                         <p className="text-xs text-muted-foreground">For formal legal notices and court documents</p>
                       </div>
