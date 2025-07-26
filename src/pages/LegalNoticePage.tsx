@@ -279,27 +279,7 @@ const LegalNoticePage = () => {
                 </section>
 
                 <section>
-                  <h2 className="text-xl md:text-2xl font-semibold mb-4 text-primary">Legal Notices and Contact Information</h2>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="bg-card border rounded-lg p-4">
-                      <h3 className="font-semibold mb-3 text-sm md:text-base">Legal Department:</h3>
-                      <div className="text-sm space-y-1">
-                        <p><strong>General Counsel:</strong> Sarah Mitchell, Esq.</p>
-                        <p><strong>Email:</strong> legal@apexregulations.com</p>
-                        <p><strong>Phone:</strong> +1 (609) 918-3047 ext. 201</p>
-                        <p><strong>Fax:</strong> +1 (609) 918-3048</p>
-                        <p className="text-xs text-muted-foreground">Response time: 5 business days maximum</p>
-                      </div>
-                    </div>
-                    <div className="bg-card border rounded-lg p-4">
-                      <h3 className="font-semibold mb-3 text-sm md:text-base">Service of Process:</h3>
-                      <div className="text-sm space-y-1">
-                        <p><strong>Registered Agent:</strong><br />Corporate Services Inc.<br />456 Legal Plaza<br />Wilmington, DE 19801</p>
-                        <p><strong>Business Hours:</strong> Mon-Fri 9AM-5PM EST</p>
-                        <p className="text-xs text-muted-foreground">For formal legal notices and court documents</p>
-                      </div>
-                    </div>
-                  </div>
+         
                   <div className="mt-4 text-xs bg-muted/50 p-3 rounded">
                     <strong>Document Retention:</strong> All legal notices and communications are retained for 7 years as required by law. Electronic signatures are accepted under the Electronic Signatures in Global and National Commerce Act (E-SIGN).
                   </div>
