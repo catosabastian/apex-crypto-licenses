@@ -14,9 +14,7 @@ const PrivacyPolicyPage = () => {
         <div className="container mx-auto py-8 md:py-16 px-4">
           <div className="max-w-4xl mx-auto">
             <div className="bg-card rounded-lg border p-6 md:p-8">
-              <h1 className="text-2xl md:text-4xl font-bold mb-4 md:mb-8 text-foreground">Privacy Policy</h1>
-              <p className="text-xs md:text-sm text-muted-foreground mb-6 md:mb-8">Last updated: {new Date().toLocaleDateString()}</p>
-              
+              <h1 className="text-2xl md:text-4xl font-bold mb-4 md:mb-8 text-foreground">Privacy Policy</h1>              
               <div className="space-y-6 md:space-y-8 text-foreground">
                 <section className="border-b pb-6 mb-6">
                   <h2 className="text-xl md:text-2xl font-semibold mb-4 text-primary">1. Information We Collect</h2>
