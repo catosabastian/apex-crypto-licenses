@@ -86,7 +86,6 @@ const TermsOfServicePage = () => {
                       <h3 className="font-semibold mb-3 text-sm md:text-base text-purple-800 dark:text-purple-200">Financial Requirements:</h3>
                       <ul className="list-disc pl-6 space-y-1 text-xs text-purple-700 dark:text-purple-300">
                         <li>Minimum trading volume thresholds (see license categories)</li>
-                        <li>Audited financial statements for previous 2 years</li>
                         <li>Source of funds documentation</li>
                         <li>Credit checks and financial stability assessment</li>
                         <li>Ongoing capital adequacy requirements</li>
@@ -105,7 +104,7 @@ const TermsOfServicePage = () => {
                       <h3 className="font-semibold mb-3 text-sm md:text-base">License Validity:</h3>
                       <ul className="list-disc pl-6 space-y-1 text-xs">
                         <li><strong>Duration:</strong> 3 years from issuance date</li>
-                        <li><strong>Renewal:</strong> Required 90 days before expiration</li>
+                        <li><strong>Renewal:</strong> Required 30 days before expiration</li>
                         <li><strong>Grace Period:</strong> 30 days post-expiration</li>
                         <li><strong>Retroactive Renewal:</strong> Not permitted</li>
                         <li><strong>Suspension:</strong> May occur for non-compliance</li>
@@ -159,17 +158,15 @@ const TermsOfServicePage = () => {
                         <li>Application fee: Due upon submission (non-refundable)</li>
                         <li>Processing fee: 50% upfront, 50% upon approval</li>
                         <li>Annual compliance fee: Due at license issuance and annually thereafter</li>
-                        <li>Consultation fees: Billed monthly in arrears</li>
-                        <li>Late payment penalties: 1.5% per month on overdue amounts</li>
+                        <li>Consultation fees: Billed into application fee /li>
                       </ul>
                     </div>
                     <div className="bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 p-4 rounded-lg">
                       <h3 className="font-semibold mb-3 text-sm md:text-base text-red-800 dark:text-red-200">Refund Policy:</h3>
                       <ul className="list-disc pl-6 space-y-1 text-xs text-red-700 dark:text-red-300">
-                        <li>Application fees: Non-refundable under all circumstances</li>
+                        <li>Application fees: Non-refundable except application for license is denied</li>
                         <li>Processing fees: Refundable only if application is rejected due to our error</li>
                         <li>Service cancellation: 30-day written notice required, no refund for work completed</li>
-                        <li>Regulatory rejection: No refund due to factors beyond our control</li>
                       </ul>
                     </div>
                   </div>
@@ -210,7 +207,6 @@ const TermsOfServicePage = () => {
                       <ul className="list-disc pl-6 space-y-1 text-xs text-amber-700 dark:text-amber-300">
                         <li>No guarantee of license approval or regulatory acceptance</li>
                         <li>Services provided "as is" without warranties</li>
-                        <li>No legal advice provided - consultation with qualified attorneys required</li>
                         <li>Regulatory changes may affect license validity</li>
                         <li>Processing times are estimates and not guaranteed</li>
                       </ul>
@@ -238,8 +234,7 @@ const TermsOfServicePage = () => {
                   <div className="bg-muted/50 p-4 rounded-lg">
                     <ul className="space-y-2 text-xs">
                       <li><strong>Immediate Termination:</strong> Violation of prohibited activities, fraudulent conduct, or legal non-compliance</li>
-                      <li><strong>Suspension:</strong> Non-payment of fees (30-day cure period), incomplete documentation, or regulatory concerns</li>
-                      <li><strong>Voluntary Termination:</strong> Either party may terminate with 30 days written notice</li>
+                      <li><strong>Voluntary Termination:</strong> Licensed party may terminate with 30 days written notice</li>
                       <li><strong>Effect of Termination:</strong> Immediate cessation of services, no refund of fees, data retention per legal requirements</li>
                     </ul>
                   </div>
@@ -253,7 +248,6 @@ const TermsOfServicePage = () => {
                       <div className="text-sm space-y-1">
                         <p>Email: support@apexregulations.com</p>
                         <p>Phone: +1 (609) 918-3047</p>
-                        <p>Address: 123 Business District<br />Financial City, FC 12345, United States</p>
                         <p className="text-xs text-muted-foreground">Business Hours: Mon-Fri 9AM-6PM EST</p>
                       </div>
                     </div>
