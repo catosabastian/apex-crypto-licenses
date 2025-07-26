@@ -15,6 +15,8 @@ const LegalNoticePage = () => {
           <div className="max-w-4xl mx-auto">
             <div className="bg-card rounded-lg border p-6 md:p-8">
               <h1 className="text-2xl md:text-4xl font-bold mb-4 md:mb-8 text-foreground">Legal Notice</h1>
+              <p className="text-xs md:text-sm text-muted-foreground mb-6 md:mb-8">Last updated: {new Date().toLocaleDateString()}</p>
+              
               <div className="space-y-6 md:space-y-8 text-foreground">
                 <section className="border-b pb-6 mb-6">
                   <h2 className="text-xl md:text-2xl font-semibold mb-4 text-primary">Company Information and Registration</h2>
@@ -22,11 +24,9 @@ const LegalNoticePage = () => {
                     <div className="bg-muted/50 p-4 rounded-lg">
                       <h3 className="font-semibold mb-3 text-sm md:text-base">Corporate Details:</h3>
                       <div className="text-sm space-y-1">
-                        <p><strong>Legal Name:</strong> APEX Crypto Licensing LLC</p>
-                        <p><strong>Registration Number:</strong> LLC-2024-CR-789456</p>
-                        <p><strong>Incorporation:</strong> Delaware, United States</p>
-                        <p><strong>Business License:</strong> FL-CRY-2024-001234</p>
-                        <p><strong>Tax ID:</strong> 88-1234567</p>
+                        <p><strong>Legal Name:</strong> APEX Crypto Licensing</p>
+                        <p><strong>Registration Number:</strong> 99112</p>
+                        <p><strong>Business License:</strong> 9845004FF5E8CAXE3825</p>
                       </div>
                     </div>
                     <div className="bg-muted/50 p-4 rounded-lg">
