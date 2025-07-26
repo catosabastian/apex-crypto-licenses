@@ -233,10 +233,8 @@ const PrivacyPolicyPage = () => {
                   <p className="mb-4 text-sm md:text-base leading-relaxed">We retain personal information for different periods based on the purpose and legal requirements:</p>
                   <div className="bg-muted/50 p-4 rounded-lg">
                     <ul className="space-y-2 text-xs">
-                      <li><strong>Active licenses:</strong> Duration of license plus 7 years after expiration</li>
-                      <li><strong>Application data:</strong> 7 years from application date (regulatory requirement)</li>
-                      <li><strong>Financial records:</strong> 7 years from transaction date</li>
-                      <li><strong>Communications:</strong> 7 years from last contact</li>
+                      <li><strong>Active licenses:</strong> Duration of license plus 2 years after expiration</li>
+                      <li><strong>Financial records:</strong> 3 years from transaction date</li>
                       <li><strong>Website analytics:</strong> 26 months maximum</li>
                       <li><strong>Marketing data:</strong> Until opt-out or 3 years of inactivity</li>
                     </ul>
