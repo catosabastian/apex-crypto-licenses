@@ -78,21 +78,10 @@ const TermsOfServicePage = () => {
                         <li>Legal capacity to enter binding agreements</li>
                         <li>Clean criminal background (financial crimes disqualify)</li>
                         <li>Verified identity with government-issued documentation</li>
-                        <li>Proof of address and tax residency</li>
                         <li>Professional qualifications in finance or related field (for certain licenses)</li>
                       </ul>
                     </div>
-                    <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 p-4 rounded-lg">
-                      <h3 className="font-semibold mb-3 text-sm md:text-base text-green-800 dark:text-green-200">Corporate Requirements:</h3>
-                      <ul className="list-disc pl-6 space-y-1 text-xs text-green-700 dark:text-green-300">
-                        <li>Legal entity registration in recognized jurisdiction</li>
-                        <li>Minimum paid-up capital requirements (varies by license type)</li>
-                        <li>Qualified directors and key personnel</li>
-                        <li>Comprehensive business plan and operational procedures</li>
-                        <li>Professional indemnity and cyber security insurance</li>
-                        <li>Segregated client funds and cold storage capabilities</li>
-                      </ul>
-                    </div>
+          
                     <div className="bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800 p-4 rounded-lg">
                       <h3 className="font-semibold mb-3 text-sm md:text-base text-purple-800 dark:text-purple-200">Financial Requirements:</h3>
                       <ul className="list-disc pl-6 space-y-1 text-xs text-purple-700 dark:text-purple-300">
