@@ -265,13 +265,12 @@ const PrivacyPolicyPage = () => {
                         <p className="mb-2"><strong>General Inquiries:</strong></p>
                         <p className="mb-1">Email: privacy@apexregulations.com</p>
                         <p className="mb-1">Phone: +1 (609) 918-3047</p>
-                        <p>Response time: 30 days maximum</p>
+                        <p>Response time: 3 days maximum</p>
                       </div>
                       <div>
                         <p className="mb-2"><strong>Data Protection Officer:</strong></p>
                         <p className="mb-1">Email: dpo@apexregulations.com</p>
-                        <p className="mb-1">Address: 123 Business District</p>
-                        <p>Financial City, FC 12345, United States</p>
+                        <p>Response time: 24 hours maximum</p>
                       </div>
                     </div>
                   </div>
