@@ -20,6 +20,9 @@ import CorporateServicesPage from '@/pages/services/CorporateServicesPage';
 import ApplicationPage from '@/pages/ApplicationPage';
 import RegulationsPage from '@/pages/RegulationsPage';
 import LicensingSolutions from '@/pages/LicensingSolutions';
+import PrivacyPolicyPage from '@/pages/PrivacyPolicyPage';
+import TermsOfServicePage from '@/pages/TermsOfServicePage';
+import LegalNoticePage from '@/pages/LegalNoticePage';
 import ProtectedRoute from '@/components/ProtectedRoute';
 
 const queryClient = new QueryClient({
@@ -58,6 +61,9 @@ function App() {
                         <Route path="/services/fintech" element={<FinTechServicesPage />} />
                         <Route path="/services/gambling" element={<GamblingServicesPage />} />
                         <Route path="/services/corporate" element={<CorporateServicesPage />} />
+                        <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                        <Route path="/terms-of-service" element={<TermsOfServicePage />} />
+                        <Route path="/legal-notice" element={<LegalNoticePage />} />
                         <Route 
                           path="/admin" 
                           element={

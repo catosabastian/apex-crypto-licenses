@@ -290,7 +290,7 @@ const LicenseCategory = ({ category, title, price, minVolume, icon: Icon, color,
       <CardContent className="pb-4">
         <div className="mb-6">
           <div className="text-4xl font-bold text-accent mb-2">{price}</div>
-          <p className="text-sm text-muted-foreground font-medium">1-year license validity</p>
+          <p className="text-sm text-muted-foreground font-medium">3-year license validity</p>
         </div>
         
         <div className="space-y-3">
