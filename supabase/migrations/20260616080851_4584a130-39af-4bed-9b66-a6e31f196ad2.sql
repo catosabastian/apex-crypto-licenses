@@ -1,0 +1,1 @@
+UPDATE public.license_categories SET available = true WHERE category_number IN (1,2,3);
