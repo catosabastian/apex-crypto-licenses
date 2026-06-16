@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -19,7 +19,7 @@ export type Database = {
           action: string
           created_at: string
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           new_data: Json | null
           old_data: Json | null
           record_id: string | null
@@ -31,7 +31,7 @@ export type Database = {
           action: string
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           new_data?: Json | null
           old_data?: Json | null
           record_id?: string | null
@@ -43,7 +43,7 @@ export type Database = {
           action?: string
           created_at?: string
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           new_data?: Json | null
           old_data?: Json | null
           record_id?: string | null
@@ -59,7 +59,7 @@ export type Database = {
           endpoint: string
           error_message: string | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           method: string
           response_time_ms: number | null
           status_code: number | null
@@ -71,7 +71,7 @@ export type Database = {
           endpoint: string
           error_message?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           method: string
           response_time_ms?: number | null
           status_code?: number | null
@@ -83,7 +83,7 @@ export type Database = {
           endpoint?: string
           error_message?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           method?: string
           response_time_ms?: number | null
           status_code?: number | null
@@ -768,55 +768,43 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      create_first_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      create_first_admin: { Args: never; Returns: boolean }
       get_admin_users: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
-          id: string
-          email: string
-          role: string
           created_at: string
+          email: string
+          id: string
+          role: string
         }[]
       }
       get_audit_logs: {
         Args: { log_limit?: number }
         Returns: {
-          id: string
-          user_id: string
           action: string
-          table_name: string
-          record_id: string
-          old_data: Json
-          new_data: Json
           created_at: string
+          id: string
+          new_data: Json
+          old_data: Json
+          record_id: string
+          table_name: string
+          user_id: string
         }[]
       }
-      has_admin_users: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      has_admin_users: { Args: never; Returns: boolean }
       has_role: {
         Args: {
-          _user_id: string
           _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
         }
         Returns: boolean
       }
-      is_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      is_admin: { Args: never; Returns: boolean }
       setup_admin_user: {
         Args: { admin_email: string; admin_password: string }
         Returns: boolean
       }
-      setup_first_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      setup_first_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
