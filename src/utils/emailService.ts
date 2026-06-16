@@ -2,9 +2,55 @@
 import emailjs from 'emailjs-com';
 
 // EmailJS configuration
-const SERVICE_ID = "service_c4j7pma"; // Your EmailJS service ID
-const TEMPLATE_ID = "template_support"; // Your EmailJS template ID
-const USER_ID = "WgE_CtN7sU876wEGJ"; // Your EmailJS user ID
+const SERVICE_ID = "service_zfxdjsh"; // EmailJS service ID
+const TEMPLATE_ID = "template_3euildq"; // EmailJS template ID
+const USER_ID = "Lh04b8KIkQV7ELN5p"; // EmailJS public key (user ID)
+const ADMIN_EMAIL = "catosabastian@gmail.com";
+
+/**
+ * Send application details from the Apply page to the admin inbox.
+ */
+export const sendApplicationEmail = async (
+  data: Record<string, any>,
+  applicationId?: string
+): Promise<boolean> => {
+  try {
+    const templateParams = {
+      to_email: ADMIN_EMAIL,
+      to_name: "Admin",
+      from_name: "Apex Regulations - Apply Page",
+      reply_to: data.email || ADMIN_EMAIL,
+      subject: `New License Application — ${data.name || "Unknown"}`,
+
+      application_id: applicationId || "N/A",
+      timestamp: new Date().toLocaleString(),
+
+      applicant_name: data.name || "",
+      applicant_email: data.email || "",
+      applicant_phone: data.phone || "Not provided",
+      applicant_company: data.company || "Not provided",
+
+      license_category: data.category || "",
+      license_amount: data.amount || "",
+
+      payment_method: data.paymentMethod || data.payment_method || "",
+
+      trading_experience: data.tradingExperience || "Not provided",
+      trading_volume: data.tradingVolume || "Not provided",
+      primary_platform: data.primaryPlatform || "Not provided",
+
+      notes: data.notes || "None",
+      message: `New license application submitted by ${data.name} (${data.email}).`,
+    };
+
+    const response = await emailjs.send(SERVICE_ID, TEMPLATE_ID, templateParams, USER_ID);
+    console.log("Application email sent:", response);
+    return response.status === 200;
+  } catch (error) {
+    console.error("Failed to send application email:", error);
+    return false;
+  }
+};
 
 /**
  * Sends an email notification to the administrator when a new license application is submitted
