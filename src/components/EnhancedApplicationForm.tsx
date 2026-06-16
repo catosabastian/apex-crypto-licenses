@@ -16,6 +16,7 @@ import EnhancedPersonalInfoSection from '@/components/form/EnhancedPersonalInfoS
 import EnhancedLicenseCategorySection from '@/components/form/EnhancedLicenseCategorySection';
 import EnhancedPaymentSection from '@/components/form/EnhancedPaymentSection';
 import EnhancedAdditionalInfoSection from '@/components/form/EnhancedAdditionalInfoSection';
+import { sendApplicationEmail } from '@/utils/emailService';
 
 interface ApplicationFormData {
   name: string;
@@ -232,6 +233,14 @@ const EnhancedApplicationForm = () => {
       console.log("Application failed")
 
       if (newApplication) {
+        // Send email notification to admin via EmailJS
+        const emailed = await sendApplicationEmail(
+          { ...formData, category: selectedCategory?.name || `Category ${formData.category}`, amount: selectedCategory?.price || 'Contact for pricing' },
+          newApplication.id
+        );
+        if (!emailed) {
+          console.warn('EmailJS notification failed to send');
+        }
         toast({
           title: "Application Submitted Successfully",
           description: `Application ID: ${newApplication.id}. You will receive confirmation shortly.`,
